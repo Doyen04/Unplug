@@ -1,13 +1,13 @@
 import type {
-  DashboardFilter,
-  DashboardSummary,
-  DashboardAlert,
-  Subscription,
+    DashboardFilter,
+    DashboardSummary,
+    DashboardAlert,
+    Subscription,
 } from '../../types/subscription';
 import {
-  readStoredSubscriptions,
-  writeStoredSubscriptions,
-  type StoredSubscription,
+    readStoredSubscriptions,
+    writeStoredSubscriptions,
+    type StoredSubscription,
 } from './subscriptions-store';
 
 export interface DashboardPayload {
