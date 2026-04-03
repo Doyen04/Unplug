@@ -1,17 +1,13 @@
 import { betterAuth } from 'better-auth';
-import { memoryAdapter } from 'better-auth/adapters/memory';
+import { kyselyAdapter } from '@better-auth/kysely-adapter';
 import { nextCookies } from 'better-auth/next-js';
 
-const memoryDb = {
-    user: [],
-    session: [],
-    account: [],
-    verification: [],
-    rateLimit: [],
-};
+import { db } from './server/db';
 
 export const auth = betterAuth({
-    database: memoryAdapter(memoryDb),
+    database: kyselyAdapter(db, {
+        type: 'postgres',
+    }),
     emailAndPassword: {
         enabled: true,
     },
