@@ -1,19 +1,19 @@
-import { cookies } from 'next/headers';
+import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import type { ReactNode } from 'react';
 
-const SESSION_COOKIE_NAME = 'unplug_session';
-const SESSION_COOKIE_VALUE = 'active';
+import { auth } from '../../lib/auth';
 
 interface DashboardLayoutProps {
     children: ReactNode;
 }
 
 const DashboardLayout = async ({ children }: DashboardLayoutProps) => {
-    const cookieStore = await cookies();
-    const sessionValue = cookieStore.get(SESSION_COOKIE_NAME)?.value;
+    const session = await auth.api.getSession({
+        headers: await headers(),
+    });
 
-    if (sessionValue !== SESSION_COOKIE_VALUE) {
+    if (!session) {
         redirect('/login');
     }
 

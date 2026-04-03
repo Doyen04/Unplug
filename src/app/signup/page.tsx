@@ -1,31 +1,39 @@
 import Link from 'next/link';
-import { cookies } from 'next/headers';
+import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 
-const SESSION_COOKIE_NAME = 'unplug_session';
-const SESSION_COOKIE_VALUE = 'active';
-const SESSION_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
+import { auth } from '../../lib/auth';
 
-const signupAction = async () => {
+const signupAction = async (formData: FormData) => {
     'use server';
 
-    const cookieStore = await cookies();
-    cookieStore.set({
-        name: SESSION_COOKIE_NAME,
-        value: SESSION_COOKIE_VALUE,
-        httpOnly: true,
-        sameSite: 'lax',
-        secure: process.env.NODE_ENV === 'production',
-        path: '/',
-        maxAge: SESSION_COOKIE_MAX_AGE,
+    const name = String(formData.get('name') ?? '').trim();
+    const email = String(formData.get('email') ?? '').trim();
+    const password = String(formData.get('password') ?? '').trim();
+
+    if (!name || !email || !password) {
+        redirect('/signup?error=invalid_input');
+    }
+
+    await auth.api.signUpEmail({
+        body: {
+            name,
+            email,
+            password,
+            callbackURL: '/dashboard',
+        },
+        headers: await headers(),
     });
 
     redirect('/dashboard');
 };
 
 const SignupPage = async () => {
-    const cookieStore = await cookies();
-    if (cookieStore.get(SESSION_COOKIE_NAME)?.value === SESSION_COOKIE_VALUE) {
+    const session = await auth.api.getSession({
+        headers: await headers(),
+    });
+
+    if (session) {
         redirect('/dashboard');
     }
 

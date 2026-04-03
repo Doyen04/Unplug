@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
 import { getDashboardPayload } from '../../../lib/server/dashboard-data';
+import { getServerSession } from '../../../lib/server/auth-session';
 
 const debriefSchema = z.object({
     month: z.string(),
@@ -9,6 +10,11 @@ const debriefSchema = z.object({
 });
 
 export async function GET() {
+    const session = await getServerSession();
+    if (!session) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     try {
         const {
             summary: { monthlySpend, unusedCount, saveablePerYear },
