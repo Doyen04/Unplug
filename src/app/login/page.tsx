@@ -14,19 +14,32 @@ const loginAction = async (formData: FormData) => {
         redirect('/login?error=invalid_credentials');
     }
 
-    await auth.api.signInEmail({
-        body: {
-            email,
-            password,
-            callbackURL: '/dashboard',
-        },
-        headers: await headers(),
-    });
+    try {
+        await auth.api.signInEmail({
+            body: {
+                email,
+                password,
+                callbackURL: '/dashboard',
+            },
+            headers: await headers(),
+        });
+    } catch {
+        redirect('/login?error=invalid_credentials');
+    }
 
     redirect('/dashboard');
 };
 
-const LoginPage = async () => {
+interface LoginPageProps {
+    searchParams?: Promise<{
+        error?: string;
+    }>;
+}
+
+const LoginPage = async ({ searchParams }: LoginPageProps) => {
+    const params = (await searchParams) ?? {};
+    const hasInvalidCredentials = params.error === 'invalid_credentials';
+
     const session = await auth.api.getSession({
         headers: await headers(),
     });
@@ -58,6 +71,16 @@ const LoginPage = async () => {
 
                 <section className="border border-stone-800 bg-stone-900 p-6 sm:p-8">
                     <p className="text-[11px] uppercase tracking-[0.08em] text-stone-500">Account Access</p>
+
+                    {hasInvalidCredentials ? (
+                        <div
+                            className="mt-4 border border-red-900 bg-red-950 p-3 text-xs uppercase tracking-[0.08em] text-red-400"
+                            role="status"
+                            aria-live="polite"
+                        >
+                            Invalid email or password.
+                        </div>
+                    ) : null}
 
                     <form className="mt-5 space-y-4" action={loginAction}>
                         <div>
