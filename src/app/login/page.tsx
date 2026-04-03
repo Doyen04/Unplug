@@ -49,27 +49,33 @@ const LoginPage = async ({ searchParams }: LoginPageProps) => {
     }
 
     return (
-        <main className="flex min-h-screen items-center bg-stone-950 px-4 py-8 text-stone-100 md:px-6 md:py-10 lg:px-8">
-            <div className="mx-auto grid w-full max-w-6xl gap-4 lg:grid-cols-[1.2fr_1fr]">
-                <section className="border border-stone-800 bg-stone-900 p-6 sm:p-8 lg:p-10">
-                    <p className="text-[11px] uppercase tracking-[0.08em] text-stone-500">Unplug</p>
-                    <h1 className="mt-4 font-display text-4xl leading-tight text-stone-100 sm:text-5xl">
-                        Log in and face
-                        <br />
-                        your subscriptions.
-                    </h1>
-                    <p className="mt-5 max-w-xl text-sm leading-7 text-stone-300">
-                        No fluff. No fake optimism. Just a clear view of what you pay, what you use,
-                        and what should have been cancelled months ago.
-                    </p>
+        <main className="h-screen overflow-hidden bg-stone-950 px-4 py-8 text-stone-100 md:px-6 md:py-10 lg:px-8">
+            <div className="mx-auto grid h-full w-full max-w-6xl items-stretch gap-4 lg:grid-cols-[1.2fr_1fr]">
+                <section className="max-h-[calc(100vh-4rem)] overflow-hidden border border-stone-800 bg-stone-900 p-6 sm:p-8 lg:p-10">
+                    <Link
+                        href="/"
+                        className="block focus-visible:outline-2 focus-visible:outline-acid-green"
+                        aria-label="Go to Unplug home page"
+                    >
+                        <p className="text-[11px] uppercase tracking-[0.08em] text-stone-500">Unplug</p>
+                        <h1 className="mt-4 font-display text-4xl leading-tight text-stone-100 sm:text-5xl">
+                            Log in and face
+                            <br />
+                            your subscriptions.
+                        </h1>
+                        <p className="mt-5 max-w-xl text-sm leading-7 text-stone-300">
+                            No fluff. No fake optimism. Just a clear view of what you pay, what you use,
+                            and what should have been cancelled months ago.
+                        </p>
 
-                    <div className="mt-8 border-l-2 border-acid-green pl-4">
-                        <p className="text-xs uppercase tracking-[0.08em] text-stone-500">This month</p>
-                        <p className="mt-2 text-sm text-stone-300">Average recoverable waste: $1,320 / year</p>
-                    </div>
+                        <div className="mt-8 border-l-2 border-acid-green pl-4">
+                            <p className="text-xs uppercase tracking-[0.08em] text-stone-500">This month</p>
+                            <p className="mt-2 text-sm text-stone-300">Average recoverable waste: $1,320 / year</p>
+                        </div>
+                    </Link>
                 </section>
 
-                <section className="border border-stone-800 bg-stone-900 p-6 sm:p-8">
+                <section className="scrollbar-hidden max-h-[calc(100vh-4rem)] overflow-y-auto border border-stone-800 bg-stone-900 p-6 sm:p-8">
                     <p className="text-[11px] uppercase tracking-[0.08em] text-stone-500">Account Access</p>
 
                     {hasInvalidCredentials ? (

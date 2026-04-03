@@ -85,13 +85,13 @@ const DashboardPage = () => {
   }
 
   return (
-    <main className="min-h-screen bg-stone-950 px-4 py-10 text-stone-100 md:px-6 lg:px-8">
-      <div className="mx-auto grid w-full max-w-350 grid-cols-1 gap-4 lg:grid-cols-[240px_minmax(0,800px)_280px]">
-        <div className="order-1 lg:order-1">
+    <main className="min-h-screen bg-stone-950 px-4 py-10 text-stone-100 md:px-6 lg:h-screen lg:overflow-hidden lg:px-8">
+      <div className="mx-auto grid w-full max-w-350 grid-cols-1 gap-4 lg:h-full lg:grid-cols-[240px_minmax(0,800px)_280px] lg:items-stretch">
+        <div className="order-1 lg:order-1 lg:h-full">
           <DashboardSidebar monthlySpend={summary.monthlySpend} />
         </div>
 
-        <section className="order-3 space-y-4 lg:order-2">
+        <section className="scrollbar-hidden order-3 space-y-4 lg:order-2 lg:h-full lg:overflow-y-auto lg:pr-1">
           <ShameScoreMeter
             score={summary.shameScore}
             previousScore={summary.previousShameScore}
@@ -111,6 +111,13 @@ const DashboardPage = () => {
               variant="success"
             />
           </div>
+
+          <DebriefPanel
+            month={debrief?.month ?? 'APR 2026'}
+            isLoading={isDebriefLoading}
+            content={debrief?.content ?? null}
+            error={!isDebriefLoading && !debrief}
+          />
 
           <section className="space-y-3">
             <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
@@ -174,16 +181,9 @@ const DashboardPage = () => {
               </div>
             </div>
           </section>
-
-          <DebriefPanel
-            month={debrief?.month ?? 'APR 2026'}
-            isLoading={isDebriefLoading}
-            content={debrief?.content ?? null}
-            error={!isDebriefLoading && !debrief}
-          />
         </section>
 
-        <div className="order-2 lg:order-3">
+        <div className="order-2 lg:order-3 lg:h-full">
           <DashboardAlertsPanel alerts={alerts} />
         </div>
       </div>

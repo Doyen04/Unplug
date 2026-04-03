@@ -7,7 +7,7 @@ interface DashboardSidebarProps {
 }
 
 export const DashboardSidebar = ({ monthlySpend }: DashboardSidebarProps) => (
-  <aside className="flex h-full min-h-0 flex-col border border-stone-800 bg-stone-900 p-5 lg:min-h-130">
+  <aside className="flex h-full min-h-0 flex-col border border-stone-800 bg-stone-900 p-5">
     <p className="text-[11px] uppercase tracking-[0.08em] text-stone-500">Unplug</p>
 
     <nav className="mt-8 space-y-3 text-sm text-stone-300">
