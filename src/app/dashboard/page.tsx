@@ -87,9 +87,11 @@ const DashboardPage = () => {
   return (
     <main className="min-h-screen bg-stone-950 px-4 py-10 text-stone-100 md:px-6 lg:px-8">
       <div className="mx-auto grid w-full max-w-350 grid-cols-1 gap-4 lg:grid-cols-[240px_minmax(0,800px)_280px]">
-        <DashboardSidebar monthlySpend={summary.monthlySpend} />
+        <div className="order-1 lg:order-1">
+          <DashboardSidebar monthlySpend={summary.monthlySpend} />
+        </div>
 
-        <section className="space-y-4">
+        <section className="order-3 space-y-4 lg:order-2">
           <ShameScoreMeter
             score={summary.shameScore}
             previousScore={summary.previousShameScore}
@@ -111,7 +113,7 @@ const DashboardPage = () => {
           </div>
 
           <section className="space-y-3">
-            <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
               <p className="text-[11px] uppercase tracking-[0.08em] text-stone-500">
                 Subscriptions
               </p>
@@ -148,11 +150,11 @@ const DashboardPage = () => {
               ))
             )}
 
-            <div className="flex items-center justify-between border border-stone-800 bg-stone-900 px-3 py-2 text-xs uppercase tracking-[0.06em] text-stone-400">
-              <span>
+            <div className="flex flex-col gap-2 border border-stone-800 bg-stone-900 px-3 py-2 text-xs uppercase tracking-[0.06em] text-stone-400 sm:flex-row sm:items-center sm:justify-between">
+              <span className="text-center sm:text-left">
                 Page {page} / {pageCount}
               </span>
-              <div className="flex gap-2">
+              <div className="flex justify-center gap-2 sm:justify-end">
                 <button
                   type="button"
                   onClick={() => setPage(page - 1)}
@@ -181,7 +183,9 @@ const DashboardPage = () => {
           />
         </section>
 
-        <DashboardAlertsPanel alerts={alerts} />
+        <div className="order-2 lg:order-3">
+          <DashboardAlertsPanel alerts={alerts} />
+        </div>
       </div>
 
       {pendingUndoId ? (
@@ -190,15 +194,17 @@ const DashboardPage = () => {
           role="status"
           aria-live="polite"
         >
-          Subscription cancelled. Undo within 5 seconds.
-          <button
-            type="button"
-            onClick={() => void undoCancel()}
-            disabled={isCancelling}
-            className="ml-3 border border-acid-green px-2 py-1 text-xs uppercase tracking-[0.06em] text-acid-green"
-          >
-            Undo
-          </button>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <span>Subscription cancelled. Undo within 5 seconds.</span>
+            <button
+              type="button"
+              onClick={() => void undoCancel()}
+              disabled={isCancelling}
+              className="border border-acid-green px-2 py-1 text-xs uppercase tracking-[0.06em] text-acid-green"
+            >
+              Undo
+            </button>
+          </div>
         </div>
       ) : null}
     </main>

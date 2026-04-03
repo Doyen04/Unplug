@@ -2,9 +2,9 @@ import Link from 'next/link';
 
 const SignupPage = () => {
   return (
-    <main className="flex min-h-screen items-center bg-stone-950 px-4 py-10 text-stone-100 md:px-6 lg:px-8">
+    <main className="flex min-h-screen items-center bg-stone-950 px-4 py-8 text-stone-100 md:px-6 md:py-10 lg:px-8">
       <div className="mx-auto grid w-full max-w-6xl gap-4 lg:grid-cols-[1fr_1.2fr]">
-        <section className="order-2 border border-stone-800 bg-stone-900 p-8 lg:order-1">
+        <section className="order-2 border border-stone-800 bg-stone-900 p-6 sm:p-8 lg:order-1">
           <p className="text-[11px] uppercase tracking-[0.08em] text-stone-500">Create Account</p>
 
           <form className="mt-5 space-y-4" action="#" method="post">
@@ -69,9 +69,9 @@ const SignupPage = () => {
           </p>
         </section>
 
-        <section className="order-1 border border-stone-800 bg-stone-900 p-8 lg:order-2 lg:p-10">
+        <section className="order-1 border border-stone-800 bg-stone-900 p-6 sm:p-8 lg:order-2 lg:p-10">
           <p className="text-[11px] uppercase tracking-[0.08em] text-stone-500">Unplug</p>
-          <h1 className="mt-4 font-display text-5xl leading-tight text-stone-100">
+          <h1 className="mt-4 font-display text-4xl leading-tight text-stone-100 sm:text-5xl">
             Build a habit of
             <br />
             paying attention.

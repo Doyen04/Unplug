@@ -15,7 +15,7 @@ export const ShameScoreMeter = ({
 
   return (
     <section
-      className="border border-stone-800 bg-stone-900 p-6"
+      className="border border-stone-800 bg-stone-900 p-5 sm:p-6"
       role="meter"
       aria-valuemin={0}
       aria-valuemax={100}
@@ -23,8 +23,8 @@ export const ShameScoreMeter = ({
       aria-label="Shame Score"
     >
       <p className="text-[11px] uppercase tracking-[0.08em] text-stone-500">SHAME SCORE</p>
-      <div className="mt-3 flex items-end gap-3">
-        <p className={`font-display text-7xl leading-none ${getScoreColorClass(score)}`}>
+      <div className="mt-3 flex items-end gap-2 sm:gap-3">
+        <p className={`font-display text-5xl leading-none sm:text-6xl lg:text-7xl ${getScoreColorClass(score)}`}>
           {isLoading ? '--' : score}
         </p>
         {delta !== null ? (
