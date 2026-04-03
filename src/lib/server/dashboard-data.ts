@@ -1,81 +1,14 @@
 import type {
-    DashboardFilter,
-    DashboardSummary,
-    DashboardAlert,
-    Subscription,
-    SubscriptionStatus,
+  DashboardFilter,
+  DashboardSummary,
+  DashboardAlert,
+  Subscription,
 } from '../../types/subscription';
-
-interface StoredSubscription extends Subscription {
-    previousStatus?: Exclude<SubscriptionStatus, 'cancelled'>;
-}
-
-let subscriptionsStore: StoredSubscription[] = [
-    {
-        id: 's-1',
-        serviceName: 'Netflix',
-        amountMonthly: 19,
-        frequencyLabel: 'monthly',
-        status: 'unused',
-        confidence: 'high',
-        usageScore: 18,
-        verdict: 'unused',
-        alert: { type: 'unused', message: 'No usage signals in 45 days' },
-    },
-    {
-        id: 's-2',
-        serviceName: 'Spotify',
-        amountMonthly: 12,
-        frequencyLabel: 'monthly',
-        status: 'healthy',
-        confidence: 'high',
-        usageScore: 84,
-        verdict: 'active',
-    },
-    {
-        id: 's-3',
-        serviceName: 'Notion',
-        amountMonthly: 15,
-        frequencyLabel: 'monthly',
-        status: 'price-hike',
-        confidence: 'medium',
-        usageScore: 62,
-        verdict: 'likely_unused',
-        alert: { type: 'price-hike', message: 'Up $2.00 vs last month' },
-    },
-    {
-        id: 's-4',
-        serviceName: 'Duolingo',
-        amountMonthly: 13,
-        frequencyLabel: 'monthly',
-        status: 'trial-ending',
-        confidence: 'medium',
-        usageScore: 50,
-        verdict: 'likely_unused',
-        alert: { type: 'trial-ending', message: 'Trial converts in 2 days' },
-    },
-    {
-        id: 's-5',
-        serviceName: 'YouTube Premium',
-        amountMonthly: 14,
-        frequencyLabel: 'monthly',
-        status: 'healthy',
-        confidence: 'high',
-        usageScore: 76,
-        verdict: 'active',
-    },
-    {
-        id: 's-6',
-        serviceName: 'Adobe CC',
-        amountMonthly: 61,
-        frequencyLabel: 'monthly',
-        status: 'unused',
-        confidence: 'medium',
-        usageScore: 28,
-        verdict: 'unused',
-        alert: { type: 'dormant', message: 'Likely unused based on recent signals' },
-    },
-];
+import {
+  readStoredSubscriptions,
+  writeStoredSubscriptions,
+  type StoredSubscription,
+} from './subscriptions-store';
 
 export interface DashboardPayload {
     summary: DashboardSummary;
@@ -111,12 +44,15 @@ const applyFilter = (subscriptions: Subscription[], filter: DashboardFilter): Su
     );
 };
 
-export const getDashboardPayload = (options: DashboardQueryOptions = {}): DashboardPayload => {
+export const getDashboardPayload = async (
+    options: DashboardQueryOptions = {}
+): Promise<DashboardPayload> => {
     const filter = options.filter ?? 'all';
     const pageSize = Math.min(20, Math.max(1, options.pageSize ?? 4));
     const requestedPage = Math.max(1, options.page ?? 1);
 
-    const subscriptions: Subscription[] = subscriptionsStore.map(({ previousStatus, ...item }) => item);
+    const storedSubscriptions = await readStoredSubscriptions();
+    const subscriptions: Subscription[] = storedSubscriptions.map(({ previousStatus, ...item }) => item);
     const filteredSubscriptions = applyFilter(subscriptions, filter);
     const total = filteredSubscriptions.length;
     const pageCount = Math.max(1, Math.ceil(total / pageSize));
@@ -168,22 +104,26 @@ export const getDashboardPayload = (options: DashboardQueryOptions = {}): Dashbo
     };
 };
 
-export const cancelSubscriptionById = (id: string): Subscription | null => {
+export const cancelSubscriptionById = async (id: string): Promise<Subscription | null> => {
+    const subscriptionsStore = await readStoredSubscriptions();
     const target = subscriptionsStore.find((item) => item.id === id);
     if (!target) return null;
     if (target.status !== 'cancelled') {
         target.previousStatus = target.status;
         target.status = 'cancelled';
+        await writeStoredSubscriptions(subscriptionsStore);
     }
     return { ...target };
 };
 
-export const undoCancelSubscriptionById = (id: string): Subscription | null => {
+export const undoCancelSubscriptionById = async (id: string): Promise<Subscription | null> => {
+    const subscriptionsStore = await readStoredSubscriptions();
     const target = subscriptionsStore.find((item) => item.id === id);
     if (!target) return null;
     if (target.status === 'cancelled') {
         target.status = target.previousStatus ?? 'healthy';
         target.previousStatus = undefined;
+        await writeStoredSubscriptions(subscriptionsStore);
     }
     return { ...target };
 };

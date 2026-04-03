@@ -15,7 +15,7 @@ export async function GET(request: Request) {
         ? filterSchema.parse(filterParam)
         : 'all';
 
-    const payload = getDashboardPayload({
+    const payload = await getDashboardPayload({
         filter,
         page: Number.isFinite(pageParam) ? pageParam : 1,
         pageSize: Number.isFinite(pageSizeParam) ? pageSizeParam : 4,

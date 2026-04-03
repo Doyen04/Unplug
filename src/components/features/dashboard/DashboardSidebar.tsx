@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 import { formatCurrency } from '../../../lib/utils/format';
 
 interface DashboardSidebarProps {
@@ -13,6 +15,9 @@ export const DashboardSidebar = ({ monthlySpend }: DashboardSidebarProps) => (
       <p>Subscriptions</p>
       <p>Alerts</p>
       <p>Debrief</p>
+      <Link href="/logout" className="block text-stone-500 hover:text-red-400">
+        Log out
+      </Link>
     </nav>
 
     <div className="mt-auto border-t border-stone-800 pt-4">

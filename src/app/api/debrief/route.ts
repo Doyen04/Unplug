@@ -12,7 +12,7 @@ export async function GET() {
     try {
         const {
             summary: { monthlySpend, unusedCount, saveablePerYear },
-        } = getDashboardPayload();
+        } = await getDashboardPayload();
 
         const content =
             unusedCount > 0

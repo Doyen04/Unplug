@@ -1,0 +1,78 @@
+[
+  {
+    "id": "s-1",
+    "serviceName": "Netflix",
+    "amountMonthly": 19,
+    "frequencyLabel": "monthly",
+    "status": "unused",
+    "confidence": "high",
+    "usageScore": 18,
+    "verdict": "unused",
+    "alert": {
+      "type": "unused",
+      "message": "No usage signals in 45 days"
+    }
+  },
+  {
+    "id": "s-2",
+    "serviceName": "Spotify",
+    "amountMonthly": 12,
+    "frequencyLabel": "monthly",
+    "status": "healthy",
+    "confidence": "high",
+    "usageScore": 84,
+    "verdict": "active"
+  },
+  {
+    "id": "s-3",
+    "serviceName": "Notion",
+    "amountMonthly": 15,
+    "frequencyLabel": "monthly",
+    "status": "price-hike",
+    "confidence": "medium",
+    "usageScore": 62,
+    "verdict": "likely_unused",
+    "alert": {
+      "type": "price-hike",
+      "message": "Up $2.00 vs last month"
+    }
+  },
+  {
+    "id": "s-4",
+    "serviceName": "Duolingo",
+    "amountMonthly": 13,
+    "frequencyLabel": "monthly",
+    "status": "trial-ending",
+    "confidence": "medium",
+    "usageScore": 50,
+    "verdict": "likely_unused",
+    "alert": {
+      "type": "trial-ending",
+      "message": "Trial converts in 2 days"
+    }
+  },
+  {
+    "id": "s-5",
+    "serviceName": "YouTube Premium",
+    "amountMonthly": 14,
+    "frequencyLabel": "monthly",
+    "status": "healthy",
+    "confidence": "high",
+    "usageScore": 76,
+    "verdict": "active"
+  },
+  {
+    "id": "s-6",
+    "serviceName": "Adobe CC",
+    "amountMonthly": 61,
+    "frequencyLabel": "monthly",
+    "status": "unused",
+    "confidence": "medium",
+    "usageScore": 28,
+    "verdict": "unused",
+    "alert": {
+      "type": "dormant",
+      "message": "Likely unused based on recent signals"
+    }
+  }
+]

@@ -124,8 +124,8 @@ const DashboardPage = () => {
                     type="button"
                     onClick={() => setFilter(option.key)}
                     className={`border px-3 py-1 text-xs uppercase tracking-[0.06em] ${filter === option.key
-                        ? 'border-acid-green text-acid-green'
-                        : 'border-stone-700 text-stone-400 hover:border-stone-500'
+                      ? 'border-acid-green text-acid-green'
+                      : 'border-stone-700 text-stone-400 hover:border-stone-500'
                       }`}
                   >
                     {option.label}

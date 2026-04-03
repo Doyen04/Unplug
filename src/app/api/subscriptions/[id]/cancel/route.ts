@@ -8,7 +8,7 @@ interface RouteContext {
 
 export async function POST(_: Request, context: RouteContext) {
     const { id } = await context.params;
-    const updated = cancelSubscriptionById(id);
+    const updated = await cancelSubscriptionById(id);
 
     if (!updated) {
         return NextResponse.json({ error: 'Subscription not found' }, { status: 404 });
