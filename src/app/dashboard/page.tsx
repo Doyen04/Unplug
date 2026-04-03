@@ -1,0 +1,208 @@
+'use client';
+
+import { useEffect } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+
+import { DashboardAlertsPanel } from '../../components/features/dashboard/DashboardAlertsPanel';
+import { DashboardSidebar } from '../../components/features/dashboard/DashboardSidebar';
+import { ShameScoreMeter } from '../../components/features/dashboard/ShameScoreMeter';
+import { StatCard } from '../../components/features/dashboard/StatCard';
+import { DebriefPanel } from '../../components/features/debrief/DebriefPanel';
+import { SubscriptionRow } from '../../components/features/subscriptions/SubscriptionRow';
+import { useDashboardData } from '../../hooks/useDashboardData';
+import { formatCurrency } from '../../lib/utils/format';
+import type { DashboardFilter } from '../../types/subscription';
+
+const FILTERS: Array<{ key: DashboardFilter; label: string }> = [
+  { key: 'all', label: 'All' },
+  { key: 'at-risk', label: 'At risk' },
+  { key: 'unused', label: 'Unused' },
+  { key: 'active', label: 'Active' },
+  { key: 'cancelled', label: 'Cancelled' },
+];
+
+const DashboardPage = () => {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const initialFilter = (searchParams.get('filter') as DashboardFilter | null) ?? 'all';
+  const initialPage = Number(searchParams.get('page') ?? '1') || 1;
+
+  const {
+    summary,
+    subscriptions,
+    alerts,
+    debrief,
+    isLoading,
+    isDebriefLoading,
+    isError,
+    filter,
+    setFilter,
+    page,
+    pageCount,
+    setPage,
+    cancelSubscription,
+    undoCancel,
+    clearPendingUndo,
+    pendingUndoId,
+    isCancelling,
+  } = useDashboardData({
+    initialFilter,
+    initialPage,
+  });
+
+  useEffect(() => {
+    const currentFilter = searchParams.get('filter') ?? 'all';
+    const currentPage = Number(searchParams.get('page') ?? '1') || 1;
+
+    if (currentFilter === filter && currentPage === page) return;
+
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('filter', filter);
+    params.set('page', String(page));
+    router.replace(`${pathname}?${params.toString()}`);
+  }, [filter, page, pathname, router, searchParams]);
+
+  useEffect(() => {
+    if (!pendingUndoId) return;
+
+    const timeoutId = setTimeout(() => {
+      clearPendingUndo();
+    }, 5000);
+
+    return () => clearTimeout(timeoutId);
+  }, [pendingUndoId, clearPendingUndo]);
+
+  if (isError) {
+    return (
+      <main className="min-h-screen bg-stone-950 px-4 py-10 text-stone-100 md:px-6 lg:px-8">
+        <div className="mx-auto max-w-3xl border border-red-900 bg-red-950 p-6 text-sm uppercase tracking-[0.08em] text-red-400">
+          Dashboard unavailable. Try again.
+        </div>
+      </main>
+    );
+  }
+
+  return (
+    <main className="min-h-screen bg-stone-950 px-4 py-10 text-stone-100 md:px-6 lg:px-8">
+      <div className="mx-auto grid w-full max-w-350 grid-cols-1 gap-4 lg:grid-cols-[240px_minmax(0,800px)_280px]">
+        <DashboardSidebar monthlySpend={summary.monthlySpend} />
+
+        <section className="space-y-4">
+          <ShameScoreMeter
+            score={summary.shameScore}
+            previousScore={summary.previousShameScore}
+            isLoading={isLoading}
+          />
+
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <StatCard
+              label="Monthly Spend"
+              value={formatCurrency(summary.monthlySpend)}
+              variant="danger"
+            />
+            <StatCard label="Unused Count" value={`${summary.unusedCount}`} />
+            <StatCard
+              label="Saveable / yr"
+              value={formatCurrency(summary.saveablePerYear)}
+              variant="success"
+            />
+          </div>
+
+          <section className="space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <p className="text-[11px] uppercase tracking-[0.08em] text-stone-500">
+                Subscriptions
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {FILTERS.map((option) => (
+                  <button
+                    key={option.key}
+                    type="button"
+                    onClick={() => setFilter(option.key)}
+                    className={`border px-3 py-1 text-xs uppercase tracking-[0.06em] ${filter === option.key
+                        ? 'border-acid-green text-acid-green'
+                        : 'border-stone-700 text-stone-400 hover:border-stone-500'
+                      }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {isLoading ? (
+              <div className="border border-stone-800 bg-stone-900 p-4 text-sm text-stone-500">
+                Scanning transactions
+                <span className="animate-blink">_</span>
+              </div>
+            ) : (
+              subscriptions.map((subscription, index) => (
+                <SubscriptionRow
+                  key={subscription.id}
+                  subscription={subscription}
+                  onCancel={cancelSubscription}
+                  index={index}
+                />
+              ))
+            )}
+
+            <div className="flex items-center justify-between border border-stone-800 bg-stone-900 px-3 py-2 text-xs uppercase tracking-[0.06em] text-stone-400">
+              <span>
+                Page {page} / {pageCount}
+              </span>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPage(page - 1)}
+                  disabled={page <= 1}
+                  className="border border-stone-700 px-2 py-1 disabled:opacity-40"
+                >
+                  Prev
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPage(page + 1)}
+                  disabled={page >= pageCount}
+                  className="border border-stone-700 px-2 py-1 disabled:opacity-40"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <DebriefPanel
+            month={debrief?.month ?? 'APR 2026'}
+            isLoading={isDebriefLoading}
+            content={debrief?.content ?? null}
+            error={!isDebriefLoading && !debrief}
+          />
+        </section>
+
+        <DashboardAlertsPanel alerts={alerts} />
+      </div>
+
+      {pendingUndoId ? (
+        <div
+          className="fixed bottom-4 left-1/2 w-[92%] max-w-md -translate-x-1/2 border border-stone-700 bg-stone-900 p-3 text-sm text-stone-200"
+          role="status"
+          aria-live="polite"
+        >
+          Subscription cancelled. Undo within 5 seconds.
+          <button
+            type="button"
+            onClick={() => void undoCancel()}
+            disabled={isCancelling}
+            className="ml-3 border border-acid-green px-2 py-1 text-xs uppercase tracking-[0.06em] text-acid-green"
+          >
+            Undo
+          </button>
+        </div>
+      ) : null}
+    </main>
+  );
+};
+
+export default DashboardPage;

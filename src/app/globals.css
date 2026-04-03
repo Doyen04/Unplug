@@ -1,0 +1,41 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+:root {
+  --color-bg-base: #0d0d0b;
+  --color-bg-surface: #141412;
+  --color-bg-elevated: #1c1c19;
+  --color-bg-subtle: #242420;
+  --color-accent: #c8f135;
+  --color-danger: #ff4444;
+  --color-text-primary: #f0efe8;
+  --color-text-secondary: #8a8980;
+  --color-border: #2a2a26;
+}
+
+* {
+  border-radius: 0;
+}
+
+body {
+  background: var(--color-bg-base);
+  color: var(--color-text-primary);
+  font-family: 'IBM Plex Mono', 'Courier New', monospace;
+}
+
+@keyframes blink {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0;
+  }
+}
+
+.animate-blink {
+  animation: blink 1s step-end infinite;
+}
