@@ -112,14 +112,16 @@ const DashboardPage = () => {
             />
           </div>
 
-          <DebriefPanel
-            month={debrief?.month ?? 'APR 2026'}
-            isLoading={isDebriefLoading}
-            content={debrief?.content ?? null}
-            error={!isDebriefLoading && !debrief}
-          />
+          <div id="debrief">
+            <DebriefPanel
+              month={debrief?.month ?? 'APR 2026'}
+              isLoading={isDebriefLoading}
+              content={debrief?.content ?? null}
+              error={!isDebriefLoading && !debrief}
+            />
+          </div>
 
-          <section className="space-y-3">
+          <section id="subscriptions" className="space-y-3">
             <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
               <p className="text-[11px] uppercase tracking-[0.08em] text-stone-500">
                 Subscriptions
@@ -132,7 +134,7 @@ const DashboardPage = () => {
                     onClick={() => setFilter(option.key)}
                     className={`border px-3 py-1 text-xs uppercase tracking-[0.06em] ${filter === option.key
                       ? 'border-acid-green text-acid-green'
-                      : 'border-stone-700 text-stone-400 hover:border-stone-500'
+                      : 'border-stone-600 text-stone-200 hover:border-stone-400 hover:text-stone-100'
                       }`}
                   >
                     {option.label}
@@ -166,7 +168,7 @@ const DashboardPage = () => {
                   type="button"
                   onClick={() => setPage(page - 1)}
                   disabled={page <= 1}
-                  className="border border-stone-700 px-2 py-1 disabled:opacity-40"
+                  className="border border-stone-600 px-2 py-1 text-stone-200 hover:border-stone-400 hover:text-stone-100 disabled:opacity-40"
                 >
                   Prev
                 </button>
@@ -174,7 +176,7 @@ const DashboardPage = () => {
                   type="button"
                   onClick={() => setPage(page + 1)}
                   disabled={page >= pageCount}
-                  className="border border-stone-700 px-2 py-1 disabled:opacity-40"
+                  className="border border-stone-600 px-2 py-1 text-stone-200 hover:border-stone-400 hover:text-stone-100 disabled:opacity-40"
                 >
                   Next
                 </button>
@@ -183,7 +185,7 @@ const DashboardPage = () => {
           </section>
         </section>
 
-        <div className="order-2 lg:order-3 lg:h-full">
+        <div id="alerts" className="order-2 lg:order-3 lg:h-full">
           <DashboardAlertsPanel alerts={alerts} />
         </div>
       </div>
