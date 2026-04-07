@@ -85,14 +85,14 @@ const HomePage = async () => {
         <header className="flex items-center justify-between border border-stone-800 bg-stone-900 px-4 py-3 md:px-6">
           <p className="font-display text-2xl italic tracking-[-0.02em]">Unplug</p>
           <div className="hidden items-center gap-4 text-[11px] uppercase tracking-[0.08em] text-stone-400 md:flex">
-            <a href="#how-it-works" className="hover:text-stone-100">How it works</a>
-            <a href="#pricing" className="hover:text-stone-100">Pricing</a>
+            <a href="#how-it-works" className="hover:text-stone-100 focus-visible:outline-2 focus-visible:outline-acid-green">How it works</a>
+            <a href="#pricing" className="hover:text-stone-100 focus-visible:outline-2 focus-visible:outline-acid-green">Pricing</a>
           </div>
           <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.08em]">
-            <Link href="/login" className="border border-stone-700 px-3 py-2 text-stone-300 hover:border-stone-500">
+            <Link href="/login" className="border border-stone-700 px-3 py-2 text-stone-300 hover:border-stone-500 focus-visible:outline-2 focus-visible:outline-acid-green">
               Log in
             </Link>
-            <Link href="/signup" className="border border-acid-green bg-acid-green px-3 py-2 text-stone-950 hover:bg-acid-dim">
+            <Link href="/signup" className="border border-acid-green bg-acid-green px-3 py-2 text-stone-950 hover:bg-acid-dim focus-visible:outline-2 focus-visible:outline-acid-green">
               Start now
             </Link>
           </div>
@@ -131,13 +131,13 @@ const HomePage = async () => {
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link
                 href="/signup"
-                className="border border-acid-green bg-acid-green px-5 py-3 text-center text-xs uppercase tracking-[0.08em] text-stone-950 hover:bg-acid-dim"
+                className="border border-acid-green bg-acid-green px-5 py-3 text-center text-xs uppercase tracking-[0.08em] text-stone-950 hover:bg-acid-dim focus-visible:outline-2 focus-visible:outline-acid-green"
               >
                 Audit my subscriptions
               </Link>
               <Link
                 href="/dashboard"
-                className="border border-stone-700 px-5 py-3 text-center text-xs uppercase tracking-[0.08em] text-stone-300 hover:border-stone-500"
+                className="border border-stone-700 px-5 py-3 text-center text-xs uppercase tracking-[0.08em] text-stone-300 hover:border-stone-500 focus-visible:outline-2 focus-visible:outline-acid-green"
               >
                 View dashboard preview
               </Link>
@@ -209,12 +209,12 @@ const HomePage = async () => {
               <article
                 key={plan.id}
                 className={`flex flex-col border p-4 ${plan.highlight
-                  ? 'border-blue-500 bg-stone-950'
+                  ? 'border-acid-green bg-acid-muted/30'
                   : 'border-stone-700 bg-stone-950'
                   }`}
               >
                 {plan.badge ? (
-                  <span className="inline-flex w-fit border border-blue-800 bg-blue-950 px-2 py-1 text-[10px] uppercase tracking-[0.08em] text-blue-300">
+                  <span className="inline-flex w-fit border border-acid-green/40 bg-acid-muted px-2 py-1 text-[10px] uppercase tracking-[0.08em] text-acid-green">
                     {plan.badge}
                   </span>
                 ) : (
@@ -242,7 +242,7 @@ const HomePage = async () => {
                   className={`mt-4 border px-4 py-2 text-center text-xs uppercase tracking-[0.08em] ${plan.highlight
                     ? 'border-acid-green bg-acid-green text-stone-950 hover:bg-acid-dim'
                     : 'border-stone-600 text-stone-100 hover:border-stone-400'
-                    }`}
+                    } focus-visible:outline-2 focus-visible:outline-acid-green`}
                 >
                   {plan.cta}
                 </Link>
@@ -268,13 +268,13 @@ const HomePage = async () => {
           <div className="mt-6 flex flex-col gap-3 sm:flex-row">
             <Link
               href="/signup"
-              className="border border-acid-green bg-acid-green px-5 py-3 text-center text-xs uppercase tracking-[0.08em] text-stone-950 hover:bg-acid-dim"
+              className="border border-acid-green bg-acid-green px-5 py-3 text-center text-xs uppercase tracking-[0.08em] text-stone-950 hover:bg-acid-dim focus-visible:outline-2 focus-visible:outline-acid-green"
             >
               Start now
             </Link>
             <Link
               href="/login"
-              className="border border-stone-700 px-5 py-3 text-center text-xs uppercase tracking-[0.08em] text-stone-300 hover:border-stone-500"
+              className="border border-stone-700 px-5 py-3 text-center text-xs uppercase tracking-[0.08em] text-stone-300 hover:border-stone-500 focus-visible:outline-2 focus-visible:outline-acid-green"
             >
               I already have an account
             </Link>

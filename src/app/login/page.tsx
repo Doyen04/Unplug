@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 
+import { FormSubmitButton } from '../../components/features/auth/FormSubmitButton';
 import { auth } from '../../lib/auth';
 import { getServerSession } from '../../lib/server/auth-session';
 
@@ -34,12 +35,14 @@ const loginAction = async (formData: FormData) => {
 interface LoginPageProps {
     searchParams?: Promise<{
         error?: string;
+        reset?: string;
     }>;
 }
 
 const LoginPage = async ({ searchParams }: LoginPageProps) => {
     const params = (await searchParams) ?? {};
     const hasInvalidCredentials = params.error === 'invalid_credentials';
+    const hasPasswordResetSuccess = params.reset === 'success';
 
     const session = await getServerSession();
 
@@ -87,6 +90,16 @@ const LoginPage = async ({ searchParams }: LoginPageProps) => {
                         </div>
                     ) : null}
 
+                    {hasPasswordResetSuccess ? (
+                        <div
+                            className="mt-4 border border-acid-muted bg-acid-muted/30 p-3 text-xs uppercase tracking-[0.08em] text-acid-green"
+                            role="status"
+                            aria-live="polite"
+                        >
+                            Password reset successful. Log in with your new password.
+                        </div>
+                    ) : null}
+
                     <form className="mt-5 space-y-4" action={loginAction}>
                         <div>
                             <label htmlFor="email" className="text-xs uppercase tracking-[0.08em] text-stone-500">
@@ -97,7 +110,7 @@ const LoginPage = async ({ searchParams }: LoginPageProps) => {
                                 name="email"
                                 type="email"
                                 required
-                                className="mt-2 w-full border border-stone-700 bg-stone-950 px-3 py-2 text-sm text-stone-100 outline-none transition-colors focus:border-acid-green"
+                                className="mt-2 w-full border border-stone-700 bg-stone-950 px-3 py-2 text-sm text-stone-100 outline-none transition-colors focus:border-acid-green focus-visible:outline-2 focus-visible:outline-acid-green"
                                 placeholder="you@example.com"
                             />
                         </div>
@@ -114,26 +127,25 @@ const LoginPage = async ({ searchParams }: LoginPageProps) => {
                                 name="password"
                                 type="password"
                                 required
-                                className="mt-2 w-full border border-stone-700 bg-stone-950 px-3 py-2 text-sm text-stone-100 outline-none transition-colors focus:border-acid-green"
+                                className="mt-2 w-full border border-stone-700 bg-stone-950 px-3 py-2 text-sm text-stone-100 outline-none transition-colors focus:border-acid-green focus-visible:outline-2 focus-visible:outline-acid-green"
                                 placeholder="••••••••"
                             />
                         </div>
 
-                        <button
-                            type="submit"
-                            className="w-full border border-acid-green bg-acid-green px-4 py-2 text-xs font-medium uppercase tracking-[0.08em] text-stone-950 transition-colors hover:bg-acid-dim"
-                        >
-                            Log in
-                        </button>
+                        <FormSubmitButton
+                            idleLabel="Log in"
+                            pendingLabel="Logging in..."
+                            className="w-full border border-acid-green bg-acid-green px-4 py-2 text-xs font-medium uppercase tracking-[0.08em] text-stone-950 transition-colors hover:bg-acid-dim focus-visible:outline-2 focus-visible:outline-acid-green disabled:cursor-not-allowed disabled:opacity-60"
+                        />
                     </form>
 
                     <div className="mt-4 flex items-center justify-between text-xs uppercase tracking-[0.06em] text-stone-500">
-                        <Link href="/signup" className="hover:text-acid-green">
+                        <Link href="/signup" className="hover:text-acid-green focus-visible:outline-2 focus-visible:outline-acid-green">
                             Create account
                         </Link>
-                        <a href="#" className="hover:text-stone-300">
+                        <Link href="/forgot-password" className="hover:text-stone-300 focus-visible:outline-2 focus-visible:outline-acid-green">
                             Forgot password
-                        </a>
+                        </Link>
                     </div>
                 </section>
             </div>

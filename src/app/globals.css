@@ -48,3 +48,18 @@ body {
 .scrollbar-hidden::-webkit-scrollbar {
   display: none;
 }
+
+@keyframes alert-border-pulse {
+  0%,
+  100% {
+    box-shadow: inset 3px 0 0 rgba(239, 68, 68, 0.35);
+  }
+
+  50% {
+    box-shadow: inset 3px 0 0 rgba(239, 68, 68, 1);
+  }
+}
+
+.alert-pulse-border {
+  animation: alert-border-pulse 3s ease-in-out infinite;
+}

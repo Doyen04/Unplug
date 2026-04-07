@@ -114,7 +114,7 @@ const DashboardPage = () => {
             <div className="mt-4 flex flex-col gap-2 sm:flex-row">
               <Link
                 href="/dashboard/connect"
-                className="border border-acid-green bg-acid-green px-4 py-2 text-center text-xs uppercase tracking-[0.08em] text-stone-950 hover:bg-acid-dim"
+                className="border border-acid-green bg-acid-green px-4 py-2 text-center text-xs uppercase tracking-[0.08em] text-stone-950 hover:bg-acid-dim focus-visible:outline-2 focus-visible:outline-acid-green"
               >
                 Connect another account
               </Link>
@@ -164,7 +164,7 @@ const DashboardPage = () => {
                     className={`border px-3 py-1 text-xs uppercase tracking-[0.06em] ${filter === option.key
                       ? 'border-acid-green text-acid-green'
                       : 'border-stone-600 text-stone-200 hover:border-stone-400 hover:text-stone-100'
-                      }`}
+                      } focus-visible:outline-2 focus-visible:outline-acid-green`}
                   >
                     {option.label}
                   </button>
@@ -197,7 +197,7 @@ const DashboardPage = () => {
                   type="button"
                   onClick={() => setPage(page - 1)}
                   disabled={page <= 1}
-                  className="border border-stone-600 px-2 py-1 text-stone-200 hover:border-stone-400 hover:text-stone-100 disabled:opacity-40"
+                  className="border border-stone-600 px-2 py-1 text-stone-200 hover:border-stone-400 hover:text-stone-100 focus-visible:outline-2 focus-visible:outline-acid-green disabled:opacity-40"
                 >
                   Prev
                 </button>
@@ -205,7 +205,7 @@ const DashboardPage = () => {
                   type="button"
                   onClick={() => setPage(page + 1)}
                   disabled={page >= pageCount}
-                  className="border border-stone-600 px-2 py-1 text-stone-200 hover:border-stone-400 hover:text-stone-100 disabled:opacity-40"
+                  className="border border-stone-600 px-2 py-1 text-stone-200 hover:border-stone-400 hover:text-stone-100 focus-visible:outline-2 focus-visible:outline-acid-green disabled:opacity-40"
                 >
                   Next
                 </button>
@@ -231,7 +231,7 @@ const DashboardPage = () => {
               type="button"
               onClick={() => void undoCancel()}
               disabled={isCancelling}
-              className="border border-acid-green px-2 py-1 text-xs uppercase tracking-[0.06em] text-acid-green"
+              className="border border-acid-green px-2 py-1 text-xs uppercase tracking-[0.06em] text-acid-green focus-visible:outline-2 focus-visible:outline-acid-green disabled:opacity-60"
             >
               Undo
             </button>

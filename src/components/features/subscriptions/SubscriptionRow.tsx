@@ -35,7 +35,7 @@ export const SubscriptionRow = ({
     }}
     transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1], delay: index * 0.03 }}
     layout
-    className={`flex flex-col gap-3 border border-stone-800 bg-stone-900 p-4 sm:flex-row sm:items-center ${borderClassMap[subscription.status]}`}
+    className={`flex flex-col gap-3 border border-stone-800 bg-stone-900 p-4 sm:flex-row sm:items-center ${borderClassMap[subscription.status]} ${subscription.status === 'unused' ? 'alert-pulse-border' : ''}`}
   >
     <div className="flex h-9 w-9 shrink-0 items-center justify-center border border-stone-700 text-xs uppercase text-stone-300">
       {subscription.serviceName.slice(0, 1)}

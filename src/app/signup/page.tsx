@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 
+import { FormSubmitButton } from '../../components/features/auth/FormSubmitButton';
 import { auth } from '../../lib/auth';
 import { getServerSession } from '../../lib/server/auth-session';
 
@@ -75,7 +76,7 @@ const SignupPage = async ({ searchParams }: SignupPageProps) => {
                                 name="name"
                                 type="text"
                                 required
-                                className="mt-2 w-full border border-stone-700 bg-stone-950 px-3 py-2 text-sm text-stone-100 outline-none transition-colors focus:border-acid-green"
+                                className="mt-2 w-full border border-stone-700 bg-stone-950 px-3 py-2 text-sm text-stone-100 outline-none transition-colors focus:border-acid-green focus-visible:outline-2 focus-visible:outline-acid-green"
                                 placeholder="Your name"
                             />
                         </div>
@@ -89,7 +90,7 @@ const SignupPage = async ({ searchParams }: SignupPageProps) => {
                                 name="email"
                                 type="email"
                                 required
-                                className="mt-2 w-full border border-stone-700 bg-stone-950 px-3 py-2 text-sm text-stone-100 outline-none transition-colors focus:border-acid-green"
+                                className="mt-2 w-full border border-stone-700 bg-stone-950 px-3 py-2 text-sm text-stone-100 outline-none transition-colors focus:border-acid-green focus-visible:outline-2 focus-visible:outline-acid-green"
                                 placeholder="you@example.com"
                             />
                         </div>
@@ -106,22 +107,21 @@ const SignupPage = async ({ searchParams }: SignupPageProps) => {
                                 name="password"
                                 type="password"
                                 required
-                                className="mt-2 w-full border border-stone-700 bg-stone-950 px-3 py-2 text-sm text-stone-100 outline-none transition-colors focus:border-acid-green"
+                                className="mt-2 w-full border border-stone-700 bg-stone-950 px-3 py-2 text-sm text-stone-100 outline-none transition-colors focus:border-acid-green focus-visible:outline-2 focus-visible:outline-acid-green"
                                 placeholder="At least 8 characters"
                             />
                         </div>
 
-                        <button
-                            type="submit"
-                            className="w-full border border-acid-green bg-acid-green px-4 py-2 text-xs font-medium uppercase tracking-[0.08em] text-stone-950 transition-colors hover:bg-acid-dim"
-                        >
-                            Create account
-                        </button>
+                        <FormSubmitButton
+                            idleLabel="Create account"
+                            pendingLabel="Creating..."
+                            className="w-full border border-acid-green bg-acid-green px-4 py-2 text-xs font-medium uppercase tracking-[0.08em] text-stone-950 transition-colors hover:bg-acid-dim focus-visible:outline-2 focus-visible:outline-acid-green disabled:cursor-not-allowed disabled:opacity-60"
+                        />
                     </form>
 
                     <p className="mt-4 text-xs uppercase tracking-[0.06em] text-stone-500">
                         Already have an account?{' '}
-                        <Link href="/login" className="text-acid-green hover:text-acid-dim">
+                        <Link href="/login" className="text-acid-green hover:text-acid-dim focus-visible:outline-2 focus-visible:outline-acid-green">
                             Log in
                         </Link>
                     </p>
