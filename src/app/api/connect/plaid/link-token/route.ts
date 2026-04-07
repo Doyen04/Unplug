@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
+import { z } from 'zod';
 
+import { getConnectedAccountById } from '../../../../../lib/server/connected-accounts-store';
 import { getServerSession } from '../../../../../lib/server/auth-session';
+import { decryptToken } from '../../../../../lib/server/token-crypto';
 
 const PLAID_BASE_URLS: Record<string, string> = {
     sandbox: 'https://sandbox.plaid.com',
@@ -8,7 +11,11 @@ const PLAID_BASE_URLS: Record<string, string> = {
     production: 'https://production.plaid.com',
 };
 
-export async function POST() {
+const requestSchema = z.object({
+    accountId: z.string().optional(),
+});
+
+export async function POST(request: Request) {
     const session = await getServerSession();
     if (!session) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -29,6 +36,23 @@ export async function POST() {
     const sessionAny = session as { user?: { id?: string } };
     const userId = sessionAny.user?.id ?? 'local-user';
 
+    const body = await request.json().catch(() => ({}));
+    const parsed = requestSchema.safeParse(body);
+    if (!parsed.success) {
+        return NextResponse.json({ error: 'Invalid payload' }, { status: 400 });
+    }
+
+    let accessToken: string | undefined;
+
+    if (parsed.data.accountId) {
+        const account = await getConnectedAccountById(userId, parsed.data.accountId);
+        if (!account || account.provider !== 'plaid' || !account.encryptedAccessToken) {
+            return NextResponse.json({ error: 'Plaid account not found for reconnect' }, { status: 404 });
+        }
+
+        accessToken = decryptToken(account.encryptedAccessToken);
+    }
+
     const response = await fetch(`${baseUrl}/link/token/create`, {
         method: 'POST',
         headers: {
@@ -44,6 +68,14 @@ export async function POST() {
                 client_user_id: userId,
             },
             products: ['transactions'],
+            ...(accessToken
+                ? {
+                    access_token: accessToken,
+                    update: {
+                        account_selection_enabled: true,
+                    },
+                }
+                : {}),
         }),
         cache: 'no-store',
     });

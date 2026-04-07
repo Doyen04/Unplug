@@ -5,6 +5,8 @@ import { useEffect, useMemo, useState } from 'react';
 interface ConnectProviderButtonsProps {
     provider: 'plaid' | 'mono';
     preferredProvider: 'plaid' | 'mono';
+    accountId?: string;
+    compact?: boolean;
 }
 
 declare global {
@@ -48,7 +50,7 @@ const loadScript = (id: string, src: string): Promise<void> =>
         document.body.appendChild(script);
     });
 
-export const ConnectProviderButtons = ({ provider, preferredProvider }: ConnectProviderButtonsProps) => {
+export const ConnectProviderButtons = ({ provider, preferredProvider, accountId, compact = false }: ConnectProviderButtonsProps) => {
     const [plaidToken, setPlaidToken] = useState<string | null>(null);
     const [isPlaidBusy, setIsPlaidBusy] = useState(false);
     const [isMonoBusy, setIsMonoBusy] = useState(false);
@@ -69,6 +71,7 @@ export const ConnectProviderButtons = ({ provider, preferredProvider }: ConnectP
                 const response = await fetch('/api/connect/plaid/link-token', {
                     method: 'POST',
                     headers: { 'content-type': 'application/json' },
+                    body: JSON.stringify(accountId ? { accountId } : {}),
                 });
 
                 if (!response.ok) {
@@ -95,20 +98,20 @@ export const ConnectProviderButtons = ({ provider, preferredProvider }: ConnectP
 
     const plaidButtonClasses = useMemo(
         () =>
-            `mt-4 w-full border px-4 py-2 text-xs uppercase tracking-[0.08em] ${preferredProvider === 'plaid'
+            `${compact ? '' : 'mt-4 w-full'} border px-4 py-2 text-xs uppercase tracking-[0.08em] ${preferredProvider === 'plaid'
                 ? 'border-acid-green bg-acid-green text-stone-950 hover:bg-acid-dim'
                 : 'border-stone-600 text-stone-100 hover:border-stone-400'
             }`,
-        [preferredProvider]
+        [compact, preferredProvider]
     );
 
     const monoButtonClasses = useMemo(
         () =>
-            `mt-4 w-full border px-4 py-2 text-xs uppercase tracking-[0.08em] ${preferredProvider === 'mono'
+            `${compact ? '' : 'mt-4 w-full'} border px-4 py-2 text-xs uppercase tracking-[0.08em] ${preferredProvider === 'mono'
                 ? 'border-acid-green bg-acid-green text-stone-950 hover:bg-acid-dim'
                 : 'border-stone-600 text-stone-100 hover:border-stone-400'
             }`,
-        [preferredProvider]
+        [compact, preferredProvider]
     );
 
     const handlePlaidSetup = async () => {
@@ -204,7 +207,7 @@ export const ConnectProviderButtons = ({ provider, preferredProvider }: ConnectP
                     disabled={isPlaidBusy}
                     className={`${plaidButtonClasses} disabled:opacity-50`}
                 >
-                    {isPlaidBusy ? 'Opening Plaid...' : 'Setup Plaid'}
+                    {isPlaidBusy ? 'Opening Plaid...' : accountId ? 'Reconnect Plaid' : 'Setup Plaid'}
                 </button>
             ) : (
                 <button

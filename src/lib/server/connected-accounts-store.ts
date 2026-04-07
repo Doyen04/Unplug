@@ -4,6 +4,7 @@ import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
 
 export type ConnectedProvider = 'plaid' | 'mono';
+export type ConnectedAccountAuthStatus = 'active' | 'reconnect_required';
 
 export interface ConnectedAccount {
     id: string;
@@ -12,6 +13,8 @@ export interface ConnectedAccount {
     accountRef: string;
     displayName: string;
     connectedAt: string;
+    authStatus?: ConnectedAccountAuthStatus;
+    encryptedAccessToken?: string;
 }
 
 const dataFilePath = join(process.cwd(), 'data', 'connected-accounts.json');
@@ -23,6 +26,8 @@ const connectedAccountSchema: z.ZodType<ConnectedAccount> = z.object({
     accountRef: z.string(),
     displayName: z.string(),
     connectedAt: z.string(),
+    authStatus: z.enum(['active', 'reconnect_required']).optional(),
+    encryptedAccessToken: z.string().optional(),
 });
 
 const connectedAccountsSchema = z.array(connectedAccountSchema);
@@ -69,6 +74,8 @@ interface UpsertConnectedAccountInput {
     provider: ConnectedProvider;
     accountRef: string;
     displayName: string;
+    authStatus?: ConnectedAccountAuthStatus;
+    encryptedAccessToken?: string;
 }
 
 export const upsertConnectedAccount = async (
@@ -86,6 +93,10 @@ export const upsertConnectedAccount = async (
     if (existing) {
         existing.displayName = input.displayName;
         existing.connectedAt = new Date().toISOString();
+        existing.authStatus = input.authStatus ?? existing.authStatus ?? 'active';
+        if (input.encryptedAccessToken) {
+            existing.encryptedAccessToken = input.encryptedAccessToken;
+        }
         await writeAllConnectedAccounts(accounts);
         return existing;
     }
@@ -97,6 +108,8 @@ export const upsertConnectedAccount = async (
         accountRef: input.accountRef,
         displayName: input.displayName,
         connectedAt: new Date().toISOString(),
+        authStatus: input.authStatus ?? 'active',
+        encryptedAccessToken: input.encryptedAccessToken,
     };
 
     accounts.push(next);
@@ -116,4 +129,46 @@ export const disconnectConnectedAccount = async (userId: string, id: string): Pr
 
     await writeAllConnectedAccounts(next);
     return true;
+};
+
+export const getConnectedAccountById = async (
+    userId: string,
+    id: string
+): Promise<ConnectedAccount | null> => {
+    const accounts = await readAllConnectedAccounts();
+    return accounts.find((account) => account.userId === userId && account.id === id) ?? null;
+};
+
+export const getConnectedAccountByRef = async (
+    userId: string,
+    provider: ConnectedProvider,
+    accountRef: string
+): Promise<ConnectedAccount | null> => {
+    const accounts = await readAllConnectedAccounts();
+    return accounts.find(
+        (account) =>
+            account.userId === userId
+            && account.provider === provider
+            && account.accountRef === accountRef
+    ) ?? null;
+};
+
+export const markConnectedAccountAuthStatus = async (
+    userId: string,
+    provider: ConnectedProvider,
+    accountRef: string,
+    authStatus: ConnectedAccountAuthStatus
+): Promise<void> => {
+    const accounts = await readAllConnectedAccounts();
+    const target = accounts.find(
+        (account) =>
+            account.userId === userId
+            && account.provider === provider
+            && account.accountRef === accountRef
+    );
+
+    if (!target) return;
+
+    target.authStatus = authStatus;
+    await writeAllConnectedAccounts(accounts);
 };

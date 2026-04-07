@@ -123,17 +123,36 @@ const ConnectAccountsPage = async ({ searchParams }: ConnectAccountsPageProps) =
                                         <p className="text-[11px] uppercase tracking-[0.08em] text-stone-500">
                                             {account.provider} · {account.accountRef}
                                         </p>
+                                        <p
+                                            className={`mt-1 text-[11px] uppercase tracking-[0.08em] ${account.authStatus === 'reconnect_required'
+                                                ? 'text-amber-400'
+                                                : 'text-acid-green'
+                                                }`}
+                                        >
+                                            {account.authStatus === 'reconnect_required' ? 'Reconnect required' : 'Active'}
+                                        </p>
                                     </div>
 
-                                    <form action={disconnectAccountAction}>
-                                        <input type="hidden" name="accountId" value={account.id} />
-                                        <button
-                                            type="submit"
-                                            className="border border-red-900 px-3 py-1 text-xs uppercase tracking-[0.08em] text-red-400 hover:border-red-700"
-                                        >
-                                            Disconnect
-                                        </button>
-                                    </form>
+                                    <div className="flex items-center gap-2">
+                                        {account.provider === 'plaid' && account.authStatus === 'reconnect_required' ? (
+                                            <ConnectProviderButtons
+                                                provider="plaid"
+                                                preferredProvider={preferredProvider}
+                                                accountId={account.id}
+                                                compact
+                                            />
+                                        ) : null}
+
+                                        <form action={disconnectAccountAction}>
+                                            <input type="hidden" name="accountId" value={account.id} />
+                                            <button
+                                                type="submit"
+                                                className="border border-red-900 px-3 py-1 text-xs uppercase tracking-[0.08em] text-red-400 hover:border-red-700"
+                                            >
+                                                Disconnect
+                                            </button>
+                                        </form>
+                                    </div>
                                 </li>
                             ))}
                         </ul>

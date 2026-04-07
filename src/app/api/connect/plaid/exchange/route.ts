@@ -3,6 +3,7 @@ import { z } from 'zod';
 
 import { getServerSession } from '../../../../../lib/server/auth-session';
 import { upsertConnectedAccount } from '../../../../../lib/server/connected-accounts-store';
+import { encryptToken } from '../../../../../lib/server/token-crypto';
 
 const exchangeSchema = z.object({
     publicToken: z.string(),
@@ -66,11 +67,15 @@ export async function POST(request: Request) {
         access_token: string;
     };
 
+    const encryptedAccessToken = encryptToken(payload.access_token);
+
     await upsertConnectedAccount({
         userId,
         provider: 'plaid',
         accountRef: payload.item_id,
         displayName: 'Plaid linked account',
+        encryptedAccessToken,
+        authStatus: 'active',
     });
 
     // TODO: Persist encrypted access token by user in database.
