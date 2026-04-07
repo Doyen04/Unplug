@@ -3,6 +3,7 @@ import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 
 import { auth } from '../../lib/auth';
+import { getServerSession } from '../../lib/server/auth-session';
 
 const signupAction = async (formData: FormData) => {
     'use server';
@@ -15,23 +16,34 @@ const signupAction = async (formData: FormData) => {
         redirect('/signup?error=invalid_input');
     }
 
-    await auth.api.signUpEmail({
-        body: {
-            name,
-            email,
-            password,
-            callbackURL: '/dashboard',
-        },
-        headers: await headers(),
-    });
+    try {
+        await auth.api.signUpEmail({
+            body: {
+                name,
+                email,
+                password,
+                callbackURL: '/dashboard',
+            },
+            headers: await headers(),
+        });
+    } catch {
+        redirect('/signup?error=signup_failed');
+    }
 
     redirect('/dashboard');
 };
 
-const SignupPage = async () => {
-    const session = await auth.api.getSession({
-        headers: await headers(),
-    });
+interface SignupPageProps {
+    searchParams?: Promise<{
+        error?: string;
+    }>;
+}
+
+const SignupPage = async ({ searchParams }: SignupPageProps) => {
+    const params = (await searchParams) ?? {};
+    const hasSignupError = params.error === 'signup_failed';
+
+    const session = await getServerSession();
 
     if (session) {
         redirect('/dashboard');
@@ -42,6 +54,16 @@ const SignupPage = async () => {
             <div className="mx-auto grid w-full max-w-6xl gap-4 lg:grid-cols-[1fr_1.2fr]">
                 <section className="order-2 border border-stone-800 bg-stone-900 p-6 sm:p-8 lg:order-1">
                     <p className="text-[11px] uppercase tracking-[0.08em] text-stone-500">Create Account</p>
+
+                    {hasSignupError ? (
+                        <div
+                            className="mt-4 border border-red-900 bg-red-950 p-3 text-xs uppercase tracking-[0.08em] text-red-400"
+                            role="status"
+                            aria-live="polite"
+                        >
+                            Sign-up failed. Check your connection and try again.
+                        </div>
+                    ) : null}
 
                     <form className="mt-5 space-y-4" action={signupAction}>
                         <div>

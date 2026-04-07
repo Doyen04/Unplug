@@ -1,17 +1,14 @@
-import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import type { ReactNode } from 'react';
 
-import { auth } from '../../lib/auth';
+import { getServerSession } from '../../lib/server/auth-session';
 
 interface DashboardLayoutProps {
     children: ReactNode;
 }
 
 const DashboardLayout = async ({ children }: DashboardLayoutProps) => {
-    const session = await auth.api.getSession({
-        headers: await headers(),
-    });
+    const session = await getServerSession();
 
     if (!session) {
         redirect('/login');

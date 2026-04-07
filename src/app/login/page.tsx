@@ -3,6 +3,7 @@ import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 
 import { auth } from '../../lib/auth';
+import { getServerSession } from '../../lib/server/auth-session';
 
 const loginAction = async (formData: FormData) => {
     'use server';
@@ -40,9 +41,7 @@ const LoginPage = async ({ searchParams }: LoginPageProps) => {
     const params = (await searchParams) ?? {};
     const hasInvalidCredentials = params.error === 'invalid_credentials';
 
-    const session = await auth.api.getSession({
-        headers: await headers(),
-    });
+    const session = await getServerSession();
 
     if (session) {
         redirect('/dashboard');
