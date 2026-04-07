@@ -1,16 +1,18 @@
+import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import type { ReactNode } from 'react';
-
-import { getServerSession } from '../../lib/server/auth-session';
 
 interface DashboardLayoutProps {
     children: ReactNode;
 }
 
 const DashboardLayout = async ({ children }: DashboardLayoutProps) => {
-    const session = await getServerSession();
+    const cookieStore = await cookies();
+    const hasSessionCookie =
+        Boolean(cookieStore.get('better-auth.session_token')?.value)
+        || Boolean(cookieStore.get('__Secure-better-auth.session_token')?.value);
 
-    if (!session) {
+    if (!hasSessionCookie) {
         redirect('/login');
     }
 

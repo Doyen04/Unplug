@@ -50,6 +50,7 @@ body {
 }
 
 @keyframes alert-border-pulse {
+
   0%,
   100% {
     box-shadow: inset 3px 0 0 rgba(239, 68, 68, 0.35);

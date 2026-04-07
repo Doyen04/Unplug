@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
 import { getServerSession } from '../../../../../lib/server/auth-session';
+import { upsertConnectedAccount } from '../../../../../lib/server/connected-accounts-store';
 
 const exchangeSchema = z.object({
     publicToken: z.string(),
@@ -19,6 +20,9 @@ export async function POST(request: Request) {
     if (!session) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    const sessionAny = session as { user?: { id?: string } };
+    const userId = sessionAny.user?.id ?? 'local-user';
 
     const body = await request.json();
     const parsed = exchangeSchema.safeParse(body);
@@ -62,6 +66,18 @@ export async function POST(request: Request) {
         access_token: string;
     };
 
+    await upsertConnectedAccount({
+        userId,
+        provider: 'plaid',
+        accountRef: payload.item_id,
+        displayName: 'Plaid linked account',
+    });
+
     // TODO: Persist encrypted access token by user in database.
-    return NextResponse.json({ ok: true, itemId: payload.item_id, hasAccessToken: Boolean(payload.access_token) });
+    return NextResponse.json({
+        ok: true,
+        provider: 'plaid',
+        itemId: payload.item_id,
+        hasAccessToken: Boolean(payload.access_token),
+    });
 }

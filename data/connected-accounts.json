@@ -1,0 +1,10 @@
+[
+  {
+    "id": "7bc6033d-9b1a-4dc4-994e-b92f4f457cf1",
+    "userId": "1bx2svDtmH4lnPrg7lOMvkHpHCtBUIVe",
+    "provider": "plaid",
+    "accountRef": "6z5ywaAJyvHem5Ra8ZGRIDxXyZrWAWtrmJ68D",
+    "displayName": "Plaid linked account",
+    "connectedAt": "2026-04-07T21:12:32.492Z"
+  }
+]

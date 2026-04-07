@@ -123,13 +123,19 @@ export const ConnectProviderButtons = ({ provider, preferredProvider }: ConnectP
         const handler = window.Plaid.create({
             token: plaidToken,
             onSuccess: async (publicToken, metadata) => {
-                await fetch('/api/connect/plaid/exchange', {
+                const response = await fetch('/api/connect/plaid/exchange', {
                     method: 'POST',
                     headers: { 'content-type': 'application/json' },
                     body: JSON.stringify({ publicToken, metadata }),
                 });
 
-                window.location.assign('/dashboard?connected=plaid');
+                if (!response.ok) {
+                    setError('Plaid exchange failed. Try again.');
+                    setIsPlaidBusy(false);
+                    return;
+                }
+
+                window.location.assign('/dashboard/connect?connected=plaid');
             },
             onExit: () => {
                 setIsPlaidBusy(false);
@@ -157,13 +163,19 @@ export const ConnectProviderButtons = ({ provider, preferredProvider }: ConnectP
         const mono = new window.Connect({
             key: monoPublicKey,
             onSuccess: async ({ code }) => {
-                await fetch('/api/connect/mono/exchange', {
+                const response = await fetch('/api/connect/mono/exchange', {
                     method: 'POST',
                     headers: { 'content-type': 'application/json' },
                     body: JSON.stringify({ code }),
                 });
 
-                window.location.assign('/dashboard?connected=mono');
+                if (!response.ok) {
+                    setError('Mono exchange failed. Try again.');
+                    setIsMonoBusy(false);
+                    return;
+                }
+
+                window.location.assign('/dashboard/connect?connected=mono');
             },
             onClose: () => {
                 setIsMonoBusy(false);
