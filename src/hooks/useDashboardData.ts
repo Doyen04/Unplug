@@ -12,6 +12,7 @@ import type {
 export interface DashboardData {
   summary: DashboardPayload['summary'];
   subscriptions: Subscription[];
+  totalSubscriptions: number;
   alerts: DashboardPayload['alerts'];
   debrief: { month: string; content: string } | null;
   isLoading: boolean;
@@ -124,6 +125,7 @@ export const useDashboardData = (
   return {
     summary: payload.summary,
     subscriptions: payload.subscriptions,
+    totalSubscriptions: payload.pagination.total,
     alerts: payload.alerts,
     debrief: debrief ?? null,
     isLoading,

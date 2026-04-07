@@ -12,6 +12,12 @@ export const auth = betterAuth({
         db,
         type: 'postgres',
     },
+    session: {
+        // seconds: 7 days
+        expiresIn: 60 * 60 * 24 * 7,
+        // seconds: refresh at most once per 24h
+        updateAge: 60 * 60 * 24,
+    },
     emailAndPassword: {
         enabled: true,
     },

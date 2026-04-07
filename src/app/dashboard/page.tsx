@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import { DashboardAlertsPanel } from '../../components/features/dashboard/DashboardAlertsPanel';
@@ -32,6 +33,7 @@ const DashboardPage = () => {
   const {
     summary,
     subscriptions,
+    totalSubscriptions,
     alerts,
     debrief,
     isLoading,
@@ -92,6 +94,33 @@ const DashboardPage = () => {
         </div>
 
         <section className="scrollbar-hidden order-3 space-y-4 lg:order-2 lg:h-full lg:overflow-y-auto lg:pr-1">
+          <section className="border border-stone-800 bg-stone-900 p-5 sm:p-6">
+            <p className="text-[11px] uppercase tracking-[0.08em] text-stone-500">Dashboard command center</p>
+            <div className="mt-3 grid gap-3 sm:grid-cols-3">
+              <article className="border border-stone-800 bg-stone-950 p-4">
+                <p className="text-[11px] uppercase tracking-[0.08em] text-stone-500">Tracked subscriptions</p>
+                <p className="mt-2 font-display text-4xl text-stone-100">{isLoading ? '--' : totalSubscriptions}</p>
+              </article>
+              <article className="border border-stone-800 bg-stone-950 p-4">
+                <p className="text-[11px] uppercase tracking-[0.08em] text-stone-500">Live alerts</p>
+                <p className="mt-2 font-display text-4xl text-amber-400">{isLoading ? '--' : alerts.length}</p>
+              </article>
+              <article className="border border-stone-800 bg-stone-950 p-4">
+                <p className="text-[11px] uppercase tracking-[0.08em] text-stone-500">Action this month</p>
+                <p className="mt-2 font-display text-4xl text-acid-green">{summary.unusedCount > 0 ? 'Cancel' : 'Stable'}</p>
+              </article>
+            </div>
+
+            <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+              <Link
+                href="/dashboard/connect"
+                className="border border-acid-green bg-acid-green px-4 py-2 text-center text-xs uppercase tracking-[0.08em] text-stone-950 hover:bg-acid-dim"
+              >
+                Connect another account
+              </Link>
+            </div>
+          </section>
+
           <ShameScoreMeter
             score={summary.shameScore}
             previousScore={summary.previousShameScore}
@@ -161,7 +190,7 @@ const DashboardPage = () => {
 
             <div className="flex flex-col gap-2 border border-stone-800 bg-stone-900 px-3 py-2 text-xs uppercase tracking-[0.06em] text-stone-400 sm:flex-row sm:items-center sm:justify-between">
               <span className="text-center sm:text-left">
-                Page {page} / {pageCount}
+                Page {page} / {pageCount} · {totalSubscriptions} total
               </span>
               <div className="flex justify-center gap-2 sm:justify-end">
                 <button
