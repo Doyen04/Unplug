@@ -34,6 +34,9 @@ export interface DashboardSummary {
   saveablePerYear: number;
   shameScore: number;
   previousShameScore: number;
+  linkedAccounts: number;
+  recentTransactionCount: number;
+  dataSource: 'plaid' | 'seeded';
 }
 
 export interface DashboardAlert {

@@ -12,6 +12,9 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const sessionAny = session as { user?: { id?: string } };
+    const userId = sessionAny.user?.id ?? 'local-user';
+
     const url = new URL(request.url);
     const filterParam = url.searchParams.get('filter');
     const pageParam = Number(url.searchParams.get('page') ?? '1');
@@ -25,6 +28,7 @@ export async function GET(request: Request) {
         filter,
         page: Number.isFinite(pageParam) ? pageParam : 1,
         pageSize: Number.isFinite(pageSizeParam) ? pageSizeParam : 4,
+        userId,
     });
 
     return NextResponse.json(payload);

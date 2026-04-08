@@ -1,78 +1,176 @@
 [
   {
-    "id": "s-1",
-    "serviceName": "Netflix",
-    "amountMonthly": 19,
+    "id": "plaid-ach-electronic-creditgusto-pay-123456",
+    "serviceName": "ACH Electronic CreditGUSTO PAY 123456",
+    "amountMonthly": 5850,
     "frequencyLabel": "monthly",
-    "status": "unused",
-    "confidence": "high",
-    "usageScore": 18,
-    "verdict": "unused",
+    "status": "healthy",
+    "confidence": "medium",
+    "usageScore": 60,
+    "verdict": "likely_unused",
     "alert": {
-      "type": "unused",
-      "message": "No usage signals in 45 days"
+      "type": "dormant",
+      "message": "Likely unused based on transaction cadence"
     }
   },
   {
-    "id": "s-2",
-    "serviceName": "Spotify",
+    "id": "plaid-automatic-payment-thank",
+    "serviceName": "AUTOMATIC PAYMENT - THANK",
+    "amountMonthly": 2078.5,
+    "frequencyLabel": "monthly",
+    "status": "healthy",
+    "confidence": "medium",
+    "usageScore": 67,
+    "verdict": "likely_unused",
+    "alert": {
+      "type": "dormant",
+      "message": "Likely unused based on transaction cadence"
+    }
+  },
+  {
+    "id": "plaid-cd-deposit-initial",
+    "serviceName": "CD DEPOSIT .INITIAL.",
+    "amountMonthly": 1000,
+    "frequencyLabel": "monthly",
+    "status": "healthy",
+    "confidence": "medium",
+    "usageScore": 60,
+    "verdict": "likely_unused",
+    "alert": {
+      "type": "dormant",
+      "message": "Likely unused based on transaction cadence"
+    }
+  },
+  {
+    "id": "plaid-united-airlines",
+    "serviceName": "United Airlines",
+    "amountMonthly": 500,
+    "frequencyLabel": "monthly",
+    "status": "healthy",
+    "confidence": "medium",
+    "usageScore": 72,
+    "verdict": "active"
+  },
+  {
+    "id": "plaid-tectra-inc",
+    "serviceName": "Tectra Inc",
+    "amountMonthly": 500,
+    "frequencyLabel": "monthly",
+    "status": "healthy",
+    "confidence": "medium",
+    "usageScore": 68,
+    "verdict": "likely_unused",
+    "alert": {
+      "type": "dormant",
+      "message": "Likely unused based on transaction cadence"
+    }
+  },
+  {
+    "id": "plaid-kfc",
+    "serviceName": "KFC",
+    "amountMonthly": 500,
+    "frequencyLabel": "monthly",
+    "status": "healthy",
+    "confidence": "medium",
+    "usageScore": 67,
+    "verdict": "likely_unused",
+    "alert": {
+      "type": "dormant",
+      "message": "Likely unused based on transaction cadence"
+    }
+  },
+  {
+    "id": "plaid-madison-bicycle-shop",
+    "serviceName": "Madison Bicycle Shop",
+    "amountMonthly": 500,
+    "frequencyLabel": "monthly",
+    "status": "healthy",
+    "confidence": "medium",
+    "usageScore": 67,
+    "verdict": "likely_unused",
+    "alert": {
+      "type": "dormant",
+      "message": "Likely unused based on transaction cadence"
+    }
+  },
+  {
+    "id": "plaid-fun",
+    "serviceName": "FUN",
+    "amountMonthly": 89.4,
+    "frequencyLabel": "monthly",
+    "status": "healthy",
+    "confidence": "medium",
+    "usageScore": 58,
+    "verdict": "likely_unused",
+    "alert": {
+      "type": "dormant",
+      "message": "Likely unused based on transaction cadence"
+    }
+  },
+  {
+    "id": "plaid-touchstone-climbing",
+    "serviceName": "Touchstone Climbing",
+    "amountMonthly": 78.5,
+    "frequencyLabel": "monthly",
+    "status": "healthy",
+    "confidence": "medium",
+    "usageScore": 59,
+    "verdict": "likely_unused",
+    "alert": {
+      "type": "dormant",
+      "message": "Likely unused based on transaction cadence"
+    }
+  },
+  {
+    "id": "plaid-credit-card-3333-payment",
+    "serviceName": "CREDIT CARD 3333 PAYMENT *//",
+    "amountMonthly": 25,
+    "frequencyLabel": "monthly",
+    "status": "healthy",
+    "confidence": "medium",
+    "usageScore": 61,
+    "verdict": "likely_unused",
+    "alert": {
+      "type": "dormant",
+      "message": "Likely unused based on transaction cadence"
+    }
+  },
+  {
+    "id": "plaid-mcdonald-s",
+    "serviceName": "McDonald's",
     "amountMonthly": 12,
     "frequencyLabel": "monthly",
     "status": "healthy",
-    "confidence": "high",
-    "usageScore": 84,
-    "verdict": "active"
-  },
-  {
-    "id": "s-3",
-    "serviceName": "Notion",
-    "amountMonthly": 15,
-    "frequencyLabel": "monthly",
-    "status": "price-hike",
     "confidence": "medium",
-    "usageScore": 62,
+    "usageScore": 58,
     "verdict": "likely_unused",
     "alert": {
-      "type": "price-hike",
-      "message": "Up $2.00 vs last month"
+      "type": "dormant",
+      "message": "Likely unused based on transaction cadence"
     }
   },
   {
-    "id": "s-4",
-    "serviceName": "Duolingo",
-    "amountMonthly": 13,
-    "frequencyLabel": "monthly",
-    "status": "trial-ending",
-    "confidence": "medium",
-    "usageScore": 50,
-    "verdict": "likely_unused",
-    "alert": {
-      "type": "trial-ending",
-      "message": "Trial converts in 2 days"
-    }
-  },
-  {
-    "id": "s-5",
-    "serviceName": "YouTube Premium",
-    "amountMonthly": 14,
+    "id": "plaid-uber",
+    "serviceName": "Uber",
+    "amountMonthly": 6.02,
     "frequencyLabel": "monthly",
     "status": "healthy",
     "confidence": "high",
-    "usageScore": 76,
+    "usageScore": 79,
     "verdict": "active"
   },
   {
-    "id": "s-6",
-    "serviceName": "Adobe CC",
-    "amountMonthly": 61,
+    "id": "plaid-starbucks",
+    "serviceName": "Starbucks",
+    "amountMonthly": 4.33,
     "frequencyLabel": "monthly",
-    "status": "unused",
+    "status": "healthy",
     "confidence": "medium",
-    "usageScore": 28,
-    "verdict": "unused",
+    "usageScore": 58,
+    "verdict": "likely_unused",
     "alert": {
       "type": "dormant",
-      "message": "Likely unused based on recent signals"
+      "message": "Likely unused based on transaction cadence"
     }
   }
 ]

@@ -15,10 +15,13 @@ export async function GET() {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const sessionAny = session as { user?: { id?: string } };
+    const userId = sessionAny.user?.id ?? 'local-user';
+
     try {
         const {
             summary: { monthlySpend, unusedCount, saveablePerYear },
-        } = await getDashboardPayload();
+        } = await getDashboardPayload({ userId });
 
         const content =
             unusedCount > 0

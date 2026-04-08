@@ -3,12 +3,12 @@ interface DashboardAlertsPanelProps {
 }
 
 export const DashboardAlertsPanel = ({ alerts }: DashboardAlertsPanelProps) => (
-  <aside className="border border-stone-800 bg-stone-900 p-5">
-    <p className="text-[11px] uppercase tracking-[0.08em] text-stone-500">
+  <aside className="flex h-full min-h-0 flex-col border border-stone-800 bg-stone-900 p-5">
+    <p className="shrink-0 text-[11px] uppercase tracking-[0.08em] text-stone-500">
       Alerts ({alerts.length})
     </p>
 
-    <ul className="mt-4 space-y-3">
+    <ul className="mt-4 min-h-0 space-y-3 overflow-y-auto pr-1">
       {alerts.length === 0 ? (
         <li className="text-sm text-stone-500">No active alerts.</li>
       ) : (

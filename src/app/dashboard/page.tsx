@@ -88,26 +88,29 @@ const DashboardPage = () => {
 
   return (
     <main className="min-h-screen bg-stone-950 px-4 py-10 text-stone-100 md:px-6 lg:h-screen lg:overflow-hidden lg:px-8">
-      <div className="mx-auto grid w-full max-w-350 grid-cols-1 gap-4 lg:h-full lg:grid-cols-[240px_minmax(0,800px)_280px] lg:items-stretch">
+      <div className="mx-auto grid w-full max-w-350 grid-cols-1 gap-4 lg:h-full lg:min-h-0 lg:grid-cols-[240px_minmax(0,800px)_280px] lg:items-stretch">
         <div className="order-1 lg:order-1 lg:h-full">
           <DashboardSidebar monthlySpend={summary.monthlySpend} />
         </div>
 
-        <section className="scrollbar-hidden order-3 space-y-4 lg:order-2 lg:h-full lg:overflow-y-auto lg:pr-1">
+        <section className="scrollbar-hidden order-3 space-y-4 lg:order-2 lg:h-full lg:min-h-0 lg:overflow-y-auto lg:pr-1">
           <section className="border border-stone-800 bg-stone-900 p-5 sm:p-6">
             <p className="text-[11px] uppercase tracking-[0.08em] text-stone-500">Dashboard command center</p>
+            <p className="mt-1 text-[10px] uppercase tracking-[0.08em] text-stone-500">
+              Source: {summary.dataSource === 'plaid' ? 'Plaid live data' : 'Seeded fallback data'}
+            </p>
             <div className="mt-3 grid gap-3 sm:grid-cols-3">
               <article className="border border-stone-800 bg-stone-950 p-4">
                 <p className="text-[11px] uppercase tracking-[0.08em] text-stone-500">Tracked subscriptions</p>
                 <p className="mt-2 font-display text-4xl text-stone-100">{isLoading ? '--' : totalSubscriptions}</p>
               </article>
               <article className="border border-stone-800 bg-stone-950 p-4">
-                <p className="text-[11px] uppercase tracking-[0.08em] text-stone-500">Live alerts</p>
-                <p className="mt-2 font-display text-4xl text-amber-400">{isLoading ? '--' : alerts.length}</p>
+                <p className="text-[11px] uppercase tracking-[0.08em] text-stone-500">Linked accounts</p>
+                <p className="mt-2 font-display text-4xl text-acid-green">{isLoading ? '--' : summary.linkedAccounts}</p>
               </article>
               <article className="border border-stone-800 bg-stone-950 p-4">
-                <p className="text-[11px] uppercase tracking-[0.08em] text-stone-500">Action this month</p>
-                <p className="mt-2 font-display text-4xl text-acid-green">{summary.unusedCount > 0 ? 'Cancel' : 'Stable'}</p>
+                <p className="text-[11px] uppercase tracking-[0.08em] text-stone-500">Recent transactions</p>
+                <p className="mt-2 font-display text-4xl text-amber-400">{isLoading ? '--' : summary.recentTransactionCount}</p>
               </article>
             </div>
 
@@ -214,7 +217,7 @@ const DashboardPage = () => {
           </section>
         </section>
 
-        <div id="alerts" className="order-2 lg:order-3 lg:h-full">
+        <div id="alerts" className="order-2 lg:order-3 lg:h-full lg:min-h-0">
           <DashboardAlertsPanel alerts={alerts} />
         </div>
       </div>
