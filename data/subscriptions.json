@@ -6,7 +6,7 @@
     "frequencyLabel": "monthly",
     "status": "healthy",
     "confidence": "medium",
-    "usageScore": 60,
+    "usageScore": 59,
     "verdict": "likely_unused",
     "alert": {
       "type": "dormant",
@@ -34,7 +34,7 @@
     "frequencyLabel": "monthly",
     "status": "healthy",
     "confidence": "medium",
-    "usageScore": 60,
+    "usageScore": 59,
     "verdict": "likely_unused",
     "alert": {
       "type": "dormant",
@@ -48,7 +48,7 @@
     "frequencyLabel": "monthly",
     "status": "healthy",
     "confidence": "medium",
-    "usageScore": 72,
+    "usageScore": 71,
     "verdict": "active"
   },
   {
@@ -58,7 +58,7 @@
     "frequencyLabel": "monthly",
     "status": "healthy",
     "confidence": "medium",
-    "usageScore": 68,
+    "usageScore": 67,
     "verdict": "likely_unused",
     "alert": {
       "type": "dormant",
@@ -100,7 +100,7 @@
     "frequencyLabel": "monthly",
     "status": "healthy",
     "confidence": "medium",
-    "usageScore": 58,
+    "usageScore": 57,
     "verdict": "likely_unused",
     "alert": {
       "type": "dormant",
@@ -114,7 +114,7 @@
     "frequencyLabel": "monthly",
     "status": "healthy",
     "confidence": "medium",
-    "usageScore": 59,
+    "usageScore": 58,
     "verdict": "likely_unused",
     "alert": {
       "type": "dormant",
@@ -128,7 +128,7 @@
     "frequencyLabel": "monthly",
     "status": "healthy",
     "confidence": "medium",
-    "usageScore": 61,
+    "usageScore": 60,
     "verdict": "likely_unused",
     "alert": {
       "type": "dormant",
@@ -156,7 +156,7 @@
     "frequencyLabel": "monthly",
     "status": "healthy",
     "confidence": "high",
-    "usageScore": 79,
+    "usageScore": 78,
     "verdict": "active"
   },
   {

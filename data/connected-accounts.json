@@ -1,1 +1,12 @@
-[]
+[
+  {
+    "id": "e67d9f25-36d1-4933-93ff-755aa7bac934",
+    "userId": "1bx2svDtmH4lnPrg7lOMvkHpHCtBUIVe",
+    "provider": "plaid",
+    "accountRef": "r8GallgzoMHKZ5xBKdnmcXxQK3o7V9ty8LvNE",
+    "displayName": "Plaid linked account",
+    "connectedAt": "2026-04-08T20:08:50.662Z",
+    "authStatus": "active",
+    "encryptedAccessToken": "Eotx2txV0qxjyReV:4yDkp0GrjMzSqHmERAM5Zg==:/8FDRHFLc/EFpZrDbkPy+dtXHyMdyFJOc/DHrl4EjXZl7/LejtDH+sumH0eFYzVGnhSq"
+  }
+]

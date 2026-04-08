@@ -15,6 +15,8 @@ import {
     writeStoredSubscriptions,
     type StoredSubscription,
 } from './subscriptions-store';
+import { writeFile } from 'fs/promises';
+import path from 'path';
 
 export interface DashboardPayload {
     summary: DashboardSummary;
@@ -48,6 +50,7 @@ interface PlaidTransaction {
 interface PlaidSnapshot {
     linkedAccounts: number;
     transactions: PlaidTransaction[];
+    noAccount?: boolean;
 }
 
 const PLAID_BASE_URLS: Record<string, string> = {
@@ -268,11 +271,16 @@ const mergeDetectedWithStored = (
 };
 
 const fetchPlaidSnapshot = async (userId: string): Promise<PlaidSnapshot | null> => {
-    const plaidAccount = (await listConnectedAccountsByUser(userId)).find(
-        (item) => item.provider === 'plaid'
-    );
+    const userAccounts = await listConnectedAccountsByUser(userId);
+    const plaidAccounts = userAccounts.filter((item) => item.provider === 'plaid');
+    const plaidAccount = plaidAccounts.find((item) => item.encryptedAccessToken) ?? plaidAccounts[0];
 
-    if (!plaidAccount?.encryptedAccessToken) {
+    // If the user has not connected any Plaid account, return a marker object
+    if (plaidAccounts.length === 0 || !plaidAccount) {
+        return { linkedAccounts: 0, transactions: [], noAccount: true };
+    }
+
+    if (!plaidAccount.encryptedAccessToken) {
         return null;
     }
 
@@ -348,8 +356,24 @@ const fetchPlaidSnapshot = async (userId: string): Promise<PlaidSnapshot | null>
         transactions: PlaidTransaction[];
     };
 
+    // Write fetched transactions to a text file for inspection
+    try {
+        const outPath = path.resolve(process.cwd(), 'data', `plaid-transactions-${userId}.txt`);
+        const content = [
+            `Plaid Snapshot for user: ${userId}`,
+            `Fetched at: ${new Date().toISOString()}`,
+            `Connected Plaid records: ${plaidAccounts.length}`,
+            `Plaid API accounts returned: ${accountsPayload.accounts.length}`,
+            'Transactions:',
+            JSON.stringify(transactionsPayload.transactions, null, 2),
+        ].join('\n\n');
+        await writeFile(outPath, content, 'utf8');
+    } catch {
+        // ignore file write errors - we still return the snapshot
+    }
+
     return {
-        linkedAccounts: accountsPayload.accounts.length,
+        linkedAccounts: plaidAccounts.length,
         transactions: transactionsPayload.transactions,
     };
 };
@@ -378,6 +402,34 @@ export const getDashboardPayload = async (
 
     const storedSubscriptions = await readStoredSubscriptions();
     const plaidSnapshot = options.userId ? await fetchPlaidSnapshot(options.userId) : null;
+
+    // If the user has not connected any Plaid account, return empty dashboard
+    if (options.userId && plaidSnapshot?.noAccount) {
+        const summary: DashboardSummary = {
+            monthlySpend: 0,
+            unusedCount: 0,
+            saveablePerYear: 0,
+            shameScore: 0,
+            previousShameScore: 0,
+            linkedAccounts: 0,
+            recentTransactionCount: 0,
+            dataSource: 'seeded',
+        };
+
+        const page = 1;
+        return {
+            summary,
+            subscriptions: [],
+            alerts: [],
+            pagination: {
+                filter,
+                page,
+                pageSize,
+                pageCount: 1,
+                total: 0,
+            },
+        };
+    }
 
     const detectedSubscriptions = plaidSnapshot
         ? detectSubscriptionsFromTransactions(plaidSnapshot.transactions)
