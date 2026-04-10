@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { Toaster, toast } from 'sonner';
 
 import { DashboardAlertsPanel } from '../../components/features/dashboard/DashboardAlertsPanel';
 import { DashboardSidebar } from '../../components/features/dashboard/DashboardSidebar';
@@ -21,6 +22,26 @@ const FILTERS: Array<{ key: DashboardFilter; label: string }> = [
   { key: 'active', label: 'Active' },
   { key: 'cancelled', label: 'Cancelled' },
 ];
+
+/* Subscription list skeleton */
+const SubscriptionSkeleton = () => (
+  <div className="space-y-3">
+    {[...Array(4)].map((_, i) => (
+      <div
+        key={i}
+        className="flex items-center gap-3 rounded-card border border-border bg-white px-4 py-[18px] shadow-card"
+        style={{ minHeight: '72px' }}
+      >
+        <div className="shimmer h-10 w-10 rounded-[10px]" />
+        <div className="flex-1 space-y-2">
+          <div className="shimmer h-4 w-32 rounded" />
+          <div className="shimmer h-3 w-20 rounded" />
+        </div>
+        <div className="shimmer h-5 w-16 rounded" />
+      </div>
+    ))}
+  </div>
+);
 
 const DashboardPage = () => {
   const router = useRouter();
@@ -54,6 +75,7 @@ const DashboardPage = () => {
     initialPage,
   });
 
+  /* Sync filter/page to URL */
   useEffect(() => {
     const currentFilter = searchParams.get('filter') ?? 'all';
     const currentPage = Number(searchParams.get('page') ?? '1') || 1;
@@ -66,182 +88,245 @@ const DashboardPage = () => {
     router.replace(`${pathname}?${params.toString()}`);
   }, [filter, page, pathname, router, searchParams]);
 
+  /* Auto-clear undo toast after 5s */
   useEffect(() => {
     if (!pendingUndoId) return;
+
+    toast.success('Subscription cancelled!', {
+      description: 'You can undo within 5 seconds.',
+      action: {
+        label: 'Undo',
+        onClick: () => void undoCancel(),
+      },
+      duration: 5000,
+    });
 
     const timeoutId = setTimeout(() => {
       clearPendingUndo();
     }, 5000);
 
     return () => clearTimeout(timeoutId);
-  }, [pendingUndoId, clearPendingUndo]);
+  }, [pendingUndoId, clearPendingUndo, undoCancel]);
 
   if (isError) {
     return (
-      <main className="min-h-screen bg-[#FAFAF7] px-4 py-10 text-[#1A1A17] md:px-6 lg:px-8">
-        <div className="mx-auto max-w-3xl rounded-2xl border border-[#E53434] bg-[#FEF0F0] p-6 text-sm uppercase tracking-[0.08em] text-[#E53434] shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)]">
-          Dashboard unavailable. Try again.
+      <main className="flex min-h-screen items-center justify-center bg-bg-base px-4">
+        <div className="max-w-md rounded-card border border-danger bg-danger-light p-6 text-center shadow-card">
+          <p className="text-[15px] font-medium text-danger">Dashboard unavailable</p>
+          <p className="mt-2 text-[13px] text-text-secondary">
+            Something went wrong loading your data. Please try again.
+          </p>
+          <button
+            type="button"
+            onClick={() => window.location.reload()}
+            className="mt-4 rounded-btn bg-brand px-5 py-2.5 text-[13px] font-semibold text-white transition-colors hover:bg-brand-dark"
+          >
+            Retry
+          </button>
         </div>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-[#FAFAF7] px-4 py-10 text-[#1A1A17] md:px-6 lg:h-screen lg:overflow-hidden lg:px-8">
-      <div className="mx-auto grid w-full max-w-350 grid-cols-1 gap-4 lg:h-full lg:min-h-0 lg:grid-cols-[240px_minmax(0,800px)_280px] lg:items-stretch">
-        <div className="order-1 lg:order-1 lg:h-full">
-          <DashboardSidebar monthlySpend={summary.monthlySpend} />
-        </div>
+    <>
+      <Toaster
+        position="bottom-center"
+        toastOptions={{
+          style: {
+            background: '#FFFFFF',
+            border: '1px solid #E8E7E0',
+            boxShadow: '0 1px 4px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04)',
+            borderRadius: '16px',
+            fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+          },
+        }}
+      />
+      <main className="min-h-screen bg-bg-base px-4 py-6 text-text-primary md:px-6 lg:h-screen lg:overflow-hidden lg:px-8 lg:py-6">
+        <div className="mx-auto grid w-full max-w-[1400px] grid-cols-1 gap-4 lg:h-full lg:min-h-0 lg:grid-cols-[240px_minmax(0,1fr)_280px] lg:items-stretch">
 
-        <section className="scrollbar-hidden order-3 space-y-4 lg:order-2 lg:h-full lg:min-h-0 lg:overflow-y-auto lg:pr-1">
-          <section className="rounded-2xl border border-[#E8E7E0] bg-white p-5 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] sm:p-6">
-            <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#A9A79E]">Dashboard command center</p>
-            <p className="mt-1 text-[10px] uppercase tracking-[0.08em] text-[#A9A79E]">
-              Source: {summary.dataSource === 'plaid' ? 'Plaid live data' : 'Seeded fallback data'}
-            </p>
-            <div className="mt-3 grid gap-3 sm:grid-cols-3">
-              <article className="rounded-2xl border border-[#E8E7E0] bg-[#FAFAF7] p-4">
-                <p className="text-[11px] uppercase tracking-[0.08em] text-[#A9A79E]">Tracked subscriptions</p>
-                <p className="font-display mt-2 text-4xl text-[#1A1A17]">{isLoading ? '--' : totalSubscriptions}</p>
-              </article>
-              <article className="rounded-2xl border border-[#E8E7E0] bg-[#FAFAF7] p-4">
-                <p className="text-[11px] uppercase tracking-[0.08em] text-[#A9A79E]">Linked accounts</p>
-                <p className="font-display mt-2 text-4xl text-[#1C9E5B]">{isLoading ? '--' : summary.linkedAccounts}</p>
-              </article>
-              <article className="rounded-2xl border border-[#E8E7E0] bg-[#FAFAF7] p-4">
-                <p className="text-[11px] uppercase tracking-[0.08em] text-[#A9A79E]">Recent transactions</p>
-                <p className="font-display mt-2 text-4xl text-[#E8860A]">{isLoading ? '--' : summary.recentTransactionCount}</p>
-              </article>
-            </div>
-
-            <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-              <Link
-                href="/dashboard/connect"
-                className="rounded-[10px] border border-[#FF5C35] bg-[#FF5C35] px-4 py-2 text-center text-xs font-semibold uppercase tracking-[0.08em] text-white hover:bg-[#C93A1A] focus-visible:outline-2 focus-visible:outline-[#FF5C35]"
-              >
-                Connect another account
-              </Link>
-            </div>
-          </section>
-
-          <ShameScoreMeter
-            score={summary.shameScore}
-            previousScore={summary.previousShameScore}
-            isLoading={isLoading}
-          />
-
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-            <StatCard
-              label="Monthly Spend"
-              value={formatCurrency(summary.monthlySpend)}
-              variant="danger"
-            />
-            <StatCard label="Unused Count" value={`${summary.unusedCount}`} />
-            <StatCard
-              label="Saveable / yr"
-              value={formatCurrency(summary.saveablePerYear)}
-              variant="success"
-            />
+          {/* Sidebar */}
+          <div className="order-1 lg:order-1 lg:h-full">
+            <DashboardSidebar monthlySpend={summary.monthlySpend} />
           </div>
 
-          <div id="debrief">
-            <DebriefPanel
-              month={debrief?.month ?? 'APR 2026'}
-              isLoading={isDebriefLoading}
-              content={debrief?.content ?? null}
-              error={!isDebriefLoading && !debrief}
-            />
-          </div>
+          {/* Main content */}
+          <section className="scrollbar-hidden order-3 space-y-4 lg:order-2 lg:h-full lg:min-h-0 lg:overflow-y-auto lg:pr-2">
 
-          <section id="subscriptions" className="space-y-3">
-            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-              <p className="text-[11px] uppercase tracking-[0.08em] text-[#A9A79E]">
-                Subscriptions
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {FILTERS.map((option) => (
-                  <button
-                    key={option.key}
-                    type="button"
-                    onClick={() => setFilter(option.key)}
-                    className={`rounded-[10px] border px-3 py-1 text-xs uppercase tracking-[0.06em] ${filter === option.key
-                      ? 'border-[#FF5C35] bg-[#FFF0EC] text-[#C93A1A]'
-                      : 'border-[#D0CFC7] bg-white text-[#6B6960] hover:border-[#1A1A17] hover:text-[#1A1A17]'
-                      } focus-visible:outline-2 focus-visible:outline-acid-green`}
+            {/* Command center */}
+            <section className="rounded-card border border-border bg-white p-5 shadow-card sm:p-6">
+              <div className="flex items-center justify-between">
+                <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-text-muted">
+                  Dashboard
+                </p>
+                <p className="text-[10px] uppercase tracking-[0.08em] text-text-muted">
+                  {summary.dataSource === 'plaid' ? '● Live data' : '● Demo data'}
+                </p>
+              </div>
+              <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                <div className="rounded-tag border border-border bg-bg-muted p-4">
+                  <p className="text-[11px] font-medium uppercase tracking-[0.05em] text-text-muted">
+                    Tracked
+                  </p>
+                  <p className="mt-1 font-display text-3xl font-bold text-text-primary">
+                    {isLoading ? '--' : totalSubscriptions}
+                  </p>
+                </div>
+                <div className="rounded-tag border border-border bg-bg-muted p-4">
+                  <p className="text-[11px] font-medium uppercase tracking-[0.05em] text-text-muted">
+                    Linked accounts
+                  </p>
+                  <p className="mt-1 font-display text-3xl font-bold text-success">
+                    {isLoading ? '--' : summary.linkedAccounts}
+                  </p>
+                </div>
+                <div className="rounded-tag border border-border bg-bg-muted p-4">
+                  <p className="text-[11px] font-medium uppercase tracking-[0.05em] text-text-muted">
+                    Recent charges
+                  </p>
+                  <p className="mt-1 font-display text-3xl font-bold text-warning">
+                    {isLoading ? '--' : summary.recentTransactionCount}
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-4">
+                <Link
+                  href="/dashboard/connect"
+                  className="inline-flex rounded-btn bg-brand px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-white transition-all duration-150 hover:bg-brand-dark hover:-translate-y-0.5"
+                >
+                  Connect another account
+                </Link>
+              </div>
+            </section>
+
+            {/* Shame Score */}
+            <ShameScoreMeter
+              score={summary.shameScore}
+              previousScore={summary.previousShameScore}
+              isLoading={isLoading}
+            />
+
+            {/* Stat cards */}
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+              <StatCard
+                label="Monthly Spend"
+                value={formatCurrency(summary.monthlySpend)}
+                variant="danger"
+                index={0}
+              />
+              <StatCard
+                label="Unused"
+                value={`${summary.unusedCount}`}
+                index={1}
+              />
+              <StatCard
+                label="Saveable / yr"
+                value={formatCurrency(summary.saveablePerYear)}
+                variant="success"
+                index={2}
+              />
+            </div>
+
+            {/* Debrief */}
+            <div id="debrief">
+              <DebriefPanel
+                month={debrief?.month ?? 'APR 2026'}
+                isLoading={isDebriefLoading}
+                content={debrief?.content ?? null}
+                error={!isDebriefLoading && !debrief}
+              />
+            </div>
+
+            {/* Subscriptions */}
+            <section id="subscriptions" className="space-y-3">
+              <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+                <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-text-muted">
+                  Subscriptions
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {FILTERS.map((option) => (
+                    <button
+                      key={option.key}
+                      type="button"
+                      onClick={() => setFilter(option.key)}
+                      className={`rounded-pill px-4 py-1.5 text-[13px] font-medium transition-all duration-150 ${
+                        filter === option.key
+                          ? 'bg-text-primary text-white'
+                          : 'border border-border bg-white text-text-secondary hover:border-border-strong hover:text-text-primary'
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {isLoading ? (
+                <SubscriptionSkeleton />
+              ) : subscriptions.length === 0 ? (
+                <div className="flex flex-col items-center gap-3 rounded-card border border-border bg-white py-12 shadow-card">
+                  <div className="text-4xl">👻</div>
+                  <p className="text-[15px] font-medium text-text-primary">
+                    Nothing in the graveyard yet
+                  </p>
+                  <p className="text-[13px] text-text-secondary">
+                    Connect your bank to find subscriptions automatically
+                  </p>
+                  <Link
+                    href="/dashboard/connect"
+                    className="mt-2 rounded-btn bg-brand px-5 py-2.5 text-[13px] font-semibold text-white transition-all duration-150 hover:bg-brand-dark"
                   >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
-            </div>
+                    Connect Bank
+                  </Link>
+                </div>
+              ) : (
+                subscriptions.map((subscription, index) => (
+                  <SubscriptionRow
+                    key={subscription.id}
+                    subscription={subscription}
+                    onCancel={cancelSubscription}
+                    index={index}
+                  />
+                ))
+              )}
 
-            {isLoading ? (
-              <div className="rounded-2xl border border-[#E8E7E0] bg-white p-4 text-sm text-[#6B6960] shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)]">
-                Scanning transactions
-                <span className="animate-blink">_</span>
-              </div>
-            ) : (
-              subscriptions.map((subscription, index) => (
-                <SubscriptionRow
-                  key={subscription.id}
-                  subscription={subscription}
-                  onCancel={cancelSubscription}
-                  index={index}
-                />
-              ))
-            )}
-
-            <div className="flex flex-col gap-2 rounded-2xl border border-[#E8E7E0] bg-white px-3 py-2 text-xs uppercase tracking-[0.06em] text-[#6B6960] shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] sm:flex-row sm:items-center sm:justify-between">
-              <span className="text-center sm:text-left">
-                Page {page} / {pageCount} · {totalSubscriptions} total
-              </span>
-              <div className="flex justify-center gap-2 sm:justify-end">
-                <button
-                  type="button"
-                  onClick={() => setPage(page - 1)}
-                  disabled={page <= 1}
-                  className="rounded-[10px] border border-[#D0CFC7] px-2 py-1 text-[#1A1A17] hover:border-[#1A1A17] focus-visible:outline-2 focus-visible:outline-[#FF5C35] disabled:opacity-40"
-                >
-                  Prev
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setPage(page + 1)}
-                  disabled={page >= pageCount}
-                  className="rounded-[10px] border border-[#D0CFC7] px-2 py-1 text-[#1A1A17] hover:border-[#1A1A17] focus-visible:outline-2 focus-visible:outline-[#FF5C35] disabled:opacity-40"
-                >
-                  Next
-                </button>
-              </div>
-            </div>
+              {/* Pagination */}
+              {pageCount > 1 && (
+                <div className="flex items-center justify-between rounded-card border border-border bg-white px-4 py-3 shadow-card">
+                  <span className="text-[13px] text-text-muted">
+                    Page {page} of {pageCount} · {totalSubscriptions} total
+                  </span>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setPage(page - 1)}
+                      disabled={page <= 1}
+                      className="rounded-btn border border-border px-3 py-1.5 text-[13px] font-medium text-text-primary transition-colors hover:border-border-strong disabled:opacity-40"
+                    >
+                      ← Prev
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPage(page + 1)}
+                      disabled={page >= pageCount}
+                      className="rounded-btn border border-border px-3 py-1.5 text-[13px] font-medium text-text-primary transition-colors hover:border-border-strong disabled:opacity-40"
+                    >
+                      Next →
+                    </button>
+                  </div>
+                </div>
+              )}
+            </section>
           </section>
-        </section>
 
-        <div id="alerts" className="order-2 lg:order-3 lg:h-full lg:min-h-0">
-          <DashboardAlertsPanel alerts={alerts} />
-        </div>
-      </div>
-
-      {pendingUndoId ? (
-        <div
-          className="fixed bottom-4 left-1/2 w-[92%] max-w-md -translate-x-1/2 rounded-2xl border border-[#E8E7E0] bg-white p-3 text-sm text-[#1A1A17] shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)]"
-          role="status"
-          aria-live="polite"
-        >
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <span>Subscription cancelled. Undo within 5 seconds.</span>
-            <button
-              type="button"
-              onClick={() => void undoCancel()}
-              disabled={isCancelling}
-              className="rounded-[10px] border border-[#FF5C35] px-2 py-1 text-xs uppercase tracking-[0.06em] text-[#FF5C35] focus-visible:outline-2 focus-visible:outline-[#FF5C35] disabled:opacity-60"
-            >
-              Undo
-            </button>
+          {/* Alerts panel */}
+          <div id="alerts" className="order-2 lg:order-3 lg:h-full lg:min-h-0">
+            <DashboardAlertsPanel alerts={alerts} />
           </div>
         </div>
-      ) : null}
-    </main>
+      </main>
+    </>
   );
 };
 
