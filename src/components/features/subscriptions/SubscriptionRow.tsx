@@ -12,40 +12,12 @@ interface SubscriptionRowProps {
   showAlerts?: boolean;
 }
 
-const BRAND_COLORS: Record<string, string> = {
-  Netflix: '#E50914',
-  Spotify: '#1DB954',
-  Adobe: '#FF0000',
-  Duolingo: '#58CC02',
-  Headspace: '#F47D2B',
-  'Disney+': '#113CCF',
-  Amazon: '#FF9900',
-  Apple: '#555555',
-  YouTube: '#FF0000',
-  Hulu: '#1CE783',
-  Notion: '#000000',
-  Figma: '#A259FF',
-  Slack: '#4A154B',
-  Zoom: '#2D8CFF',
-  Dropbox: '#0061FE',
-  GitHub: '#24292E',
-  ChatGPT: '#10A37F',
-  Grammarly: '#15C39A',
-};
-
-const getAvatarColor = (name: string): string => {
-  const match = Object.keys(BRAND_COLORS).find(
-    (key) => name.toLowerCase().includes(key.toLowerCase())
-  );
-  return match ? BRAND_COLORS[match] : '#6B6960';
-};
-
-const borderStatusClass: Record<Subscription['status'], string> = {
-  unused: 'border-l-[3px] border-l-danger',
-  'trial-ending': 'border-l-[3px] border-l-warning',
-  'price-hike': 'border-l-[3px] border-l-warning',
-  healthy: '',
-  cancelled: 'bg-bg-muted opacity-60',
+const borderClassMap: Record<Subscription['status'], string> = {
+  unused: 'border-l-4 border-l-[#E53434]',
+  'trial-ending': 'border-l-4 border-l-[#E8860A]',
+  'price-hike': 'border-l-4 border-l-[#E8860A]',
+  healthy: 'border-l-4 border-l-transparent',
+  cancelled: 'border-l-4 border-l-[#1C9E5B] opacity-60',
 };
 
 export const SubscriptionRow = ({
@@ -53,68 +25,47 @@ export const SubscriptionRow = ({
   onCancel,
   index,
   showAlerts = true,
-}: SubscriptionRowProps) => {
-  const avatarColor = getAvatarColor(subscription.serviceName);
+}: SubscriptionRowProps) => (
+  <motion.article
+    initial={{ opacity: 0, y: 12 }}
+    animate={{
+      opacity: subscription.status === 'cancelled' ? 0.5 : 1,
+      x: subscription.status === 'cancelled' ? 8 : 0,
+      y: 0,
+    }}
+    transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1], delay: index * 0.03 }}
+    layout
+    className={`flex flex-col gap-3 rounded-2xl border border-[#E8E7E0] bg-white p-4 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] sm:flex-row sm:items-center ${borderClassMap[subscription.status]} ${subscription.status === 'unused' ? 'alert-pulse-border' : ''}`}
+  >
+    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] bg-[#6B6960] text-xs font-semibold uppercase text-white">
+      {subscription.serviceName.slice(0, 1)}
+    </div>
 
-  return (
-    <motion.article
-      initial={{ opacity: 0, y: 16 }}
-      animate={{
-        opacity: subscription.status === 'cancelled' ? 0.6 : 1,
-        y: 0,
-      }}
-      transition={{
-        duration: 0.35,
-        ease: [0.34, 1.56, 0.64, 1],
-        delay: index * 0.04,
-      }}
-      layout
-      className={`flex items-center gap-3 rounded-card border border-border bg-white px-4 py-[18px] shadow-card transition-shadow duration-200 hover:shadow-card-hover ${borderStatusClass[subscription.status]}`}
-      style={{ minHeight: '72px' }}
-    >
-      {/* Service avatar */}
-      <div
-        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] font-display text-lg font-bold text-white"
-        style={{ backgroundColor: avatarColor }}
-      >
-        {subscription.serviceName.charAt(0)}
-      </div>
+    <div className="min-w-0 flex-1">
+      <p className="truncate text-[15px] text-[#1A1A17]">{subscription.serviceName}</p>
+      <p className="mt-1 text-xs text-[#6B6960]">
+        Confidence: {subscription.confidence.toUpperCase()} · Verdict: {subscription.verdict.replace('_', ' ')}
+      </p>
+      {showAlerts && subscription.alert ? (
+        <div className="mt-2 flex items-center gap-2">
+          <span className="text-xs font-medium text-[#E8860A]">ALERT</span>
+          <AlertBadge type={subscription.alert.type} message={subscription.alert.message} />
+        </div>
+      ) : null}
+    </div>
 
-      {/* Info */}
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-[15px] font-medium text-text-primary">
-          {subscription.serviceName}
-        </p>
-        <p className="mt-0.5 text-[13px] text-text-muted">
-          {subscription.frequencyLabel.charAt(0).toUpperCase() + subscription.frequencyLabel.slice(1)} ·{' '}
-          Confidence: {subscription.confidence.charAt(0).toUpperCase() + subscription.confidence.slice(1)}
-        </p>
-        {showAlerts && subscription.alert && (
-          <div className="mt-1.5">
-            <AlertBadge type={subscription.alert.type} message={subscription.alert.message} />
-          </div>
-        )}
-      </div>
+    <div className="w-full text-left sm:w-auto sm:text-right">
+      <p className="font-display text-[15px] text-[#1A1A17]">{formatCurrencyPrecise(subscription.amountMonthly)}</p>
+      <p className="text-xs uppercase tracking-[0.06em] text-[#A9A79E]">{subscription.frequencyLabel}</p>
+    </div>
 
-      {/* Amount */}
-      <div className="shrink-0 text-right">
-        <p className="font-display text-base font-bold text-text-primary">
-          {formatCurrencyPrecise(subscription.amountMonthly)}
-        </p>
-        <p className="text-[11px] uppercase tracking-[0.06em] text-text-muted">
-          {subscription.frequencyLabel === 'monthly' ? '/mo' : subscription.frequencyLabel === 'yearly' ? '/yr' : '/wk'}
-        </p>
-      </div>
-
-      {/* Cancel button */}
-      <div className="shrink-0">
-        <CancelButton
-          subscriptionId={subscription.id}
-          serviceName={subscription.serviceName}
-          onSuccess={() => onCancel(subscription.id)}
-          disabled={subscription.status === 'cancelled'}
-        />
-      </div>
-    </motion.article>
-  );
-};
+    <div className="w-full sm:w-auto">
+      <CancelButton
+        subscriptionId={subscription.id}
+        serviceName={subscription.serviceName}
+        onSuccess={() => onCancel(subscription.id)}
+        disabled={subscription.status === 'cancelled'}
+      />
+    </div>
+  </motion.article>
+);

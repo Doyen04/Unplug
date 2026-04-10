@@ -10,11 +10,6 @@ interface ShameScoreMeterProps {
   isLoading?: boolean;
 }
 
-const RING_SIZE = 200;
-const STROKE_WIDTH = 12;
-const RADIUS = (RING_SIZE - STROKE_WIDTH) / 2;
-const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
-
 export const ShameScoreMeter = ({
   score,
   previousScore,
@@ -27,106 +22,52 @@ export const ShameScoreMeter = ({
 
     const from = displayScore;
     const to = score;
-    const duration = 800;
+    const duration = 600;
     const start = performance.now();
 
-    let frameId = 0;
+    let animationFrameId = 0;
 
     const animate = (timestamp: number) => {
       const elapsed = timestamp - start;
       const progress = Math.min(1, elapsed / duration);
       const eased = 1 - Math.pow(1 - progress, 3);
-      setDisplayScore(Math.round(from + (to - from) * eased));
+      const nextValue = Math.round(from + (to - from) * eased);
+      setDisplayScore(nextValue);
 
       if (progress < 1) {
-        frameId = requestAnimationFrame(animate);
+        animationFrameId = requestAnimationFrame(animate);
       }
     };
 
-    frameId = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(frameId);
+    animationFrameId = requestAnimationFrame(animate);
+
+    return () => cancelAnimationFrame(animationFrameId);
   }, [score, isLoading]);
 
   const delta = typeof previousScore === 'number' ? score - previousScore : null;
   const scoreColor = useMemo(() => interpolateScoreColor(displayScore), [displayScore]);
-  const strokeOffset = CIRCUMFERENCE - (displayScore / 100) * CIRCUMFERENCE;
-
-  if (isLoading) {
-    return (
-      <section className="flex flex-col items-center rounded-card border border-border bg-white p-6 shadow-card">
-        <div className="shimmer h-[200px] w-[200px] rounded-full" />
-        <div className="shimmer mt-4 h-3 w-28 rounded" />
-      </section>
-    );
-  }
 
   return (
     <section
-      className="flex flex-col items-center rounded-card border border-border bg-white p-6 shadow-card"
+      className="rounded-2xl border border-[#E8E7E0] bg-white p-5 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] sm:p-6"
       role="meter"
       aria-valuemin={0}
       aria-valuemax={100}
       aria-valuenow={displayScore}
       aria-label="Shame Score"
     >
-      <p className="text-[11px] font-medium uppercase tracking-[0.1em] text-text-muted">
-        YOUR SHAME SCORE
-      </p>
-
-      <div className="relative mt-4">
-        <svg
-          width={RING_SIZE}
-          height={RING_SIZE}
-          viewBox={`0 0 ${RING_SIZE} ${RING_SIZE}`}
-          className="-rotate-90"
-        >
-          {/* Background ring */}
-          <circle
-            cx={RING_SIZE / 2}
-            cy={RING_SIZE / 2}
-            r={RADIUS}
-            fill="none"
-            stroke="#EEEDE6"
-            strokeWidth={STROKE_WIDTH}
-          />
-          {/* Score ring */}
-          <circle
-            cx={RING_SIZE / 2}
-            cy={RING_SIZE / 2}
-            r={RADIUS}
-            fill="none"
-            stroke={scoreColor}
-            strokeWidth={STROKE_WIDTH}
-            strokeDasharray={CIRCUMFERENCE}
-            strokeDashoffset={strokeOffset}
-            strokeLinecap="round"
-            className="transition-all duration-700 ease-smooth"
-          />
-        </svg>
-
-        {/* Score number centered inside ring */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <p
-            className="font-display text-[72px] font-black leading-none"
-            style={{ color: scoreColor }}
-          >
-            {displayScore}
+      <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#A9A79E]">SHAME SCORE</p>
+      <div className="mt-3 flex items-end gap-2 sm:gap-3">
+        <p className="font-display text-5xl leading-none sm:text-6xl lg:text-7xl" style={{ color: scoreColor }}>
+          {isLoading ? '--' : displayScore}
+        </p>
+        {delta !== null ? (
+          <p className={`mb-2 text-sm ${delta <= 0 ? 'text-[#1C9E5B]' : 'text-[#E53434]'}`}>
+            {delta > 0 ? `+${delta}` : `${delta}`}
           </p>
-          {delta !== null && (
-            <p
-              className={`mt-1 text-[13px] font-medium ${
-                delta <= 0 ? 'text-success' : 'text-danger'
-              }`}
-            >
-              {delta > 0 ? `+${delta}` : `${delta}`}
-            </p>
-          )}
-        </div>
+        ) : null}
       </div>
-
-      <p className="mt-4 text-center text-[13px] text-text-secondary">
-        {getShameLabel(score)}
-      </p>
+      <p className="mt-3 text-sm text-[#6B6960]">{getShameLabel(score)}</p>
     </section>
   );
 };

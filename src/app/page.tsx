@@ -95,144 +95,91 @@ const HomePage = async () => {
     : subscriptions.slice(0, 3);
 
   return (
-    <main className={`${jakarta.className} min-h-screen bg-bg-base text-text-primary`}>
+    <main className={`${jakarta.className} min-h-screen bg-[#FAFAF7] text-[#1A1A17]`}>
       <div className="mx-auto w-full max-w-6xl px-4 pb-16 pt-6 md:px-6 md:pt-8 lg:px-8 lg:pt-10">
-
-        {/* Header */}
-        <header className="flex items-center justify-between rounded-card border border-border bg-white px-4 py-3 shadow-card md:px-6">
-          <p className={`${playfair.className} text-3xl tracking-[-0.02em] text-text-primary`}>
-            Unplug
-          </p>
-          <div className="hidden items-center gap-5 text-[11px] font-medium uppercase tracking-[0.08em] text-text-secondary md:flex">
-            <a href="#how-it-works" className="transition-colors hover:text-text-primary">
-              How it works
-            </a>
-            <a href="#pricing" className="transition-colors hover:text-text-primary">
-              Pricing
-            </a>
+        <header className="flex items-center justify-between rounded-2xl border border-[#E8E7E0] bg-white px-4 py-3 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] md:px-6">
+          <p className={`${playfair.className} text-3xl tracking-[-0.02em] text-[#1A1A17]`}>Unplug</p>
+          <div className="hidden items-center gap-4 text-[11px] font-medium uppercase tracking-[0.08em] text-[#6B6960] md:flex">
+            <a href="#how-it-works" className="hover:text-[#1A1A17] focus-visible:outline-2 focus-visible:outline-[#FF5C35]">How it works</a>
+            <a href="#pricing" className="hover:text-[#1A1A17] focus-visible:outline-2 focus-visible:outline-[#FF5C35]">Pricing</a>
           </div>
           <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.08em]">
-            <Link
-              href="/login"
-              className="rounded-btn border border-border-strong px-3 py-2 text-text-secondary transition-all duration-150 hover:border-text-primary hover:text-text-primary"
-            >
+            <Link href="/login" className="rounded-[10px] border border-[#D0CFC7] px-3 py-2 text-[#6B6960] hover:border-[#1A1A17] hover:text-[#1A1A17] focus-visible:outline-2 focus-visible:outline-[#FF5C35]">
               Log in
             </Link>
-            <Link
-              href="/signup"
-              className="rounded-btn bg-brand px-3 py-2 text-white transition-all duration-150 hover:bg-brand-dark hover:-translate-y-0.5"
-            >
+            <Link href="/signup" className="rounded-[10px] border border-[#FF5C35] bg-[#FF5C35] px-3 py-2 text-white hover:bg-[#C93A1A] focus-visible:outline-2 focus-visible:outline-[#FF5C35]">
               Start now
             </Link>
           </div>
         </header>
 
-        {/* Hero section */}
-        <section
-          className="mt-4 grid gap-4 lg:grid-cols-[1.2fr_0.8fr]"
-          style={{ animationDelay: '0.1s' }}
-        >
-          <article className="rounded-card border border-border bg-white p-6 shadow-card card-hover sm:p-8 lg:p-10">
-            <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-text-muted">
-              Subscription waste dashboard
-            </p>
-            <h1 className={`${playfair.className} mt-4 max-w-3xl text-5xl leading-[1.02] tracking-[-0.02em] text-text-primary sm:text-6xl`}>
+        <section className="mt-4 grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
+          <article className="rounded-2xl border border-[#E8E7E0] bg-white p-6 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] sm:p-8 lg:p-10">
+            <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#A9A79E]">Subscription waste dashboard</p>
+            <h1 className={`${playfair.className} mt-4 max-w-3xl text-5xl leading-[1.02] tracking-[-0.02em] text-[#1A1A17] sm:text-6xl`}>
               You are paying for
               <br />
               things you forgot.
             </h1>
-            <p className="mt-6 max-w-xl text-[15px] leading-7 text-text-secondary">
+            <p className="mt-6 max-w-xl text-sm leading-7 text-[#6B6960]">
               Unplug scans recurring charges, scores likely waste, and forces one clear decision:
               keep paying, or cut it.
             </p>
 
-            {/* Stat cards */}
             <div className="mt-8 grid gap-3 sm:grid-cols-3">
-              <div className="rounded-card border border-border bg-brand-light p-4 transition-shadow duration-200 hover:shadow-card-hover">
-                <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-text-muted">
-                  Burning / month
-                </p>
-                <p className={`${playfair.className} mt-2 text-4xl text-danger`}>
-                  {formatCurrency(summary.monthlySpend)}
-                </p>
+              <div className="rounded-2xl border border-[#E8E7E0] bg-[#FFF0EC] p-4">
+                <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#A9A79E]">Burning / month</p>
+                <p className={`${playfair.className} mt-2 text-4xl text-[#E53434]`}>{formatCurrency(summary.monthlySpend)}</p>
               </div>
-              <div className="rounded-card border border-border bg-bg-muted p-4 transition-shadow duration-200 hover:shadow-card-hover">
-                <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-text-muted">
-                  Likely unused
-                </p>
-                <p className={`${playfair.className} mt-2 text-4xl text-text-primary`}>
-                  {summary.unusedCount}
-                </p>
+              <div className="rounded-2xl border border-[#E8E7E0] bg-[#F4F3EE] p-4">
+                <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#A9A79E]">Likely unused</p>
+                <p className={`${playfair.className} mt-2 text-4xl text-[#1A1A17]`}>{summary.unusedCount}</p>
               </div>
-              <div className="rounded-card border border-border bg-success-light p-4 transition-shadow duration-200 hover:shadow-card-hover">
-                <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-text-muted">
-                  Recoverable / yr
-                </p>
-                <p className={`${playfair.className} mt-2 text-4xl text-success`}>
+              <div className="rounded-2xl border border-[#E8E7E0] bg-[#EDFAF3] p-4">
+                <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#A9A79E]">Recoverable / yr</p>
+                <p className={`${playfair.className} mt-2 text-4xl text-[#1C9E5B]`}>
                   {formatCurrency(summary.saveablePerYear)}
                 </p>
               </div>
             </div>
 
-            {/* CTAs */}
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link
                 href="/signup"
-                className="rounded-btn bg-brand px-5 py-3 text-center text-[11px] font-semibold uppercase tracking-[0.08em] text-white transition-all duration-150 hover:bg-brand-dark hover:-translate-y-0.5"
+                className="rounded-[10px] border border-[#FF5C35] bg-[#FF5C35] px-5 py-3 text-center text-xs font-semibold uppercase tracking-[0.08em] text-white hover:bg-[#C93A1A] focus-visible:outline-2 focus-visible:outline-[#FF5C35]"
               >
                 Audit my subscriptions
               </Link>
               <Link
                 href="/dashboard"
-                className="rounded-btn border border-border-strong px-5 py-3 text-center text-[11px] font-semibold uppercase tracking-[0.08em] text-text-secondary transition-all duration-150 hover:border-text-primary hover:text-text-primary"
+                className="rounded-[10px] border border-[#D0CFC7] px-5 py-3 text-center text-xs font-semibold uppercase tracking-[0.08em] text-[#6B6960] hover:border-[#1A1A17] hover:text-[#1A1A17] focus-visible:outline-2 focus-visible:outline-[#FF5C35]"
               >
                 View dashboard preview
               </Link>
             </div>
           </article>
 
-          {/* Pressure list sidebar */}
-          <aside className="rounded-card border border-border bg-white p-6 shadow-card">
-            <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-text-muted">
-              Live pressure list
-            </p>
-
-            <div className="mt-4 rounded-card border border-border bg-bg-muted p-4">
-              <p className="text-[11px] font-medium uppercase tracking-[0.1em] text-text-muted">
-                Shame score
-              </p>
-              <p className={`${playfair.className} mt-2 text-6xl font-black ${
-                summary.shameScore >= 70
-                  ? 'text-danger'
-                  : summary.shameScore >= 40
-                    ? 'text-warning'
-                    : 'text-success'
-              }`}>
+          <aside className="rounded-2xl border border-[#E8E7E0] bg-white p-6 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)]">
+            <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#A9A79E]">Live pressure list</p>
+            <div className="mt-4 rounded-2xl border border-[#E8E7E0] bg-[#F4F3EE] p-4">
+              <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#A9A79E]">Shame score</p>
+              <p className={`${playfair.className} mt-2 text-6xl ${summary.shameScore >= 70 ? 'text-[#E53434]' : summary.shameScore >= 40 ? 'text-[#E8860A]' : 'text-[#1C9E5B]'}`}>
                 {summary.shameScore}
               </p>
-              <p className="mt-2 text-[13px] text-text-secondary">
-                Lower is better. Every cancel moves it down.
-              </p>
+              <p className="mt-2 text-xs text-[#6B6960]">Lower is better. Every cancel moves it down.</p>
             </div>
 
             <div className="mt-4 space-y-3">
               {displayPressureList.map((item) => (
                 <div
                   key={item.id}
-                  className="rounded-btn border border-border border-l-[3px] border-l-danger bg-danger-light p-3 transition-shadow duration-200 hover:shadow-card-hover"
+                  className="rounded-[10px] border-y border-r border-[#E8E7E0] border-l-[3px] border-l-[#E53434] bg-[#FEF0F0] p-3"
                 >
                   <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2">
-                      <div className="flex h-7 w-7 items-center justify-center rounded-[6px] bg-danger font-display text-xs font-bold text-white">
-                        {item.serviceName.charAt(0)}
-                      </div>
-                      <p className="text-[13px] font-medium text-text-primary">{item.serviceName}</p>
-                    </div>
-                    <p className={`${playfair.className} text-[13px] font-bold text-danger`}>
-                      {formatCurrency(item.amountMonthly)}/mo
-                    </p>
+                    <p className="text-sm text-[#1A1A17]">{item.serviceName}</p>
+                    <p className={`${playfair.className} text-sm text-[#E53434]`}>{formatCurrency(item.amountMonthly)}/mo</p>
                   </div>
-                  <p className="mt-2 text-[11px] font-medium uppercase tracking-[0.08em] text-text-muted">
+                  <p className="mt-2 text-[11px] font-medium uppercase tracking-[0.08em] text-[#A9A79E]">
                     {item.alert?.message ?? 'Low utility detected'}
                   </p>
                 </div>
@@ -241,93 +188,78 @@ const HomePage = async () => {
           </aside>
         </section>
 
-        {/* How it works */}
         <section id="how-it-works" className="mt-4 grid gap-4 md:grid-cols-3">
-          {[
-            { step: '01 / detect', title: 'Find recurring charges', description: 'We map monthly transactions into a clean list of subscriptions so hidden spend stops hiding.' },
-            { step: '02 / score', title: 'Measure actual usage', description: 'Every service gets a confidence-weighted usage score so you stop arguing with vague feelings.' },
-            { step: '03 / cut', title: 'Cancel dead weight fast', description: 'One-click cancellation flow, short undo window, and a lower shame score every time you act.' },
-          ].map(({ step, title, description }) => (
-            <article
-              key={step}
-              className="rounded-card border border-border bg-white p-6 shadow-card card-hover"
-            >
-              <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-brand">
-                {step}
-              </p>
-              <h2 className={`${playfair.className} mt-3 text-3xl text-text-primary`}>{title}</h2>
-              <p className="mt-4 text-[15px] leading-7 text-text-secondary">{description}</p>
-            </article>
-          ))}
+          <article className="rounded-2xl border border-[#E8E7E0] bg-white p-6 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)]">
+            <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#A9A79E]">01 / detect</p>
+            <h2 className={`${playfair.className} mt-3 text-3xl text-[#1A1A17]`}>Find recurring charges</h2>
+            <p className="mt-4 text-sm leading-7 text-[#6B6960]">
+              We map monthly transactions into a clean list of subscriptions so hidden spend stops hiding.
+            </p>
+          </article>
+          <article className="rounded-2xl border border-[#E8E7E0] bg-white p-6 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)]">
+            <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#A9A79E]">02 / score</p>
+            <h2 className={`${playfair.className} mt-3 text-3xl text-[#1A1A17]`}>Measure actual usage</h2>
+            <p className="mt-4 text-sm leading-7 text-[#6B6960]">
+              Every service gets a confidence-weighted usage score so you stop arguing with vague feelings.
+            </p>
+          </article>
+          <article className="rounded-2xl border border-[#E8E7E0] bg-white p-6 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)]">
+            <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#A9A79E]">03 / cut</p>
+            <h2 className={`${playfair.className} mt-3 text-3xl text-[#1A1A17]`}>Cancel dead weight fast</h2>
+            <p className="mt-4 text-sm leading-7 text-[#6B6960]">
+              One-click cancellation flow, short undo window, and a lower shame score every time you act.
+            </p>
+          </article>
         </section>
 
-        {/* Pricing */}
-        <section
-          id="pricing"
-          className="mt-4 rounded-card border border-border bg-white p-6 shadow-card sm:p-8"
-        >
+        <section id="pricing" className="mt-4 rounded-2xl border border-[#E8E7E0] bg-white p-6 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] sm:p-8">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-text-muted">
-                Pricing
-              </p>
-              <h2 className={`${playfair.className} mt-2 text-4xl text-text-primary`}>
-                Choose your pressure level
-              </h2>
+              <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#A9A79E]">Pricing</p>
+              <h2 className={`${playfair.className} mt-2 text-4xl text-[#1A1A17]`}>Choose your pressure level</h2>
             </div>
-            <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-text-muted">
-              No annual lock-in
-            </p>
+            <p className="text-xs font-medium uppercase tracking-[0.08em] text-[#A9A79E]">No annual lock-in</p>
           </div>
 
           <div className="mt-6 grid gap-3 lg:grid-cols-3">
             {PRICING_PLANS.map((plan) => (
               <article
                 key={plan.id}
-                className={`card-hover flex flex-col rounded-card border p-5 ${
-                  plan.highlight
-                    ? 'border-brand bg-brand-light'
-                    : 'border-border bg-bg-base'
-                }`}
+                className={`flex flex-col rounded-2xl border p-4 ${plan.highlight
+                  ? 'border-[#FF5C35] bg-[#FFF0EC]'
+                  : 'border-[#E8E7E0] bg-[#FAFAF7]'
+                  }`}
               >
                 {plan.badge ? (
-                  <span className="inline-flex w-fit rounded-pill bg-brand px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-white">
+                  <span className="inline-flex w-fit rounded-[9999px] border border-[#FF5C35]/40 bg-[#FFF0EC] px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#C93A1A]">
                     {plan.badge}
                   </span>
                 ) : (
                   <span className="h-6" aria-hidden="true" />
                 )}
 
-                <h3 className="mt-3 text-2xl font-medium text-text-primary">{plan.name}</h3>
-                <p className={`${playfair.className} mt-1 text-5xl font-bold leading-none text-text-primary`}>
+                <h3 className="mt-3 text-2xl text-[#1A1A17]">{plan.name}</h3>
+                <p className={`${playfair.className} mt-1 text-5xl leading-none text-[#1A1A17]`}>
                   ${plan.monthly}
-                  <span className="ml-1 font-ui text-base font-normal text-text-secondary">/ month</span>
+                  <span className="ml-1 text-base text-[#6B6960]">/ month</span>
                 </p>
-                <p className="mt-3 min-h-12 text-[13px] text-text-secondary">{plan.subtitle}</p>
+                <p className="mt-3 min-h-12 text-sm text-[#6B6960]">{plan.subtitle}</p>
 
-                <ul className="mt-4 flex-1 space-y-2.5 border-t border-border pt-4 text-[13px]">
+                <ul className="mt-3 flex-1 space-y-2 border-t border-[#E8E7E0] pt-3 text-sm">
                   {plan.features.map((feature) => (
                     <li key={feature.text} className="flex items-start gap-2">
-                      <span
-                        className={`mt-0.5 text-[14px] ${feature.available ? 'text-success' : 'text-text-muted'}`}
-                        aria-hidden="true"
-                      >
-                        {feature.available ? '✓' : '—'}
-                      </span>
-                      <span className={feature.available ? 'text-text-primary' : 'text-text-muted'}>
-                        {feature.text}
-                      </span>
+                      <span className={feature.available ? 'text-[#1C9E5B]' : 'text-[#A9A79E]'} aria-hidden="true">•</span>
+                      <span className={feature.available ? 'text-[#1A1A17]' : 'text-[#A9A79E]'}>{feature.text}</span>
                     </li>
                   ))}
                 </ul>
 
                 <Link
                   href={plan.href}
-                  className={`mt-5 rounded-btn border px-4 py-2.5 text-center text-[11px] font-semibold uppercase tracking-[0.08em] transition-all duration-150 ${
-                    plan.highlight
-                      ? 'border-brand bg-brand text-white hover:bg-brand-dark hover:-translate-y-0.5'
-                      : 'border-border-strong text-text-primary hover:border-text-primary hover:bg-bg-muted'
-                  }`}
+                  className={`mt-4 rounded-[10px] border px-4 py-2 text-center text-xs font-semibold uppercase tracking-[0.08em] ${plan.highlight
+                    ? 'border-[#FF5C35] bg-[#FF5C35] text-white hover:bg-[#C93A1A]'
+                    : 'border-[#D0CFC7] text-[#1A1A17] hover:border-[#1A1A17]'
+                    } focus-visible:outline-2 focus-visible:outline-[#FF5C35]`}
                 >
                   {plan.cta}
                 </Link>
@@ -335,40 +267,36 @@ const HomePage = async () => {
             ))}
           </div>
 
-          <p className="mt-6 text-center text-[11px] font-medium uppercase tracking-[0.06em] text-text-muted">
+          <p className="mt-6 text-center text-xs font-medium uppercase tracking-[0.06em] text-[#A9A79E]">
             Why this pricing works: start free, upgrade only when waste is measurable.
           </p>
         </section>
 
-        {/* Final CTA */}
-        <section className="mt-4 rounded-card border border-border bg-white p-6 shadow-card sm:p-8">
-          <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-text-muted">
-            Final prompt
-          </p>
-          <h2 className={`${playfair.className} mt-3 max-w-3xl text-4xl leading-tight text-text-primary sm:text-5xl`}>
+        <section className="mt-4 rounded-2xl border border-[#E8E7E0] bg-white p-6 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] sm:p-8">
+          <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#A9A79E]">Final prompt</p>
+          <h2 className={`${playfair.className} mt-3 max-w-3xl text-4xl leading-tight text-[#1A1A17] sm:text-5xl`}>
             Keep leaking money,
             <br />
             or face it this week.
           </h2>
-          <p className="mt-4 max-w-2xl text-[15px] leading-7 text-text-secondary">
+          <p className="mt-4 max-w-2xl text-sm leading-7 text-[#6B6960]">
             Connect your accounts, surface recurring waste, and cut dead subscriptions in minutes.
           </p>
           <div className="mt-6 flex flex-col gap-3 sm:flex-row">
             <Link
               href="/signup"
-              className="rounded-btn bg-brand px-5 py-3 text-center text-[11px] font-semibold uppercase tracking-[0.08em] text-white transition-all duration-150 hover:bg-brand-dark hover:-translate-y-0.5"
+              className="rounded-[10px] border border-[#FF5C35] bg-[#FF5C35] px-5 py-3 text-center text-xs font-semibold uppercase tracking-[0.08em] text-white hover:bg-[#C93A1A] focus-visible:outline-2 focus-visible:outline-[#FF5C35]"
             >
               Start now
             </Link>
             <Link
               href="/login"
-              className="rounded-btn border border-border-strong px-5 py-3 text-center text-[11px] font-semibold uppercase tracking-[0.08em] text-text-secondary transition-all duration-150 hover:border-text-primary hover:text-text-primary"
+              className="rounded-[10px] border border-[#D0CFC7] px-5 py-3 text-center text-xs font-semibold uppercase tracking-[0.08em] text-[#6B6960] hover:border-[#1A1A17] hover:text-[#1A1A17] focus-visible:outline-2 focus-visible:outline-[#FF5C35]"
             >
               I already have an account
             </Link>
           </div>
         </section>
-
       </div>
     </main>
   );

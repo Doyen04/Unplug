@@ -51,69 +51,58 @@ const LoginPage = async ({ searchParams }: LoginPageProps) => {
     }
 
     return (
-        <main className="flex min-h-screen items-center bg-bg-base px-4 py-8 text-text-primary md:px-6 md:py-10 lg:px-8">
+        <main className="min-h-screen bg-[#FAFAF7] px-4 py-8 text-[#1A1A17] md:px-6 md:py-10 lg:px-8">
             <div className="mx-auto grid h-full w-full max-w-6xl items-stretch gap-4 lg:grid-cols-[1.2fr_1fr]">
-
-                {/* Left branding panel */}
-                <section className="rounded-card border border-border bg-white p-6 shadow-card sm:p-8 lg:p-10">
+                <section className="rounded-2xl border border-[#E8E7E0] bg-white p-6 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] sm:p-8 lg:p-10">
                     <Link
                         href="/"
-                        className="block transition-opacity hover:opacity-80"
+                        className="block focus-visible:outline-2 focus-visible:outline-[#FF5C35]"
                         aria-label="Go to Unplug home page"
                     >
-                        <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-text-muted">
-                            Unplug
-                        </p>
-                        <h1 className="mt-4 font-display text-4xl font-bold leading-tight text-text-primary sm:text-5xl">
+                        <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#A9A79E]">Unplug</p>
+                        <h1 className="font-display mt-4 text-4xl leading-tight text-[#1A1A17] sm:text-5xl">
                             Log in and face
                             <br />
                             your subscriptions.
                         </h1>
-                        <p className="mt-5 max-w-xl text-[15px] leading-7 text-text-secondary">
+                        <p className="mt-5 max-w-xl text-sm leading-7 text-[#6B6960]">
                             No fluff. No fake optimism. Just a clear view of what you pay, what you use,
                             and what should have been cancelled months ago.
                         </p>
 
-                        <div className="mt-8 rounded-tag border-l-[3px] border-l-brand bg-brand-light p-4">
-                            <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-text-muted">
-                                This month
-                            </p>
-                            <p className="mt-2 text-[13px] text-text-secondary">
-                                Average recoverable waste: <span className="font-display font-bold text-danger">$1,320</span> / year
-                            </p>
+                        <div className="mt-8 border-l-2 border-[#FF5C35] pl-4">
+                            <p className="text-xs uppercase tracking-[0.08em] text-[#A9A79E]">This month</p>
+                            <p className="mt-2 text-sm text-[#6B6960]">Average recoverable waste: $1,320 / year</p>
                         </div>
                     </Link>
                 </section>
 
-                {/* Right form panel */}
-                <section className="scrollbar-hidden max-h-[calc(100vh-4rem)] overflow-y-auto rounded-card border border-border bg-white p-6 shadow-card sm:p-8">
-                    <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-text-muted">
-                        Account Access
-                    </p>
+                <section className="scrollbar-hidden max-h-[calc(100vh-4rem)] overflow-y-auto rounded-2xl border border-[#E8E7E0] bg-white p-6 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] sm:p-8">
+                    <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#A9A79E]">Account Access</p>
 
-                    {hasInvalidCredentials && (
+                    {hasInvalidCredentials ? (
                         <div
-                            className="mt-4 rounded-btn border border-danger bg-danger-light p-3 text-[13px] text-danger"
+                            className="mt-4 rounded-[10px] border border-[#E53434] bg-[#FEF0F0] p-3 text-xs uppercase tracking-[0.08em] text-[#E53434]"
                             role="status"
                             aria-live="polite"
                         >
-                            Invalid email or password. Please try again.
+                            Invalid email or password.
                         </div>
-                    )}
+                    ) : null}
 
-                    {hasPasswordResetSuccess && (
+                    {hasPasswordResetSuccess ? (
                         <div
-                            className="mt-4 rounded-btn border border-success bg-success-light p-3 text-[13px] text-success"
+                            className="mt-4 rounded-[10px] border border-[#1C9E5B] bg-[#EDFAF3] p-3 text-xs uppercase tracking-[0.08em] text-[#1C9E5B]"
                             role="status"
                             aria-live="polite"
                         >
                             Password reset successful. Log in with your new password.
                         </div>
-                    )}
+                    ) : null}
 
                     <form className="mt-5 space-y-4" action={loginAction}>
                         <div>
-                            <label htmlFor="email" className="text-[11px] font-medium uppercase tracking-[0.08em] text-text-muted">
+                            <label htmlFor="email" className="text-xs uppercase tracking-[0.08em] text-stone-500">
                                 Email
                             </label>
                             <input
@@ -121,13 +110,16 @@ const LoginPage = async ({ searchParams }: LoginPageProps) => {
                                 name="email"
                                 type="email"
                                 required
-                                className="mt-2 w-full rounded-btn border border-border bg-bg-base px-3 py-2.5 text-[15px] text-text-primary outline-none transition-colors focus:border-brand"
+                                className="mt-2 w-full rounded-[10px] border border-[#D0CFC7] bg-[#FAFAF7] px-3 py-2 text-sm text-[#1A1A17] outline-none transition-colors focus:border-[#FF5C35] focus-visible:outline-2 focus-visible:outline-[#FF5C35]"
                                 placeholder="you@example.com"
                             />
                         </div>
 
                         <div>
-                            <label htmlFor="password" className="text-[11px] font-medium uppercase tracking-[0.08em] text-text-muted">
+                            <label
+                                htmlFor="password"
+                                className="text-xs uppercase tracking-[0.08em] text-stone-500"
+                            >
                                 Password
                             </label>
                             <input
@@ -135,7 +127,7 @@ const LoginPage = async ({ searchParams }: LoginPageProps) => {
                                 name="password"
                                 type="password"
                                 required
-                                className="mt-2 w-full rounded-btn border border-border bg-bg-base px-3 py-2.5 text-[15px] text-text-primary outline-none transition-colors focus:border-brand"
+                                className="mt-2 w-full rounded-[10px] border border-[#D0CFC7] bg-[#FAFAF7] px-3 py-2 text-sm text-[#1A1A17] outline-none transition-colors focus:border-[#FF5C35] focus-visible:outline-2 focus-visible:outline-[#FF5C35]"
                                 placeholder="••••••••"
                             />
                         </div>
@@ -143,20 +135,19 @@ const LoginPage = async ({ searchParams }: LoginPageProps) => {
                         <FormSubmitButton
                             idleLabel="Log in"
                             pendingLabel="Logging in..."
-                            className="w-full rounded-btn bg-brand px-4 py-2.5 text-[13px] font-semibold text-white transition-all duration-150 hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-60"
+                            className="w-full rounded-[10px] border border-[#FF5C35] bg-[#FF5C35] px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-white transition-colors hover:bg-[#C93A1A] focus-visible:outline-2 focus-visible:outline-[#FF5C35] disabled:cursor-not-allowed disabled:opacity-60"
                         />
                     </form>
 
-                    <div className="mt-5 flex items-center justify-between text-[11px] uppercase tracking-[0.06em]">
-                        <Link href="/signup" className="text-text-secondary transition-colors hover:text-brand">
+                    <div className="mt-4 flex items-center justify-between text-xs uppercase tracking-[0.06em] text-[#6B6960]">
+                        <Link href="/signup" className="hover:text-[#FF5C35] focus-visible:outline-2 focus-visible:outline-[#FF5C35]">
                             Create account
                         </Link>
-                        <Link href="/forgot-password" className="text-text-secondary transition-colors hover:text-text-primary">
+                        <Link href="/forgot-password" className="hover:text-[#1A1A17] focus-visible:outline-2 focus-visible:outline-[#FF5C35]">
                             Forgot password
                         </Link>
                     </div>
                 </section>
-
             </div>
         </main>
     );

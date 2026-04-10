@@ -20,7 +20,7 @@
     "frequencyLabel": "monthly",
     "status": "healthy",
     "confidence": "medium",
-    "usageScore": 66,
+    "usageScore": 65,
     "verdict": "likely_unused",
     "alert": {
       "type": "dormant",
@@ -58,7 +58,7 @@
     "frequencyLabel": "monthly",
     "status": "healthy",
     "confidence": "medium",
-    "usageScore": 67,
+    "usageScore": 66,
     "verdict": "likely_unused",
     "alert": {
       "type": "dormant",
@@ -72,7 +72,7 @@
     "frequencyLabel": "monthly",
     "status": "healthy",
     "confidence": "medium",
-    "usageScore": 66,
+    "usageScore": 65,
     "verdict": "likely_unused",
     "alert": {
       "type": "dormant",
@@ -86,7 +86,7 @@
     "frequencyLabel": "monthly",
     "status": "healthy",
     "confidence": "medium",
-    "usageScore": 66,
+    "usageScore": 65,
     "verdict": "likely_unused",
     "alert": {
       "type": "dormant",
@@ -99,13 +99,9 @@
     "amountMonthly": 89.4,
     "frequencyLabel": "monthly",
     "status": "healthy",
-    "confidence": "medium",
-    "usageScore": 56,
-    "verdict": "likely_unused",
-    "alert": {
-      "type": "dormant",
-      "message": "Likely unused based on transaction cadence"
-    }
+    "confidence": "high",
+    "usageScore": 82,
+    "verdict": "active"
   },
   {
     "id": "plaid-touchstone-climbing",
@@ -114,7 +110,7 @@
     "frequencyLabel": "monthly",
     "status": "healthy",
     "confidence": "medium",
-    "usageScore": 58,
+    "usageScore": 57,
     "verdict": "likely_unused",
     "alert": {
       "type": "dormant",
@@ -128,7 +124,7 @@
     "frequencyLabel": "monthly",
     "status": "healthy",
     "confidence": "medium",
-    "usageScore": 59,
+    "usageScore": 58,
     "verdict": "likely_unused",
     "alert": {
       "type": "dormant",
@@ -142,7 +138,7 @@
     "frequencyLabel": "monthly",
     "status": "healthy",
     "confidence": "medium",
-    "usageScore": 57,
+    "usageScore": 56,
     "verdict": "likely_unused",
     "alert": {
       "type": "dormant",
@@ -156,7 +152,7 @@
     "frequencyLabel": "monthly",
     "status": "healthy",
     "confidence": "high",
-    "usageScore": 78,
+    "usageScore": 77,
     "verdict": "active"
   },
   {
@@ -166,7 +162,7 @@
     "frequencyLabel": "monthly",
     "status": "healthy",
     "confidence": "medium",
-    "usageScore": 57,
+    "usageScore": 56,
     "verdict": "likely_unused",
     "alert": {
       "type": "dormant",

@@ -1,60 +1,27 @@
-import { motion } from 'framer-motion';
-
 interface StatCardProps {
   label: string;
   value: string;
   variant?: 'default' | 'danger' | 'success';
-  trend?: {
-    direction: 'up' | 'down' | 'neutral';
-    text: string;
-    isGood: boolean;
-  };
-  index?: number;
+  delta?: string;
 }
 
-const variantValueClass: Record<NonNullable<StatCardProps['variant']>, string> = {
-  default: 'text-text-primary',
-  danger: 'text-danger',
-  success: 'text-success',
-};
-
-const trendArrow: Record<string, string> = {
-  up: '↑',
-  down: '↓',
-  neutral: '→',
+const variantClassMap: Record<NonNullable<StatCardProps['variant']>, string> = {
+  default: 'text-[#1A1A17]',
+  danger: 'text-[#E53434]',
+  success: 'text-[#1C9E5B]',
 };
 
 export const StatCard = ({
   label,
   value,
   variant = 'default',
-  trend,
-  index = 0,
+  delta,
 }: StatCardProps) => (
-  <motion.article
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{
-      duration: 0.35,
-      ease: [0.34, 1.56, 0.64, 1],
-      delay: index * 0.06,
-    }}
-    className="rounded-card border border-border bg-white p-6 shadow-card card-hover"
-  >
-    <p className="text-[13px] font-medium uppercase tracking-[0.05em] text-text-muted">
-      {label}
-    </p>
-    <p className={`mt-2 font-display text-4xl font-bold leading-none ${variantValueClass[variant]}`}>
+  <article className="rounded-2xl border border-[#E8E7E0] bg-white p-6 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)]">
+    <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#A9A79E]">{label}</p>
+    <p className={`font-display mt-2 text-4xl leading-none ${variantClassMap[variant]}`}>
       {value}
     </p>
-    {trend && (
-      <p
-        className={`mt-1 text-[13px] ${
-          trend.isGood ? 'text-success' : 'text-danger'
-        }`}
-      >
-        {trendArrow[trend.direction]} {trend.text}
-      </p>
-    )}
-  </motion.article>
+    {delta ? <p className="mt-1 text-xs text-[#6B6960]">{delta}</p> : null}
+  </article>
 );
