@@ -6,7 +6,7 @@
     "frequencyLabel": "monthly",
     "status": "healthy",
     "confidence": "medium",
-    "usageScore": 59,
+    "usageScore": 58,
     "verdict": "likely_unused",
     "alert": {
       "type": "dormant",
@@ -20,7 +20,7 @@
     "frequencyLabel": "monthly",
     "status": "healthy",
     "confidence": "medium",
-    "usageScore": 67,
+    "usageScore": 66,
     "verdict": "likely_unused",
     "alert": {
       "type": "dormant",
@@ -34,7 +34,7 @@
     "frequencyLabel": "monthly",
     "status": "healthy",
     "confidence": "medium",
-    "usageScore": 59,
+    "usageScore": 58,
     "verdict": "likely_unused",
     "alert": {
       "type": "dormant",
@@ -48,7 +48,7 @@
     "frequencyLabel": "monthly",
     "status": "healthy",
     "confidence": "medium",
-    "usageScore": 71,
+    "usageScore": 70,
     "verdict": "active"
   },
   {
@@ -72,7 +72,7 @@
     "frequencyLabel": "monthly",
     "status": "healthy",
     "confidence": "medium",
-    "usageScore": 67,
+    "usageScore": 66,
     "verdict": "likely_unused",
     "alert": {
       "type": "dormant",
@@ -86,7 +86,7 @@
     "frequencyLabel": "monthly",
     "status": "healthy",
     "confidence": "medium",
-    "usageScore": 67,
+    "usageScore": 66,
     "verdict": "likely_unused",
     "alert": {
       "type": "dormant",
@@ -100,7 +100,7 @@
     "frequencyLabel": "monthly",
     "status": "healthy",
     "confidence": "medium",
-    "usageScore": 57,
+    "usageScore": 56,
     "verdict": "likely_unused",
     "alert": {
       "type": "dormant",
@@ -128,7 +128,7 @@
     "frequencyLabel": "monthly",
     "status": "healthy",
     "confidence": "medium",
-    "usageScore": 60,
+    "usageScore": 59,
     "verdict": "likely_unused",
     "alert": {
       "type": "dormant",
@@ -142,7 +142,7 @@
     "frequencyLabel": "monthly",
     "status": "healthy",
     "confidence": "medium",
-    "usageScore": 58,
+    "usageScore": 57,
     "verdict": "likely_unused",
     "alert": {
       "type": "dormant",
@@ -166,7 +166,7 @@
     "frequencyLabel": "monthly",
     "status": "healthy",
     "confidence": "medium",
-    "usageScore": 58,
+    "usageScore": 57,
     "verdict": "likely_unused",
     "alert": {
       "type": "dormant",

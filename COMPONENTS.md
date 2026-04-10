@@ -1,117 +1,130 @@
-# Component Patterns — Unplug
+# Component Patterns — Subscription Graveyard
 
-AI coding agents: read this before building any UI component.
-These patterns are non-negotiable. Deviate only with explicit instruction.
-
----
-
-## Component Rules
-
-### Every component must
-
-1. Have a named TypeScript interface for props (`ComponentNameProps`)
-2. Be a functional component using arrow function syntax
-3. Include an error boundary if it fetches data or calls AI
-4. Use Tailwind classes — no inline styles, no styled-components
-5. Be under 200 lines — split if larger
-
-### Import order (enforced by ESLint)
-
-```typescript
-// 1. React
-import { useState, useEffect } from 'react'
-// 2. External libraries
-import { motion } from 'framer-motion'
-import { TrendingDown } from 'lucide-react'
-// 3. Internal — absolute paths
-import { useSubscriptions } from '@/hooks/useSubscriptions'
-import { formatCurrency } from '@/lib/utils/format'
-// 4. Types
-import type { Subscription } from '@/types'
-// 5. Styles (if any CSS modules)
-import styles from './Component.module.css'
-```
+Read DESIGN.md first. These patterns implement the design system in code.
+Every component in this project follows these exact patterns.
 
 ---
 
-## Key Components
+## Non-negotiable Component Rules
 
-### SubscriptionRow
+1. Arrow function syntax: `const MyComponent = (props: Props) => { ... }`
+2. Named props interface: `interface MyComponentProps { ... }`
+3. Under 200 lines — split if larger
+4. Tailwind only — no inline styles (exception: dynamic values like shame score color)
+5. No `any` in props or internal types
+6. Error boundaries around all data-fetching and AI-powered components
+7. Every interactive element has an accessible `aria-label` if icon-only
 
-The core list item. Used everywhere subscriptions are displayed.
+---
 
-```typescript
-interface SubscriptionRowProps {
-  subscription: Subscription;
-  onCancel: (id: string) => void;
-  showAlerts?: boolean;
-}
+## ShameScore
 
-// Status determines left border color via Tailwind:
-// unused        → border-l-3 border-red-500
-// trial-ending  → border-l-3 border-amber-500
-// price-hike    → border-l-3 border-amber-500
-// healthy       → border-l-3 border-stone-700
-// cancelled     → border-l-3 border-green-600 opacity-50
+The dashboard centerpiece. Implemented as an SVG ring with a counting number.
 
-// Layout: flex row, items-center, gap-3, p-4, bg-stone-900, border border-stone-800
-// Left: service icon (letter avatar, not emoji)
-// Center: name (15px mono 500), metadata (12px mono secondary), alert badge if present
-// Right: amount ($XX.XX, 15px mono), frequency (12px secondary), cancel button
-```
-
-### ShameScoreMeter
-
-The dashboard centerpiece. Cannot be a generic progress bar.
-
-```typescript
+```tsx
 interface ShameScoreMeterProps {
   score: number;           // 0–100
-  previousScore?: number;  // for showing delta
+  previousScore?: number;
   isLoading?: boolean;
 }
 
-// Display:
-// - Large number in DM Serif Display, ~72px
-// - Color: interpolate from #FF4444 (100) to #C8F135 (0)
-//   Use: `style={{ color: interpolateColor(score) }}`
-// - Label: "SHAME SCORE" in IBM Plex Mono, 11px, uppercase, letter-spacing 0.08em
-// - Delta: show "+5" or "-12" in 14px when previousScore provided
-// - Animate: count from 0 to score on mount (600ms, ease-out)
-// - Sub-label: contextual message based on score range:
-//     80–100: "You should feel bad about this."
-//     60–79:  "Room for improvement. Significant room."
-//     40–59:  "Mediocre. But fixable."
-//     20–39:  "Not bad. Keep going."
-//     0–19:   "Respectable. For now."
-```
-
-### StatCard
-
-Used in the top summary row. 3 cards: Monthly Spend, Unused Count, Saveable/yr.
-
-```typescript
-interface StatCardProps {
-  label: string;
-  value: string;         // pre-formatted (e.g., "$147", "3", "$1,764")
-  variant?: 'default' | 'danger' | 'success';
-  delta?: string;        // optional: "+$12 vs last month"
+// Color interpolation for the score
+function getScoreColor(score: number): string {
+  if (score >= 70) return '#E53434';  // --danger
+  if (score >= 40) return '#E8860A';  // --warning
+  return '#1C9E5B';                   // --success
 }
 
-// Layout: bg-stone-900, border border-stone-800, p-6, rounded-none (sharp)
-// Label: 11px mono, uppercase, letter-spacing 0.08em, text-stone-500
-// Value: 36px DM Serif Display
-//   danger variant: text-red-500
-//   success variant: text-acid-green (#C8F135)
-//   default: text-stone-100
-// Delta: 12px mono, text-stone-400, margin-top 4px
+// Sub-label copy based on score range
+function getScoreLabel(score: number): string {
+  if (score >= 80) return "Ouch. Let's fix this.";
+  if (score >= 60) return "Some room to improve.";
+  if (score >= 40) return "Getting better.";
+  if (score >= 20) return "Nearly there.";
+  return "Clean slate. Nice work.";
+}
+
+// SVG ring: 200px diameter, 12px stroke width, animates stroke-dashoffset
+// Number: Playfair Display Black 72px, color interpolated from getScoreColor()
+// Label: Plus Jakarta Sans 500 11px uppercase tracking-widest text-text-muted
+// Sub-label: Plus Jakarta Sans 400 13px text-text-secondary mt-2
+// Animate: useEffect count from previousScore to score using requestAnimationFrame
 ```
 
-### AlertBadge
+---
 
-Compact status label used inside SubscriptionRow.
+## StatCard
 
-```typescript
+```tsx
+interface StatCardProps {
+  label: string;
+  value: string;      // pre-formatted: "$147", "3", "$1,764/yr"
+  trend?: {
+    direction: 'up' | 'down' | 'neutral';
+    text: string;     // e.g. "↑ $12 more than last month"
+    isGood: boolean;  // true = green, false = red
+  };
+  variant?: 'default' | 'danger' | 'success';
+}
+
+// Card: white bg, 1px border border-color-border, rounded-card, p-6, shadow-card
+// Label: text-sm font-medium uppercase tracking-[0.05em] text-text-muted mb-2
+// Value: text-2xl font-bold font-display
+//   danger variant:  text-[--danger]
+//   success variant: text-[--success]
+//   default:         text-text-primary
+// Trend: text-sm mt-1, colored based on isGood (green/red) + direction arrow
+```
+
+---
+
+## SubscriptionRow
+
+```tsx
+interface SubscriptionRowProps {
+  subscription: {
+    id: string;
+    name: string;
+    category: string;
+    amount: number;
+    frequency: 'monthly' | 'weekly' | 'annual';
+    status: 'active' | 'unused' | 'trial-ending' | 'price-hike' | 'cancelled';
+    alertMessage?: string;
+    brandColor?: string;  // from BRAND_COLORS map
+    usageScore?: number;
+    lastCharge?: Date;
+  };
+  onCancel: (id: string) => Promise<void>;
+}
+
+// Row outer: flex items-center gap-3 px-4 py-[18px] border-b border-border
+//   last-child: no bottom border
+//   cancelled: bg-bg-muted opacity-60 pointer-events-none
+//   unused: border-l-[3px] border-l-[--danger]
+//   trial-ending | price-hike: border-l-[3px] border-l-[--warning]
+
+// Service avatar: 40x40, rounded-[10px], bg from brandColor or default warm gray
+//   Letter: Playfair Display 700, 18px, white, centered
+
+// Info section (flex-1):
+//   Name: text-base font-medium text-text-primary
+//   Meta: text-sm text-text-muted (e.g. "Monthly · Since Mar 2024")
+//   Alert badge: shown below meta if status !== 'active'
+
+// Amount section (text-right, flex-shrink-0):
+//   Amount: font-display font-bold text-base text-text-primary
+//   Frequency: text-xs text-text-muted
+
+// Cancel button: btn-cancel style, hidden when cancelled
+//   Shows "Cancelling..." spinner during in-flight request
+//   Shows "✓ Cancelled" green text after success
+```
+
+---
+
+## AlertBadge
+
+```tsx
 type AlertType = 'unused' | 'trial-ending' | 'price-hike' | 'dormant';
 
 interface AlertBadgeProps {
@@ -119,81 +132,110 @@ interface AlertBadgeProps {
   message: string;
 }
 
-// All badges: 10px mono, uppercase, letter-spacing 0.08em, px-2 py-0.5, rounded-none
-// unused:       bg-red-950 text-red-400 border border-red-800
-// trial-ending: bg-amber-950 text-amber-400 border border-amber-800
-// price-hike:   bg-amber-950 text-amber-400 border border-amber-800
-// dormant:      bg-red-950 text-red-500 border border-red-800
+// All: inline-flex items-center gap-1 rounded-pill px-2.5 py-0.5
+//      text-[11px] font-semibold uppercase tracking-[0.05em]
+
+// unused:       bg-[--danger-light]  text-[--danger]
+// trial-ending: bg-[--warning-light] text-[--warning]
+// price-hike:   bg-[--warning-light] text-[--warning]
+// dormant:      bg-[--danger-light]  text-[--danger]
 ```
 
-### DebriefPanel
+---
 
-The AI-generated monthly narrative. Treat like a receipt, not a chat bubble.
+## DebriefPanel
 
-```typescript
+The AI-generated monthly narrative. Styled like a premium letter, not a chat bubble.
+
+```tsx
 interface DebriefPanelProps {
   month: string;
   isLoading: boolean;
-  content: string | null;
+  debrief: { summary: string; action: string; sentiment: string } | null;
   error: boolean;
+  onGenerate: () => void;
 }
 
-// Layout: bg-stone-950, border border-stone-800, p-6
-// Header: "MONTHLY DEBRIEF / [MONTH YEAR]" — 11px mono uppercase
-// Content: 15px mono, text-stone-300, line-height 1.7
-// Loading state: blinking cursor animation (not a spinner)
-//   "Analysing your subscriptions_" with blinking underscore
-// Error state: "DEBRIEF UNAVAILABLE" in red, no retry button visible
-//   (retry is triggered by pressing the generate button again)
+// Outer card: white, rounded-card, shadow-card, p-6
+// Header row: flex justify-between items-center mb-4
+//   Left: "Monthly Debrief" — text-lg font-medium text-text-primary
+//   Right: month — text-sm text-text-muted
+
+// Loading state (isLoading=true):
+//   Three animated dots: inline flex gap-1
+//   Each dot: w-2 h-2 rounded-full bg-brand, animate-bounce with stagger delay
+//   Text below: "Gemini is analysing your subscriptions..." text-sm text-text-muted
+
+// Content (debrief !== null):
+//   Summary paragraph: text-base text-text-primary leading-relaxed font-ui
+//   Divider: border-t border-border my-3
+//   Action line: flex items-start gap-2
+//     Icon: Lightbulb from lucide, 16px, text-brand
+//     Text: text-sm font-medium text-text-primary
+
+// Empty state (debrief === null && !isLoading && !error):
+//   Centered: sparkles icon, "Get your monthly debrief" heading, generate button
+
+// Error state:
+//   Centered: text-sm text-text-secondary "Couldn't generate your debrief."
+//   Retry button (ghost style)
 ```
 
-### CancelButton
+---
 
-Destructive action. Must feel deliberate.
+## FilterPills
 
-```typescript
-interface CancelButtonProps {
-  subscriptionId: string;
-  serviceName: string;
-  onSuccess: () => void;
-  disabled?: boolean;
+```tsx
+type FilterType = 'all' | 'unused' | 'trial' | 'hike';
+
+interface FilterPillsProps {
+  active: FilterType;
+  counts: Record<FilterType, number>;
+  onChange: (filter: FilterType) => void;
 }
 
-// Default: transparent bg, border border-stone-700, text-stone-400, 12px mono, uppercase
-// Hover: border-red-700, text-red-400, bg-transparent
-// After click: shows "CANCELLING..." for 800ms, then success state
-// Never shows a confirmation dialog — the cancel is final
-// (cancelled state is reversible for 5 seconds via a toast undo)
+// Container: flex gap-2 flex-wrap
+// Each pill: inline-flex items-center gap-1.5 rounded-pill px-4 py-1.5
+//   Inactive: border border-border bg-white text-text-secondary text-sm font-medium
+//   Active:   bg-text-primary text-white border-text-primary
+//   Count badge inside: text-xs opacity-60 (inactive) or opacity-70 (active)
+// Transition: all 150ms ease on background/color
 ```
 
 ---
 
 ## Loading States
 
-**Never use:** spinning circles, pulsing gray rectangles, generic skeletons
+**Never use:** spinning loaders, pulsing skeleton bars in gray.
 
 **Use instead:**
 
 ```tsx
-// Terminal-style loading for subscription list
-const TerminalLoader = () => (
-  <div className="font-mono text-sm text-stone-500 p-4">
-    <span>Scanning transactions</span>
-    <span className="animate-blink">_</span>
+// Subscription list loading — rows with shimmer
+const SubscriptionSkeleton = () => (
+  <div className="animate-pulse space-y-0">
+    {[...Array(4)].map((_, i) => (
+      <div key={i} className="flex items-center gap-3 px-4 py-[18px] border-b border-border">
+        <div className="w-10 h-10 rounded-[10px] bg-bg-subtle" />
+        <div className="flex-1 space-y-2">
+          <div className="h-4 bg-bg-subtle rounded w-32" />
+          <div className="h-3 bg-bg-subtle rounded w-20" />
+        </div>
+        <div className="h-5 bg-bg-subtle rounded w-16" />
+      </div>
+    ))}
   </div>
 );
 
-// For AI debrief
-const DebriefLoader = () => (
-  <div className="font-mono text-sm text-stone-500">
-    <span>Analysing your subscriptions</span>
-    <span className="animate-blink">_</span>
+// Shame score loading
+const ShameScoreSkeleton = () => (
+  <div className="flex flex-col items-center gap-3 animate-pulse">
+    <div className="w-[200px] h-[200px] rounded-full bg-bg-subtle" />
+    <div className="h-4 w-28 bg-bg-subtle rounded" />
   </div>
 );
 
-// CSS for blink animation (add to globals.css):
-// @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
-// .animate-blink { animation: blink 1s step-end infinite; }
+// AI debrief loading — use the animated dots pattern, not a spinner
 ```
 
 ---
@@ -201,83 +243,98 @@ const DebriefLoader = () => (
 ## Error States
 
 ```tsx
-// Component-level error (not full page)
-const ComponentError = ({ message }: { message: string }) => (
-  <div className="border border-red-900 bg-red-950 p-4 font-mono text-xs text-red-400 uppercase tracking-widest">
-    ERROR: {message}
+// Inline component error (not full page)
+const InlineError = ({ message, onRetry }: { message: string; onRetry?: () => void }) => (
+  <div className="rounded-tag border border-[color:var(--danger)] bg-[color:var(--danger-light)] p-4">
+    <p className="text-sm font-medium text-[color:var(--danger)]">{message}</p>
+    {onRetry && (
+      <button onClick={onRetry} className="text-sm text-[color:var(--danger)] underline mt-1">
+        Try again
+      </button>
+    )}
   </div>
 );
 ```
 
 ---
 
-## Tailwind Custom Config
+## Toast Notifications
 
-Add to `tailwind.config.ts`:
+Use `sonner` for toasts (add to DEPENDENCIES.md):
 
-```typescript
-theme: {
-  extend: {
-    colors: {
-      'acid-green':  '#C8F135',
-      'acid-dim':    '#9AB828',
-      'acid-muted':  '#1E2A0D',
-      stone: {        // extend defaults with app-specific tones
-        950: '#0D0D0B',
-        900: '#141412',
-        850: '#1C1C19',
-        800: '#242420',
-      }
-    },
-    fontFamily: {
-      mono:    ['IBM Plex Mono', 'Courier New', 'monospace'],
-      display: ['DM Serif Display', 'Georgia', 'serif'],
-    },
-    borderRadius: {
-      DEFAULT: '0px',   // override default rounding — we use sharp corners
-      sm:      '2px',
-      md:      '4px',
-    },
-    animation: {
-      blink: 'blink 1s step-end infinite',
-    },
-    keyframes: {
-      blink: {
-        '0%, 100%': { opacity: '1' },
-        '50%':       { opacity: '0' },
-      }
-    }
-  }
-}
+```tsx
+import { toast } from 'sonner';
+
+// Success — after cancellation
+toast.success(`Cancelled ${name}!`, {
+  description: `You'll save $${annualSaving.toFixed(0)}/year`,
+  duration: 4000,
+});
+
+// Undo — 5 second window after cancel
+toast.success('Cancelled!', {
+  action: {
+    label: 'Undo',
+    onClick: () => handleUndo(subscriptionId),
+  },
+  duration: 5000,
+});
+
+// Error
+toast.error('Something went wrong', {
+  description: 'Please try again in a moment',
+});
 ```
 
 ---
 
-## Zustand Store Shape
+## Framer Motion Usage
 
-```typescript
-// src/stores/subscriptionStore.ts
+```tsx
+// Staggered list entrance
+const container = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.04 } },
+};
+const item = {
+  hidden:  { opacity: 0, y: 16 },
+  show:    { opacity: 1, y: 0, transition: { duration: 0.35, ease: [0.34, 1.56, 0.64, 1] } },
+};
 
-interface SubscriptionStore {
-  subscriptions: Subscription[];
-  filter: 'all' | 'unused' | 'trial' | 'hike';
-  isLoading: boolean;
-  error: string | null;
+// Cancel row animation
+const rowVariants = {
+  active:    { x: 0, opacity: 1 },
+  cancelled: { opacity: 0.6, transition: { duration: 0.4 } },
+};
 
-  // Actions
-  setFilter: (filter: SubscriptionStore['filter']) => void;
-  cancelSubscription: (id: string) => void;
-  undoCancel: (id: string) => void;
-  refreshSubscriptions: () => Promise<void>;
-}
+// Stat card number count (use useMemo + useEffect with RAF, not a library)
 ```
 
 ---
 
-## Accessibility Rules
+## Drizzle Schema Shape (reference for component types)
 
-- All interactive elements have `aria-label` when icon-only
-- Color is never the ONLY indicator of status (always paired with text/icon)
-- Focus rings use `outline: 2px solid var(--color-accent)` — visible in dark mode
-- Shame score meter has `role="meter"` with `aria-valuenow`, `aria-valuemin`, `aria-valuemax`
-- Cancel confirmation uses `aria-live="polite"` for the undo toast
+```typescript
+// src/db/schema.ts — abridged
+export const subscriptions = pgTable('subscriptions', {
+  id:          uuid('id').primaryKey().defaultRandom(),
+  userId:      text('user_id').notNull(),          // Clerk user ID
+  name:        text('name').notNull(),              // normalized service name
+  rawMerchant: text('raw_merchant').notNull(),      // original from Plaid
+  category:    text('category').notNull(),
+  amount:      numeric('amount', { precision: 10, scale: 2 }).notNull(),
+  frequency:   text('frequency').notNull(),         // 'monthly' | 'weekly' | 'annual'
+  status:      text('status').notNull(),            // 'active' | 'unused' | etc.
+  usageScore:  integer('usage_score'),
+  lastCharge:  timestamp('last_charge'),
+  alertType:   text('alert_type'),
+  alertMsg:    text('alert_message'),
+  cancelledAt: timestamp('cancelled_at'),
+  deletedAt:   timestamp('deleted_at'),
+  createdAt:   timestamp('created_at').defaultNow().notNull(),
+  updatedAt:   timestamp('updated_at').defaultNow().notNull(),
+});
+
+export type Subscription = typeof subscriptions.$inferSelect;
+export type NewSubscription = typeof subscriptions.$inferInsert;
+```

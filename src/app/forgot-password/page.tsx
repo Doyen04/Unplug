@@ -79,31 +79,31 @@ const ForgotPasswordPage = async ({ searchParams }: ForgotPasswordPageProps) => 
     const hasInvalidCodeError = params.error === 'invalid_code';
 
     return (
-        <main className="min-h-screen bg-stone-950 px-4 py-8 text-stone-100 md:px-6 md:py-10 lg:px-8">
+        <main className="min-h-screen bg-[#FAFAF7] px-4 py-8 text-[#1A1A17] md:px-6 md:py-10 lg:px-8">
             <div className="mx-auto grid w-full max-w-6xl gap-4 lg:grid-cols-[1.1fr_0.9fr]">
-                <section className="border border-stone-800 bg-stone-900 p-6 sm:p-8 lg:p-10">
-                    <p className="text-[11px] uppercase tracking-[0.08em] text-stone-500">Password recovery</p>
-                    <h1 className="mt-4 font-display text-4xl leading-tight text-stone-100 sm:text-5xl">
+                <section className="rounded-2xl border border-[#E8E7E0] bg-white p-6 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] sm:p-8 lg:p-10">
+                    <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#A9A79E]">Password recovery</p>
+                    <h1 className="font-display mt-4 text-4xl leading-tight text-[#1A1A17] sm:text-5xl">
                         Forgot your password?
                     </h1>
-                    <p className="mt-5 max-w-xl text-sm leading-7 text-stone-300">
+                    <p className="mt-5 max-w-xl text-sm leading-7 text-[#6B6960]">
                         Enter your email to receive a 6-digit reset code. Then set a new password.
                     </p>
 
                     {hasInvalidEmailError ? (
-                        <div className="mt-4 border border-red-900 bg-red-950 p-3 text-xs uppercase tracking-[0.08em] text-red-400">
+                        <div className="mt-4 rounded-[10px] border border-[#E53434] bg-[#FEF0F0] p-3 text-xs uppercase tracking-[0.08em] text-[#E53434]">
                             Enter a valid email.
                         </div>
                     ) : null}
 
                     {hasRequestFailedError ? (
-                        <div className="mt-4 border border-red-900 bg-red-950 p-3 text-xs uppercase tracking-[0.08em] text-red-400">
+                        <div className="mt-4 rounded-[10px] border border-[#E53434] bg-[#FEF0F0] p-3 text-xs uppercase tracking-[0.08em] text-[#E53434]">
                             Could not send reset code. Check email settings and try again.
                         </div>
                     ) : null}
 
                     {sent ? (
-                        <div className="mt-4 border border-acid-muted bg-acid-muted/30 p-3 text-xs uppercase tracking-[0.08em] text-acid-green">
+                        <div className="mt-4 rounded-[10px] border border-[#1C9E5B] bg-[#EDFAF3] p-3 text-xs uppercase tracking-[0.08em] text-[#1C9E5B]">
                             If an account exists for this email, a reset code will arrive shortly.
                         </div>
                     ) : null}
@@ -119,7 +119,7 @@ const ForgotPasswordPage = async ({ searchParams }: ForgotPasswordPageProps) => 
                                 type="email"
                                 defaultValue={email}
                                 required
-                                className="mt-2 w-full border border-stone-700 bg-stone-950 px-3 py-2 text-sm text-stone-100 outline-none transition-colors focus:border-acid-green focus-visible:outline-2 focus-visible:outline-acid-green"
+                                className="mt-2 w-full rounded-[10px] border border-[#D0CFC7] bg-[#FAFAF7] px-3 py-2 text-sm text-[#1A1A17] outline-none transition-colors focus:border-[#FF5C35] focus-visible:outline-2 focus-visible:outline-[#FF5C35]"
                                 placeholder="you@example.com"
                             />
                         </div>
@@ -127,22 +127,22 @@ const ForgotPasswordPage = async ({ searchParams }: ForgotPasswordPageProps) => 
                         <FormSubmitButton
                             idleLabel="Send reset code"
                             pendingLabel="Sending..."
-                            className="w-full border border-acid-green bg-acid-green px-4 py-2 text-xs font-medium uppercase tracking-[0.08em] text-stone-950 transition-colors hover:bg-acid-dim focus-visible:outline-2 focus-visible:outline-acid-green disabled:cursor-not-allowed disabled:opacity-60"
+                            className="w-full rounded-[10px] border border-[#FF5C35] bg-[#FF5C35] px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-white transition-colors hover:bg-[#C93A1A] focus-visible:outline-2 focus-visible:outline-[#FF5C35] disabled:cursor-not-allowed disabled:opacity-60"
                         />
                     </form>
                 </section>
 
-                <section className="border border-stone-800 bg-stone-900 p-6 sm:p-8">
-                    <p className="text-[11px] uppercase tracking-[0.08em] text-stone-500">Use code</p>
+                <section className="rounded-2xl border border-[#E8E7E0] bg-white p-6 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] sm:p-8">
+                    <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#A9A79E]">Use code</p>
 
                     {hasInvalidResetInputError ? (
-                        <div className="mt-4 border border-red-900 bg-red-950 p-3 text-xs uppercase tracking-[0.08em] text-red-400">
+                        <div className="mt-4 rounded-[10px] border border-[#E53434] bg-[#FEF0F0] p-3 text-xs uppercase tracking-[0.08em] text-[#E53434]">
                             Enter email, 6-digit code, and a password with at least 8 characters.
                         </div>
                     ) : null}
 
                     {hasInvalidCodeError ? (
-                        <div className="mt-4 border border-red-900 bg-red-950 p-3 text-xs uppercase tracking-[0.08em] text-red-400">
+                        <div className="mt-4 rounded-[10px] border border-[#E53434] bg-[#FEF0F0] p-3 text-xs uppercase tracking-[0.08em] text-[#E53434]">
                             Invalid or expired code. Request another code and retry.
                         </div>
                     ) : null}
@@ -158,7 +158,7 @@ const ForgotPasswordPage = async ({ searchParams }: ForgotPasswordPageProps) => 
                                 type="email"
                                 defaultValue={email}
                                 required
-                                className="mt-2 w-full border border-stone-700 bg-stone-950 px-3 py-2 text-sm text-stone-100 outline-none transition-colors focus:border-acid-green focus-visible:outline-2 focus-visible:outline-acid-green"
+                                className="mt-2 w-full rounded-[10px] border border-[#D0CFC7] bg-[#FAFAF7] px-3 py-2 text-sm text-[#1A1A17] outline-none transition-colors focus:border-[#FF5C35] focus-visible:outline-2 focus-visible:outline-[#FF5C35]"
                                 placeholder="you@example.com"
                             />
                         </div>
@@ -176,7 +176,7 @@ const ForgotPasswordPage = async ({ searchParams }: ForgotPasswordPageProps) => 
                                 minLength={6}
                                 maxLength={6}
                                 required
-                                className="mt-2 w-full border border-stone-700 bg-stone-950 px-3 py-2 text-sm tracking-[0.35em] text-stone-100 outline-none transition-colors focus:border-acid-green focus-visible:outline-2 focus-visible:outline-acid-green"
+                                className="mt-2 w-full rounded-[10px] border border-[#D0CFC7] bg-[#FAFAF7] px-3 py-2 text-sm tracking-[0.35em] text-[#1A1A17] outline-none transition-colors focus:border-[#FF5C35] focus-visible:outline-2 focus-visible:outline-[#FF5C35]"
                                 placeholder="123456"
                             />
                         </div>
@@ -191,7 +191,7 @@ const ForgotPasswordPage = async ({ searchParams }: ForgotPasswordPageProps) => 
                                 type="password"
                                 minLength={8}
                                 required
-                                className="mt-2 w-full border border-stone-700 bg-stone-950 px-3 py-2 text-sm text-stone-100 outline-none transition-colors focus:border-acid-green focus-visible:outline-2 focus-visible:outline-acid-green"
+                                className="mt-2 w-full rounded-[10px] border border-[#D0CFC7] bg-[#FAFAF7] px-3 py-2 text-sm text-[#1A1A17] outline-none transition-colors focus:border-[#FF5C35] focus-visible:outline-2 focus-visible:outline-[#FF5C35]"
                                 placeholder="At least 8 characters"
                             />
                         </div>
@@ -199,13 +199,13 @@ const ForgotPasswordPage = async ({ searchParams }: ForgotPasswordPageProps) => 
                         <FormSubmitButton
                             idleLabel="Reset password"
                             pendingLabel="Resetting..."
-                            className="w-full border border-stone-600 px-4 py-2 text-xs font-medium uppercase tracking-[0.08em] text-stone-100 transition-colors hover:border-stone-400 focus-visible:outline-2 focus-visible:outline-acid-green disabled:cursor-not-allowed disabled:opacity-60"
+                            className="w-full rounded-[10px] border border-[#FF5C35] bg-[#FF5C35] px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-white transition-colors hover:bg-[#C93A1A] focus-visible:outline-2 focus-visible:outline-[#FF5C35] disabled:cursor-not-allowed disabled:opacity-60"
                         />
                     </form>
 
-                    <p className="mt-4 text-xs uppercase tracking-[0.06em] text-stone-500">
+                    <p className="mt-4 text-xs uppercase tracking-[0.06em] text-[#6B6960]">
                         Remembered your password?{' '}
-                        <Link href="/login" className="text-acid-green hover:text-acid-dim focus-visible:outline-2 focus-visible:outline-acid-green">
+                        <Link href="/login" className="text-[#FF5C35] hover:text-[#C93A1A] focus-visible:outline-2 focus-visible:outline-[#FF5C35]">
                             Back to login
                         </Link>
                     </p>

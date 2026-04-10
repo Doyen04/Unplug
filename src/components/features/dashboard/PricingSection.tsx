@@ -69,55 +69,55 @@ const TIERS: PricingTier[] = [
 ];
 
 export const PricingSection = () => (
-    <section id="pricing" className="border border-stone-800 bg-stone-900 p-5 sm:p-6">
+    <section id="pricing" className="rounded-2xl border border-[#E8E7E0] bg-white p-5 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] sm:p-6">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
-                <p className="text-[11px] uppercase tracking-[0.08em] text-stone-500">Pricing</p>
-                <h2 className="mt-2 font-display text-3xl text-stone-100">Pick the pressure level</h2>
+                <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#A9A79E]">Pricing</p>
+                <h2 className="mt-2 font-display text-3xl text-[#1A1A17]">Pick the pressure level</h2>
             </div>
-            <p className="text-xs uppercase tracking-[0.06em] text-stone-500">Cancel anytime</p>
+            <p className="text-xs font-medium uppercase tracking-[0.06em] text-[#A9A79E]">Cancel anytime</p>
         </div>
 
         <div className="mt-5 grid gap-3 xl:grid-cols-3">
             {TIERS.map((tier) => (
                 <article
                     key={tier.id}
-                    className={`flex h-full flex-col border p-4 ${tier.highlight
-                        ? 'border-blue-500 bg-stone-950'
-                        : 'border-stone-700 bg-stone-950'
+                    className={`flex h-full flex-col rounded-2xl border p-4 ${tier.highlight
+                        ? 'border-[#FF5C35] bg-[#FFF0EC]'
+                        : 'border-[#E8E7E0] bg-[#FAFAF7]'
                         }`}
                 >
                     {tier.badgeLabel ? (
-                        <span className="inline-flex w-fit border border-blue-800 bg-blue-950 px-2 py-1 text-[10px] uppercase tracking-[0.08em] text-blue-300">
+                        <span className="inline-flex w-fit rounded-[9999px] border border-[#FF5C35]/40 bg-[#FFF0EC] px-2 py-1 text-[10px] uppercase tracking-[0.08em] text-[#C93A1A]">
                             {tier.badgeLabel}
                         </span>
                     ) : (
                         <span className="h-6" aria-hidden="true" />
                     )}
 
-                    <p className="mt-3 text-lg text-stone-100">{tier.label}</p>
-                    <p className="mt-1 font-display text-5xl leading-none text-stone-100">
+                    <p className="mt-3 text-lg text-[#1A1A17]">{tier.label}</p>
+                    <p className="font-display mt-1 text-5xl leading-none text-[#1A1A17]">
                         ${tier.monthlyPrice}
-                        <span className="ml-1 text-base text-stone-400">/ month</span>
+                        <span className="ml-1 text-base text-[#6B6960]">/ month</span>
                     </p>
-                    <p className="mt-3 min-h-12 text-sm text-stone-300">{tier.subtitle}</p>
+                    <p className="mt-3 min-h-12 text-sm text-[#6B6960]">{tier.subtitle}</p>
 
-                    <ul className="mt-3 flex-1 space-y-2 border-t border-stone-800 pt-3 text-sm text-stone-300">
+                    <ul className="mt-3 flex-1 space-y-2 border-t border-[#E8E7E0] pt-3 text-sm text-[#6B6960]">
                         {tier.features.map((feature) => (
                             <li key={feature.text} className="flex items-start gap-2">
-                                <span className={feature.available ? 'text-acid-green' : 'text-stone-500'} aria-hidden="true">
+                                <span className={feature.available ? 'text-[#1C9E5B]' : 'text-[#A9A79E]'} aria-hidden="true">
                                     •
                                 </span>
-                                <span className={feature.available ? 'text-stone-200' : 'text-stone-500'}>{feature.text}</span>
+                                <span className={feature.available ? 'text-[#1A1A17]' : 'text-[#A9A79E]'}>{feature.text}</span>
                             </li>
                         ))}
                     </ul>
 
                     <Link
                         href={tier.href}
-                        className={`mt-4 border px-4 py-2 text-center text-xs uppercase tracking-[0.08em] ${tier.highlight
-                            ? 'border-acid-green bg-acid-green text-stone-950 hover:bg-acid-dim'
-                            : 'border-stone-600 text-stone-100 hover:border-stone-400'
+                        className={`mt-4 rounded-[10px] border px-4 py-2 text-center text-xs uppercase tracking-[0.08em] ${tier.highlight
+                            ? 'border-[#FF5C35] bg-[#FF5C35] text-white hover:bg-[#C93A1A]'
+                            : 'border-[#D0CFC7] text-[#1A1A17] hover:border-[#1A1A17]'
                             }`}
                     >
                         {tier.ctaLabel}

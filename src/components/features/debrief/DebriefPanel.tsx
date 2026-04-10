@@ -11,20 +11,19 @@ export const DebriefPanel = ({
   content,
   error,
 }: DebriefPanelProps) => (
-  <section className="border border-stone-800 bg-stone-950 p-6">
-    <p className="text-[11px] uppercase tracking-[0.08em] text-stone-500">
+  <section className="rounded-2xl border border-[#E8E7E0] bg-white p-6 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)]">
+    <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#A9A79E]">
       MONTHLY DEBRIEF / {month}
     </p>
 
-    <div className="mt-4 text-[15px] leading-7 text-stone-300">
+    <div className="mt-4 text-[15px] leading-7 text-[#1A1A17]">
       {isLoading ? (
-        <p className="text-sm text-stone-500">
-          Analysing your subscriptions
-          <span className="animate-blink">_</span>
+        <p className="text-sm text-[#6B6960]">
+          Analysing your subscriptions<span className="animate-blink">_</span>
         </p>
       ) : null}
 
-      {!isLoading && error ? <p className="text-red-500">DEBRIEF UNAVAILABLE</p> : null}
+      {!isLoading && error ? <p className="text-[#E53434]">Debrief unavailable.</p> : null}
 
       {!isLoading && !error && content ? <p>{content}</p> : null}
     </div>

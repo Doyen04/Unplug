@@ -78,8 +78,8 @@ const DashboardPage = () => {
 
   if (isError) {
     return (
-      <main className="min-h-screen bg-stone-950 px-4 py-10 text-stone-100 md:px-6 lg:px-8">
-        <div className="mx-auto max-w-3xl border border-red-900 bg-red-950 p-6 text-sm uppercase tracking-[0.08em] text-red-400">
+      <main className="min-h-screen bg-[#FAFAF7] px-4 py-10 text-[#1A1A17] md:px-6 lg:px-8">
+        <div className="mx-auto max-w-3xl rounded-2xl border border-[#E53434] bg-[#FEF0F0] p-6 text-sm uppercase tracking-[0.08em] text-[#E53434] shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)]">
           Dashboard unavailable. Try again.
         </div>
       </main>
@@ -87,37 +87,37 @@ const DashboardPage = () => {
   }
 
   return (
-    <main className="min-h-screen bg-stone-950 px-4 py-10 text-stone-100 md:px-6 lg:h-screen lg:overflow-hidden lg:px-8">
+    <main className="min-h-screen bg-[#FAFAF7] px-4 py-10 text-[#1A1A17] md:px-6 lg:h-screen lg:overflow-hidden lg:px-8">
       <div className="mx-auto grid w-full max-w-350 grid-cols-1 gap-4 lg:h-full lg:min-h-0 lg:grid-cols-[240px_minmax(0,800px)_280px] lg:items-stretch">
         <div className="order-1 lg:order-1 lg:h-full">
           <DashboardSidebar monthlySpend={summary.monthlySpend} />
         </div>
 
         <section className="scrollbar-hidden order-3 space-y-4 lg:order-2 lg:h-full lg:min-h-0 lg:overflow-y-auto lg:pr-1">
-          <section className="border border-stone-800 bg-stone-900 p-5 sm:p-6">
-            <p className="text-[11px] uppercase tracking-[0.08em] text-stone-500">Dashboard command center</p>
-            <p className="mt-1 text-[10px] uppercase tracking-[0.08em] text-stone-500">
+          <section className="rounded-2xl border border-[#E8E7E0] bg-white p-5 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] sm:p-6">
+            <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#A9A79E]">Dashboard command center</p>
+            <p className="mt-1 text-[10px] uppercase tracking-[0.08em] text-[#A9A79E]">
               Source: {summary.dataSource === 'plaid' ? 'Plaid live data' : 'Seeded fallback data'}
             </p>
             <div className="mt-3 grid gap-3 sm:grid-cols-3">
-              <article className="border border-stone-800 bg-stone-950 p-4">
-                <p className="text-[11px] uppercase tracking-[0.08em] text-stone-500">Tracked subscriptions</p>
-                <p className="mt-2 font-display text-4xl text-stone-100">{isLoading ? '--' : totalSubscriptions}</p>
+              <article className="rounded-2xl border border-[#E8E7E0] bg-[#FAFAF7] p-4">
+                <p className="text-[11px] uppercase tracking-[0.08em] text-[#A9A79E]">Tracked subscriptions</p>
+                <p className="font-display mt-2 text-4xl text-[#1A1A17]">{isLoading ? '--' : totalSubscriptions}</p>
               </article>
-              <article className="border border-stone-800 bg-stone-950 p-4">
-                <p className="text-[11px] uppercase tracking-[0.08em] text-stone-500">Linked accounts</p>
-                <p className="mt-2 font-display text-4xl text-acid-green">{isLoading ? '--' : summary.linkedAccounts}</p>
+              <article className="rounded-2xl border border-[#E8E7E0] bg-[#FAFAF7] p-4">
+                <p className="text-[11px] uppercase tracking-[0.08em] text-[#A9A79E]">Linked accounts</p>
+                <p className="font-display mt-2 text-4xl text-[#1C9E5B]">{isLoading ? '--' : summary.linkedAccounts}</p>
               </article>
-              <article className="border border-stone-800 bg-stone-950 p-4">
-                <p className="text-[11px] uppercase tracking-[0.08em] text-stone-500">Recent transactions</p>
-                <p className="mt-2 font-display text-4xl text-amber-400">{isLoading ? '--' : summary.recentTransactionCount}</p>
+              <article className="rounded-2xl border border-[#E8E7E0] bg-[#FAFAF7] p-4">
+                <p className="text-[11px] uppercase tracking-[0.08em] text-[#A9A79E]">Recent transactions</p>
+                <p className="font-display mt-2 text-4xl text-[#E8860A]">{isLoading ? '--' : summary.recentTransactionCount}</p>
               </article>
             </div>
 
             <div className="mt-4 flex flex-col gap-2 sm:flex-row">
               <Link
                 href="/dashboard/connect"
-                className="border border-acid-green bg-acid-green px-4 py-2 text-center text-xs uppercase tracking-[0.08em] text-stone-950 hover:bg-acid-dim focus-visible:outline-2 focus-visible:outline-acid-green"
+                className="rounded-[10px] border border-[#FF5C35] bg-[#FF5C35] px-4 py-2 text-center text-xs font-semibold uppercase tracking-[0.08em] text-white hover:bg-[#C93A1A] focus-visible:outline-2 focus-visible:outline-[#FF5C35]"
               >
                 Connect another account
               </Link>
@@ -155,7 +155,7 @@ const DashboardPage = () => {
 
           <section id="subscriptions" className="space-y-3">
             <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-              <p className="text-[11px] uppercase tracking-[0.08em] text-stone-500">
+              <p className="text-[11px] uppercase tracking-[0.08em] text-[#A9A79E]">
                 Subscriptions
               </p>
               <div className="flex flex-wrap gap-2">
@@ -164,9 +164,9 @@ const DashboardPage = () => {
                     key={option.key}
                     type="button"
                     onClick={() => setFilter(option.key)}
-                    className={`border px-3 py-1 text-xs uppercase tracking-[0.06em] ${filter === option.key
-                      ? 'border-acid-green text-acid-green'
-                      : 'border-stone-600 text-stone-200 hover:border-stone-400 hover:text-stone-100'
+                    className={`rounded-[10px] border px-3 py-1 text-xs uppercase tracking-[0.06em] ${filter === option.key
+                      ? 'border-[#FF5C35] bg-[#FFF0EC] text-[#C93A1A]'
+                      : 'border-[#D0CFC7] bg-white text-[#6B6960] hover:border-[#1A1A17] hover:text-[#1A1A17]'
                       } focus-visible:outline-2 focus-visible:outline-acid-green`}
                   >
                     {option.label}
@@ -176,7 +176,7 @@ const DashboardPage = () => {
             </div>
 
             {isLoading ? (
-              <div className="border border-stone-800 bg-stone-900 p-4 text-sm text-stone-500">
+              <div className="rounded-2xl border border-[#E8E7E0] bg-white p-4 text-sm text-[#6B6960] shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)]">
                 Scanning transactions
                 <span className="animate-blink">_</span>
               </div>
@@ -191,7 +191,7 @@ const DashboardPage = () => {
               ))
             )}
 
-            <div className="flex flex-col gap-2 border border-stone-800 bg-stone-900 px-3 py-2 text-xs uppercase tracking-[0.06em] text-stone-400 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-2 rounded-2xl border border-[#E8E7E0] bg-white px-3 py-2 text-xs uppercase tracking-[0.06em] text-[#6B6960] shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] sm:flex-row sm:items-center sm:justify-between">
               <span className="text-center sm:text-left">
                 Page {page} / {pageCount} · {totalSubscriptions} total
               </span>
@@ -200,7 +200,7 @@ const DashboardPage = () => {
                   type="button"
                   onClick={() => setPage(page - 1)}
                   disabled={page <= 1}
-                  className="border border-stone-600 px-2 py-1 text-stone-200 hover:border-stone-400 hover:text-stone-100 focus-visible:outline-2 focus-visible:outline-acid-green disabled:opacity-40"
+                  className="rounded-[10px] border border-[#D0CFC7] px-2 py-1 text-[#1A1A17] hover:border-[#1A1A17] focus-visible:outline-2 focus-visible:outline-[#FF5C35] disabled:opacity-40"
                 >
                   Prev
                 </button>
@@ -208,7 +208,7 @@ const DashboardPage = () => {
                   type="button"
                   onClick={() => setPage(page + 1)}
                   disabled={page >= pageCount}
-                  className="border border-stone-600 px-2 py-1 text-stone-200 hover:border-stone-400 hover:text-stone-100 focus-visible:outline-2 focus-visible:outline-acid-green disabled:opacity-40"
+                  className="rounded-[10px] border border-[#D0CFC7] px-2 py-1 text-[#1A1A17] hover:border-[#1A1A17] focus-visible:outline-2 focus-visible:outline-[#FF5C35] disabled:opacity-40"
                 >
                   Next
                 </button>
@@ -224,7 +224,7 @@ const DashboardPage = () => {
 
       {pendingUndoId ? (
         <div
-          className="fixed bottom-4 left-1/2 w-[92%] max-w-md -translate-x-1/2 border border-stone-700 bg-stone-900 p-3 text-sm text-stone-200"
+          className="fixed bottom-4 left-1/2 w-[92%] max-w-md -translate-x-1/2 rounded-2xl border border-[#E8E7E0] bg-white p-3 text-sm text-[#1A1A17] shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)]"
           role="status"
           aria-live="polite"
         >
@@ -234,7 +234,7 @@ const DashboardPage = () => {
               type="button"
               onClick={() => void undoCancel()}
               disabled={isCancelling}
-              className="border border-acid-green px-2 py-1 text-xs uppercase tracking-[0.06em] text-acid-green focus-visible:outline-2 focus-visible:outline-acid-green disabled:opacity-60"
+              className="rounded-[10px] border border-[#FF5C35] px-2 py-1 text-xs uppercase tracking-[0.06em] text-[#FF5C35] focus-visible:outline-2 focus-visible:outline-[#FF5C35] disabled:opacity-60"
             >
               Undo
             </button>
