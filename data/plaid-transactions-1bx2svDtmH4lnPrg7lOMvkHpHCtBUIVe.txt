@@ -1,6 +1,6 @@
 Plaid Snapshot for user: 1bx2svDtmH4lnPrg7lOMvkHpHCtBUIVe
 
-Fetched at: 2026-04-13T09:39:09.272Z
+Fetched at: 2026-04-13T13:47:44.696Z
 
 Connected Plaid records: 1
 
@@ -9,6 +9,112 @@ Plaid API accounts returned: 12
 Transactions:
 
 [
+  {
+    "account_id": "MWz3eejrVQHarKvbaNmDf4XDZkz9JaFLAzr9v",
+    "account_owner": null,
+    "amount": 5850,
+    "authorized_date": null,
+    "authorized_datetime": null,
+    "category": null,
+    "category_id": null,
+    "check_number": null,
+    "counterparties": [],
+    "date": "2026-04-13",
+    "datetime": null,
+    "iso_currency_code": "USD",
+    "location": {
+      "address": null,
+      "city": null,
+      "country": null,
+      "lat": null,
+      "lon": null,
+      "postal_code": null,
+      "region": null,
+      "store_number": null
+    },
+    "logo_url": null,
+    "merchant_entity_id": null,
+    "merchant_name": null,
+    "name": "ACH Electronic CreditGUSTO PAY 123456",
+    "payment_channel": "online",
+    "payment_meta": {
+      "by_order_of": null,
+      "payee": null,
+      "payer": null,
+      "payment_method": "ACH",
+      "payment_processor": null,
+      "ppd_id": null,
+      "reason": null,
+      "reference_number": null
+    },
+    "pending": false,
+    "pending_transaction_id": null,
+    "personal_finance_category": {
+      "confidence_level": "LOW",
+      "detailed": "RENT_AND_UTILITIES_WATER",
+      "primary": "RENT_AND_UTILITIES",
+      "version": "v2"
+    },
+    "personal_finance_category_icon_url": "https://plaid-category-icons.plaid.com/PFC_RENT_AND_UTILITIES.png",
+    "transaction_code": null,
+    "transaction_id": "gjGyeePn6xsRNmLQR4MKU39lG3Xz6WCElPZpN",
+    "transaction_type": "special",
+    "unofficial_currency_code": null,
+    "website": null
+  },
+  {
+    "account_id": "Qbd411XxALHjxk4ajA3lCNpbAzVBajiwLzVpM",
+    "account_owner": null,
+    "amount": 1000,
+    "authorized_date": null,
+    "authorized_datetime": null,
+    "category": null,
+    "category_id": null,
+    "check_number": null,
+    "counterparties": [],
+    "date": "2026-04-13",
+    "datetime": null,
+    "iso_currency_code": "USD",
+    "location": {
+      "address": null,
+      "city": null,
+      "country": null,
+      "lat": null,
+      "lon": null,
+      "postal_code": null,
+      "region": null,
+      "store_number": null
+    },
+    "logo_url": null,
+    "merchant_entity_id": null,
+    "merchant_name": null,
+    "name": "CD DEPOSIT .INITIAL.",
+    "payment_channel": "other",
+    "payment_meta": {
+      "by_order_of": null,
+      "payee": null,
+      "payer": null,
+      "payment_method": null,
+      "payment_processor": null,
+      "ppd_id": null,
+      "reason": null,
+      "reference_number": null
+    },
+    "pending": false,
+    "pending_transaction_id": null,
+    "personal_finance_category": {
+      "confidence_level": "LOW",
+      "detailed": "ENTERTAINMENT_SPORTING_EVENTS_AMUSEMENT_PARKS_AND_MUSEUMS",
+      "primary": "ENTERTAINMENT",
+      "version": "v2"
+    },
+    "personal_finance_category_icon_url": "https://plaid-category-icons.plaid.com/PFC_ENTERTAINMENT.png",
+    "transaction_code": null,
+    "transaction_id": "LErB774KweidKAW8dMNEueADaeolP7fkLq4na",
+    "transaction_type": "special",
+    "unofficial_currency_code": null,
+    "website": null
+  },
   {
     "account_id": "ZlZ1KK8QAnsoQgDRoAePf9eXkoaVxghewzBgL",
     "account_owner": null,
