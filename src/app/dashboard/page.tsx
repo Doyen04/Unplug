@@ -216,7 +216,7 @@ export default function DashboardPage() {
 
       {/* ROW 2: CHART + SECONDARY INSIGHT CARDS */}
       <section className="grid grid-cols-1 gap-5 lg:grid-cols-4">
-        <article className="col-span-1 lg:col-span-2 group flex flex-col justify-between rounded-2xl border border-[#E8E7E0] bg-white p-6 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] lg:row-span-1 transition-all duration-300 hover:shadow-[0_4px_24px_rgba(0,0,0,0.08)] hover:border-[#D0CFC7]">
+        <article className="col-span-1 min-w-0 lg:col-span-2 group flex flex-col justify-between rounded-2xl border border-[#E8E7E0] bg-white p-6 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] lg:row-span-1 transition-all duration-300 hover:shadow-[0_4px_24px_rgba(0,0,0,0.08)] hover:border-[#D0CFC7]">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#FAFAF7] text-[#1A1A17] ring-1 ring-[#E8E7E0] transition-colors group-hover:bg-[#1A1A17] group-hover:text-white">
@@ -227,8 +227,8 @@ export default function DashboardPage() {
             <p className="font-display text-2xl font-semibold text-[#1A1A17]">{formatCurrency(summary.monthlySpend)}</p>
           </div>
           <div className="mt-8 flex flex-col flex-1 pb-2">
-            <div className="h-40 lg:h-64 w-full group-hover:opacity-100 transition-opacity">
-              <ResponsiveContainer width="100%" height="100%">
+            <div className="h-40 min-h-[160px] w-full min-w-0 lg:h-64 group-hover:opacity-100 transition-opacity">
+              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={160}>
                 <BarChart data={MOCK_CHART_DATA} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
                   <XAxis
                     dataKey="name"
@@ -309,21 +309,21 @@ export default function DashboardPage() {
             <button
               type="button"
               onClick={() => setLedgerTab('subscriptions')}
-              className={`rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.06em] transition-colors ${ledgerTab === 'subscriptions' ? 'bg-[#1A1A17] text-white' : 'text-[#6B6960] hover:text-[#1A1A17]'}`}
+              className={`rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.06em] transition-colors ${ledgerTab === 'subscriptions' ? 'bg-[#FF5C35] text-white' : 'text-[#6B6960] hover:text-[#C93A1A]'}`}
             >
               Your Subscriptions
             </button>
             <button
               type="button"
               onClick={() => setLedgerTab('transactions')}
-              className={`rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.06em] transition-colors ${ledgerTab === 'transactions' ? 'bg-[#1A1A17] text-white' : 'text-[#6B6960] hover:text-[#1A1A17]'}`}
+              className={`rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.06em] transition-colors ${ledgerTab === 'transactions' ? 'bg-[#FF5C35] text-white' : 'text-[#6B6960] hover:text-[#C93A1A]'}`}
             >
               Recent Transactions
             </button>
           </div>
 
           {ledgerTab === 'subscriptions' ? (
-            <div className="mt-4 flex w-full max-w-sm items-center gap-2 rounded-[10px] border border-[#D0CFC7] bg-[#FAFAF7] px-3 py-2 sm:mt-0 focus-within:border-[#1A1A17] focus-within:bg-white transition-colors">
+            <div className="mt-4 flex w-full max-w-sm items-center gap-2 rounded-[10px] border border-[#D0CFC7] bg-[#FAFAF7] px-3 py-2 sm:mt-0 focus-within:border-[#FF5C35] focus-within:bg-white transition-colors">
               <Search size={16} className="text-[#A9A79E]" />
               <input
                 type="text"
@@ -345,8 +345,8 @@ export default function DashboardPage() {
                 key={f.key}
                 onClick={() => setFilter(f.key)}
                 className={`shrink-0 rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.05em] transition-colors ${filter === f.key
-                  ? 'bg-[#1A1A17] text-white'
-                  : 'bg-[#F4F3EE] text-[#6B6960] hover:bg-[#E8E7E0] hover:text-[#1A1A17]'
+                  ? 'bg-[#FF5C35] text-white'
+                  : 'bg-[#F4F3EE] text-[#6B6960] hover:bg-[#FFE9E2] hover:text-[#C93A1A]'
                   }`}
               >
                 {f.label}
@@ -413,8 +413,8 @@ export default function DashboardPage() {
                   <div className="text-right">
                     <p className="text-sm font-bold text-[#1A1A17]">{formatCurrency(tx.amount)}</p>
                     <span className={`inline-block rounded-md px-2 py-0.5 mt-1.5 text-[10px] font-bold uppercase tracking-[0.08em] ${tx.amount > 0
-                        ? 'bg-[#FEF6EC] text-[#E8860A] border border-[#E8860A]/20'
-                        : 'bg-[#EDFAF3] text-[#1C9E5B] border border-[#1C9E5B]/20'
+                      ? 'bg-[#FEF6EC] text-[#E8860A] border border-[#E8860A]/20'
+                      : 'bg-[#EDFAF3] text-[#1C9E5B] border border-[#1C9E5B]/20'
                       }`}>
                       {tx.amount > 0 ? 'Outflow' : 'Inflow'}
                     </span>

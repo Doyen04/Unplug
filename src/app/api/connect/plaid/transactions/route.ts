@@ -34,6 +34,8 @@ export async function GET(request: Request) {
     const url = new URL(request.url);
     const accountId = url.searchParams.get('accountId');
     const days = Number(url.searchParams.get('days') ?? '30');
+    const page = Number(url.searchParams.get('page') ?? '1');
+    const pageSize = Number(url.searchParams.get('pageSize') ?? '20');
 
     const connectedAccount = accountId
         ? await getConnectedAccountById(userId, accountId)
@@ -58,6 +60,9 @@ export async function GET(request: Request) {
 
     const accessToken = decryptToken(connectedAccount.encryptedAccessToken);
     const lookbackDays = Number.isFinite(days) ? Math.min(Math.max(days, 1), 365) : 30;
+    const currentPage = Number.isFinite(page) ? Math.max(1, Math.floor(page)) : 1;
+    const safePageSize = Number.isFinite(pageSize) ? Math.min(Math.max(Math.floor(pageSize), 1), 100) : 20;
+    const offset = (currentPage - 1) * safePageSize;
 
     const response = await fetch(`${baseUrl}/transactions/get`, {
         method: 'POST',
@@ -69,8 +74,8 @@ export async function GET(request: Request) {
             start_date: isoDateDaysAgo(lookbackDays),
             end_date: new Date().toISOString().slice(0, 10),
             options: {
-                count: 100,
-                offset: 0,
+                count: safePageSize,
+                offset,
             },
         }),
         cache: 'no-store',
@@ -111,6 +116,9 @@ export async function GET(request: Request) {
 
     return NextResponse.json({
         total: payload.total_transactions,
+        page: currentPage,
+        pageSize: safePageSize,
+        pageCount: Math.max(1, Math.ceil(payload.total_transactions / safePageSize)),
         transactions: payload.transactions,
     });
 }

@@ -66,9 +66,12 @@ export default async function DashboardSettingsPage({ searchParams }: SettingsPa
     const name = getSessionUserField(session, 'name') ?? 'Account user';
 
     return (
-        <div className="space-y-8 max-w-4xl mx-auto w-full pb-10">
-            <header className="flex items-center justify-between">
-                <h1 className="text-3xl font-bold tracking-tight text-[#1A1A17]">Settings</h1>
+        <div className="space-y-6">
+            <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                    <h1 className="text-3xl font-bold tracking-tight text-[#1A1A17]">Settings</h1>
+                    <p className="text-sm text-[#6B6960]">Manage your personal information and preferences.</p>
+                </div>
             </header>
 
             <div className="space-y-6">
@@ -148,7 +151,7 @@ export default async function DashboardSettingsPage({ searchParams }: SettingsPa
                                     <FormSubmitButton
                                         idleLabel="Update"
                                         pendingLabel="Updating..."
-                                        className="rounded-lg bg-[#1A1A17] px-5 py-2.5 text-xs font-bold text-white hover:bg-[#31302A] focus:ring-2 focus:ring-offset-1 focus:ring-[#1A1A17] transition-all"
+                                        className="rounded-lg bg-[#FF5C35] px-5 py-2.5 text-xs font-bold text-white hover:bg-[#C93A1A] focus:ring-2 focus:ring-offset-1 focus:ring-[#FF5C35] transition-all"
                                     />
                                 </div>
                             </form>
@@ -178,7 +181,7 @@ export default async function DashboardSettingsPage({ searchParams }: SettingsPa
                         </div>
                         <p className="text-sm font-bold text-[#1A1A17]">Control your synced data</p>
                         <p className="text-xs text-[#6B6960] mt-1.5 max-w-sm leading-relaxed">Connect new accounts or update existing credentials safely through our encrypted providers.</p>
-                        <Link href="/dashboard/connect" className="mt-6 rounded-xl bg-[#1A1A17] px-6 py-3 text-xs font-bold uppercase tracking-[0.08em] text-white hover:bg-[#31302A] focus:ring-2 focus:ring-offset-2 focus:ring-[#1A1A17] transition-all shadow-sm hover:shadow-md">
+                        <Link href="/dashboard/connect" className="mt-6 rounded-xl bg-[#FF5C35] px-6 py-3 text-xs font-bold uppercase tracking-[0.08em] text-white hover:bg-[#C93A1A] focus:ring-2 focus:ring-offset-2 focus:ring-[#FF5C35] transition-all shadow-sm hover:shadow-md">
                             Go to Connections
                         </Link>
                     </div>

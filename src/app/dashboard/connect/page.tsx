@@ -1,5 +1,4 @@
 import { headers } from 'next/headers';
-import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 import { ConnectProviderButtons } from '../../../components/features/connect/ConnectProviderButtons';
@@ -76,45 +75,37 @@ const ConnectAccountsPage = async ({ searchParams }: ConnectAccountsPageProps) =
     const preferredProvider = MONO_COUNTRIES.has(countryCode) ? 'mono' : 'plaid';
 
     return (
-        <main className="min-h-screen bg-[#FAFAF7] px-4 py-10 text-[#1A1A17] md:px-6 lg:px-8">
-            <div className="mx-auto w-full max-w-6xl space-y-4">
-                <section className="rounded-2xl border border-[#E8E7E0] bg-white p-6 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] sm:p-8">
-                    <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-                        <div>
-                            <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#A9A79E]">Account Connections</p>
-                            <h1 className="font-display mt-3 text-4xl leading-tight text-[#1A1A17]">Connect your accounts</h1>
-                            <p className="mt-3 text-sm leading-7 text-[#6B6960]">
-                                Region detected: <span className="text-[#1A1A17]">{countryCode}</span>. Choose your bank linking provider below.
-                            </p>
-                        </div>
-                        <Link
-                            href="/dashboard"
-                            className="rounded-[10px] border border-[#D0CFC7] px-4 py-2 text-center text-xs font-semibold uppercase tracking-[0.08em] text-[#1A1A17] hover:border-[#1A1A17] focus-visible:outline-2 focus-visible:outline-[#FF5C35]"
-                        >
-                            Back to Dashboard
-                        </Link>
-                    </div>
+        <div className="space-y-6">
+            <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                    <h1 className="text-3xl font-bold tracking-tight text-[#1A1A17]">Connect Accounts</h1>
+                    <p className="text-sm text-[#6B6960]">
+                        Region detected: <span className="text-[#1A1A17] font-semibold">{countryCode}</span>. Choose your bank linking provider below.
+                    </p>
+                </div>
+            </header>
 
-                    {hasConnectSuccess ? (
-                        <div className="mt-4 rounded-[10px] border border-[#1C9E5B] bg-[#EDFAF3] p-3 text-xs uppercase tracking-[0.08em] text-[#1C9E5B]">
+            {(hasConnectSuccess || hasDisconnected || hasDisconnectError) && (
+                <div className="space-y-3">
+                    {hasConnectSuccess && (
+                        <div className="rounded-[10px] border border-[#1C9E5B] bg-[#EDFAF3] p-3 text-xs uppercase tracking-[0.08em] text-[#1C9E5B]">
                             Account connected.
                         </div>
-                    ) : null}
-
-                    {hasDisconnected ? (
-                        <div className="mt-4 rounded-[10px] border border-[#1C9E5B] bg-[#EDFAF3] p-3 text-xs uppercase tracking-[0.08em] text-[#1C9E5B]">
+                    )}
+                    {hasDisconnected && (
+                        <div className="rounded-[10px] border border-[#1C9E5B] bg-[#EDFAF3] p-3 text-xs uppercase tracking-[0.08em] text-[#1C9E5B]">
                             Account disconnected.
                         </div>
-                    ) : null}
-
-                    {hasDisconnectError ? (
-                        <div className="mt-4 rounded-[10px] border border-[#E53434] bg-[#FEF0F0] p-3 text-xs uppercase tracking-[0.08em] text-[#E53434]">
+                    )}
+                    {hasDisconnectError && (
+                        <div className="rounded-[10px] border border-[#E53434] bg-[#FEF0F0] p-3 text-xs uppercase tracking-[0.08em] text-[#E53434]">
                             Could not disconnect account.
                         </div>
-                    ) : null}
-                </section>
+                    )}
+                </div>
+            )}
 
-                <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
+            <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
                     <section className="rounded-2xl border border-[#E8E7E0] bg-white p-5 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] sm:p-6">
                         <div className="flex items-center justify-between gap-3">
                             <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#A9A79E]">Connected accounts</p>
@@ -201,8 +192,7 @@ const ConnectAccountsPage = async ({ searchParams }: ConnectAccountsPageProps) =
                         </article>
                     </section>
                 </div>
-            </div>
-        </main>
+        </div>
     );
 };
 

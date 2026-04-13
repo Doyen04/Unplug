@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Search } from 'lucide-react';
 
 import { SubscriptionRow } from '../../../components/features/subscriptions/SubscriptionRow';
 import type { DashboardFilter, DashboardPayload } from '../../../types/subscription';
@@ -89,12 +90,15 @@ export default function SubscriptionsPage() {
                     <h1 className="text-3xl font-bold tracking-tight text-[#1A1A17]">Subscriptions</h1>
                     <p className="text-sm text-[#6B6960]">Live subscription data from your connected accounts.</p>
                 </div>
-                <input
-                    value={search}
-                    onChange={(event) => setSearch(event.target.value)}
-                    placeholder="Search subscriptions"
-                    className="w-full rounded-lg border border-[#D0CFC7] bg-white px-3 py-2 text-sm text-[#1A1A17] outline-none sm:w-72"
-                />
+                <div className="flex w-full items-center gap-2 rounded-lg border border-[#D0CFC7] bg-white px-3 py-2 focus-within:border-[#FF5C35] sm:w-72">
+                    <Search size={16} className="text-[#A9A79E]" />
+                    <input
+                        value={search}
+                        onChange={(event) => setSearch(event.target.value)}
+                        placeholder="Search subscriptions"
+                        className="w-full border-none bg-transparent text-sm text-[#1A1A17] outline-none"
+                    />
+                </div>
             </header>
 
             <div className="flex gap-2 overflow-x-auto pb-1">
@@ -107,7 +111,7 @@ export default function SubscriptionsPage() {
                             setPage(1);
                         }}
                         className={`rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.06em] ${item.key === filter
-                                ? 'bg-[#1A1A17] text-white'
+                                ? 'bg-[#FF5C35] text-white'
                                 : 'bg-[#F4F3EE] text-[#6B6960] hover:bg-[#E8E7E0]'
                             }`}
                     >
