@@ -98,18 +98,18 @@ export const ConnectProviderButtons = ({ provider, preferredProvider, accountId,
 
     const plaidButtonClasses = useMemo(
         () =>
-            `${compact ? '' : 'mt-4 w-full'} border px-4 py-2 text-xs uppercase tracking-[0.08em] ${preferredProvider === 'plaid'
-                ? 'border-acid-green bg-acid-green text-stone-950 hover:bg-acid-dim'
-                : 'border-stone-600 text-stone-100 hover:border-stone-400'
+            `${compact ? 'rounded-[10px] px-3 py-1' : 'mt-4 w-full rounded-[10px] px-4 py-2'} border text-xs font-semibold uppercase tracking-[0.08em] ${preferredProvider === 'plaid'
+                ? 'border-[#FF5C35] bg-[#FF5C35] text-white hover:bg-[#C93A1A]'
+                : 'border-[#D0CFC7] bg-white text-[#1A1A17] hover:border-[#1A1A17]'
             }`,
         [compact, preferredProvider]
     );
 
     const monoButtonClasses = useMemo(
         () =>
-            `${compact ? '' : 'mt-4 w-full'} border px-4 py-2 text-xs uppercase tracking-[0.08em] ${preferredProvider === 'mono'
-                ? 'border-acid-green bg-acid-green text-stone-950 hover:bg-acid-dim'
-                : 'border-stone-600 text-stone-100 hover:border-stone-400'
+            `${compact ? 'rounded-[10px] px-3 py-1' : 'mt-4 w-full rounded-[10px] px-4 py-2'} border text-xs font-semibold uppercase tracking-[0.08em] ${preferredProvider === 'mono'
+                ? 'border-[#FF5C35] bg-[#FF5C35] text-white hover:bg-[#C93A1A]'
+                : 'border-[#D0CFC7] bg-white text-[#1A1A17] hover:border-[#1A1A17]'
             }`,
         [compact, preferredProvider]
     );
@@ -195,7 +195,7 @@ export const ConnectProviderButtons = ({ provider, preferredProvider, accountId,
     return (
         <>
             {error ? (
-                <div className="mb-3 border border-red-900 bg-red-950 p-3 text-xs uppercase tracking-[0.08em] text-red-400">
+                <div className="mb-3 rounded-[10px] border border-[#E53434] bg-[#FEF0F0] p-3 text-xs uppercase tracking-[0.08em] text-[#E53434]">
                     {error}
                 </div>
             ) : null}
@@ -205,7 +205,7 @@ export const ConnectProviderButtons = ({ provider, preferredProvider, accountId,
                     type="button"
                     onClick={() => void handlePlaidSetup()}
                     disabled={isPlaidBusy}
-                    className={`${plaidButtonClasses} disabled:opacity-50`}
+                    className={`${plaidButtonClasses} focus-visible:outline-2 focus-visible:outline-[#FF5C35] disabled:opacity-50`}
                 >
                     {isPlaidBusy ? 'Opening Plaid...' : accountId ? 'Reconnect Plaid' : 'Setup Plaid'}
                 </button>
@@ -214,7 +214,7 @@ export const ConnectProviderButtons = ({ provider, preferredProvider, accountId,
                     type="button"
                     onClick={() => void handleMonoSetup()}
                     disabled={isMonoBusy}
-                    className={`${monoButtonClasses} disabled:opacity-50`}
+                    className={`${monoButtonClasses} focus-visible:outline-2 focus-visible:outline-[#FF5C35] disabled:opacity-50`}
                 >
                     {isMonoBusy ? 'Opening Mono...' : 'Setup Mono'}
                 </button>

@@ -82,6 +82,24 @@ const PRICING_PLANS: PricingPlan[] = [
   },
 ];
 
+const FAQ_ITEMS = [
+  {
+    question: 'Is it safe to connect my account?',
+    answer:
+      'Yes. We use secure bank-link providers and only pull the data needed to detect recurring subscriptions and estimate waste.',
+  },
+  {
+    question: 'Will Unplug cancel subscriptions automatically?',
+    answer:
+      'You stay in control. Pro gives guided cancellation links, and Concierge can handle cancellation steps for you with your approval.',
+  },
+  {
+    question: 'Can I start for free?',
+    answer:
+      'Yes. The free plan lets you scan subscriptions and view total monthly spend before choosing any upgrade.',
+  },
+];
+
 const HomePage = async () => {
   const { summary, subscriptions } = await getDashboardPayload({ pageSize: 20 });
 
@@ -95,8 +113,18 @@ const HomePage = async () => {
     : subscriptions.slice(0, 3);
 
   return (
-    <main className={`${jakarta.className} min-h-screen bg-[#FAFAF7] text-[#1A1A17]`}>
-      <div className="mx-auto w-full max-w-6xl px-4 pb-16 pt-6 md:px-6 md:pt-8 lg:px-8 lg:pt-10">
+    <main className={`${jakarta.className} relative min-h-screen bg-[#FAFAF7] text-[#1A1A17]`}>
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0"
+        style={{
+          backgroundImage: [
+            'repeating-linear-gradient(45deg, rgba(26, 26, 23, 0.05) 0px, rgba(26, 26, 23, 0.05) 1px, transparent 1px, transparent 40px)',
+            'repeating-linear-gradient(135deg, rgba(26, 26, 23, 0.05) 0px, rgba(26, 26, 23, 0.05) 1px, transparent 1px, transparent 40px)',
+          ].join(', '),
+        }}
+      />
+      <div className="relative z-1 mx-auto w-full max-w-6xl px-4 pb-16 pt-6 md:px-6 md:pt-8 lg:px-8 lg:pt-10">
         <header className="flex items-center justify-between rounded-2xl border border-[#E8E7E0] bg-white px-4 py-3 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] md:px-6">
           <p className={`${playfair.className} text-3xl tracking-[-0.02em] text-[#1A1A17]`}>Unplug</p>
           <div className="hidden items-center gap-4 text-[11px] font-medium uppercase tracking-[0.08em] text-[#6B6960] md:flex">
@@ -297,6 +325,53 @@ const HomePage = async () => {
             </Link>
           </div>
         </section>
+
+        <section id="faq" className="mt-4 rounded-2xl border border-[#E8E7E0] bg-white p-6 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] sm:p-8">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#A9A79E]">FAQ</p>
+              <h2 className={`${playfair.className} mt-2 text-4xl text-[#1A1A17]`}>Questions before you unplug</h2>
+            </div>
+            <p className="text-xs font-medium uppercase tracking-[0.08em] text-[#A9A79E]">Clear answers, no fluff</p>
+          </div>
+
+          <div className="mt-6 grid gap-3 md:grid-cols-3">
+            {FAQ_ITEMS.map((item) => (
+              <article key={item.question} className="rounded-2xl border border-[#E8E7E0] bg-[#FAFAF7] p-4">
+                <h3 className="text-base font-semibold text-[#1A1A17]">{item.question}</h3>
+                <p className="mt-2 text-sm leading-7 text-[#6B6960]">{item.answer}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <footer className="mt-4 rounded-2xl border border-[#E8E7E0] bg-[#F4F3EE] px-6 py-5 shadow-[0_1px_4px_rgba(0,0,0,0.06)] sm:px-8">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className={`${playfair.className} text-2xl tracking-[-0.02em] text-[#1A1A17]`}>Unplug</p>
+              <p className="mt-1 text-xs uppercase tracking-[0.08em] text-[#6B6960]">Cut subscription waste with confidence</p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#6B6960]">
+              <Link href="/signup" className="hover:text-[#1A1A17] focus-visible:outline-2 focus-visible:outline-[#FF5C35]">
+                Get started
+              </Link>
+              <Link href="/login" className="hover:text-[#1A1A17] focus-visible:outline-2 focus-visible:outline-[#FF5C35]">
+                Log in
+              </Link>
+              <a href="#pricing" className="hover:text-[#1A1A17] focus-visible:outline-2 focus-visible:outline-[#FF5C35]">
+                Pricing
+              </a>
+              <a href="#faq" className="hover:text-[#1A1A17] focus-visible:outline-2 focus-visible:outline-[#FF5C35]">
+                FAQ
+              </a>
+            </div>
+          </div>
+
+          <div className="mt-4 border-t border-[#DCDAD0] pt-4 text-[11px] uppercase tracking-[0.08em] text-[#8A887E]">
+            © {new Date().getFullYear()} Unplug. All rights reserved.
+          </div>
+        </footer>
       </div>
     </main>
   );

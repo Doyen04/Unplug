@@ -59,6 +59,7 @@ interface ForgotPasswordPageProps {
         sent?: string;
         email?: string;
         error?: string;
+        step?: string;
     }>;
 }
 
@@ -72,6 +73,10 @@ const ForgotPasswordPage = async ({ searchParams }: ForgotPasswordPageProps) => 
     const params = (await searchParams) ?? {};
     const sent = params.sent === '1';
     const email = String(params.email ?? '').trim();
+    const requestedStep = params.step === 'reset' ? 'reset' : params.step === 'request' ? 'request' : null;
+    const mobileStep = requestedStep ?? (sent ? 'reset' : 'request');
+    const showRequestOnMobile = mobileStep === 'request';
+    const showResetOnMobile = mobileStep === 'reset';
 
     const hasInvalidEmailError = params.error === 'invalid_email';
     const hasRequestFailedError = params.error === 'request_failed';
@@ -79,11 +84,26 @@ const ForgotPasswordPage = async ({ searchParams }: ForgotPasswordPageProps) => 
     const hasInvalidCodeError = params.error === 'invalid_code';
 
     return (
-        <main className="min-h-screen bg-[#FAFAF7] px-4 py-8 text-[#1A1A17] md:px-6 md:py-10 lg:px-8">
-            <div className="mx-auto grid h-full w-full max-w-6xl items-stretch gap-4 lg:grid-cols-[1.1fr_0.9fr]">
+        <main className="auth-page flex min-h-screen items-center justify-center px-4 py-8 text-[#1A1A17] md:px-6 md:py-10 lg:px-8">
+            <div aria-hidden="true" className="auth-page-pattern" />
+            <div className="auth-content mx-auto grid w-full max-w-6xl items-stretch gap-4 lg:grid-cols-[1.1fr_0.9fr]">
                 {/* Request Reset Code - Left */}
-                <section className="scrollbar-hidden flex max-h-[calc(100vh-4rem)] flex-col overflow-y-auto rounded-2xl border border-[#E8E7E0] bg-white p-6 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] sm:p-8 lg:p-10">
+                <section className={`auth-card scrollbar-hidden ${showRequestOnMobile ? 'flex' : 'hidden'} max-h-[calc(100vh-4rem)] flex-col overflow-y-auto rounded-2xl p-6 sm:p-8 lg:flex lg:p-10`}>
                     <div className="my-auto w-full">
+                        <div className="mb-4 lg:hidden">
+                            <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#A9A79E]">Step 1 of 2</p>
+                            <Link
+                                href={`/forgot-password?${new URLSearchParams({
+                                    ...(email ? { email } : {}),
+                                    ...(sent ? { sent: '1' } : {}),
+                                    step: 'reset',
+                                }).toString()}`}
+                                className="mt-2 inline-block text-xs font-semibold uppercase tracking-[0.08em] text-[#E8482C] hover:text-[#D43D23] focus-visible:outline-2 focus-visible:outline-[#E8482C]"
+                            >
+                                Already have a code? Enter it
+                            </Link>
+                        </div>
+
                         <Link
                             href="/"
                             className="inline-block focus-visible:outline-2 focus-visible:outline-[#FF5C35]"
@@ -127,7 +147,7 @@ const ForgotPasswordPage = async ({ searchParams }: ForgotPasswordPageProps) => 
                                     type="email"
                                     defaultValue={email}
                                     required
-                                    className="mt-2 w-full rounded-[10px] border border-[#D0CFC7] bg-[#FAFAF7] px-4 py-3 text-sm text-[#1A1A17] placeholder-[#A9A79E] outline-none transition-colors focus:border-[#FF5C35] focus:bg-white focus-visible:outline-2 focus-visible:outline-[#FF5C35]"
+                                    className="auth-input mt-2 w-full rounded-[10px] border bg-[#FAFAF7] px-4 py-3 text-sm text-[#1A1A17] placeholder-[#A9A79E] outline-none transition-colors focus:bg-white"
                                     placeholder="you@example.com"
                                 />
                             </div>
@@ -135,15 +155,28 @@ const ForgotPasswordPage = async ({ searchParams }: ForgotPasswordPageProps) => 
                             <FormSubmitButton
                                 idleLabel="Send reset code"
                                 pendingLabel="Sending..."
-                                className="w-full rounded-[10px] border border-[#FF5C35] bg-[#FF5C35] px-4 py-3 text-xs font-semibold uppercase tracking-[0.08em] text-white transition-all hover:bg-[#C93A1A] focus-visible:outline-2 focus-visible:outline-[#FF5C35] disabled:cursor-not-allowed disabled:opacity-60"
+                                className="auth-btn-primary w-full rounded-[10px] border px-4 py-3 text-xs font-semibold uppercase tracking-[0.08em] text-white focus-visible:outline-2 focus-visible:outline-[#E8482C] disabled:cursor-not-allowed disabled:opacity-60"
                             />
                         </form>
                     </div>
                 </section>
 
                 {/* Use Reset Code - Right */}
-                <section className="scrollbar-hidden flex max-h-[calc(100vh-4rem)] flex-col overflow-y-auto rounded-2xl border border-[#E8E7E0] bg-white p-6 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] sm:p-8">
+                <section className={`auth-card scrollbar-hidden ${showResetOnMobile ? 'flex' : 'hidden'} max-h-[calc(100vh-4rem)] flex-col overflow-y-auto rounded-2xl p-6 sm:p-8 lg:flex`}>
                     <div className="my-auto w-full">
+                        <div className="mb-4 lg:hidden">
+                            <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#A9A79E]">Step 2 of 2</p>
+                            <Link
+                                href={`/forgot-password?${new URLSearchParams({
+                                    ...(email ? { email } : {}),
+                                    step: 'request',
+                                }).toString()}`}
+                                className="mt-2 inline-block text-xs font-semibold uppercase tracking-[0.08em] text-[#6B6960] hover:text-[#1A1A17] focus-visible:outline-2 focus-visible:outline-[#E8482C]"
+                            >
+                                Need a new code? Go back
+                            </Link>
+                        </div>
+
                         <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#A9A79E]">Use code</p>
 
                         {hasInvalidResetInputError ? (
@@ -169,7 +202,7 @@ const ForgotPasswordPage = async ({ searchParams }: ForgotPasswordPageProps) => 
                                     type="email"
                                     defaultValue={email}
                                     required
-                                    className="mt-2 w-full rounded-[10px] border border-[#D0CFC7] bg-[#FAFAF7] px-4 py-3 text-sm text-[#1A1A17] placeholder-[#A9A79E] outline-none transition-colors focus:border-[#FF5C35] focus:bg-white focus-visible:outline-2 focus-visible:outline-[#FF5C35]"
+                                    className="auth-input mt-2 w-full rounded-[10px] border bg-[#FAFAF7] px-4 py-3 text-sm text-[#1A1A17] placeholder-[#A9A79E] outline-none transition-colors focus:bg-white"
                                     placeholder="you@example.com"
                                 />
                             </div>
@@ -187,7 +220,7 @@ const ForgotPasswordPage = async ({ searchParams }: ForgotPasswordPageProps) => 
                                     minLength={6}
                                     maxLength={6}
                                     required
-                                    className="mt-2 w-full rounded-[10px] border border-[#D0CFC7] bg-[#FAFAF7] px-4 py-3 text-sm tracking-[0.35em] text-[#1A1A17] placeholder-[#A9A79E] outline-none transition-colors focus:border-[#FF5C35] focus:bg-white focus-visible:outline-2 focus-visible:outline-[#FF5C35]"
+                                    className="auth-input mt-2 w-full rounded-[10px] border bg-[#FAFAF7] px-4 py-3 text-sm tracking-[0.35em] text-[#1A1A17] placeholder-[#A9A79E] outline-none transition-colors focus:bg-white"
                                     placeholder="123456"
                                 />
                             </div>
@@ -202,7 +235,7 @@ const ForgotPasswordPage = async ({ searchParams }: ForgotPasswordPageProps) => 
                                     type="password"
                                     minLength={8}
                                     required
-                                    className="mt-2 w-full rounded-[10px] border border-[#D0CFC7] bg-[#FAFAF7] px-4 py-3 text-sm text-[#1A1A17] placeholder-[#A9A79E] outline-none transition-colors focus:border-[#FF5C35] focus:bg-white focus-visible:outline-2 focus-visible:outline-[#FF5C35]"
+                                    className="auth-input mt-2 w-full rounded-[10px] border bg-[#FAFAF7] px-4 py-3 text-sm text-[#1A1A17] placeholder-[#A9A79E] outline-none transition-colors focus:bg-white"
                                     placeholder="At least 8 characters"
                                 />
                             </div>
@@ -210,13 +243,13 @@ const ForgotPasswordPage = async ({ searchParams }: ForgotPasswordPageProps) => 
                             <FormSubmitButton
                                 idleLabel="Reset password"
                                 pendingLabel="Resetting..."
-                                className="w-full rounded-[10px] border border-[#FF5C35] bg-[#FF5C35] px-4 py-3 text-xs font-semibold uppercase tracking-[0.08em] text-white transition-all hover:bg-[#C93A1A] focus-visible:outline-2 focus-visible:outline-[#FF5C35] disabled:cursor-not-allowed disabled:opacity-60"
+                                className="auth-btn-primary w-full rounded-[10px] border px-4 py-3 text-xs font-semibold uppercase tracking-[0.08em] text-white focus-visible:outline-2 focus-visible:outline-[#E8482C] disabled:cursor-not-allowed disabled:opacity-60"
                             />
                         </form>
 
                         <p className="mt-6 text-center text-xs uppercase tracking-[0.06em] text-[#6B6960]">
                             Remembered your password?{' '}
-                            <Link href="/login" className="font-semibold text-[#FF5C35] hover:text-[#C93A1A] focus-visible:outline-2 focus-visible:outline-[#FF5C35]">
+                            <Link href="/login" className="font-semibold text-[#E8482C] hover:text-[#D43D23] focus-visible:outline-2 focus-visible:outline-[#E8482C]">
                                 Back to login
                             </Link>
                         </p>
