@@ -55,6 +55,7 @@ export default function DashboardPage() {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [isAlertsOpen, setIsAlertsOpen] = useState(false);
+  const [ledgerTab, setLedgerTab] = useState<'subscriptions' | 'transactions'>('subscriptions');
 
   const initialFilter = (searchParams.get('filter') as DashboardFilter | null) ?? 'all';
   const initialPage = Number(searchParams.get('page') ?? '1') || 1;
@@ -283,46 +284,7 @@ export default function DashboardPage() {
         </article>
       </section>
 
-      {/* ROW 3: RECENT TRANSACTIONS */}
-      <section className="group flex flex-col rounded-2xl border border-[#E8E7E0] bg-white shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_4px_24px_rgba(0,0,0,0.08)] hover:border-[#D0CFC7]">
-        <div className="flex items-center justify-between p-6 border-b border-[#E8E7E0]/60">
-          <div className="flex items-center gap-3">
-            <h2 className="text-base font-bold text-[#1A1A17]">Recent Transactions</h2>
-          </div>
-          <Link href="/dashboard/transactions" className="text-xs font-bold uppercase tracking-[0.08em] text-[#FF5C35] hover:text-[#C93A1A] transition-colors">View all &rarr;</Link>
-        </div>
-
-        <div className="divide-y divide-[#E8E7E0]/60">
-          {isTransactionsLoading ? (
-            <div className="px-6 py-4 text-sm text-[#6B6960]">Loading transactions...</div>
-          ) : recentTransactions.length === 0 ? (
-            <div className="px-6 py-4 text-sm text-[#6B6960]">No live transactions found. Connect an account to populate this list.</div>
-          ) : recentTransactions.map((tx) => (
-            <div key={tx.transaction_id} className="flex items-center justify-between px-6 py-4 hover:bg-[#FAFAF7] transition-colors last:rounded-b-2xl">
-              <div className="flex items-center gap-4">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#1A1A17] text-white font-bold text-sm shadow-inner">
-                  {(tx.merchant_name ?? tx.name).charAt(0)}
-                </div>
-                <div>
-                  <p className="text-sm font-bold text-[#1A1A17]">{tx.merchant_name ?? tx.name}</p>
-                  <p className="text-xs text-[#6B6960] mt-1">{new Date(tx.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
-                </div>
-              </div>
-              <div className="text-right">
-                <p className="text-sm font-bold text-[#1A1A17]">{formatCurrency(tx.amount)}</p>
-                <span className={`inline-block rounded-md px-2 py-0.5 mt-1.5 text-[10px] font-bold uppercase tracking-[0.08em] ${tx.amount > 0
-                    ? 'bg-[#FEF6EC] text-[#E8860A] border border-[#E8860A]/20'
-                    : 'bg-[#EDFAF3] text-[#1C9E5B] border border-[#1C9E5B]/20'
-                  }`}>
-                  {tx.amount > 0 ? 'Outflow' : 'Inflow'}
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ROW 4: BANNER (If no accounts linked) */}
+      {/* ROW 3: BANNER (If no accounts linked) */}
       {summary.linkedAccounts === 0 && !isLoading && (
         <section className="flex flex-col gap-5 rounded-2xl border border-[#E8E7E0] bg-[#1A1A17] p-6 text-white sm:flex-row sm:items-center sm:justify-between shadow-[0_8px_32px_rgba(26,26,23,0.12)] transition-all hover:shadow-[0_8px_32px_rgba(26,26,23,0.2)]">
           <div className="flex items-center gap-5">
@@ -340,68 +302,125 @@ export default function DashboardPage() {
         </section>
       )}
 
-      {/* ROW 4: SUBSCRIPTION LIST */}
+      {/* ROW 4: SUBSCRIPTIONS + TRANSACTIONS (TABBED) */}
       <section id="subscriptions" className="group rounded-2xl border border-[#E8E7E0] bg-white shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] transition-all duration-300 hover:shadow-[0_4px_24px_rgba(0,0,0,0.06)] hover:border-[#D0CFC7]">
         <div className="flex flex-col justify-between border-b border-[#E8E7E0] p-6 sm:flex-row sm:items-center">
-          <h2 className="text-base font-bold text-[#1A1A17]">Your Subscriptions</h2>
-          <div className="mt-4 flex w-full max-w-sm items-center gap-2 rounded-[10px] border border-[#D0CFC7] bg-[#FAFAF7] px-3 py-2 sm:mt-0 focus-within:border-[#1A1A17] focus-within:bg-white transition-colors">
-            <Search size={16} className="text-[#A9A79E]" />
-            <input
-              type="text"
-              placeholder="Search subscriptions..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full border-none bg-transparent text-sm text-[#1A1A17] outline-none placeholder:text-[#A9A79E]"
-            />
+          <div className="flex items-center gap-2 rounded-full bg-[#F4F3EE] p-1">
+            <button
+              type="button"
+              onClick={() => setLedgerTab('subscriptions')}
+              className={`rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.06em] transition-colors ${ledgerTab === 'subscriptions' ? 'bg-[#1A1A17] text-white' : 'text-[#6B6960] hover:text-[#1A1A17]'}`}
+            >
+              Your Subscriptions
+            </button>
+            <button
+              type="button"
+              onClick={() => setLedgerTab('transactions')}
+              className={`rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.06em] transition-colors ${ledgerTab === 'transactions' ? 'bg-[#1A1A17] text-white' : 'text-[#6B6960] hover:text-[#1A1A17]'}`}
+            >
+              Recent Transactions
+            </button>
           </div>
+
+          {ledgerTab === 'subscriptions' ? (
+            <div className="mt-4 flex w-full max-w-sm items-center gap-2 rounded-[10px] border border-[#D0CFC7] bg-[#FAFAF7] px-3 py-2 sm:mt-0 focus-within:border-[#1A1A17] focus-within:bg-white transition-colors">
+              <Search size={16} className="text-[#A9A79E]" />
+              <input
+                type="text"
+                placeholder="Search subscriptions..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full border-none bg-transparent text-sm text-[#1A1A17] outline-none placeholder:text-[#A9A79E]"
+              />
+            </div>
+          ) : (
+            <Link href="/dashboard/transactions" className="mt-4 text-xs font-bold uppercase tracking-[0.08em] text-[#FF5C35] hover:text-[#C93A1A] sm:mt-0">View all &rarr;</Link>
+          )}
         </div>
 
-        <div className="flex gap-4 overflow-x-auto border-b border-[#E8E7E0] px-5 py-3">
-          {FILTERS.map((f) => (
-            <button
-              key={f.key}
-              onClick={() => setFilter(f.key)}
-              className={`shrink-0 rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.05em] transition-colors ${filter === f.key
-                ? 'bg-[#1A1A17] text-white'
-                : 'bg-[#F4F3EE] text-[#6B6960] hover:bg-[#E8E7E0] hover:text-[#1A1A17]'
-                }`}
-            >
-              {f.label}
-            </button>
-          ))}
-        </div>
+        {ledgerTab === 'subscriptions' ? (
+          <div className="flex gap-4 overflow-x-auto border-b border-[#E8E7E0] px-5 py-3">
+            {FILTERS.map((f) => (
+              <button
+                key={f.key}
+                onClick={() => setFilter(f.key)}
+                className={`shrink-0 rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.05em] transition-colors ${filter === f.key
+                  ? 'bg-[#1A1A17] text-white'
+                  : 'bg-[#F4F3EE] text-[#6B6960] hover:bg-[#E8E7E0] hover:text-[#1A1A17]'
+                  }`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+        ) : null}
 
         <div className="p-5 overflow-hidden">
-          <div className="flex flex-col gap-3">
-            {isLoading ? (
-              <div className="text-sm text-[#6B6960] py-4">Scanning transactions...</div>
-            ) : subscriptions.length === 0 ? (
-              <div className="text-sm text-[#6B6960] py-4">No subscriptions matched this filter.</div>
-            ) : (
-              subscriptions.map((subscription, index) => (
-                <SubscriptionRow
-                  key={subscription.id}
-                  subscription={subscription}
-                  onCancel={cancelSubscription}
-                  index={index}
-                />
-              ))
-            )}
-          </div>
-
-          {!isLoading && subscriptions.length > 0 && (
-            <div className="mt-4 flex items-center justify-between pt-4 border-t border-[#E8E7E0]">
-              <span className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#A9A79E]">
-                Page {page} / {pageCount} · {totalSubscriptions} total
-              </span>
-              <div className="flex gap-2">
-                <button type="button" onClick={() => setPage(page - 1)} disabled={page <= 1} className="rounded-lg border border-[#D0CFC7] px-3 py-1.5 text-xs font-medium text-[#1A1A17] hover:bg-[#F4F3EE] disabled:opacity-40 transition-colors">
-                  Prev
-                </button>
-                <button type="button" onClick={() => setPage(page + 1)} disabled={page >= pageCount} className="rounded-lg border border-[#D0CFC7] px-3 py-1.5 text-xs font-medium text-[#1A1A17] hover:bg-[#F4F3EE] disabled:opacity-40 transition-colors">
-                  Next
-                </button>
+          {ledgerTab === 'subscriptions' ? (
+            <>
+              <div className="flex flex-col gap-3">
+                {isLoading ? (
+                  <div className="text-sm text-[#6B6960] py-4">Scanning transactions...</div>
+                ) : subscriptions.filter((subscription) => subscription.serviceName.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 ? (
+                  <div className="text-sm text-[#6B6960] py-4">No subscriptions matched this filter.</div>
+                ) : (
+                  subscriptions
+                    .filter((subscription) => subscription.serviceName.toLowerCase().includes(searchQuery.toLowerCase()))
+                    .map((subscription, index) => (
+                      <SubscriptionRow
+                        key={subscription.id}
+                        subscription={subscription}
+                        onCancel={cancelSubscription}
+                        index={index}
+                      />
+                    ))
+                )}
               </div>
+
+              {!isLoading && subscriptions.length > 0 && (
+                <div className="mt-4 flex items-center justify-between pt-4 border-t border-[#E8E7E0]">
+                  <span className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#A9A79E]">
+                    Page {page} / {pageCount} · {totalSubscriptions} total
+                  </span>
+                  <div className="flex gap-2">
+                    <button type="button" onClick={() => setPage(page - 1)} disabled={page <= 1} className="rounded-lg border border-[#D0CFC7] px-3 py-1.5 text-xs font-medium text-[#1A1A17] hover:bg-[#F4F3EE] disabled:opacity-40 transition-colors">
+                      Prev
+                    </button>
+                    <button type="button" onClick={() => setPage(page + 1)} disabled={page >= pageCount} className="rounded-lg border border-[#D0CFC7] px-3 py-1.5 text-xs font-medium text-[#1A1A17] hover:bg-[#F4F3EE] disabled:opacity-40 transition-colors">
+                      Next
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="divide-y divide-[#E8E7E0]/60">
+              {isTransactionsLoading ? (
+                <div className="py-4 text-sm text-[#6B6960]">Loading transactions...</div>
+              ) : recentTransactions.length === 0 ? (
+                <div className="py-4 text-sm text-[#6B6960]">No live transactions found. Connect an account to populate this list.</div>
+              ) : recentTransactions.map((tx) => (
+                <div key={tx.transaction_id} className="flex items-center justify-between py-4 hover:bg-[#FAFAF7] transition-colors">
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#1A1A17] text-white font-bold text-sm shadow-inner">
+                      {(tx.merchant_name ?? tx.name).charAt(0)}
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-[#1A1A17]">{tx.merchant_name ?? tx.name}</p>
+                      <p className="text-xs text-[#6B6960] mt-1">{new Date(tx.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-bold text-[#1A1A17]">{formatCurrency(tx.amount)}</p>
+                    <span className={`inline-block rounded-md px-2 py-0.5 mt-1.5 text-[10px] font-bold uppercase tracking-[0.08em] ${tx.amount > 0
+                        ? 'bg-[#FEF6EC] text-[#E8860A] border border-[#E8860A]/20'
+                        : 'bg-[#EDFAF3] text-[#1C9E5B] border border-[#1C9E5B]/20'
+                      }`}>
+                      {tx.amount > 0 ? 'Outflow' : 'Inflow'}
+                    </span>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </div>
