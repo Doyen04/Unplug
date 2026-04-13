@@ -77,75 +77,77 @@ const LoginPage = async ({ searchParams }: LoginPageProps) => {
                     </Link>
                 </section>
 
-                <section className="scrollbar-hidden max-h-[calc(100vh-4rem)] overflow-y-auto rounded-2xl border border-[#E8E7E0] bg-white p-6 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] sm:p-8">
-                    <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#A9A79E]">Account Access</p>
+                <section className="scrollbar-hidden flex max-h-[calc(100vh-4rem)] flex-col overflow-y-auto rounded-2xl border border-[#E8E7E0] bg-white p-6 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] sm:p-8">
+                    <div className="my-auto w-full">
+                        <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#A9A79E]">Account Access</p>
 
-                    {hasInvalidCredentials ? (
-                        <div
-                            className="mt-4 rounded-[10px] border border-[#E53434] bg-[#FEF0F0] p-3 text-xs uppercase tracking-[0.08em] text-[#E53434]"
-                            role="status"
-                            aria-live="polite"
-                        >
-                            Invalid email or password.
-                        </div>
-                    ) : null}
-
-                    {hasPasswordResetSuccess ? (
-                        <div
-                            className="mt-4 rounded-[10px] border border-[#1C9E5B] bg-[#EDFAF3] p-3 text-xs uppercase tracking-[0.08em] text-[#1C9E5B]"
-                            role="status"
-                            aria-live="polite"
-                        >
-                            Password reset successful. Log in with your new password.
-                        </div>
-                    ) : null}
-
-                    <form className="mt-5 space-y-4" action={loginAction}>
-                        <div>
-                            <label htmlFor="email" className="text-xs uppercase tracking-[0.08em] text-stone-500">
-                                Email
-                            </label>
-                            <input
-                                id="email"
-                                name="email"
-                                type="email"
-                                required
-                                className="mt-2 w-full rounded-[10px] border border-[#D0CFC7] bg-[#FAFAF7] px-3 py-2 text-sm text-[#1A1A17] outline-none transition-colors focus:border-[#FF5C35] focus-visible:outline-2 focus-visible:outline-[#FF5C35]"
-                                placeholder="you@example.com"
-                            />
-                        </div>
-
-                        <div>
-                            <label
-                                htmlFor="password"
-                                className="text-xs uppercase tracking-[0.08em] text-stone-500"
+                        {hasInvalidCredentials ? (
+                            <div
+                                className="mt-4 rounded-[10px] border border-[#E53434] bg-[#FEF0F0] p-4 text-xs font-medium uppercase tracking-[0.08em] text-[#E53434]"
+                                role="status"
+                                aria-live="polite"
                             >
-                                Password
-                            </label>
-                            <input
-                                id="password"
-                                name="password"
-                                type="password"
-                                required
-                                className="mt-2 w-full rounded-[10px] border border-[#D0CFC7] bg-[#FAFAF7] px-3 py-2 text-sm text-[#1A1A17] outline-none transition-colors focus:border-[#FF5C35] focus-visible:outline-2 focus-visible:outline-[#FF5C35]"
-                                placeholder="••••••••"
+                                Invalid email or password.
+                            </div>
+                        ) : null}
+
+                        {hasPasswordResetSuccess ? (
+                            <div
+                                className="mt-4 rounded-[10px] border border-[#1C9E5B] bg-[#EDFAF3] p-4 text-xs font-medium uppercase tracking-[0.08em] text-[#1C9E5B]"
+                                role="status"
+                                aria-live="polite"
+                            >
+                                Password reset successful. Log in with your new password.
+                            </div>
+                        ) : null}
+
+                        <form className="mt-6 space-y-5" action={loginAction}>
+                            <div>
+                                <label htmlFor="email" className="text-xs font-medium uppercase tracking-[0.08em] text-[#A9A79E]">
+                                    Email
+                                </label>
+                                <input
+                                    id="email"
+                                    name="email"
+                                    type="email"
+                                    required
+                                    className="mt-2 w-full rounded-[10px] border border-[#D0CFC7] bg-[#FAFAF7] px-4 py-3 text-sm text-[#1A1A17] placeholder-[#A9A79E] outline-none transition-colors focus:border-[#FF5C35] focus:bg-white focus-visible:outline-2 focus-visible:outline-[#FF5C35]"
+                                    placeholder="you@example.com"
+                                />
+                            </div>
+
+                            <div>
+                                <label
+                                    htmlFor="password"
+                                    className="text-xs font-medium uppercase tracking-[0.08em] text-[#A9A79E]"
+                                >
+                                    Password
+                                </label>
+                                <input
+                                    id="password"
+                                    name="password"
+                                    type="password"
+                                    required
+                                    className="mt-2 w-full rounded-[10px] border border-[#D0CFC7] bg-[#FAFAF7] px-4 py-3 text-sm text-[#1A1A17] placeholder-[#A9A79E] outline-none transition-colors focus:border-[#FF5C35] focus:bg-white focus-visible:outline-2 focus-visible:outline-[#FF5C35]"
+                                    placeholder="••••••••"
+                                />
+                            </div>
+
+                            <FormSubmitButton
+                                idleLabel="Log in"
+                                pendingLabel="Logging in..."
+                                className="w-full rounded-[10px] border border-[#FF5C35] bg-[#FF5C35] px-4 py-3 text-xs font-semibold uppercase tracking-[0.08em] text-white transition-all hover:bg-[#C93A1A] focus-visible:outline-2 focus-visible:outline-[#FF5C35] disabled:cursor-not-allowed disabled:opacity-60"
                             />
+                        </form>
+
+                        <div className="mt-6 flex items-center justify-between text-xs uppercase tracking-[0.06em] text-[#6B6960]">
+                            <Link href="/signup" className="font-semibold text-[#FF5C35] hover:text-[#C93A1A] focus-visible:outline-2 focus-visible:outline-[#FF5C35]">
+                                Create account
+                            </Link>
+                            <Link href="/forgot-password" className="hover:text-[#1A1A17] focus-visible:outline-2 focus-visible:outline-[#FF5C35]">
+                                Forgot password
+                            </Link>
                         </div>
-
-                        <FormSubmitButton
-                            idleLabel="Log in"
-                            pendingLabel="Logging in..."
-                            className="w-full rounded-[10px] border border-[#FF5C35] bg-[#FF5C35] px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-white transition-colors hover:bg-[#C93A1A] focus-visible:outline-2 focus-visible:outline-[#FF5C35] disabled:cursor-not-allowed disabled:opacity-60"
-                        />
-                    </form>
-
-                    <div className="mt-4 flex items-center justify-between text-xs uppercase tracking-[0.06em] text-[#6B6960]">
-                        <Link href="/signup" className="hover:text-[#FF5C35] focus-visible:outline-2 focus-visible:outline-[#FF5C35]">
-                            Create account
-                        </Link>
-                        <Link href="/forgot-password" className="hover:text-[#1A1A17] focus-visible:outline-2 focus-visible:outline-[#FF5C35]">
-                            Forgot password
-                        </Link>
                     </div>
                 </section>
             </div>
