@@ -8,6 +8,13 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 import { formatCurrency } from '../../lib/utils/format';
+
+const getInitials = (name: string): string => {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return '?';
+  if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+  return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+};
 import { useDashboardData } from '../../hooks/useDashboardData';
 import { interpolateScoreColor } from '../../lib/utils/shameScore';
 import type { DashboardFilter } from '../../types/subscription';
@@ -56,6 +63,22 @@ export default function DashboardPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isAlertsOpen, setIsAlertsOpen] = useState(false);
   const [ledgerTab, setLedgerTab] = useState<'subscriptions' | 'transactions'>('subscriptions');
+  const [userInitials, setUserInitials] = useState('?');
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const response = await fetch('/api/user');
+        if (response.ok) {
+          const data = await response.json();
+          setUserInitials(getInitials(data.name));
+        }
+      } catch {
+        // Silently fail, default initials will be used
+      }
+    };
+    fetchUser();
+  }, []);
 
   const initialFilter = (searchParams.get('filter') as DashboardFilter | null) ?? 'all';
   const initialPage = Number(searchParams.get('page') ?? '1') || 1;
@@ -144,7 +167,7 @@ export default function DashboardPage() {
             </button>
           </div>
           <div className="h-10 w-10 overflow-hidden rounded-full border border-[#D0CFC7]">
-            <div className="flex h-full w-full items-center justify-center bg-[#1A1A17] text-white font-medium text-sm">JD</div>
+            <div className="flex h-full w-full items-center justify-center bg-[#1A1A17] text-white font-medium text-sm">{userInitials}</div>
           </div>
         </div>
       </header>
@@ -215,8 +238,8 @@ export default function DashboardPage() {
       </section>
 
       {/* ROW 2: CHART + SECONDARY INSIGHT CARDS */}
-      <section className="grid grid-cols-1 gap-5 lg:grid-cols-4">
-        <article className="col-span-1 min-w-0 lg:col-span-2 group flex flex-col justify-between rounded-2xl border border-[#E8E7E0] bg-white p-6 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] lg:row-span-1 transition-all duration-300 hover:shadow-[0_4px_24px_rgba(0,0,0,0.08)] hover:border-[#D0CFC7]">
+      <section className="grid grid-cols-1 gap-5 lg:grid-cols-3">
+        <article className="col-span-1 min-w-0 lg:col-span-2 group flex h-full flex-col justify-between rounded-2xl border border-[#E8E7E0] bg-white p-5 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] transition-all duration-300 hover:shadow-[0_4px_24px_rgba(0,0,0,0.08)] hover:border-[#D0CFC7]">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#FAFAF7] text-[#1A1A17] ring-1 ring-[#E8E7E0] transition-colors group-hover:bg-[#1A1A17] group-hover:text-white">
@@ -226,8 +249,8 @@ export default function DashboardPage() {
             </div>
             <p className="font-display text-2xl font-semibold text-[#1A1A17]">{formatCurrency(summary.monthlySpend)}</p>
           </div>
-          <div className="mt-8 flex flex-col flex-1 pb-2">
-            <div className="h-40 min-h-[160px] w-full min-w-0 lg:h-64 group-hover:opacity-100 transition-opacity">
+          <div className="mt-6 flex flex-1 flex-col">
+            <div className="h-full min-h-40 w-full min-w-0 group-hover:opacity-100 transition-opacity">
               <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={160}>
                 <BarChart data={MOCK_CHART_DATA} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
                   <XAxis
@@ -254,34 +277,36 @@ export default function DashboardPage() {
           </div>
         </article>
 
-        <article className="group flex flex-col justify-between rounded-2xl border border-[#E8E7E0] bg-white p-6 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] transition-all duration-300 hover:shadow-[0_4px_24px_rgba(0,0,0,0.08)] hover:border-[#D0CFC7]">
-          <div>
-            <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#FAFAF7] text-[#1A1A17] ring-1 ring-[#E8E7E0] transition-colors group-hover:bg-[#1A1A17] group-hover:text-white">
-                <AlertTriangle size={16} />
+        <div className="col-span-1 grid h-full gap-3 lg:grid-rows-2">
+          <article className="group flex h-full flex-col justify-between rounded-2xl border border-[#E8E7E0] bg-white p-4 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] transition-all duration-300 hover:shadow-[0_4px_24px_rgba(0,0,0,0.08)] hover:border-[#D0CFC7]">
+            <div>
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#FAFAF7] text-[#1A1A17] ring-1 ring-[#E8E7E0] transition-colors group-hover:bg-[#1A1A17] group-hover:text-white">
+                  <AlertTriangle size={16} />
+                </div>
+                <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[#6B6960]">Unused</p>
               </div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[#6B6960]">Unused</p>
+              <p className="mt-4 font-display text-5xl font-semibold leading-none text-[#1A1A17]">{summary.unusedCount}</p>
+              <p className="mt-2 text-sm text-[#6B6960] max-w-xs">subscriptions you haven't used proactively in 30+ days.</p>
             </div>
-            <p className="mt-5 font-display text-5xl font-semibold leading-none text-[#1A1A17]">{summary.unusedCount}</p>
-            <p className="mt-3 text-sm text-[#6B6960] max-w-xs">subscriptions you haven't used proactively in 30+ days.</p>
-          </div>
-          <Link href="#subscriptions" onClick={() => setFilter('unused')} className="mt-6 flex w-max items-center font-bold text-[#FF5C35] text-xs uppercase tracking-[0.08em] hover:text-[#C93A1A] bg-transparent hover:bg-[#FEF6EC] px-3 py-1.5 -ml-3 rounded-lg transition-colors">
-            Review unused <ArrowRight size={14} className="ml-1.5 transition-transform group-hover:translate-x-1" />
-          </Link>
-        </article>
+            <Link href="#subscriptions" onClick={() => setFilter('unused')} className="mt-4 flex w-max items-center font-bold text-[#FF5C35] text-xs uppercase tracking-[0.08em] hover:text-[#C93A1A] bg-transparent hover:bg-[#FEF6EC] px-3 py-1.5 -ml-3 rounded-lg transition-colors">
+              Review unused <ArrowRight size={14} className="ml-1.5 transition-transform group-hover:translate-x-1" />
+            </Link>
+          </article>
 
-        <article className="group flex flex-col justify-between rounded-2xl border border-[#FFE8E2] bg-linear-to-br from-[#FEF0F0] to-[#FFFFFF] p-6 shadow-[0_1px_4px_rgba(229,52,52,0.04),0_4px_16px_rgba(229,52,52,0.04)] transition-all duration-300 hover:shadow-[0_4px_24px_rgba(229,52,52,0.08)] hover:border-[#FCA5A5]">
-          <div>
-            <div className="flex items-center gap-2 text-[#E53434]">
-              <p className="text-[11px] font-bold uppercase tracking-[0.08em]">You could save</p>
+          <article className="group flex h-full flex-col justify-between rounded-2xl border border-[#FFE8E2] bg-linear-to-br from-[#FEF0F0] to-[#FFFFFF] p-4 shadow-[0_1px_4px_rgba(229,52,52,0.04),0_4px_16px_rgba(229,52,52,0.04)] transition-all duration-300 hover:shadow-[0_4px_24px_rgba(229,52,52,0.08)] hover:border-[#FCA5A5]">
+            <div>
+              <div className="flex items-center gap-2 text-[#E53434]">
+                <p className="text-[11px] font-bold uppercase tracking-[0.08em]">You could save</p>
+              </div>
+              <p className="mt-4 font-display text-4xl font-bold text-[#E53434]">{formatCurrency(summary.saveablePerYear)}</p>
+              <p className="mt-1.5 text-xs text-[#E53434]/80 font-medium">by cutting unused subs</p>
             </div>
-            <p className="mt-5 font-display text-4xl font-bold text-[#E53434]">{formatCurrency(summary.saveablePerYear)}</p>
-            <p className="text-xs text-[#E53434]/80 mt-2 font-medium">by cutting unused subs</p>
-          </div>
-          <button onClick={() => setFilter('unused')} className="mt-6 rounded-xl border border-[#E53434] bg-white px-4 py-2.5 text-xs font-bold uppercase tracking-[0.08em] text-[#E53434] hover:bg-[#E53434] hover:text-white focus:ring-2 focus:ring-offset-2 focus:ring-[#E53434] transition-all shadow-sm hover:shadow-md">
-            See what to cut
-          </button>
-        </article>
+            <button onClick={() => setFilter('unused')} className="mt-4 rounded-xl border border-[#E53434] bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.08em] text-[#E53434] hover:bg-[#E53434] hover:text-white focus:ring-2 focus:ring-offset-2 focus:ring-[#E53434] transition-all shadow-sm hover:shadow-md">
+              See what to cut
+            </button>
+          </article>
+        </div>
       </section>
 
       {/* ROW 3: BANNER (If no accounts linked) */}

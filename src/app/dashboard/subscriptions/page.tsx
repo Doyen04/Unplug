@@ -111,8 +111,8 @@ export default function SubscriptionsPage() {
                             setPage(1);
                         }}
                         className={`rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.06em] ${item.key === filter
-                                ? 'bg-[#FF5C35] text-white'
-                                : 'bg-[#F4F3EE] text-[#6B6960] hover:bg-[#E8E7E0]'
+                            ? 'bg-[#FF5C35] text-white'
+                            : 'bg-[#F4F3EE] text-[#6B6960] hover:bg-[#E8E7E0]'
                             }`}
                     >
                         {item.label}

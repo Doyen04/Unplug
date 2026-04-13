@@ -76,8 +76,8 @@ export default function TransactionsPage() {
                                 setPage(1);
                             }}
                             className={`rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.06em] ${days === window
-                                    ? 'bg-[#FF5C35] text-white'
-                                    : 'bg-[#F4F3EE] text-[#6B6960] hover:bg-[#E8E7E0]'
+                                ? 'bg-[#FF5C35] text-white'
+                                : 'bg-[#F4F3EE] text-[#6B6960] hover:bg-[#E8E7E0]'
                                 }`}
                         >
                             {window}d
@@ -134,8 +134,8 @@ export default function TransactionsPage() {
                                         {formatCurrency(Math.abs(transaction.amount))}
                                     </p>
                                     <span className={`mt-1 inline-block rounded-md border px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.08em] ${transaction.amount > 0
-                                            ? 'border-[#E8860A]/20 bg-[#FEF6EC] text-[#E8860A]'
-                                            : 'border-[#1C9E5B]/20 bg-[#EDFAF3] text-[#1C9E5B]'
+                                        ? 'border-[#E8860A]/20 bg-[#FEF6EC] text-[#E8860A]'
+                                        : 'border-[#1C9E5B]/20 bg-[#EDFAF3] text-[#1C9E5B]'
                                         }`}>
                                         {transaction.amount > 0 ? 'Outflow' : 'Inflow'}
                                     </span>

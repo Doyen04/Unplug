@@ -106,92 +106,92 @@ const ConnectAccountsPage = async ({ searchParams }: ConnectAccountsPageProps) =
             )}
 
             <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
-                    <section className="rounded-2xl border border-[#E8E7E0] bg-white p-5 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] sm:p-6">
-                        <div className="flex items-center justify-between gap-3">
-                            <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#A9A79E]">Connected accounts</p>
-                            <p className="text-xs uppercase tracking-[0.08em] text-[#A9A79E]">{accounts.length}</p>
-                        </div>
+                <section className="rounded-2xl border border-[#E8E7E0] bg-white p-5 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] sm:p-6">
+                    <div className="flex items-center justify-between gap-3">
+                        <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#A9A79E]">Connected accounts</p>
+                        <p className="text-xs uppercase tracking-[0.08em] text-[#A9A79E]">{accounts.length}</p>
+                    </div>
 
-                        {accounts.length === 0 ? (
-                            <p className="mt-4 rounded-2xl border border-[#E8E7E0] bg-[#FAFAF7] p-4 text-sm text-[#6B6960]">No linked accounts yet.</p>
-                        ) : (
-                            <ul className="mt-4 space-y-2">
-                                {accounts.map((account) => (
-                                    <li
-                                        key={account.id}
-                                        className="flex flex-col gap-3 rounded-2xl border border-[#E8E7E0] bg-[#FAFAF7] p-3 sm:flex-row sm:items-center sm:justify-between"
-                                    >
-                                        <div>
-                                            <p className="text-sm text-[#1A1A17]">{account.displayName}</p>
-                                            <p className="text-[11px] uppercase tracking-[0.08em] text-[#A9A79E]">
-                                                {account.provider} · {account.accountRef}
-                                            </p>
-                                            <p
-                                                className={`mt-1 text-[11px] uppercase tracking-[0.08em] ${account.authStatus === 'reconnect_required'
-                                                    ? 'text-[#E8860A]'
-                                                    : 'text-[#1C9E5B]'
-                                                    }`}
+                    {accounts.length === 0 ? (
+                        <p className="mt-4 rounded-2xl border border-[#E8E7E0] bg-[#FAFAF7] p-4 text-sm text-[#6B6960]">No linked accounts yet.</p>
+                    ) : (
+                        <ul className="mt-4 space-y-2">
+                            {accounts.map((account) => (
+                                <li
+                                    key={account.id}
+                                    className="flex flex-col gap-3 rounded-2xl border border-[#E8E7E0] bg-[#FAFAF7] p-3 sm:flex-row sm:items-center sm:justify-between"
+                                >
+                                    <div>
+                                        <p className="text-sm text-[#1A1A17]">{account.displayName}</p>
+                                        <p className="text-[11px] uppercase tracking-[0.08em] text-[#A9A79E]">
+                                            {account.provider} · {account.accountRef}
+                                        </p>
+                                        <p
+                                            className={`mt-1 text-[11px] uppercase tracking-[0.08em] ${account.authStatus === 'reconnect_required'
+                                                ? 'text-[#E8860A]'
+                                                : 'text-[#1C9E5B]'
+                                                }`}
+                                        >
+                                            {account.authStatus === 'reconnect_required' ? 'Reconnect required' : 'Active'}
+                                        </p>
+                                    </div>
+
+                                    <div className="flex items-center gap-2">
+                                        {account.provider === 'plaid' && account.authStatus === 'reconnect_required' ? (
+                                            <ConnectProviderButtons
+                                                provider="plaid"
+                                                preferredProvider={preferredProvider}
+                                                accountId={account.id}
+                                                compact
+                                            />
+                                        ) : null}
+
+                                        <form action={disconnectAccountAction}>
+                                            <input type="hidden" name="accountId" value={account.id} />
+                                            <button
+                                                type="submit"
+                                                className="rounded-[10px] border border-[#E53434] px-3 py-1 text-xs font-semibold uppercase tracking-[0.08em] text-[#E53434] hover:bg-[#FEF0F0] focus-visible:outline-2 focus-visible:outline-[#FF5C35]"
                                             >
-                                                {account.authStatus === 'reconnect_required' ? 'Reconnect required' : 'Active'}
-                                            </p>
-                                        </div>
+                                                Disconnect
+                                            </button>
+                                        </form>
+                                    </div>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </section>
 
-                                        <div className="flex items-center gap-2">
-                                            {account.provider === 'plaid' && account.authStatus === 'reconnect_required' ? (
-                                                <ConnectProviderButtons
-                                                    provider="plaid"
-                                                    preferredProvider={preferredProvider}
-                                                    accountId={account.id}
-                                                    compact
-                                                />
-                                            ) : null}
+                <section className="space-y-3">
+                    <article
+                        className={`rounded-2xl border p-4 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] ${preferredProvider === 'plaid'
+                            ? 'border-[#FF5C35] bg-[#FFF0EC]'
+                            : 'border-[#E8E7E0] bg-white'
+                            }`}
+                    >
+                        <p className="text-[11px] uppercase tracking-[0.08em] text-[#A9A79E]">Recommended in US/Canada</p>
+                        <h2 className="font-display mt-2 text-3xl text-[#1A1A17]">Plaid</h2>
+                        <p className="mt-3 text-sm leading-7 text-[#6B6960]">
+                            Best for US-focused bank connections with broad institution support.
+                        </p>
+                        <ConnectProviderButtons provider="plaid" preferredProvider={preferredProvider} />
+                    </article>
 
-                                            <form action={disconnectAccountAction}>
-                                                <input type="hidden" name="accountId" value={account.id} />
-                                                <button
-                                                    type="submit"
-                                                    className="rounded-[10px] border border-[#E53434] px-3 py-1 text-xs font-semibold uppercase tracking-[0.08em] text-[#E53434] hover:bg-[#FEF0F0] focus-visible:outline-2 focus-visible:outline-[#FF5C35]"
-                                                >
-                                                    Disconnect
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </li>
-                                ))}
-                            </ul>
-                        )}
-                    </section>
-
-                    <section className="space-y-3">
-                        <article
-                            className={`rounded-2xl border p-4 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] ${preferredProvider === 'plaid'
-                                ? 'border-[#FF5C35] bg-[#FFF0EC]'
-                                : 'border-[#E8E7E0] bg-white'
-                                }`}
-                        >
-                            <p className="text-[11px] uppercase tracking-[0.08em] text-[#A9A79E]">Recommended in US/Canada</p>
-                            <h2 className="font-display mt-2 text-3xl text-[#1A1A17]">Plaid</h2>
-                            <p className="mt-3 text-sm leading-7 text-[#6B6960]">
-                                Best for US-focused bank connections with broad institution support.
-                            </p>
-                            <ConnectProviderButtons provider="plaid" preferredProvider={preferredProvider} />
-                        </article>
-
-                        <article
-                            className={`rounded-2xl border p-4 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] ${preferredProvider === 'mono'
-                                ? 'border-[#FF5C35] bg-[#FFF0EC]'
-                                : 'border-[#E8E7E0] bg-white'
-                                }`}
-                        >
-                            <p className="text-[11px] uppercase tracking-[0.08em] text-[#A9A79E]">Recommended in Africa</p>
-                            <h2 className="font-display mt-2 text-3xl text-[#1A1A17]">Mono</h2>
-                            <p className="mt-3 text-sm leading-7 text-[#6B6960]">
-                                Best for Nigeria and supported African markets with regional banking coverage.
-                            </p>
-                            <ConnectProviderButtons provider="mono" preferredProvider={preferredProvider} />
-                        </article>
-                    </section>
-                </div>
+                    <article
+                        className={`rounded-2xl border p-4 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] ${preferredProvider === 'mono'
+                            ? 'border-[#FF5C35] bg-[#FFF0EC]'
+                            : 'border-[#E8E7E0] bg-white'
+                            }`}
+                    >
+                        <p className="text-[11px] uppercase tracking-[0.08em] text-[#A9A79E]">Recommended in Africa</p>
+                        <h2 className="font-display mt-2 text-3xl text-[#1A1A17]">Mono</h2>
+                        <p className="mt-3 text-sm leading-7 text-[#6B6960]">
+                            Best for Nigeria and supported African markets with regional banking coverage.
+                        </p>
+                        <ConnectProviderButtons provider="mono" preferredProvider={preferredProvider} />
+                    </article>
+                </section>
+            </div>
         </div>
     );
 };
