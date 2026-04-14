@@ -6,7 +6,7 @@
     "frequencyLabel": "monthly",
     "status": "healthy",
     "confidence": "high",
-    "usageScore": 82,
+    "usageScore": 77,
     "verdict": "active"
   },
   {
@@ -16,7 +16,7 @@
     "frequencyLabel": "monthly",
     "status": "healthy",
     "confidence": "medium",
-    "usageScore": 63,
+    "usageScore": 62,
     "verdict": "likely_unused",
     "alert": {
       "type": "dormant",
@@ -30,7 +30,7 @@
     "frequencyLabel": "monthly",
     "status": "healthy",
     "confidence": "high",
-    "usageScore": 82,
+    "usageScore": 77,
     "verdict": "active"
   },
   {
@@ -54,7 +54,7 @@
     "frequencyLabel": "monthly",
     "status": "healthy",
     "confidence": "medium",
-    "usageScore": 64,
+    "usageScore": 63,
     "verdict": "likely_unused",
     "alert": {
       "type": "dormant",
@@ -68,7 +68,7 @@
     "frequencyLabel": "monthly",
     "status": "healthy",
     "confidence": "medium",
-    "usageScore": 63,
+    "usageScore": 62,
     "verdict": "likely_unused",
     "alert": {
       "type": "dormant",
@@ -82,7 +82,7 @@
     "frequencyLabel": "monthly",
     "status": "healthy",
     "confidence": "medium",
-    "usageScore": 63,
+    "usageScore": 62,
     "verdict": "likely_unused",
     "alert": {
       "type": "dormant",
@@ -96,7 +96,7 @@
     "frequencyLabel": "monthly",
     "status": "healthy",
     "confidence": "high",
-    "usageScore": 76,
+    "usageScore": 75,
     "verdict": "active"
   },
   {
@@ -106,7 +106,7 @@
     "frequencyLabel": "monthly",
     "status": "healthy",
     "confidence": "high",
-    "usageScore": 77,
+    "usageScore": 76,
     "verdict": "active"
   },
   {
@@ -116,7 +116,7 @@
     "frequencyLabel": "monthly",
     "status": "healthy",
     "confidence": "medium",
-    "usageScore": 56,
+    "usageScore": 55,
     "verdict": "likely_unused",
     "alert": {
       "type": "dormant",
@@ -139,8 +139,8 @@
     "amountMonthly": 6.02,
     "frequencyLabel": "monthly",
     "status": "healthy",
-    "confidence": "high",
-    "usageScore": 75,
+    "confidence": "medium",
+    "usageScore": 74,
     "verdict": "active"
   },
   {

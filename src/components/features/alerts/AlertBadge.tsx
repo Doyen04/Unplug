@@ -5,6 +5,12 @@ interface AlertBadgeProps {
   message: string;
 }
 
+const toSentenceCase = (value: string) => {
+  const normalized = value.trim().toLowerCase();
+  if (!normalized) return '';
+  return normalized.charAt(0).toUpperCase() + normalized.slice(1);
+};
+
 const typeConfig: Record<AlertType, { bg: string; text: string; icon: string }> = {
   unused: {
     bg: 'bg-danger-light',
@@ -30,14 +36,15 @@ const typeConfig: Record<AlertType, { bg: string; text: string; icon: string }> 
 
 export const AlertBadge = ({ type, message }: AlertBadgeProps) => {
   const config = typeConfig[type];
+  const displayMessage = toSentenceCase(message);
 
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-pill px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-[0.05em] ${config.bg} ${config.text}`}
+      className={`inline-flex items-center gap-1 rounded-pill px-2.5 py-0.5 text-[11px] font-semibold tracking-[0.03em] ${config.bg} ${config.text}`}
       aria-label={`Alert: ${message}`}
     >
       <span className="text-[9px]" aria-hidden="true">{config.icon}</span>
-      {message}
+      {displayMessage}
     </span>
   );
 };

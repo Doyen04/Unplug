@@ -12,6 +12,20 @@ interface SubscriptionRowProps {
   showAlerts?: boolean;
 }
 
+const avatarPalette = [
+  'bg-[#5F6159]',
+  'bg-[#6E645B]',
+  'bg-[#5E6A74]',
+  'bg-[#6B6960]',
+  'bg-[#5D5B66]',
+];
+
+const getAvatarClass = (name: string) => {
+  const first = name.trim().charCodeAt(0);
+  if (!Number.isFinite(first)) return avatarPalette[0];
+  return avatarPalette[first % avatarPalette.length];
+};
+
 const borderClassMap: Record<Subscription['status'], string> = {
   unused: 'border-l-4 border-l-[#E53434]',
   'trial-ending': 'border-l-4 border-l-[#E8860A]',
@@ -35,15 +49,15 @@ export const SubscriptionRow = ({
     }}
     transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1], delay: index * 0.03 }}
     layout
-    className={`flex flex-col gap-3 rounded-2xl border border-[#E8E7E0] bg-white p-4 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] sm:flex-row sm:items-center ${borderClassMap[subscription.status]} ${subscription.status === 'unused' ? 'alert-pulse-border' : ''}`}
+    className={`flex flex-col gap-3 rounded-2xl border border-[#E8E7E0] bg-white p-4 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] transition-colors hover:bg-[#FAFAF7] sm:flex-row sm:items-center ${borderClassMap[subscription.status]} ${subscription.status === 'unused' ? 'alert-pulse-border' : ''}`}
   >
-    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] bg-[#6B6960] text-xs font-semibold uppercase text-white">
+    <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] text-xs font-semibold uppercase text-white ${getAvatarClass(subscription.serviceName)}`}>
       {subscription.serviceName.slice(0, 1)}
     </div>
 
     <div className="min-w-0 flex-1">
       <p className="truncate text-[15px] text-[#1A1A17]">{subscription.serviceName}</p>
-      <p className="mt-1 text-xs text-[#6B6960]">
+      <p className="mt-1 text-[12px] font-medium text-[#57554D]">
         Confidence: {subscription.confidence.toUpperCase()} · Verdict: {subscription.verdict.replace('_', ' ')}
       </p>
       {showAlerts && subscription.alert ? (

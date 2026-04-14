@@ -3,11 +3,15 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { Bell, Settings, Flame, Layers, Link as LinkIcon, TrendingUp, AlertTriangle, Check, Search, ArrowRight, X } from 'lucide-react';
+import { Bell, Flame, Layers, Link as LinkIcon, TrendingUp, AlertTriangle, Check, Search, ArrowRight, X } from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer, Cell, ReferenceLine } from 'recharts';
 
 import { formatCurrency } from '../../lib/utils/format';
+import { useDashboardData } from '../../hooks/useDashboardData';
+import { interpolateScoreColor } from '../../lib/utils/shameScore';
+import type { DashboardFilter } from '../../types/subscription';
+import { SubscriptionRow } from '../../components/features/subscriptions/SubscriptionRow';
 
 const getInitials = (name: string): string => {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -15,10 +19,6 @@ const getInitials = (name: string): string => {
   if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
   return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
 };
-import { useDashboardData } from '../../hooks/useDashboardData';
-import { interpolateScoreColor } from '../../lib/utils/shameScore';
-import type { DashboardFilter } from '../../types/subscription';
-import { SubscriptionRow } from '../../components/features/subscriptions/SubscriptionRow';
 
 const MOCK_CHART_DATA = [
   { name: 'Nov', spend: 12000 },
@@ -148,11 +148,11 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* TOP BAR */}
       <header className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight text-[#1A1A17]">Dashboard</h1>
-        <div className="hidden lg:flex items-center gap-4">
+        <h1 className="text-3xl font-extrabold tracking-tight text-[#1A1A17]">Dashboard</h1>
+        <div className="hidden lg:flex items-center gap-5">
           <div className="relative group">
             <button
               onClick={() => setIsAlertsOpen(true)}
@@ -160,78 +160,89 @@ export default function DashboardPage() {
             >
               <Bell size={18} />
               {alerts.length > 0 && (
-                <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#E53434] text-[10px] font-bold text-white">
+                <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full border-2 border-white bg-[#E53434] text-[10px] font-bold text-white">
                   {alerts.length}
                 </span>
               )}
             </button>
           </div>
-          <div className="h-10 w-10 overflow-hidden rounded-full border border-[#D0CFC7]">
-            <div className="flex h-full w-full items-center justify-center bg-[#1A1A17] text-white font-medium text-sm">{userInitials}</div>
+          <div className="h-10 w-10 overflow-hidden rounded-full border border-[#D0CFC7] shadow-[0_1px_3px_rgba(0,0,0,0.16)] ring-1 ring-[#E8E7E0]">
+            <div className="flex h-full w-full items-center justify-center bg-[#1A1A17] text-sm font-medium text-white">{userInitials}</div>
           </div>
         </div>
       </header>
 
       {/* ROW 1: STAT CARDS */}
       <section className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
-        <article className="group flex flex-col justify-between rounded-2xl border border-[#E8E7E0] bg-white p-6 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_4px_24px_rgba(0,0,0,0.08)] hover:border-[#D0CFC7]">
+        <article className="group flex flex-col justify-between rounded-2xl border border-[#E8E7E0] border-l-4 border-l-[#E53434] bg-white p-6 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_4px_24px_rgba(0,0,0,0.08)] hover:border-[#D0CFC7] hover:border-l-[#E53434]">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#FEF0F0] text-[#E53434] ring-1 ring-[#FEE2E2] transition-colors group-hover:bg-[#E53434] group-hover:text-white">
-              <Flame size={16} />
+              <Flame size={20} />
             </div>
             <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[#6B6960]">Monthly Burn</p>
           </div>
           <div className="mt-6">
             <p className="font-display text-4xl font-semibold leading-none text-[#1A1A17]">{formatCurrency(summary.monthlySpend)}</p>
-            <p className="mt-1.5 text-xs text-[#A9A79E]">burning every month</p>
+            <p className="mt-2 text-xs text-[#A9A79E]">burning every month</p>
           </div>
         </article>
 
-        <article className="group flex flex-col justify-between rounded-2xl border border-[#E8E7E0] bg-white p-6 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_4px_24px_rgba(0,0,0,0.08)] hover:border-[#D0CFC7]">
+        <article className="group flex flex-col justify-between rounded-2xl border border-[#E8E7E0] border-l-4 border-l-[#FF5C35] bg-white p-6 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_4px_24px_rgba(0,0,0,0.08)] hover:border-[#D0CFC7] hover:border-l-[#FF5C35]">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#FFF0EB] text-[#FF5C35] ring-1 ring-[#FFE0D6] transition-colors group-hover:bg-[#FF5C35] group-hover:text-white">
-              <Layers size={16} />
+              <Layers size={20} />
             </div>
             <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[#6B6960]">Tracked Subs</p>
           </div>
           <div className="mt-6">
             <p className="font-display text-4xl font-semibold leading-none text-[#1A1A17]">{totalSubscriptions}</p>
-            <p className="mt-1.5 text-xs text-[#A9A79E]">active subscriptions</p>
+            <p className="mt-2 text-xs text-[#A9A79E]">active subscriptions</p>
           </div>
         </article>
 
-        <article className="group flex flex-col justify-between rounded-2xl border border-[#E8E7E0] bg-white p-6 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_4px_24px_rgba(0,0,0,0.08)] hover:border-[#D0CFC7]">
+        <article className="group flex flex-col justify-between rounded-2xl border border-[#E8E7E0] border-l-4 border-l-[#1C9E5B] bg-white p-6 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_4px_24px_rgba(0,0,0,0.08)] hover:border-[#D0CFC7] hover:border-l-[#1C9E5B]">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#EDFAF3] text-[#1C9E5B] ring-1 ring-[#D1F4E0] transition-colors group-hover:bg-[#1C9E5B] group-hover:text-white">
-              <LinkIcon size={16} />
+              <LinkIcon size={20} />
             </div>
             <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[#6B6960]">Linked Accounts</p>
           </div>
           <div className="mt-6">
             <p className="font-display text-4xl font-semibold leading-none text-[#1A1A17]">{summary.linkedAccounts}</p>
-            <p className="mt-1.5 text-xs text-[#A9A79E]">bank accounts connected</p>
+            <p className="mt-2 text-xs text-[#A9A79E]">bank accounts connected</p>
           </div>
         </article>
 
-        <article className="group flex flex-col justify-between rounded-2xl border border-[#E8E7E0] bg-white p-6 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] relative overflow-hidden transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_4px_24px_rgba(0,0,0,0.08)] hover:border-[#D0CFC7]">
+        <article className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-[#E8E7E0] border-l-4 border-l-[#1A1A17] bg-white p-6 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_4px_24px_rgba(0,0,0,0.08)] hover:border-[#D0CFC7] hover:border-l-[#1A1A17]">
           <div className="z-10 flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#FAFAF7] text-[#1A1A17] ring-1 ring-[#E8E7E0] transition-colors group-hover:bg-[#1A1A17] group-hover:text-white">
-              <Check size={16} />
+              <Check size={20} />
             </div>
             <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[#6B6960]">Shame Score</p>
           </div>
           <div className="z-10 mt-6 flex items-center justify-between">
             <div>
               <p className="font-display text-4xl font-semibold leading-none text-[#1A1A17]">{summary.shameScore}</p>
-              <p className="mt-1.5 text-xs text-[#A9A79E]">subscription guilt index</p>
+              <p className="mt-2 text-xs text-[#A9A79E]">subscription guilt index</p>
             </div>
             <div className="relative flex h-14 w-14 items-center justify-center transition-transform duration-500 group-hover:scale-110">
               <svg className="absolute inset-0 h-full w-full -rotate-90 transform" viewBox="0 0 44 44">
                 <circle cx="22" cy="22" r="20" fill="none" stroke="#F4F3EE" strokeWidth="4" />
-                <circle cx="22" cy="22" r="20" fill="none" strokeWidth="4" strokeLinecap="round"
-                  style={{ stroke: scoreColor, strokeDasharray: 125.6, strokeDashoffset, transition: 'stroke-dashoffset 1s ease-out' }}
-                />
+                {summary.shameScore > 0 ? (
+                  <circle
+                    cx="22"
+                    cy="22"
+                    r="20"
+                    fill="none"
+                    strokeWidth="4"
+                    strokeLinecap="round"
+                    style={{ stroke: scoreColor, strokeDasharray: 125.6, strokeDashoffset, transition: 'stroke-dashoffset 1s ease-out' }}
+                  />
+                ) : null}
               </svg>
+              {summary.shameScore === 0 ? (
+                <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#A9A79E]">0%</span>
+              ) : null}
             </div>
           </div>
         </article>
@@ -241,25 +252,29 @@ export default function DashboardPage() {
       <section className="grid grid-cols-1 gap-5 lg:grid-cols-3">
         <article className="col-span-1 min-w-0 lg:col-span-2 group flex h-full flex-col justify-between rounded-2xl border border-[#E8E7E0] bg-white p-5 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] transition-all duration-300 hover:shadow-[0_4px_24px_rgba(0,0,0,0.08)] hover:border-[#D0CFC7]">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-4">
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#FAFAF7] text-[#1A1A17] ring-1 ring-[#E8E7E0] transition-colors group-hover:bg-[#1A1A17] group-hover:text-white">
                 <TrendingUp size={16} />
               </div>
               <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[#6B6960]">Monthly Spend</p>
             </div>
-            <p className="font-display text-2xl font-semibold text-[#1A1A17]">{formatCurrency(summary.monthlySpend)}</p>
+            <div className="text-right">
+              <p className="font-display text-2xl font-semibold text-[#1A1A17]">{formatCurrency(summary.monthlySpend)}</p>
+              <p className="mt-1 text-[11px] uppercase tracking-[0.08em] text-[#A9A79E]">total this period</p>
+            </div>
           </div>
           <div className="mt-6 flex flex-1 flex-col">
             <div className="h-full min-h-40 w-full min-w-0 group-hover:opacity-100 transition-opacity">
               <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={160}>
                 <BarChart data={MOCK_CHART_DATA} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+                  <ReferenceLine y={0} stroke="#E8E7E0" strokeWidth={1} />
                   <XAxis
                     dataKey="name"
                     axisLine={false}
                     tickLine={false}
                     style={{ textTransform: 'uppercase' }}
                     tick={{ fill: '#A9A79E', fontSize: 10, fontWeight: 500 }}
-                    dy={10}
+                    dy={14}
                   />
                   <Tooltip
                     cursor={{ fill: 'transparent' }}
@@ -268,7 +283,7 @@ export default function DashboardPage() {
                   />
                   <Bar dataKey="spend" radius={[4, 4, 0, 0]}>
                     {MOCK_CHART_DATA.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill="#FF5C35" className="opacity-40 hover:opacity-100 transition-opacity duration-300" />
+                      <Cell key={`cell-${index}`} fill="#FF5C35" className="opacity-65 hover:opacity-100 transition-opacity duration-300" />
                     ))}
                   </Bar>
                 </BarChart>
@@ -277,7 +292,7 @@ export default function DashboardPage() {
           </div>
         </article>
 
-        <div className="col-span-1 grid h-full gap-3 lg:grid-rows-2">
+        <div className="col-span-1 grid h-full gap-5 lg:grid-rows-2">
           <article className="group flex h-full flex-col justify-between rounded-2xl border border-[#E8E7E0] bg-white p-4 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] transition-all duration-300 hover:shadow-[0_4px_24px_rgba(0,0,0,0.08)] hover:border-[#D0CFC7]">
             <div>
               <div className="flex items-center gap-3">
@@ -289,12 +304,12 @@ export default function DashboardPage() {
               <p className="mt-4 font-display text-5xl font-semibold leading-none text-[#1A1A17]">{summary.unusedCount}</p>
               <p className="mt-2 text-sm text-[#6B6960] max-w-xs">subscriptions you haven't used proactively in 30+ days.</p>
             </div>
-            <Link href="#subscriptions" onClick={() => setFilter('unused')} className="mt-4 flex w-max items-center font-bold text-[#FF5C35] text-xs uppercase tracking-[0.08em] hover:text-[#C93A1A] bg-transparent hover:bg-[#FEF6EC] px-3 py-1.5 -ml-3 rounded-lg transition-colors">
+            <Link href="#subscriptions" onClick={() => setFilter('unused')} className="mt-4 flex w-max items-center rounded-lg bg-transparent px-3 py-1.5 text-xs font-bold uppercase tracking-[0.08em] text-[#FF5C35] transition-colors hover:bg-[#FEF6EC] hover:text-[#C93A1A] hover:underline hover:decoration-[#FF5C35]/60 hover:underline-offset-4 -ml-3">
               Review unused <ArrowRight size={14} className="ml-1.5 transition-transform group-hover:translate-x-1" />
             </Link>
           </article>
 
-          <article className="group flex h-full flex-col justify-between rounded-2xl border border-[#FFE8E2] bg-linear-to-br from-[#FEF0F0] to-[#FFFFFF] p-4 shadow-[0_1px_4px_rgba(229,52,52,0.04),0_4px_16px_rgba(229,52,52,0.04)] transition-all duration-300 hover:shadow-[0_4px_24px_rgba(229,52,52,0.08)] hover:border-[#FCA5A5]">
+          <article className="group flex h-full flex-col justify-between rounded-2xl border border-[#FFE8E2] bg-[#FEF6F4] p-4 shadow-[0_1px_4px_rgba(229,52,52,0.04),0_4px_16px_rgba(229,52,52,0.04)] transition-all duration-300 hover:shadow-[0_4px_24px_rgba(229,52,52,0.08)] hover:border-[#FCA5A5]">
             <div>
               <div className="flex items-center gap-2 text-[#E53434]">
                 <p className="text-[11px] font-bold uppercase tracking-[0.08em]">You could save</p>
@@ -302,7 +317,7 @@ export default function DashboardPage() {
               <p className="mt-4 font-display text-4xl font-bold text-[#E53434]">{formatCurrency(summary.saveablePerYear)}</p>
               <p className="mt-1.5 text-xs text-[#E53434]/80 font-medium">by cutting unused subs</p>
             </div>
-            <button onClick={() => setFilter('unused')} className="mt-4 rounded-xl border border-[#E53434] bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.08em] text-[#E53434] hover:bg-[#E53434] hover:text-white focus:ring-2 focus:ring-offset-2 focus:ring-[#E53434] transition-all shadow-sm hover:shadow-md">
+            <button onClick={() => setFilter('unused')} className="mt-4 flex h-11 w-full items-center justify-center rounded-xl border border-[#E53434] bg-white px-4 text-center text-xs font-bold uppercase tracking-[0.08em] text-[#E53434] transition-all hover:bg-[#E53434] hover:text-white focus:ring-2 focus:ring-offset-2 focus:ring-[#E53434] shadow-sm hover:shadow-md">
               See what to cut
             </button>
           </article>
@@ -334,14 +349,14 @@ export default function DashboardPage() {
             <button
               type="button"
               onClick={() => setLedgerTab('subscriptions')}
-              className={`rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.06em] transition-colors ${ledgerTab === 'subscriptions' ? 'bg-[#FF5C35] text-white' : 'text-[#6B6960] hover:text-[#C93A1A]'}`}
+              className={`rounded-full border px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.06em] transition-colors ${ledgerTab === 'subscriptions' ? 'border-[#FF5C35] bg-[#FF5C35] text-white' : 'border-[#D0CFC7] text-[#6B6960] hover:border-[#FF5C35] hover:text-[#C93A1A]'}`}
             >
               Your Subscriptions
             </button>
             <button
               type="button"
               onClick={() => setLedgerTab('transactions')}
-              className={`rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.06em] transition-colors ${ledgerTab === 'transactions' ? 'bg-[#FF5C35] text-white' : 'text-[#6B6960] hover:text-[#C93A1A]'}`}
+              className={`rounded-full border px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.06em] transition-colors ${ledgerTab === 'transactions' ? 'border-[#FF5C35] bg-[#FF5C35] text-white' : 'border-[#D0CFC7] text-[#6B6960] hover:border-[#FF5C35] hover:text-[#C93A1A]'}`}
             >
               Recent Transactions
             </button>
@@ -369,9 +384,9 @@ export default function DashboardPage() {
               <button
                 key={f.key}
                 onClick={() => setFilter(f.key)}
-                className={`shrink-0 rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.05em] transition-colors ${filter === f.key
-                  ? 'bg-[#FF5C35] text-white'
-                  : 'bg-[#F4F3EE] text-[#6B6960] hover:bg-[#FFE9E2] hover:text-[#C93A1A]'
+                className={`shrink-0 rounded-full border-[1.5px] px-4 py-1.5 text-xs font-medium uppercase tracking-[0.05em] transition-colors ${filter === f.key
+                  ? 'border-[#FF5C35] bg-[#FF5C35] text-white'
+                  : 'border-[#D0CFC7] bg-[#F4F3EE] text-[#6B6960] hover:border-[#FF5C35] hover:bg-[#FFE9E2] hover:text-[#C93A1A]'
                   }`}
               >
                 {f.label}
@@ -408,10 +423,10 @@ export default function DashboardPage() {
                     Page {page} / {pageCount} · {totalSubscriptions} total
                   </span>
                   <div className="flex gap-2">
-                    <button type="button" onClick={() => setPage(page - 1)} disabled={page <= 1} className="rounded-lg border border-[#D0CFC7] px-3 py-1.5 text-xs font-medium text-[#1A1A17] hover:bg-[#F4F3EE] disabled:opacity-40 transition-colors">
+                    <button type="button" onClick={() => setPage(page - 1)} disabled={page <= 1} className="h-9 min-w-18 rounded-lg border border-[#D0CFC7] px-3 py-1.5 text-xs font-medium text-[#1A1A17] transition-colors hover:bg-[#F4F3EE] disabled:pointer-events-none disabled:opacity-35">
                       Prev
                     </button>
-                    <button type="button" onClick={() => setPage(page + 1)} disabled={page >= pageCount} className="rounded-lg border border-[#D0CFC7] px-3 py-1.5 text-xs font-medium text-[#1A1A17] hover:bg-[#F4F3EE] disabled:opacity-40 transition-colors">
+                    <button type="button" onClick={() => setPage(page + 1)} disabled={page >= pageCount} className="h-9 min-w-18 rounded-lg border border-[#D0CFC7] px-3 py-1.5 text-xs font-medium text-[#1A1A17] transition-colors hover:bg-[#F4F3EE] disabled:pointer-events-none disabled:opacity-35">
                       Next
                     </button>
                   </div>
@@ -501,7 +516,7 @@ export default function DashboardPage() {
                   </div>
                 ) : (
                   alerts.map((alert) => (
-                    <div key={alert.id} className="group flex flex-col gap-3 rounded-2xl border border-[#FFE8E2] bg-linear-to-br from-[#FEF6EC] to-white p-5 shadow-sm transition-all hover:shadow-[0_4px_12px_rgba(232,134,10,0.1)] hover:border-[#FDB487] hover:-translate-y-0.5">
+                    <div key={alert.id} className="group flex flex-col gap-3 rounded-2xl border border-[#FFE8E2] bg-[#FEF6EC] p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-[#FDB487] hover:shadow-[0_4px_12px_rgba(232,134,10,0.1)]">
                       <div className="flex items-start gap-4">
                         <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-[#E8860A] border border-[#FFE8E2] shadow-[0_1px_2px_rgba(232,134,10,0.1)]">
                           <AlertTriangle size={14} />

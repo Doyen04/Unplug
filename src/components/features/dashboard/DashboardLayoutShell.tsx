@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -33,6 +33,27 @@ const NAV_ITEMS = [
 
 const Sidebar = ({ expanded, toggleExpanded, isMobileOpen, setIsMobileOpen }: SidebarProps) => {
     const pathname = usePathname();
+    const [userName, setUserName] = useState('Account user');
+    const [userEmail, setUserEmail] = useState('user@unplug.app');
+
+    useEffect(() => {
+        const fetchUser = async () => {
+            try {
+                const response = await fetch('/api/user', { cache: 'no-store' });
+                if (!response.ok) return;
+
+                const payload = (await response.json()) as { name?: string; email?: string };
+                if (payload.name?.trim()) setUserName(payload.name.trim());
+                if (payload.email?.trim()) setUserEmail(payload.email.trim());
+            } catch {
+                // no-op: keep fallback values
+            }
+        };
+
+        void fetchUser();
+    }, []);
+
+    const userInitial = userName.trim().charAt(0).toUpperCase() || 'U';
 
     return (
         <>
@@ -48,7 +69,7 @@ const Sidebar = ({ expanded, toggleExpanded, isMobileOpen, setIsMobileOpen }: Si
                 className={`fixed inset-y-0 left-0 z-50 flex flex-col border-r border-[#E8E7E0] bg-[#FAFAF7] transition-all duration-300 lg:static ${isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
                     } ${expanded ? 'w-60' : 'w-16'}`}
             >
-                <div className="flex h-16 items-center justify-between px-4">
+                <div className="flex h-20 items-end justify-between px-4 pb-3">
                     {expanded ? (
                         <Link href="/" className="text-sm font-bold uppercase tracking-[0.08em] text-[#1A1A17]">
                             Unplug
@@ -61,13 +82,14 @@ const Sidebar = ({ expanded, toggleExpanded, isMobileOpen, setIsMobileOpen }: Si
 
                     <button
                         onClick={toggleExpanded}
-                        className="hidden rounded-full p-1 hover:bg-[#E8E7E0] lg:block"
+                        className="hidden h-8 w-8 items-center justify-center rounded-full text-[#6B6960] transition-colors hover:bg-[#E8E7E0] hover:text-[#1A1A17] lg:flex"
+                        aria-label={expanded ? 'Collapse sidebar' : 'Expand sidebar'}
                     >
                         {expanded ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
                     </button>
                 </div>
 
-                <nav className="flex-1 space-y-1 overflow-y-auto p-2">
+                <nav className="flex-1 space-y-1 overflow-y-auto py-2">
                     {NAV_ITEMS.map((item) => {
                         const isActive = item.href === '/dashboard'
                             ? pathname === '/dashboard'
@@ -78,7 +100,7 @@ const Sidebar = ({ expanded, toggleExpanded, isMobileOpen, setIsMobileOpen }: Si
                             <Link
                                 key={item.href}
                                 href={item.href}
-                                className={`flex items-center rounded-xl p-2.5 transition-colors ${isActive
+                                className={`mx-2 flex items-center rounded-xl px-3 py-3 transition-colors ${isActive
                                     ? 'bg-[#FFE8E2] text-[#FF5C35]'
                                     : 'text-[#6B6960] hover:bg-[#E8E7E0] hover:text-[#1A1A17]'
                                     } ${!expanded ? 'justify-center' : ''}`}
@@ -92,9 +114,21 @@ const Sidebar = ({ expanded, toggleExpanded, isMobileOpen, setIsMobileOpen }: Si
                 </nav>
 
                 <div className="border-t border-[#E8E7E0] p-4">
+                    <div className={`mb-4 flex items-center gap-3 ${!expanded ? 'justify-center' : ''}`}>
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#1A1A17] text-xs font-semibold text-white shadow-[0_1px_3px_rgba(0,0,0,0.2)]">
+                            {userInitial}
+                        </div>
+                        {expanded ? (
+                            <div className="min-w-0">
+                                <p className="truncate text-sm font-medium text-[#1A1A17]">{userName}</p>
+                                <p className="truncate text-xs text-[#A9A79E]">{userEmail}</p>
+                            </div>
+                        ) : null}
+                    </div>
+
                     <Link
                         href="/logout"
-                        className={`flex items-center text-[#6B6960] hover:text-[#E53434] transition-colors ${!expanded ? 'justify-center' : ''
+                        className={`flex items-center rounded-lg px-2 py-2 text-[#6B6960] transition-colors hover:bg-[#E8E7E0] hover:text-[#E53434] ${!expanded ? 'justify-center' : ''
                             }`}
                     >
                         <LogOut size={20} className={expanded ? 'mr-3 shrink-0' : 'shrink-0'} />
