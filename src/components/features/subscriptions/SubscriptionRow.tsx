@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { AppWindow } from 'lucide-react';
 
 import { CancelButton } from './CancelButton';
 import { formatCurrencyPrecise } from '../../../lib/utils/format';
@@ -51,8 +52,8 @@ export const SubscriptionRow = ({
       layout
       className={`flex flex-col gap-3 rounded-2xl border border-[#E8E7E0] bg-white p-4 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] transition-colors hover:bg-[#FAFAF7] sm:flex-row sm:items-center ${subscription.status === 'cancelled' ? 'opacity-60' : ''} ${hasAlert ? 'border-l-[3px] border-l-[#E8860A]' : ''} ${subscription.status === 'unused' ? 'alert-pulse-border' : ''}`}
     >
-      <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] text-xs font-semibold uppercase ${getAvatarClass(subscription.serviceName)}`}>
-        {subscription.serviceName.slice(0, 1)}
+      <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] ${getAvatarClass(subscription.serviceName)}`}>
+        <AppWindow size={16} aria-hidden="true" />
       </div>
 
       <div className="min-w-0 flex-1">

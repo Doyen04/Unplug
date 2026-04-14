@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Search } from 'lucide-react';
+import { Search, Receipt } from 'lucide-react';
 
 import { formatCurrency } from '../../../lib/utils/format';
 
@@ -113,20 +113,25 @@ export default function TransactionsPage() {
                     <div className="divide-y divide-[#E8E7E0]">
                         {filteredTransactions.map((transaction) => (
                             <article key={transaction.transaction_id} className="flex items-center justify-between gap-4 px-5 py-4">
-                                <div className="min-w-0">
-                                    <p className="truncate text-sm font-semibold text-[#1A1A17]">
-                                        {transaction.merchant_name ?? transaction.name}
-                                    </p>
-                                    <p className="mt-1 text-xs text-[#6B6960]">
-                                        {new Date(transaction.date).toLocaleDateString('en-US', {
-                                            month: 'short',
-                                            day: 'numeric',
-                                            year: 'numeric',
-                                        })}
-                                        {transaction.category?.length
-                                            ? ` · ${transaction.category[0]}`
-                                            : ''}
-                                    </p>
+                                <div className="flex min-w-0 items-center gap-3">
+                                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#1A1A17] text-white shadow-inner">
+                                        <Receipt size={14} aria-hidden="true" />
+                                    </div>
+                                    <div className="min-w-0">
+                                        <p className="truncate text-sm font-semibold text-[#1A1A17]">
+                                            {transaction.merchant_name ?? transaction.name}
+                                        </p>
+                                        <p className="mt-1 text-xs text-[#6B6960]">
+                                            {new Date(transaction.date).toLocaleDateString('en-US', {
+                                                month: 'short',
+                                                day: 'numeric',
+                                                year: 'numeric',
+                                            })}
+                                            {transaction.category?.length
+                                                ? ` · ${transaction.category[0]}`
+                                                : ''}
+                                        </p>
+                                    </div>
                                 </div>
 
                                 <div className="text-right">

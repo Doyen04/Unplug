@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { Bell, Flame, Layers, Link as LinkIcon, TrendingUp, AlertTriangle, Check, Search, ArrowRight, X, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { Bell, Flame, Layers, Link as LinkIcon, TrendingUp, AlertTriangle, Check, Search, ArrowRight, X, ArrowUpRight, ArrowDownRight, Receipt } from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer, Cell, ReferenceLine } from 'recharts';
 
@@ -137,22 +137,21 @@ export default function DashboardPage() {
 
   const scoreColor = interpolateScoreColor(summary.shameScore);
   const strokeDashoffset = 125.6 * (1 - summary.shameScore / 100);
+  const scoreAngleRadians = (summary.shameScore / 100) * Math.PI * 2 - Math.PI / 2;
+  const dialX = 22 + 20 * Math.cos(scoreAngleRadians);
+  const dialY = 22 + 20 * Math.sin(scoreAngleRadians);
   const previousPeriodSpend = 9200;
   const spendDelta = summary.monthlySpend - previousPeriodSpend;
   const spendDeltaPercent = previousPeriodSpend > 0 ? Math.round((spendDelta / previousPeriodSpend) * 100) : 0;
 
-  if (isError) {
-    return (
-      <div className="flex h-full items-center justify-center">
-        <div className="rounded-2xl border border-[#E53434] bg-[#FEF0F0] p-6 text-sm uppercase tracking-[0.08em] text-[#E53434]">
-          Dashboard unavailable. Try again.
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
+      {isError ? (
+        <div className="rounded-2xl border border-[#E8E7E0] bg-[#FAFAF7] px-4 py-3 text-xs text-[#6B6960]">
+          Live bank data is temporarily unavailable. Showing your latest available dashboard snapshot.
+        </div>
+      ) : null}
+
       {/* TOP BAR */}
       <header className="flex items-center justify-between">
         <h1 className="text-3xl font-extrabold tracking-tight text-[#1A1A17]">Dashboard</h1>
@@ -255,6 +254,14 @@ export default function DashboardPage() {
                     style={{ stroke: scoreColor, strokeDasharray: 125.6, strokeDashoffset, transition: 'stroke-dashoffset 1s ease-out' }}
                   />
                 ) : null}
+                <circle
+                  cx={dialX}
+                  cy={dialY}
+                  r="2.3"
+                  fill={summary.shameScore > 0 ? scoreColor : '#D0CFC7'}
+                  stroke="#FFFFFF"
+                  strokeWidth="1"
+                />
               </svg>
             </div>
           </div>
@@ -285,8 +292,8 @@ export default function DashboardPage() {
               </p>
             </div>
           </div>
-          <div className="mt-6 flex flex-1 flex-col">
-            <div className="h-full min-h-40 w-full min-w-0 group-hover:opacity-100 transition-opacity">
+          <div className="mt-6">
+            <div className="h-55 w-full min-w-0 sm:h-60 lg:h-65 group-hover:opacity-100 transition-opacity">
               <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={160}>
                 <BarChart data={MOCK_CHART_DATA} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
                   <ReferenceLine y={0} stroke="#E8E7E0" strokeWidth={1} />
@@ -472,7 +479,7 @@ export default function DashboardPage() {
                 <div key={tx.transaction_id} className="flex items-center justify-between py-4 hover:bg-[#FAFAF7] transition-colors">
                   <div className="flex items-center gap-4">
                     <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#1A1A17] text-white font-bold text-sm shadow-inner">
-                      {(tx.merchant_name ?? tx.name).charAt(0)}
+                      <Receipt size={16} aria-hidden="true" />
                     </div>
                     <div>
                       <p className="text-sm font-bold text-[#1A1A17]">{tx.merchant_name ?? tx.name}</p>

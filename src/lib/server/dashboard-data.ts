@@ -307,82 +307,86 @@ const fetchPlaidSnapshot = async (userId: string): Promise<PlaidSnapshot | null>
         return null;
     }
 
-    const accountsResponse = await fetch(`${baseUrl}/accounts/get`, {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({
-            client_id: clientId,
-            secret,
-            access_token: accessToken,
-        }),
-        cache: 'no-store',
-    });
-
-    if (!accountsResponse.ok) {
-        const payload = (await accountsResponse.json().catch(() => null)) as { error_code?: string } | null;
-        const errorCode = payload?.error_code;
-        if (errorCode && RECONNECT_ERROR_CODES.has(errorCode)) {
-            await markConnectedAccountAuthStatus(userId, 'plaid', plaidAccount.accountRef, 'reconnect_required');
-        }
-        return null;
-    }
-
-    const transactionsResponse = await fetch(`${baseUrl}/transactions/get`, {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({
-            client_id: clientId,
-            secret,
-            access_token: accessToken,
-            start_date: isoDateDaysAgo(90),
-            end_date: new Date().toISOString().slice(0, 10),
-            options: {
-                count: 250,
-                offset: 0,
-            },
-        }),
-        cache: 'no-store',
-    });
-
-    if (!transactionsResponse.ok) {
-        const payload = (await transactionsResponse.json().catch(() => null)) as { error_code?: string } | null;
-        const errorCode = payload?.error_code;
-        if (errorCode && RECONNECT_ERROR_CODES.has(errorCode)) {
-            await markConnectedAccountAuthStatus(userId, 'plaid', plaidAccount.accountRef, 'reconnect_required');
-        }
-        return null;
-    }
-
-    await markConnectedAccountAuthStatus(userId, 'plaid', plaidAccount.accountRef, 'active');
-
-    const accountsPayload = (await accountsResponse.json()) as {
-        accounts: Array<{ account_id: string }>;
-    };
-
-    const transactionsPayload = (await transactionsResponse.json()) as {
-        transactions: PlaidTransaction[];
-    };
-
-    // Write fetched transactions to a text file for inspection
     try {
-        const outPath = path.resolve(process.cwd(), 'data', `plaid-transactions-${userId}.txt`);
-        const content = [
-            `Plaid Snapshot for user: ${userId}`,
-            `Fetched at: ${new Date().toISOString()}`,
-            `Connected Plaid records: ${plaidAccounts.length}`,
-            `Plaid API accounts returned: ${accountsPayload.accounts.length}`,
-            'Transactions:',
-            JSON.stringify(transactionsPayload.transactions, null, 2),
-        ].join('\n\n');
-        await writeFile(outPath, content, 'utf8');
-    } catch {
-        // ignore file write errors - we still return the snapshot
-    }
+        const accountsResponse = await fetch(`${baseUrl}/accounts/get`, {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({
+                client_id: clientId,
+                secret,
+                access_token: accessToken,
+            }),
+            cache: 'no-store',
+        });
 
-    return {
-        linkedAccounts: plaidAccounts.length,
-        transactions: transactionsPayload.transactions,
-    };
+        if (!accountsResponse.ok) {
+            const payload = (await accountsResponse.json().catch(() => null)) as { error_code?: string } | null;
+            const errorCode = payload?.error_code;
+            if (errorCode && RECONNECT_ERROR_CODES.has(errorCode)) {
+                await markConnectedAccountAuthStatus(userId, 'plaid', plaidAccount.accountRef, 'reconnect_required');
+            }
+            return null;
+        }
+
+        const transactionsResponse = await fetch(`${baseUrl}/transactions/get`, {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({
+                client_id: clientId,
+                secret,
+                access_token: accessToken,
+                start_date: isoDateDaysAgo(90),
+                end_date: new Date().toISOString().slice(0, 10),
+                options: {
+                    count: 250,
+                    offset: 0,
+                },
+            }),
+            cache: 'no-store',
+        });
+
+        if (!transactionsResponse.ok) {
+            const payload = (await transactionsResponse.json().catch(() => null)) as { error_code?: string } | null;
+            const errorCode = payload?.error_code;
+            if (errorCode && RECONNECT_ERROR_CODES.has(errorCode)) {
+                await markConnectedAccountAuthStatus(userId, 'plaid', plaidAccount.accountRef, 'reconnect_required');
+            }
+            return null;
+        }
+
+        await markConnectedAccountAuthStatus(userId, 'plaid', plaidAccount.accountRef, 'active');
+
+        const accountsPayload = (await accountsResponse.json()) as {
+            accounts: Array<{ account_id: string }>;
+        };
+
+        const transactionsPayload = (await transactionsResponse.json()) as {
+            transactions: PlaidTransaction[];
+        };
+
+        // Write fetched transactions to a text file for inspection
+        try {
+            const outPath = path.resolve(process.cwd(), 'data', `plaid-transactions-${userId}.txt`);
+            const content = [
+                `Plaid Snapshot for user: ${userId}`,
+                `Fetched at: ${new Date().toISOString()}`,
+                `Connected Plaid records: ${plaidAccounts.length}`,
+                `Plaid API accounts returned: ${accountsPayload.accounts.length}`,
+                'Transactions:',
+                JSON.stringify(transactionsPayload.transactions, null, 2),
+            ].join('\n\n');
+            await writeFile(outPath, content, 'utf8');
+        } catch {
+            // ignore file write errors - we still return the snapshot
+        }
+
+        return {
+            linkedAccounts: plaidAccounts.length,
+            transactions: transactionsPayload.transactions,
+        };
+    } catch {
+        return null;
+    }
 };
 
 const applyFilter = (subscriptions: Subscription[], filter: DashboardFilter): Subscription[] => {
