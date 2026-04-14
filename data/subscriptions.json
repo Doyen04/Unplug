@@ -115,13 +115,9 @@
     "amountMonthly": 25,
     "frequencyLabel": "monthly",
     "status": "healthy",
-    "confidence": "medium",
-    "usageScore": 55,
-    "verdict": "likely_unused",
-    "alert": {
-      "type": "dormant",
-      "message": "Likely unused based on transaction cadence"
-    }
+    "confidence": "high",
+    "usageScore": 82,
+    "verdict": "active"
   },
   {
     "id": "plaid-mcdonald-s",
@@ -136,11 +132,11 @@
   {
     "id": "plaid-uber",
     "serviceName": "Uber",
-    "amountMonthly": 6.02,
+    "amountMonthly": 5.71,
     "frequencyLabel": "monthly",
     "status": "healthy",
-    "confidence": "medium",
-    "usageScore": 74,
+    "confidence": "high",
+    "usageScore": 87,
     "verdict": "active"
   },
   {

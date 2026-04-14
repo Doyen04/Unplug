@@ -55,5 +55,12 @@ export interface DashboardPayload {
     pageSize: number;
     pageCount: number;
     total: number;
+    counts: {
+      all: number;
+      active: number;
+      unused: number;
+      'at-risk': number;
+      cancelled: number;
+    };
   };
 }

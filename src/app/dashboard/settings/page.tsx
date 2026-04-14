@@ -240,7 +240,7 @@ export default async function DashboardSettingsPage({ searchParams }: SettingsPa
                             <p className="text-xs text-[#E53434]/80 mt-0.5">Destructive actions and account deletion.</p>
                         </div>
                     </div>
-                    <div className="px-6 py-6 sm:px-8 sm:py-8 flex flex-col gap-6 sm:flex-row sm:items-center justify-between bg-linear-to-br from-white to-[#FEF0F0]/30">
+                    <div className="px-6 py-6 sm:px-8 sm:py-8 flex flex-col gap-6 sm:flex-row sm:items-center justify-between bg-[#FEF6F4]">
                         <div>
                             <p className="text-sm font-bold text-[#1A1A17]">Account Actions</p>
                             <p className="text-xs text-[#6B6960] mt-1.5 max-w-sm leading-relaxed">Sign out of this session or permanently delete your account and all associated financial data.</p>

@@ -28,6 +28,13 @@ export interface DashboardPayload {
         pageSize: number;
         pageCount: number;
         total: number;
+        counts: {
+            all: number;
+            active: number;
+            unused: number;
+            'at-risk': number;
+            cancelled: number;
+        };
     };
 }
 
@@ -427,6 +434,13 @@ export const getDashboardPayload = async (
                 pageSize,
                 pageCount: 1,
                 total: 0,
+                counts: {
+                    all: 0,
+                    active: 0,
+                    unused: 0,
+                    'at-risk': 0,
+                    cancelled: 0,
+                },
             },
         };
     }
@@ -484,6 +498,14 @@ export const getDashboardPayload = async (
             label: `${item.serviceName}: ${item.alert!.message}`,
         }));
 
+    const counts = {
+        all: subscriptions.length,
+        active: applyFilter(subscriptions, 'active').length,
+        unused: applyFilter(subscriptions, 'unused').length,
+        'at-risk': applyFilter(subscriptions, 'at-risk').length,
+        cancelled: applyFilter(subscriptions, 'cancelled').length,
+    };
+
     return {
         summary,
         subscriptions: pagedSubscriptions,
@@ -494,6 +516,7 @@ export const getDashboardPayload = async (
             pageSize,
             pageCount,
             total,
+            counts,
         },
     };
 };

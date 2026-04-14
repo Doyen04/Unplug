@@ -66,12 +66,12 @@ const Sidebar = ({ expanded, toggleExpanded, isMobileOpen, setIsMobileOpen }: Si
             )}
 
             <aside
-                className={`fixed inset-y-0 left-0 z-50 flex flex-col border-r border-[#E8E7E0] bg-[#FAFAF7] transition-all duration-300 lg:static ${isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+                className={`fixed inset-y-0 left-0 z-50 flex flex-col border-r border-[#E2E1D9] bg-[#FAFAF7] transition-all duration-300 lg:static ${isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
                     } ${expanded ? 'w-60' : 'w-16'}`}
             >
-                <div className="flex h-20 items-end justify-between px-4 pb-3">
+                <div className="flex h-24 items-end justify-between px-4 pb-3 pt-7">
                     {expanded ? (
-                        <Link href="/" className="text-sm font-bold uppercase tracking-[0.08em] text-[#1A1A17]">
+                        <Link href="/" className="text-sm font-extrabold uppercase tracking-[0.08em] text-[#1A1A17]">
                             Unplug
                         </Link>
                     ) : (
@@ -90,25 +90,27 @@ const Sidebar = ({ expanded, toggleExpanded, isMobileOpen, setIsMobileOpen }: Si
                 </div>
 
                 <nav className="flex-1 space-y-1 overflow-y-auto py-2">
-                    {NAV_ITEMS.map((item) => {
+                    {NAV_ITEMS.map((item, index) => {
                         const isActive = item.href === '/dashboard'
                             ? pathname === '/dashboard'
                             : pathname.startsWith(item.href);
                         const Icon = item.icon;
 
                         return (
-                            <Link
-                                key={item.href}
-                                href={item.href}
-                                className={`mx-2 flex items-center rounded-xl px-3 py-3 transition-colors ${isActive
-                                    ? 'bg-[#FFE8E2] text-[#FF5C35]'
-                                    : 'text-[#6B6960] hover:bg-[#E8E7E0] hover:text-[#1A1A17]'
-                                    } ${!expanded ? 'justify-center' : ''}`}
-                                onClick={() => setIsMobileOpen(false)}
-                            >
-                                <Icon size={20} className={expanded ? 'mr-3 shrink-0' : 'shrink-0'} />
-                                {expanded && <span className="text-sm font-medium">{item.label}</span>}
-                            </Link>
+                            <div key={item.href}>
+                                {index === 3 ? <div className="mx-4 my-4 h-px bg-[#E8E7E0]" /> : null}
+                                <Link
+                                    href={item.href}
+                                    className={`mx-2 flex items-center rounded-xl px-3 py-3 transition-colors ${isActive
+                                        ? 'bg-[#FFE8E2] text-[#FF5C35]'
+                                        : 'text-[#6B6960] hover:bg-[#E8E7E0] hover:text-[#1A1A17]'
+                                        } ${!expanded ? 'justify-center' : ''}`}
+                                    onClick={() => setIsMobileOpen(false)}
+                                >
+                                    <Icon size={18} className={expanded ? 'mr-3 shrink-0' : 'shrink-0'} />
+                                    {expanded && <span className="text-sm font-medium">{item.label}</span>}
+                                </Link>
+                            </div>
                         );
                     })}
                 </nav>
@@ -131,7 +133,7 @@ const Sidebar = ({ expanded, toggleExpanded, isMobileOpen, setIsMobileOpen }: Si
                         className={`flex items-center rounded-lg px-2 py-2 text-[#6B6960] transition-colors hover:bg-[#E8E7E0] hover:text-[#E53434] ${!expanded ? 'justify-center' : ''
                             }`}
                     >
-                        <LogOut size={20} className={expanded ? 'mr-3 shrink-0' : 'shrink-0'} />
+                        <LogOut size={18} className={expanded ? 'mr-3 shrink-0' : 'shrink-0'} />
                         {expanded && <span className="text-sm font-medium">Log out</span>}
                     </Link>
                 </div>

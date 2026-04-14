@@ -13,6 +13,7 @@ export interface DashboardData {
   summary: DashboardPayload['summary'];
   subscriptions: Subscription[];
   totalSubscriptions: number;
+  filterCounts: DashboardPayload['pagination']['counts'];
   alerts: DashboardPayload['alerts'];
   debrief: { month: string; content: string } | null;
   isLoading: boolean;
@@ -49,6 +50,13 @@ const EMPTY_PAYLOAD: DashboardPayload = {
     pageSize: 4,
     pageCount: 1,
     total: 0,
+    counts: {
+      all: 0,
+      active: 0,
+      unused: 0,
+      'at-risk': 0,
+      cancelled: 0,
+    },
   },
 };
 
@@ -129,6 +137,7 @@ export const useDashboardData = (
     summary: payload.summary,
     subscriptions: payload.subscriptions,
     totalSubscriptions: payload.pagination.total,
+    filterCounts: payload.pagination.counts,
     alerts: payload.alerts,
     debrief: debrief ?? null,
     isLoading,

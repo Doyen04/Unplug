@@ -31,7 +31,7 @@ export const CancelButton = ({
   return (
     <button
       type="button"
-      className="h-10 min-w-20 w-full rounded-[10px] border border-[#D0CFC7] bg-[#FEF0F0] px-3 py-2 text-center text-xs font-semibold uppercase tracking-[0.06em] text-[#E53434] transition-colors hover:border-[#E53434] hover:bg-[#FDE7E7] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+      className="h-10 min-w-20 w-full rounded-lg border-[1.5px] border-[#E53434] bg-white px-3 py-2 text-center text-[12px] font-medium uppercase tracking-[0.04em] text-[#E53434] transition-all duration-150 ease-in-out hover:bg-[#E53434] hover:text-white disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
       disabled={disabled || isCancelling}
       onClick={() => setIsCancelling(true)}
       aria-label={`Cancel ${serviceName} subscription (${subscriptionId})`}
