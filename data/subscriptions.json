@@ -6,7 +6,7 @@
     "frequencyLabel": "monthly",
     "status": "healthy",
     "confidence": "high",
-    "usageScore": 77,
+    "usageScore": 76,
     "verdict": "active"
   },
   {
@@ -16,7 +16,7 @@
     "frequencyLabel": "monthly",
     "status": "healthy",
     "confidence": "medium",
-    "usageScore": 62,
+    "usageScore": 61,
     "verdict": "likely_unused",
     "alert": {
       "type": "dormant",
@@ -30,7 +30,7 @@
     "frequencyLabel": "monthly",
     "status": "healthy",
     "confidence": "high",
-    "usageScore": 77,
+    "usageScore": 76,
     "verdict": "active"
   },
   {
@@ -40,7 +40,7 @@
     "frequencyLabel": "monthly",
     "status": "healthy",
     "confidence": "medium",
-    "usageScore": 67,
+    "usageScore": 66,
     "verdict": "likely_unused",
     "alert": {
       "type": "dormant",
@@ -54,7 +54,7 @@
     "frequencyLabel": "monthly",
     "status": "healthy",
     "confidence": "medium",
-    "usageScore": 63,
+    "usageScore": 62,
     "verdict": "likely_unused",
     "alert": {
       "type": "dormant",
@@ -68,7 +68,7 @@
     "frequencyLabel": "monthly",
     "status": "healthy",
     "confidence": "medium",
-    "usageScore": 62,
+    "usageScore": 61,
     "verdict": "likely_unused",
     "alert": {
       "type": "dormant",
@@ -82,7 +82,7 @@
     "frequencyLabel": "monthly",
     "status": "healthy",
     "confidence": "medium",
-    "usageScore": 62,
+    "usageScore": 61,
     "verdict": "likely_unused",
     "alert": {
       "type": "dormant",
@@ -95,8 +95,8 @@
     "amountMonthly": 89.4,
     "frequencyLabel": "monthly",
     "status": "healthy",
-    "confidence": "high",
-    "usageScore": 75,
+    "confidence": "medium",
+    "usageScore": 74,
     "verdict": "active"
   },
   {
@@ -116,7 +116,7 @@
     "frequencyLabel": "monthly",
     "status": "healthy",
     "confidence": "high",
-    "usageScore": 82,
+    "usageScore": 77,
     "verdict": "active"
   },
   {
@@ -126,7 +126,7 @@
     "frequencyLabel": "monthly",
     "status": "healthy",
     "confidence": "high",
-    "usageScore": 76,
+    "usageScore": 75,
     "verdict": "active"
   },
   {
@@ -136,7 +136,7 @@
     "frequencyLabel": "monthly",
     "status": "healthy",
     "confidence": "high",
-    "usageScore": 87,
+    "usageScore": 86,
     "verdict": "active"
   },
   {
@@ -146,7 +146,7 @@
     "frequencyLabel": "monthly",
     "status": "healthy",
     "confidence": "high",
-    "usageScore": 76,
+    "usageScore": 75,
     "verdict": "active"
   }
 ]

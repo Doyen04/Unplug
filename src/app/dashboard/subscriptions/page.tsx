@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Search } from 'lucide-react';
+import Link from 'next/link';
+import { Search, AlertTriangle, RefreshCcw } from 'lucide-react';
 
 import { SubscriptionRow } from '../../../components/features/subscriptions/SubscriptionRow';
 import type { DashboardFilter, DashboardPayload } from '../../../types/subscription';
@@ -47,7 +48,7 @@ export default function SubscriptionsPage() {
     const [search, setSearch] = useState('');
     const [pendingUndoId, setPendingUndoId] = useState<string | null>(null);
 
-    const { data, isLoading, isError } = useQuery({
+    const { data, isLoading, isError, isFetching, refetch } = useQuery({
         queryKey: ['subscriptions-page', filter, page],
         queryFn: () => fetchSubscriptionsPage(filter, page),
     });
@@ -121,12 +122,36 @@ export default function SubscriptionsPage() {
             </div>
 
             <section className="rounded-2xl border border-[#E8E7E0] bg-white p-5 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)]">
+                {isError ? (
+                    <div className="mb-4 flex items-center justify-between gap-3 rounded-xl border border-[#F3D8D8] bg-[#FEF6F6] px-3 py-2 text-xs text-[#8E5C5C]">
+                        <div className="flex items-center gap-2">
+                            <AlertTriangle size={14} className="text-[#E53434]" />
+                            <span>Live refresh failed. Showing latest available data when possible.</span>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={() => void refetch()}
+                            className="inline-flex items-center gap-1 rounded-lg border border-[#D0CFC7] bg-white px-2 py-1 text-[11px] font-medium text-[#1A1A17] hover:bg-[#F4F3EE]"
+                        >
+                            <RefreshCcw size={12} className={isFetching ? 'animate-spin' : ''} />
+                            Retry
+                        </button>
+                    </div>
+                ) : null}
+
                 {isLoading ? (
                     <p className="text-sm text-[#6B6960]">Loading subscriptions...</p>
-                ) : isError ? (
-                    <p className="text-sm text-[#E53434]">Unable to load subscriptions.</p>
                 ) : filteredBySearch.length === 0 ? (
-                    <p className="text-sm text-[#6B6960]">No subscriptions found.</p>
+                    isError ? (
+                        <div className="rounded-xl border border-[#E8E7E0] bg-[#FAFAF7] p-4 text-sm text-[#6B6960]">
+                            <p>We couldn’t load subscriptions right now.</p>
+                            <Link href="/dashboard/connect" className="mt-2 inline-block text-xs font-semibold uppercase tracking-[0.06em] text-[#FF5C35] hover:text-[#C93A1A]">
+                                Check connections
+                            </Link>
+                        </div>
+                    ) : (
+                        <p className="text-sm text-[#6B6960]">No subscriptions found.</p>
+                    )
                 ) : (
                     <div className="space-y-3">
                         {filteredBySearch.map((subscription, index) => (

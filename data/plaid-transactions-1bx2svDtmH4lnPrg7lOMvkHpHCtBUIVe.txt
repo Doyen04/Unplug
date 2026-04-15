@@ -1,6 +1,6 @@
 Plaid Snapshot for user: 1bx2svDtmH4lnPrg7lOMvkHpHCtBUIVe
 
-Fetched at: 2026-04-14T13:20:16.556Z
+Fetched at: 2026-04-15T11:37:49.793Z
 
 Connected Plaid records: 1
 
@@ -2792,121 +2792,5 @@ Transactions:
     "transaction_type": "place",
     "unofficial_currency_code": null,
     "website": null
-  },
-  {
-    "account_id": "eNGkjjPADBI9PXR89d4aclRjnLmvGXFrKEGLb",
-    "account_owner": null,
-    "amount": 25,
-    "authorized_date": "2026-01-13",
-    "authorized_datetime": null,
-    "category": null,
-    "category_id": null,
-    "check_number": null,
-    "counterparties": [],
-    "date": "2026-01-14",
-    "datetime": null,
-    "iso_currency_code": "USD",
-    "location": {
-      "address": null,
-      "city": null,
-      "country": null,
-      "lat": null,
-      "lon": null,
-      "postal_code": null,
-      "region": null,
-      "store_number": null
-    },
-    "logo_url": null,
-    "merchant_entity_id": null,
-    "merchant_name": null,
-    "name": "CREDIT CARD 3333 PAYMENT *//",
-    "payment_channel": "other",
-    "payment_meta": {
-      "by_order_of": null,
-      "payee": null,
-      "payer": null,
-      "payment_method": null,
-      "payment_processor": null,
-      "ppd_id": null,
-      "reason": null,
-      "reference_number": null
-    },
-    "pending": false,
-    "pending_transaction_id": null,
-    "personal_finance_category": {
-      "confidence_level": "LOW",
-      "detailed": "TRANSFER_OUT_ACCOUNT_TRANSFER",
-      "primary": "TRANSFER_OUT",
-      "version": "v2"
-    },
-    "personal_finance_category_icon_url": "https://plaid-category-icons.plaid.com/PFC_TRANSFER_OUT.png",
-    "transaction_code": null,
-    "transaction_id": "GLglaay964IrMwJvrQqVSG49KQNNZVI6RgvoX",
-    "transaction_type": "special",
-    "unofficial_currency_code": null,
-    "website": null
-  },
-  {
-    "account_id": "7zxM11aZNnsxAeLMx7wdFXZvb1WzwxFdzjqgZ",
-    "account_owner": null,
-    "amount": 5.4,
-    "authorized_date": "2026-01-13",
-    "authorized_datetime": null,
-    "category": null,
-    "category_id": null,
-    "check_number": null,
-    "counterparties": [
-      {
-        "confidence_level": "VERY_HIGH",
-        "entity_id": "eyg8o776k0QmNgVpAmaQj4WgzW9Qzo6O51gdd",
-        "logo_url": "https://plaid-merchant-logos.plaid.com/uber_1060.png",
-        "name": "Uber",
-        "phone_number": null,
-        "type": "merchant",
-        "website": "uber.com"
-      }
-    ],
-    "date": "2026-01-14",
-    "datetime": null,
-    "iso_currency_code": "USD",
-    "location": {
-      "address": null,
-      "city": null,
-      "country": null,
-      "lat": null,
-      "lon": null,
-      "postal_code": null,
-      "region": null,
-      "store_number": null
-    },
-    "logo_url": "https://plaid-merchant-logos.plaid.com/uber_1060.png",
-    "merchant_entity_id": "eyg8o776k0QmNgVpAmaQj4WgzW9Qzo6O51gdd",
-    "merchant_name": "Uber",
-    "name": "Uber 063015 SF**POOL**",
-    "payment_channel": "online",
-    "payment_meta": {
-      "by_order_of": null,
-      "payee": null,
-      "payer": null,
-      "payment_method": null,
-      "payment_processor": null,
-      "ppd_id": null,
-      "reason": null,
-      "reference_number": null
-    },
-    "pending": false,
-    "pending_transaction_id": null,
-    "personal_finance_category": {
-      "confidence_level": "VERY_HIGH",
-      "detailed": "TRANSPORTATION_TAXIS_AND_RIDE_SHARES",
-      "primary": "TRANSPORTATION",
-      "version": "v2"
-    },
-    "personal_finance_category_icon_url": "https://plaid-category-icons.plaid.com/PFC_TRANSPORTATION.png",
-    "transaction_code": null,
-    "transaction_id": "vGwjzzMdJocgKqVxgP9ktPoRlK66qDtqVQmR4",
-    "transaction_type": "special",
-    "unofficial_currency_code": null,
-    "website": "uber.com"
   }
 ]
