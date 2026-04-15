@@ -1,9 +1,29 @@
-import { type NextRequest } from 'next/server';
+import { getSessionCookie } from 'better-auth/cookies';
+import { NextRequest, NextResponse } from 'next/server';
 
-import { proxy } from './src/proxy';
+const isProtectedPath = (pathname: string): boolean =>
+    pathname.startsWith('/dashboard') ||
+    pathname.startsWith('/api/dashboard') ||
+    pathname.startsWith('/api/debrief') ||
+    pathname.startsWith('/api/subscriptions');
 
 export function middleware(request: NextRequest) {
-    return proxy(request);
+    const { pathname } = request.nextUrl;
+
+    if (!isProtectedPath(pathname)) {
+        return NextResponse.next();
+    }
+
+    const sessionCookie = getSessionCookie(request);
+    if (sessionCookie) {
+        return NextResponse.next();
+    }
+
+    if (pathname.startsWith('/api/')) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    return NextResponse.redirect(new URL('/login', request.url));
 }
 
 export const config = {

@@ -7,7 +7,7 @@ const isProtectedPath = (pathname: string): boolean =>
     pathname.startsWith('/api/debrief') ||
     pathname.startsWith('/api/subscriptions');
 
-export function proxy(request: NextRequest) {
+export function handleAuthGuard(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
     if (!isProtectedPath(pathname)) {
@@ -25,7 +25,3 @@ export function proxy(request: NextRequest) {
 
     return NextResponse.redirect(new URL('/login', request.url));
 }
-
-export const config = {
-    matcher: ['/dashboard/:path*', '/api/dashboard/:path*', '/api/debrief/:path*', '/api/subscriptions/:path*'],
-};
