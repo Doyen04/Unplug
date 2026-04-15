@@ -7,8 +7,16 @@ import { db } from './server/db';
 const authBaseUrl = process.env.BETTER_AUTH_URL
     ?? (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
 
+const authSecret = process.env.BETTER_AUTH_SECRET
+    ?? (process.env.NODE_ENV === 'production' ? undefined : 'local-dev-only-secret-change-me');
+
+if (!authSecret) {
+    throw new Error('Missing BETTER_AUTH_SECRET. Set this environment variable in production.');
+}
+
 export const auth = betterAuth({
     baseURL: authBaseUrl,
+    secret: authSecret,
     database: {
         db,
         type: 'postgres',

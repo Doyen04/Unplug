@@ -1,9 +1,1 @@
-import { NextRequest, NextResponse } from 'next/server';
-
-export function middleware(_: NextRequest) {
-    return NextResponse.next();
-}
-
-export const config = {
-    matcher: [],
-};
+export { proxy as middleware, config } from './src/proxy';
