@@ -73,6 +73,9 @@ const ConnectAccountsPage = async ({ searchParams }: ConnectAccountsPageProps) =
     );
 
     const preferredProvider = MONO_COUNTRIES.has(countryCode) ? 'mono' : 'plaid';
+    const monoPublicKey = process.env.MONO_PUBLIC_KEY ?? process.env.NEXT_PUBLIC_MONO_PUBLIC_KEY ?? '';
+    const monoSandboxPublicKey =
+        process.env.MONO_SANDBOX_PUBLIC_KEY ?? process.env.NEXT_PUBLIC_MONO_SANDBOX_PUBLIC_KEY ?? '';
 
     return (
         <div className="space-y-6">
@@ -143,6 +146,8 @@ const ConnectAccountsPage = async ({ searchParams }: ConnectAccountsPageProps) =
                                                 preferredProvider={preferredProvider}
                                                 accountId={account.id}
                                                 compact
+                                                monoPublicKey={monoPublicKey}
+                                                monoSandboxPublicKey={monoSandboxPublicKey}
                                             />
                                         ) : null}
 
@@ -174,7 +179,12 @@ const ConnectAccountsPage = async ({ searchParams }: ConnectAccountsPageProps) =
                         <p className="mt-3 text-sm leading-7 text-[#6B6960]">
                             Best for US-focused bank connections with broad institution support.
                         </p>
-                        <ConnectProviderButtons provider="plaid" preferredProvider={preferredProvider} />
+                        <ConnectProviderButtons
+                            provider="plaid"
+                            preferredProvider={preferredProvider}
+                            monoPublicKey={monoPublicKey}
+                            monoSandboxPublicKey={monoSandboxPublicKey}
+                        />
                     </article>
 
                     <article
@@ -188,7 +198,12 @@ const ConnectAccountsPage = async ({ searchParams }: ConnectAccountsPageProps) =
                         <p className="mt-3 text-sm leading-7 text-[#6B6960]">
                             Best for Nigeria and supported African markets with regional banking coverage.
                         </p>
-                        <ConnectProviderButtons provider="mono" preferredProvider={preferredProvider} />
+                        <ConnectProviderButtons
+                            provider="mono"
+                            preferredProvider={preferredProvider}
+                            monoPublicKey={monoPublicKey}
+                            monoSandboxPublicKey={monoSandboxPublicKey}
+                        />
                     </article>
                 </section>
             </div>

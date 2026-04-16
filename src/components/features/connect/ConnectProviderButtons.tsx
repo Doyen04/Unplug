@@ -7,6 +7,8 @@ interface ConnectProviderButtonsProps {
     preferredProvider: 'plaid' | 'mono';
     accountId?: string;
     compact?: boolean;
+    monoPublicKey?: string;
+    monoSandboxPublicKey?: string;
 }
 
 declare global {
@@ -50,37 +52,46 @@ const loadScript = (id: string, src: string): Promise<void> =>
         document.body.appendChild(script);
     });
 
-export const ConnectProviderButtons = ({ provider, preferredProvider, accountId, compact = false }: ConnectProviderButtonsProps) => {
+export const ConnectProviderButtons = ({
+    provider,
+    preferredProvider,
+    accountId,
+    compact = false,
+    monoPublicKey = '',
+    monoSandboxPublicKey = '',
+}: ConnectProviderButtonsProps) => {
     const [plaidToken, setPlaidToken] = useState<string | null>(null);
     const [isPlaidBusy, setIsPlaidBusy] = useState(false);
     const [isMonoBusy, setIsMonoBusy] = useState(false);
+    const [activeMonoMode, setActiveMonoMode] = useState<'live' | 'sandbox' | null>(null);
     const [error, setError] = useState<string | null>(null);
-
-    const monoPublicKey = process.env.NEXT_PUBLIC_MONO_PUBLIC_KEY ?? '';
 
     useEffect(() => {
         let isMounted = true;
 
         const bootstrap = async () => {
             try {
-                await Promise.all([
-                    loadScript(PLAID_SCRIPT_ID, 'https://cdn.plaid.com/link/v2/stable/link-initialize.js'),
-                    loadScript(MONO_SCRIPT_ID, 'https://connect.withmono.com/connect.js'),
-                ]);
+                if (provider === 'plaid') {
+                    await loadScript(PLAID_SCRIPT_ID, 'https://cdn.plaid.com/link/v2/stable/link-initialize.js');
 
-                const response = await fetch('/api/connect/plaid/link-token', {
-                    method: 'POST',
-                    headers: { 'content-type': 'application/json' },
-                    body: JSON.stringify(accountId ? { accountId } : {}),
-                });
+                    const response = await fetch('/api/connect/plaid/link-token', {
+                        method: 'POST',
+                        headers: { 'content-type': 'application/json' },
+                        body: JSON.stringify(accountId ? { accountId } : {}),
+                    });
 
-                if (!response.ok) {
-                    throw new Error('Unable to initialize Plaid.');
+                    if (!response.ok) {
+                        throw new Error('Unable to initialize Plaid.');
+                    }
+
+                    const payload = (await response.json()) as { linkToken: string };
+                    if (isMounted) {
+                        setPlaidToken(payload.linkToken);
+                    }
                 }
 
-                const payload = (await response.json()) as { linkToken: string };
-                if (isMounted) {
-                    setPlaidToken(payload.linkToken);
+                if (provider === 'mono') {
+                    await loadScript(MONO_SCRIPT_ID, 'https://connect.withmono.com/connect.js');
                 }
             } catch {
                 if (isMounted) {
@@ -94,7 +105,7 @@ export const ConnectProviderButtons = ({ provider, preferredProvider, accountId,
         return () => {
             isMounted = false;
         };
-    }, []);
+    }, [accountId, provider]);
 
     const plaidButtonClasses = useMemo(
         () =>
@@ -148,11 +159,17 @@ export const ConnectProviderButtons = ({ provider, preferredProvider, accountId,
         handler.open();
     };
 
-    const handleMonoSetup = async () => {
+    const handleMonoSetup = async (mode: 'live' | 'sandbox' = 'live') => {
         setError(null);
 
-        if (!monoPublicKey) {
-            setError('Mono key is missing. Set NEXT_PUBLIC_MONO_PUBLIC_KEY.');
+        const monoKey = mode === 'sandbox' ? monoSandboxPublicKey || monoPublicKey : monoPublicKey;
+
+        if (!monoKey) {
+            setError(
+                mode === 'sandbox'
+                    ? 'Mono sandbox key is missing. Set MONO_SANDBOX_PUBLIC_KEY (or reuse MONO_PUBLIC_KEY).'
+                    : 'Mono key is missing. Set MONO_PUBLIC_KEY.'
+            );
             return;
         }
 
@@ -162,19 +179,21 @@ export const ConnectProviderButtons = ({ provider, preferredProvider, accountId,
         }
 
         setIsMonoBusy(true);
+        setActiveMonoMode(mode);
 
         const mono = new window.Connect({
-            key: monoPublicKey,
+            key: monoKey,
             onSuccess: async ({ code }) => {
                 const response = await fetch('/api/connect/mono/exchange', {
                     method: 'POST',
                     headers: { 'content-type': 'application/json' },
-                    body: JSON.stringify({ code }),
+                    body: JSON.stringify({ code, mode }),
                 });
 
                 if (!response.ok) {
                     setError('Mono exchange failed. Try again.');
                     setIsMonoBusy(false);
+                    setActiveMonoMode(null);
                     return;
                 }
 
@@ -182,6 +201,7 @@ export const ConnectProviderButtons = ({ provider, preferredProvider, accountId,
             },
             onClose: () => {
                 setIsMonoBusy(false);
+                setActiveMonoMode(null);
             },
         });
 
@@ -210,14 +230,27 @@ export const ConnectProviderButtons = ({ provider, preferredProvider, accountId,
                     {isPlaidBusy ? 'Opening Plaid...' : accountId ? 'Reconnect Plaid' : 'Setup Plaid'}
                 </button>
             ) : (
-                <button
-                    type="button"
-                    onClick={() => void handleMonoSetup()}
-                    disabled={isMonoBusy}
-                    className={`${monoButtonClasses} focus-visible:outline-2 focus-visible:outline-[#FF5C35] disabled:opacity-50`}
-                >
-                    {isMonoBusy ? 'Opening Mono...' : 'Setup Mono'}
-                </button>
+                <div className={compact ? 'flex items-center gap-2' : 'space-y-2'}>
+                    <button
+                        type="button"
+                        onClick={() => void handleMonoSetup('live')}
+                        disabled={isMonoBusy}
+                        className={`${monoButtonClasses} focus-visible:outline-2 focus-visible:outline-[#FF5C35] disabled:opacity-50`}
+                    >
+                        {isMonoBusy && activeMonoMode === 'live' ? 'Opening Mono...' : 'Setup Mono'}
+                    </button>
+
+                    {provider === 'mono' ? (
+                        <button
+                            type="button"
+                            onClick={() => void handleMonoSetup('sandbox')}
+                            disabled={isMonoBusy}
+                            className={`${compact ? 'rounded-[10px] px-3 py-1' : 'w-full rounded-[10px] px-4 py-2'} border border-[#D0CFC7] bg-white text-xs font-semibold uppercase tracking-[0.08em] text-[#1A1A17] hover:border-[#1A1A17] focus-visible:outline-2 focus-visible:outline-[#FF5C35] disabled:opacity-50`}
+                        >
+                            {isMonoBusy && activeMonoMode === 'sandbox' ? 'Opening Sandbox...' : 'Setup Mono Sandbox'}
+                        </button>
+                    ) : null}
+                </div>
             )}
         </>
     );
