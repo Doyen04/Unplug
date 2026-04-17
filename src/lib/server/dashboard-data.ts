@@ -45,7 +45,7 @@ interface DashboardQueryOptions {
     userId?: string;
 }
 
-interface PlaidTransaction {
+interface BankTransaction {
     transaction_id: string;
     name: string;
     amount: number;
@@ -54,9 +54,10 @@ interface PlaidTransaction {
     category: string[] | null;
 }
 
-interface PlaidSnapshot {
+interface BankSnapshot {
+    provider: 'plaid' | 'mono';
     linkedAccounts: number;
-    transactions: PlaidTransaction[];
+    transactions: BankTransaction[];
     noAccount?: boolean;
 }
 
@@ -65,6 +66,8 @@ const PLAID_BASE_URLS: Record<string, string> = {
     development: 'https://development.plaid.com',
     production: 'https://production.plaid.com',
 };
+
+const MONO_DEFAULT_BASE_URL = 'https://api.withmono.com/v2';
 
 const RECONNECT_ERROR_CODES = new Set(['INVALID_ACCESS_TOKEN', 'ITEM_LOGIN_REQUIRED']);
 
@@ -76,7 +79,7 @@ const isoDateDaysAgo = (days: number): string => {
 
 const clamp = (value: number, min: number, max: number): number => Math.min(max, Math.max(min, value));
 
-const normalizeMerchantLabel = (transaction: PlaidTransaction): string => {
+const normalizeMerchantLabel = (transaction: BankTransaction): string => {
     const raw = (transaction.merchant_name ?? transaction.name ?? 'Unknown service').trim();
     return raw.replace(/\s+/g, ' ');
 };
@@ -117,7 +120,7 @@ const detectFrequency = (medianGapDays: number): Subscription['frequencyLabel'] 
 
 const resolveStatusAndAlert = (
     verdict: Subscription['verdict'],
-    transactions: PlaidTransaction[]
+    transactions: BankTransaction[]
 ): Pick<Subscription, 'status' | 'alert'> => {
     const sorted = [...transactions].sort((a, b) => b.date.localeCompare(a.date));
     const recentAmounts = sorted.slice(0, 2).map((item) => item.amount);
@@ -163,9 +166,10 @@ const resolveStatusAndAlert = (
 };
 
 const buildDetectedSubscription = (
+    provider: 'plaid' | 'mono',
     merchantKey: string,
     merchantLabel: string,
-    transactions: PlaidTransaction[]
+    transactions: BankTransaction[]
 ): Subscription => {
     const sorted = [...transactions].sort((a, b) => b.date.localeCompare(a.date));
     const gaps: number[] = [];
@@ -207,7 +211,7 @@ const buildDetectedSubscription = (
     const safeMerchantKey = merchantKey.replace(/\s+/g, '-');
 
     return {
-        id: `plaid-${safeMerchantKey}`,
+        id: `${provider}-${safeMerchantKey}`,
         serviceName: merchantLabel,
         amountMonthly: Number(amountMonthly.toFixed(2)),
         frequencyLabel,
@@ -219,9 +223,12 @@ const buildDetectedSubscription = (
     };
 };
 
-const detectSubscriptionsFromTransactions = (transactions: PlaidTransaction[]): Subscription[] => {
+const detectSubscriptionsFromTransactions = (
+    provider: 'plaid' | 'mono',
+    transactions: BankTransaction[]
+): Subscription[] => {
     const recurringCandidates = transactions.filter((item) => item.amount > 0);
-    const grouped = new Map<string, { label: string; transactions: PlaidTransaction[] }>();
+    const grouped = new Map<string, { label: string; transactions: BankTransaction[] }>();
 
     for (const transaction of recurringCandidates) {
         const label = normalizeMerchantLabel(transaction);
@@ -240,7 +247,7 @@ const detectSubscriptionsFromTransactions = (transactions: PlaidTransaction[]): 
 
     return Array.from(grouped.entries())
         .filter(([, group]) => group.transactions.length >= 2)
-        .map(([merchantKey, group]) => buildDetectedSubscription(merchantKey, group.label, group.transactions))
+        .map(([merchantKey, group]) => buildDetectedSubscription(provider, merchantKey, group.label, group.transactions))
         .sort((a, b) => b.amountMonthly - a.amountMonthly)
         .slice(0, 40);
 };
@@ -277,14 +284,84 @@ const mergeDetectedWithStored = (
     return [...merged, ...staleCancelled];
 };
 
-const fetchPlaidSnapshot = async (userId: string): Promise<PlaidSnapshot | null> => {
+const normalizeMonoTransactions = (input: unknown[]): BankTransaction[] => {
+    const today = new Date().toISOString().slice(0, 10);
+
+    return input
+        .map((entry, index) => {
+            if (!entry || typeof entry !== 'object') return null;
+            const item = entry as Record<string, unknown>;
+
+            const merchant =
+                (typeof item.merchant === 'string' ? item.merchant : null)
+                ?? (typeof item.counterparty === 'string' ? item.counterparty : null);
+
+            const rawAmount =
+                typeof item.amount === 'number'
+                    ? item.amount
+                    : Number(item.amount ?? item.amount_in_minor_units ?? item.amount_minor ?? 0);
+
+            const direction = String(item.type ?? item.direction ?? item.flow ?? '').toLowerCase();
+            const normalizedAmount = Number.isFinite(rawAmount) ? Math.abs(rawAmount) : 0;
+            const amount = direction.includes('credit') ? -normalizedAmount : normalizedAmount;
+
+            const categoryValue = item.category;
+            const category = Array.isArray(categoryValue)
+                ? categoryValue.map((value) => String(value))
+                : typeof categoryValue === 'string' && categoryValue.trim().length > 0
+                    ? [categoryValue.trim()]
+                    : null;
+
+            const rawDate =
+                (typeof item.date === 'string' ? item.date : null)
+                ?? (typeof item.created_at === 'string' ? item.created_at : null)
+                ?? (typeof item.timestamp === 'string' ? item.timestamp : null)
+                ?? today;
+
+            const date = rawDate.slice(0, 10);
+
+            const name =
+                (typeof item.narration === 'string' && item.narration.trim().length > 0
+                    ? item.narration.trim()
+                    : null)
+                ?? (typeof item.description === 'string' && item.description.trim().length > 0
+                    ? item.description.trim()
+                    : null)
+                ?? (typeof item.name === 'string' && item.name.trim().length > 0
+                    ? item.name.trim()
+                    : null)
+                ?? merchant
+                ?? 'Mono transaction';
+
+            const transactionId =
+                (typeof item.id === 'string' && item.id.trim().length > 0
+                    ? item.id
+                    : null)
+                ?? (typeof item._id === 'string' && item._id.trim().length > 0
+                    ? item._id
+                    : null)
+                ?? `mono-${date}-${index}`;
+
+            return {
+                transaction_id: transactionId,
+                name,
+                amount,
+                date,
+                merchant_name: merchant,
+                category,
+            } satisfies BankTransaction;
+        })
+        .filter((value): value is BankTransaction => Boolean(value));
+};
+
+const fetchPlaidSnapshot = async (userId: string): Promise<BankSnapshot | null> => {
     const userAccounts = await listConnectedAccountsByUser(userId);
     const plaidAccounts = userAccounts.filter((item) => item.provider === 'plaid');
     const plaidAccount = plaidAccounts.find((item) => item.encryptedAccessToken) ?? plaidAccounts[0];
 
     // If the user has not connected any Plaid account, return a marker object
     if (plaidAccounts.length === 0 || !plaidAccount) {
-        return { linkedAccounts: 0, transactions: [], noAccount: true };
+        return { provider: 'plaid', linkedAccounts: 0, transactions: [], noAccount: true };
     }
 
     if (!plaidAccount.encryptedAccessToken) {
@@ -361,7 +438,7 @@ const fetchPlaidSnapshot = async (userId: string): Promise<PlaidSnapshot | null>
         };
 
         const transactionsPayload = (await transactionsResponse.json()) as {
-            transactions: PlaidTransaction[];
+            transactions: BankTransaction[];
         };
 
         // Write fetched transactions to a text file for inspection
@@ -381,8 +458,68 @@ const fetchPlaidSnapshot = async (userId: string): Promise<PlaidSnapshot | null>
         }
 
         return {
+            provider: 'plaid',
             linkedAccounts: plaidAccounts.length,
             transactions: transactionsPayload.transactions,
+        };
+    } catch {
+        return null;
+    }
+};
+
+const fetchMonoSnapshot = async (userId: string): Promise<BankSnapshot | null> => {
+    const userAccounts = await listConnectedAccountsByUser(userId);
+    const monoAccounts = userAccounts.filter((item) => item.provider === 'mono');
+    const monoAccount = monoAccounts[0];
+
+    if (monoAccounts.length === 0 || !monoAccount) {
+        return { provider: 'mono', linkedAccounts: 0, transactions: [], noAccount: true };
+    }
+
+    const monoSecretKey = process.env.MONO_SECRET_KEY;
+    const monoBaseUrl = process.env.MONO_API_BASE_URL ?? MONO_DEFAULT_BASE_URL;
+
+    if (!monoSecretKey) {
+        return null;
+    }
+
+    try {
+        const response = await fetch(
+            `${monoBaseUrl}/accounts/${monoAccount.accountRef}/transactions?start=${isoDateDaysAgo(90)}&end=${new Date().toISOString().slice(0, 10)}`,
+            {
+                method: 'GET',
+                headers: {
+                    accept: 'application/json',
+                    'mono-sec-key': monoSecretKey,
+                    authorization: `Bearer ${monoSecretKey}`,
+                },
+                cache: 'no-store',
+            }
+        );
+
+        if (!response.ok) {
+            if (response.status === 401 || response.status === 403) {
+                await markConnectedAccountAuthStatus(userId, 'mono', monoAccount.accountRef, 'reconnect_required');
+            }
+            return null;
+        }
+
+        await markConnectedAccountAuthStatus(userId, 'mono', monoAccount.accountRef, 'active');
+
+        const payload = (await response.json()) as Record<string, unknown>;
+        const rawTransactions =
+            Array.isArray(payload.data)
+                ? payload.data
+                : Array.isArray(payload.transactions)
+                    ? payload.transactions
+                    : payload.data && typeof payload.data === 'object' && Array.isArray((payload.data as Record<string, unknown>).transactions)
+                        ? ((payload.data as Record<string, unknown>).transactions as unknown[])
+                        : [];
+
+        return {
+            provider: 'mono',
+            linkedAccounts: monoAccounts.length,
+            transactions: normalizeMonoTransactions(rawTransactions),
         };
     } catch {
         return null;
@@ -413,9 +550,14 @@ export const getDashboardPayload = async (
 
     const storedSubscriptions = await readStoredSubscriptions();
     const plaidSnapshot = options.userId ? await fetchPlaidSnapshot(options.userId) : null;
+    const monoSnapshot = options.userId ? await fetchMonoSnapshot(options.userId) : null;
 
-    // If the user has not connected any Plaid account, return empty dashboard
-    if (options.userId && plaidSnapshot?.noAccount) {
+    const activeSnapshot =
+        (plaidSnapshot && !plaidSnapshot.noAccount ? plaidSnapshot : null)
+        ?? (monoSnapshot && !monoSnapshot.noAccount ? monoSnapshot : null);
+
+    // If the user has not connected any supported account, return empty dashboard
+    if (options.userId && !activeSnapshot && plaidSnapshot?.noAccount && monoSnapshot?.noAccount) {
         const summary: DashboardSummary = {
             monthlySpend: 0,
             unusedCount: 0,
@@ -449,8 +591,8 @@ export const getDashboardPayload = async (
         };
     }
 
-    const detectedSubscriptions = plaidSnapshot
-        ? detectSubscriptionsFromTransactions(plaidSnapshot.transactions)
+    const detectedSubscriptions = activeSnapshot
+        ? detectSubscriptionsFromTransactions(activeSnapshot.provider, activeSnapshot.transactions)
         : [];
 
     const effectiveStoredSubscriptions = detectedSubscriptions.length > 0
@@ -489,9 +631,9 @@ export const getDashboardPayload = async (
         saveablePerYear,
         shameScore,
         previousShameScore: Math.min(100, shameScore + 8),
-        linkedAccounts: plaidSnapshot?.linkedAccounts ?? 0,
-        recentTransactionCount: plaidSnapshot?.transactions.length ?? 0,
-        dataSource: detectedSubscriptions.length > 0 ? 'plaid' : 'seeded',
+        linkedAccounts: activeSnapshot?.linkedAccounts ?? 0,
+        recentTransactionCount: activeSnapshot?.transactions.length ?? 0,
+        dataSource: detectedSubscriptions.length > 0 ? (activeSnapshot?.provider ?? 'seeded') : 'seeded',
     };
 
     const alerts: DashboardAlert[] = subscriptions

@@ -89,7 +89,7 @@ export default function SubscriptionsPage() {
             <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight text-[#1A1A17]">Subscriptions</h1>
-                    <p className="text-sm text-[#6B6960]">Live subscription data from your connected accounts.</p>
+                    <p className="text-sm text-[#6B6960]">Live subscription data inferred from your connected transaction feed.</p>
                 </div>
                 <div className="flex w-full items-center gap-2 rounded-lg border border-[#D0CFC7] bg-white px-3 py-2 focus-within:border-[#FF5C35] sm:w-72">
                     <Search size={16} className="text-[#A9A79E]" />

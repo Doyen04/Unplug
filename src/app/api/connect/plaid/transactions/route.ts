@@ -14,12 +14,99 @@ const PLAID_BASE_URLS: Record<string, string> = {
     production: 'https://production.plaid.com',
 };
 
+const MONO_DEFAULT_BASE_URL = 'https://api.withmono.com/v2';
+
 const RECONNECT_ERROR_CODES = new Set(['INVALID_ACCESS_TOKEN', 'ITEM_LOGIN_REQUIRED']);
 
 const isoDateDaysAgo = (days: number): string => {
     const date = new Date();
     date.setUTCDate(date.getUTCDate() - days);
     return date.toISOString().slice(0, 10);
+};
+
+type NormalizedTransaction = {
+    transaction_id: string;
+    name: string;
+    amount: number;
+    date: string;
+    merchant_name: string | null;
+    iso_currency_code: string | null;
+    category: string[] | null;
+};
+
+const normalizeMonoTransactions = (input: unknown[]): NormalizedTransaction[] => {
+    const today = new Date().toISOString().slice(0, 10);
+
+    return input
+        .map((entry, index) => {
+            if (!entry || typeof entry !== 'object') return null;
+            const item = entry as Record<string, unknown>;
+            const merchant =
+                (typeof item.merchant === 'string' ? item.merchant : null)
+                ?? (typeof item.counterparty === 'string' ? item.counterparty : null);
+
+            const rawAmount =
+                typeof item.amount === 'number'
+                    ? item.amount
+                    : Number(item.amount ?? item.amount_in_minor_units ?? item.amount_minor ?? 0);
+
+            const direction = String(item.type ?? item.direction ?? item.flow ?? '').toLowerCase();
+            const normalizedAmount = Number.isFinite(rawAmount) ? Math.abs(rawAmount) : 0;
+            const amount = direction.includes('credit') ? -normalizedAmount : normalizedAmount;
+
+            const categoryValue = item.category;
+            const category = Array.isArray(categoryValue)
+                ? categoryValue.map((value) => String(value))
+                : typeof categoryValue === 'string' && categoryValue.trim().length > 0
+                    ? [categoryValue.trim()]
+                    : null;
+
+            const rawDate =
+                (typeof item.date === 'string' ? item.date : null)
+                ?? (typeof item.created_at === 'string' ? item.created_at : null)
+                ?? (typeof item.timestamp === 'string' ? item.timestamp : null)
+                ?? today;
+
+            const date = rawDate.slice(0, 10);
+
+            const name =
+                (typeof item.narration === 'string' && item.narration.trim().length > 0
+                    ? item.narration.trim()
+                    : null)
+                ?? (typeof item.description === 'string' && item.description.trim().length > 0
+                    ? item.description.trim()
+                    : null)
+                ?? (typeof item.name === 'string' && item.name.trim().length > 0
+                    ? item.name.trim()
+                    : null)
+                ?? merchant
+                ?? 'Mono transaction';
+
+            const transactionId =
+                (typeof item.id === 'string' && item.id.trim().length > 0
+                    ? item.id
+                    : null)
+                ?? (typeof item._id === 'string' && item._id.trim().length > 0
+                    ? item._id
+                    : null)
+                ?? `mono-${date}-${index}`;
+
+            return {
+                transaction_id: transactionId,
+                name,
+                amount,
+                date,
+                merchant_name: merchant,
+                iso_currency_code:
+                    typeof item.currency === 'string'
+                        ? item.currency
+                        : typeof item.iso_currency_code === 'string'
+                            ? item.iso_currency_code
+                            : null,
+                category,
+            } satisfies NormalizedTransaction;
+        })
+        .filter((value): value is NormalizedTransaction => Boolean(value));
 };
 
 export async function GET(request: Request) {
@@ -36,13 +123,91 @@ export async function GET(request: Request) {
     const days = Number(url.searchParams.get('days') ?? '30');
     const page = Number(url.searchParams.get('page') ?? '1');
     const pageSize = Number(url.searchParams.get('pageSize') ?? '20');
+    const providerParam = url.searchParams.get('provider');
+    const requestedProvider =
+        providerParam === 'plaid' || providerParam === 'mono'
+            ? providerParam
+            : null;
+
+    const lookbackDays = Number.isFinite(days) ? Math.min(Math.max(days, 1), 365) : 30;
+    const currentPage = Number.isFinite(page) ? Math.max(1, Math.floor(page)) : 1;
+    const safePageSize = Number.isFinite(pageSize) ? Math.min(Math.max(Math.floor(pageSize), 1), 100) : 20;
+
+    const allUserAccounts = await listConnectedAccountsByUser(userId);
 
     const connectedAccount = accountId
         ? await getConnectedAccountById(userId, accountId)
-        : (await listConnectedAccountsByUser(userId)).find((item) => item.provider === 'plaid');
+        : requestedProvider
+            ? allUserAccounts.find((item) => item.provider === requestedProvider)
+            : allUserAccounts.find((item) => item.provider === 'plaid')
+                ?? allUserAccounts.find((item) => item.provider === 'mono');
 
-    if (!connectedAccount || connectedAccount.provider !== 'plaid') {
-        return NextResponse.json({ error: 'No plaid account connected' }, { status: 404 });
+    if (!connectedAccount) {
+        return NextResponse.json({ error: 'No connected account found' }, { status: 404 });
+    }
+
+    if (connectedAccount.provider === 'mono') {
+        const monoSecretKey = process.env.MONO_SECRET_KEY;
+        const monoBaseUrl = process.env.MONO_API_BASE_URL ?? MONO_DEFAULT_BASE_URL;
+
+        if (!monoSecretKey) {
+            return NextResponse.json({ error: 'Missing MONO_SECRET_KEY' }, { status: 500 });
+        }
+
+        const monoUrl = new URL(`${monoBaseUrl}/accounts/${connectedAccount.accountRef}/transactions`);
+        monoUrl.searchParams.set('start', isoDateDaysAgo(lookbackDays));
+        monoUrl.searchParams.set('end', new Date().toISOString().slice(0, 10));
+
+        const monoResponse = await fetch(monoUrl.toString(), {
+            method: 'GET',
+            headers: {
+                accept: 'application/json',
+                'mono-sec-key': monoSecretKey,
+                authorization: `Bearer ${monoSecretKey}`,
+            },
+            cache: 'no-store',
+        });
+
+        if (!monoResponse.ok) {
+            if (monoResponse.status === 401 || monoResponse.status === 403) {
+                await markConnectedAccountAuthStatus(userId, 'mono', connectedAccount.accountRef, 'reconnect_required');
+                return NextResponse.json(
+                    { error: 'Mono connection requires relink', code: 'RECONNECT_REQUIRED' },
+                    { status: 401 }
+                );
+            }
+
+            const errorBody = await monoResponse.text();
+            return NextResponse.json(
+                { error: errorBody || 'Failed to fetch Mono transactions' },
+                { status: 502 }
+            );
+        }
+
+        await markConnectedAccountAuthStatus(userId, 'mono', connectedAccount.accountRef, 'active');
+
+        const monoPayload = (await monoResponse.json()) as Record<string, unknown>;
+        const rawTransactions =
+            Array.isArray(monoPayload.data)
+                ? monoPayload.data
+                : Array.isArray(monoPayload.transactions)
+                    ? monoPayload.transactions
+                    : monoPayload.data && typeof monoPayload.data === 'object' && Array.isArray((monoPayload.data as Record<string, unknown>).transactions)
+                        ? ((monoPayload.data as Record<string, unknown>).transactions as unknown[])
+                        : [];
+
+        const normalized = normalizeMonoTransactions(rawTransactions).sort((a, b) => b.date.localeCompare(a.date));
+        const offset = (currentPage - 1) * safePageSize;
+        const paged = normalized.slice(offset, offset + safePageSize);
+
+        return NextResponse.json({
+            provider: 'mono',
+            total: normalized.length,
+            page: currentPage,
+            pageSize: safePageSize,
+            pageCount: Math.max(1, Math.ceil(normalized.length / safePageSize)),
+            transactions: paged,
+        });
     }
 
     if (!connectedAccount.encryptedAccessToken) {
@@ -59,9 +224,6 @@ export async function GET(request: Request) {
     }
 
     const accessToken = decryptToken(connectedAccount.encryptedAccessToken);
-    const lookbackDays = Number.isFinite(days) ? Math.min(Math.max(days, 1), 365) : 30;
-    const currentPage = Number.isFinite(page) ? Math.max(1, Math.floor(page)) : 1;
-    const safePageSize = Number.isFinite(pageSize) ? Math.min(Math.max(Math.floor(pageSize), 1), 100) : 20;
     const offset = (currentPage - 1) * safePageSize;
 
     const response = await fetch(`${baseUrl}/transactions/get`, {
@@ -115,6 +277,7 @@ export async function GET(request: Request) {
     };
 
     return NextResponse.json({
+        provider: 'plaid',
         total: payload.total_transactions,
         page: currentPage,
         pageSize: safePageSize,

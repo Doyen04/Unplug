@@ -8,7 +8,6 @@ interface ConnectProviderButtonsProps {
     accountId?: string;
     compact?: boolean;
     monoPublicKey?: string;
-    monoSandboxPublicKey?: string;
 }
 
 declare global {
@@ -58,12 +57,10 @@ export const ConnectProviderButtons = ({
     accountId,
     compact = false,
     monoPublicKey = '',
-    monoSandboxPublicKey = '',
 }: ConnectProviderButtonsProps) => {
     const [plaidToken, setPlaidToken] = useState<string | null>(null);
     const [isPlaidBusy, setIsPlaidBusy] = useState(false);
     const [isMonoBusy, setIsMonoBusy] = useState(false);
-    const [activeMonoMode, setActiveMonoMode] = useState<'live' | 'sandbox' | null>(null);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
@@ -159,17 +156,11 @@ export const ConnectProviderButtons = ({
         handler.open();
     };
 
-    const handleMonoSetup = async (mode: 'live' | 'sandbox' = 'live') => {
+    const handleMonoSetup = async () => {
         setError(null);
 
-        const monoKey = mode === 'sandbox' ? monoSandboxPublicKey || monoPublicKey : monoPublicKey;
-
-        if (!monoKey) {
-            setError(
-                mode === 'sandbox'
-                    ? 'Mono sandbox key is missing. Set MONO_SANDBOX_PUBLIC_KEY (or reuse MONO_PUBLIC_KEY).'
-                    : 'Mono key is missing. Set MONO_PUBLIC_KEY.'
-            );
+        if (!monoPublicKey) {
+            setError('Mono key is missing. Set MONO_PUBLIC_KEY.');
             return;
         }
 
@@ -179,21 +170,19 @@ export const ConnectProviderButtons = ({
         }
 
         setIsMonoBusy(true);
-        setActiveMonoMode(mode);
 
         const mono = new window.Connect({
-            key: monoKey,
+            key: monoPublicKey,
             onSuccess: async ({ code }) => {
                 const response = await fetch('/api/connect/mono/exchange', {
                     method: 'POST',
                     headers: { 'content-type': 'application/json' },
-                    body: JSON.stringify({ code, mode }),
+                    body: JSON.stringify({ code }),
                 });
 
                 if (!response.ok) {
                     setError('Mono exchange failed. Try again.');
                     setIsMonoBusy(false);
-                    setActiveMonoMode(null);
                     return;
                 }
 
@@ -201,7 +190,6 @@ export const ConnectProviderButtons = ({
             },
             onClose: () => {
                 setIsMonoBusy(false);
-                setActiveMonoMode(null);
             },
         });
 
@@ -233,23 +221,12 @@ export const ConnectProviderButtons = ({
                 <div className={compact ? 'flex items-center gap-2' : 'space-y-2'}>
                     <button
                         type="button"
-                        onClick={() => void handleMonoSetup('live')}
+                        onClick={() => void handleMonoSetup()}
                         disabled={isMonoBusy}
                         className={`${monoButtonClasses} focus-visible:outline-2 focus-visible:outline-[#FF5C35] disabled:opacity-50`}
                     >
-                        {isMonoBusy && activeMonoMode === 'live' ? 'Opening Mono...' : 'Setup Mono'}
+                        {isMonoBusy ? 'Opening Mono...' : 'Setup Mono'}
                     </button>
-
-                    {provider === 'mono' ? (
-                        <button
-                            type="button"
-                            onClick={() => void handleMonoSetup('sandbox')}
-                            disabled={isMonoBusy}
-                            className={`${compact ? 'rounded-[10px] px-3 py-1' : 'w-full rounded-[10px] px-4 py-2'} border border-[#D0CFC7] bg-white text-xs font-semibold uppercase tracking-[0.08em] text-[#1A1A17] hover:border-[#1A1A17] focus-visible:outline-2 focus-visible:outline-[#FF5C35] disabled:opacity-50`}
-                        >
-                            {isMonoBusy && activeMonoMode === 'sandbox' ? 'Opening Sandbox...' : 'Setup Mono Sandbox'}
-                        </button>
-                    ) : null}
                 </div>
             )}
         </>

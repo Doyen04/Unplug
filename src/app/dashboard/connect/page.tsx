@@ -74,8 +74,6 @@ const ConnectAccountsPage = async ({ searchParams }: ConnectAccountsPageProps) =
 
     const preferredProvider = MONO_COUNTRIES.has(countryCode) ? 'mono' : 'plaid';
     const monoPublicKey = process.env.MONO_PUBLIC_KEY ?? process.env.NEXT_PUBLIC_MONO_PUBLIC_KEY ?? '';
-    const monoSandboxPublicKey =
-        process.env.MONO_SANDBOX_PUBLIC_KEY ?? process.env.NEXT_PUBLIC_MONO_SANDBOX_PUBLIC_KEY ?? '';
 
     return (
         <div className="space-y-6">
@@ -147,7 +145,6 @@ const ConnectAccountsPage = async ({ searchParams }: ConnectAccountsPageProps) =
                                                 accountId={account.id}
                                                 compact
                                                 monoPublicKey={monoPublicKey}
-                                                monoSandboxPublicKey={monoSandboxPublicKey}
                                             />
                                         ) : null}
 
@@ -183,7 +180,6 @@ const ConnectAccountsPage = async ({ searchParams }: ConnectAccountsPageProps) =
                             provider="plaid"
                             preferredProvider={preferredProvider}
                             monoPublicKey={monoPublicKey}
-                            monoSandboxPublicKey={monoSandboxPublicKey}
                         />
                     </article>
 
@@ -202,7 +198,6 @@ const ConnectAccountsPage = async ({ searchParams }: ConnectAccountsPageProps) =
                             provider="mono"
                             preferredProvider={preferredProvider}
                             monoPublicKey={monoPublicKey}
-                            monoSandboxPublicKey={monoSandboxPublicKey}
                         />
                     </article>
                 </section>

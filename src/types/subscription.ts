@@ -36,7 +36,7 @@ export interface DashboardSummary {
   previousShameScore: number;
   linkedAccounts: number;
   recentTransactionCount: number;
-  dataSource: 'plaid' | 'seeded';
+  dataSource: 'plaid' | 'mono' | 'seeded';
 }
 
 export interface DashboardAlert {

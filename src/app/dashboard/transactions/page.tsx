@@ -63,7 +63,7 @@ export default function TransactionsPage() {
             <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight text-[#1A1A17]">Transactions</h1>
-                    <p className="text-sm text-[#6B6960]">Real transaction feed from your linked Plaid account.</p>
+                    <p className="text-sm text-[#6B6960]">Real transaction feed from your linked bank account.</p>
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -104,7 +104,7 @@ export default function TransactionsPage() {
                 {isLoading ? (
                     <div className="px-5 py-6 text-sm text-[#6B6960]">Loading transactions...</div>
                 ) : isError ? (
-                    <div className="px-5 py-6 text-sm text-[#E53434]">Unable to load transactions. Connect or relink Plaid and try again.</div>
+                    <div className="px-5 py-6 text-sm text-[#E53434]">Unable to load transactions. Connect or relink a supported provider and try again.</div>
                 ) : (data?.transactions.length ?? 0) === 0 ? (
                     <div className="px-5 py-6 text-sm text-[#6B6960]">No transactions in this time window.</div>
                 ) : filteredTransactions.length === 0 ? (
