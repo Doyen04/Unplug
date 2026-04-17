@@ -30,72 +30,7 @@ const storedSubscriptionSchema: z.ZodType<StoredSubscription> = z.object({
 
 const storedSubscriptionsSchema = z.array(storedSubscriptionSchema);
 
-const seededSubscriptions: StoredSubscription[] = [
-    {
-        id: 's-1',
-        serviceName: 'Netflix',
-        amountMonthly: 19,
-        frequencyLabel: 'monthly',
-        status: 'unused',
-        confidence: 'high',
-        usageScore: 18,
-        verdict: 'unused',
-        alert: { type: 'unused', message: 'No usage signals in 45 days' },
-    },
-    {
-        id: 's-2',
-        serviceName: 'Spotify',
-        amountMonthly: 12,
-        frequencyLabel: 'monthly',
-        status: 'healthy',
-        confidence: 'high',
-        usageScore: 84,
-        verdict: 'active',
-    },
-    {
-        id: 's-3',
-        serviceName: 'Notion',
-        amountMonthly: 15,
-        frequencyLabel: 'monthly',
-        status: 'price-hike',
-        confidence: 'medium',
-        usageScore: 62,
-        verdict: 'likely_unused',
-        alert: { type: 'price-hike', message: 'Up $2.00 vs last month' },
-    },
-    {
-        id: 's-4',
-        serviceName: 'Duolingo',
-        amountMonthly: 13,
-        frequencyLabel: 'monthly',
-        status: 'trial-ending',
-        confidence: 'medium',
-        usageScore: 50,
-        verdict: 'likely_unused',
-        alert: { type: 'trial-ending', message: 'Trial converts in 2 days' },
-    },
-    {
-        id: 's-5',
-        serviceName: 'YouTube Premium',
-        amountMonthly: 14,
-        frequencyLabel: 'monthly',
-        status: 'healthy',
-        confidence: 'high',
-        usageScore: 76,
-        verdict: 'active',
-    },
-    {
-        id: 's-6',
-        serviceName: 'Adobe CC',
-        amountMonthly: 61,
-        frequencyLabel: 'monthly',
-        status: 'unused',
-        confidence: 'medium',
-        usageScore: 28,
-        verdict: 'unused',
-        alert: { type: 'dormant', message: 'Likely unused based on recent signals' },
-    },
-];
+const isProviderScopedId = (id: string): boolean => id.startsWith('plaid-') || id.startsWith('mono-');
 
 const ensureDataFile = async (): Promise<void> => {
     await mkdir(dirname(dataFilePath), { recursive: true });
@@ -103,7 +38,7 @@ const ensureDataFile = async (): Promise<void> => {
     try {
         await readFile(dataFilePath, 'utf-8');
     } catch {
-        await writeFile(dataFilePath, JSON.stringify(seededSubscriptions, null, 2), 'utf-8');
+        await writeFile(dataFilePath, JSON.stringify([], null, 2), 'utf-8');
     }
 };
 
@@ -114,11 +49,17 @@ export const readStoredSubscriptions = async (): Promise<StoredSubscription[]> =
     const validated = storedSubscriptionsSchema.safeParse(parsed);
 
     if (!validated.success) {
-        await writeFile(dataFilePath, JSON.stringify(seededSubscriptions, null, 2), 'utf-8');
-        return seededSubscriptions;
+        await writeFile(dataFilePath, JSON.stringify([], null, 2), 'utf-8');
+        return [];
     }
 
-    return validated.data;
+    const providerScoped = validated.data.filter((item) => isProviderScopedId(item.id));
+
+    if (providerScoped.length !== validated.data.length) {
+        await writeFile(dataFilePath, JSON.stringify(providerScoped, null, 2), 'utf-8');
+    }
+
+    return providerScoped;
 };
 
 export const writeStoredSubscriptions = async (

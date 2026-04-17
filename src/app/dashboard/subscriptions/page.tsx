@@ -2,14 +2,29 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Search, AlertTriangle, RefreshCcw } from 'lucide-react';
 
 import { SubscriptionRow } from '../../../components/features/subscriptions/SubscriptionRow';
 import { useDashboardData } from '../../../hooks/useDashboardData';
 import { DASHBOARD_FILTER_OPTIONS } from '../../../lib/constants/dashboard';
+import type { DashboardProvider } from '../../../types/subscription';
+
+const providerLabel = (provider: DashboardProvider): string =>
+    provider === 'plaid' ? 'Plaid' : 'Mono';
 
 export default function SubscriptionsPage() {
+    const router = useRouter();
+    const searchParams = useSearchParams();
     const [search, setSearch] = useState('');
+
+    const initialProviderParam = searchParams.get('provider');
+    const initialProvider =
+        initialProviderParam === 'plaid' || initialProviderParam === 'mono'
+            ? initialProviderParam
+            : undefined;
+    const [selectedProvider, setSelectedProvider] = useState<DashboardProvider | undefined>(initialProvider);
+
     const {
         subscriptions,
         totalSubscriptions,
@@ -27,12 +42,46 @@ export default function SubscriptionsPage() {
         clearPendingUndo,
         pendingUndoId,
         isCancelling,
+        providers,
     } = useDashboardData({
         initialFilter: 'all',
         initialPage: 1,
         pageSize: 20,
         includeDebrief: false,
+        provider: selectedProvider,
     });
+
+    useEffect(() => {
+        if (!providers.active) {
+            if (selectedProvider) {
+                setSelectedProvider(undefined);
+            }
+            return;
+        }
+
+        if (!selectedProvider || !providers.connected.includes(selectedProvider)) {
+            setSelectedProvider(providers.active);
+        }
+    }, [providers.active, providers.connected, selectedProvider]);
+
+    useEffect(() => {
+        const currentProviderParam = searchParams.get('provider');
+        const currentProvider =
+            currentProviderParam === 'plaid' || currentProviderParam === 'mono'
+                ? currentProviderParam
+                : undefined;
+
+        if (currentProvider === selectedProvider) return;
+
+        const params = new URLSearchParams(searchParams.toString());
+        if (selectedProvider) {
+            params.set('provider', selectedProvider);
+        } else {
+            params.delete('provider');
+        }
+
+        router.replace(`/dashboard/subscriptions?${params.toString()}`);
+    }, [router, searchParams, selectedProvider]);
 
     useEffect(() => {
         if (!pendingUndoId) return;
@@ -65,6 +114,29 @@ export default function SubscriptionsPage() {
                     />
                 </div>
             </header>
+
+            {providers.hasBoth ? (
+                <div className="flex items-center gap-2 rounded-full bg-[#F4F3EE] p-1 w-max">
+                    {providers.connected.map((provider) => (
+                        <button
+                            key={provider}
+                            type="button"
+                            onClick={() => {
+                                setSelectedProvider(provider);
+                                setPage(1);
+                            }}
+                            className={`rounded-full border px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.06em] ${providers.active === provider
+                                ? 'border-[#FF5C35] bg-[#FF5C35] text-white'
+                                : 'border-[#D0CFC7] text-[#6B6960] hover:border-[#FF5C35] hover:text-[#C93A1A]'
+                                }`}
+                        >
+                            {providerLabel(provider)}
+                        </button>
+                    ))}
+                </div>
+            ) : providers.active ? (
+                <p className="text-[11px] uppercase tracking-[0.08em] text-[#A9A79E]">Using {providerLabel(providers.active)} data</p>
+            ) : null}
 
             <div className="flex gap-2 overflow-x-auto pb-1">
                 {DASHBOARD_FILTER_OPTIONS.map((item) => (
@@ -113,8 +185,15 @@ export default function SubscriptionsPage() {
                                 Check connections
                             </Link>
                         </div>
+                    ) : providers.connected.length === 0 ? (
+                        <div className="rounded-xl border border-[#E8E7E0] bg-[#FAFAF7] p-4 text-sm text-[#6B6960]">
+                            <p>No connected providers yet, so there are no subscriptions to analyze.</p>
+                            <Link href="/dashboard/connect" className="mt-2 inline-block text-xs font-semibold uppercase tracking-[0.06em] text-[#FF5C35] hover:text-[#C93A1A]">
+                                Connect account
+                            </Link>
+                        </div>
                     ) : (
-                        <p className="text-sm text-[#6B6960]">No subscriptions found.</p>
+                        <p className="text-sm text-[#6B6960]">No subscriptions found for this provider.</p>
                     )
                 ) : (
                     <div className="space-y-3">

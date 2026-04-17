@@ -1,10 +1,17 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { Search, Receipt } from 'lucide-react';
 
+import { useDashboardData } from '../../../hooks/useDashboardData';
 import { formatCurrency } from '../../../lib/utils/format';
+import type { DashboardProvider } from '../../../types/subscription';
+
+const providerLabel = (provider: DashboardProvider): string =>
+    provider === 'plaid' ? 'Plaid' : 'Mono';
 
 interface PlaidTransaction {
     transaction_id: string;
@@ -17,6 +24,7 @@ interface PlaidTransaction {
 }
 
 interface TransactionsResponse {
+    provider: DashboardProvider;
     total: number;
     page: number;
     pageSize: number;
@@ -24,27 +32,87 @@ interface TransactionsResponse {
     transactions: PlaidTransaction[];
 }
 
-const fetchTransactions = async (days: number, page: number, pageSize: number): Promise<TransactionsResponse> => {
+const fetchTransactions = async (
+    days: number,
+    page: number,
+    pageSize: number,
+    provider?: DashboardProvider
+): Promise<TransactionsResponse> => {
     const params = new URLSearchParams({
         days: String(days),
         page: String(page),
         pageSize: String(pageSize),
     });
+
+    if (provider) {
+        params.set('provider', provider);
+    }
+
     const response = await fetch(`/api/connect/plaid/transactions?${params.toString()}`, { cache: 'no-store' });
     if (!response.ok) throw new Error('Failed to load transactions');
     return response.json();
 };
 
 export default function TransactionsPage() {
+    const router = useRouter();
+    const searchParams = useSearchParams();
     const [days, setDays] = useState(90);
     const [page, setPage] = useState(1);
     const [search, setSearch] = useState('');
     const pageSize = 20;
 
+    const initialProviderParam = searchParams.get('provider');
+    const initialProvider =
+        initialProviderParam === 'plaid' || initialProviderParam === 'mono'
+            ? initialProviderParam
+            : undefined;
+    const [selectedProvider, setSelectedProvider] = useState<DashboardProvider | undefined>(initialProvider);
+
+    const { providers } = useDashboardData({
+        initialFilter: 'all',
+        initialPage: 1,
+        pageSize: 1,
+        includeDebrief: false,
+        provider: selectedProvider,
+    });
+
+    useEffect(() => {
+        if (!providers.active) {
+            if (selectedProvider) {
+                setSelectedProvider(undefined);
+            }
+            return;
+        }
+
+        if (!selectedProvider || !providers.connected.includes(selectedProvider)) {
+            setSelectedProvider(providers.active);
+        }
+    }, [providers.active, providers.connected, selectedProvider]);
+
+    useEffect(() => {
+        const currentProviderParam = searchParams.get('provider');
+        const currentProvider =
+            currentProviderParam === 'plaid' || currentProviderParam === 'mono'
+                ? currentProviderParam
+                : undefined;
+
+        if (currentProvider === selectedProvider) return;
+
+        const params = new URLSearchParams(searchParams.toString());
+        if (selectedProvider) {
+            params.set('provider', selectedProvider);
+        } else {
+            params.delete('provider');
+        }
+
+        router.replace(`/dashboard/transactions?${params.toString()}`);
+    }, [router, searchParams, selectedProvider]);
+
     const { data, isLoading, isError } = useQuery({
-        queryKey: ['transactions-page', days, page, pageSize],
-        queryFn: () => fetchTransactions(days, page, pageSize),
+        queryKey: ['transactions-page', days, page, pageSize, selectedProvider ?? 'auto'],
+        queryFn: () => fetchTransactions(days, page, pageSize, selectedProvider),
         retry: false,
+        enabled: Boolean(selectedProvider),
     });
 
     const filteredTransactions = useMemo(() => {
@@ -86,6 +154,29 @@ export default function TransactionsPage() {
                 </div>
             </header>
 
+            {providers.hasBoth ? (
+                <div className="flex items-center gap-2 rounded-full bg-[#F4F3EE] p-1 w-max">
+                    {providers.connected.map((provider) => (
+                        <button
+                            key={provider}
+                            type="button"
+                            onClick={() => {
+                                setSelectedProvider(provider);
+                                setPage(1);
+                            }}
+                            className={`rounded-full border px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.06em] ${providers.active === provider
+                                ? 'border-[#FF5C35] bg-[#FF5C35] text-white'
+                                : 'border-[#D0CFC7] text-[#6B6960] hover:border-[#FF5C35] hover:text-[#C93A1A]'
+                                }`}
+                        >
+                            {providerLabel(provider)}
+                        </button>
+                    ))}
+                </div>
+            ) : providers.active ? (
+                <p className="text-[11px] uppercase tracking-[0.08em] text-[#A9A79E]">Using {providerLabel(providers.active)} data</p>
+            ) : null}
+
             <div className="flex w-full items-center gap-2 rounded-lg border border-[#D0CFC7] bg-white px-3 py-2 focus-within:border-[#FF5C35] sm:max-w-sm">
                 <Search size={16} className="text-[#A9A79E]" />
                 <input
@@ -105,6 +196,10 @@ export default function TransactionsPage() {
                     <div className="px-5 py-6 text-sm text-[#6B6960]">Loading transactions...</div>
                 ) : isError ? (
                     <div className="px-5 py-6 text-sm text-[#E53434]">Unable to load transactions. Connect or relink a supported provider and try again.</div>
+                ) : !selectedProvider ? (
+                    <div className="px-5 py-6 text-sm text-[#6B6960]">
+                        No connected provider yet. <Link href="/dashboard/connect" className="font-semibold text-[#FF5C35] hover:text-[#C93A1A]">Connect an account</Link> to view transactions.
+                    </div>
                 ) : (data?.transactions.length ?? 0) === 0 ? (
                     <div className="px-5 py-6 text-sm text-[#6B6960]">No transactions in this time window.</div>
                 ) : filteredTransactions.length === 0 ? (

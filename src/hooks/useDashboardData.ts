@@ -12,6 +12,7 @@ import {
 } from '../lib/client/dashboard-api';
 import type {
   DashboardFilter,
+  DashboardProvider,
   DashboardPayload,
   Subscription,
 } from '../types/subscription';
@@ -22,6 +23,7 @@ export interface DashboardData {
   totalSubscriptions: number;
   filterCounts: DashboardPayload['pagination']['counts'];
   alerts: DashboardPayload['alerts'];
+  providers: DashboardPayload['providers'];
   debrief: DashboardDebrief | null;
   isLoading: boolean;
   isDebriefLoading: boolean;
@@ -49,7 +51,12 @@ const EMPTY_PAYLOAD: DashboardPayload = {
     previousShameScore: 0,
     linkedAccounts: 0,
     recentTransactionCount: 0,
-    dataSource: 'seeded',
+    dataSource: 'none',
+  },
+  providers: {
+    connected: [],
+    active: null,
+    hasBoth: false,
   },
   subscriptions: [],
   alerts: [],
@@ -74,6 +81,7 @@ interface UseDashboardDataOptions {
   initialPage?: number;
   pageSize?: number;
   includeDebrief?: boolean;
+  provider?: DashboardProvider;
 }
 
 export const useDashboardData = (
@@ -87,8 +95,13 @@ export const useDashboardData = (
   const includeDebrief = options.includeDebrief ?? true;
 
   const dashboardQuery = useQuery({
-    queryKey: ['dashboard', filter, page, pageSize],
-    queryFn: () => fetchDashboardPayload({ filter, page, pageSize }),
+    queryKey: ['dashboard', filter, page, pageSize, options.provider ?? 'auto'],
+    queryFn: () => fetchDashboardPayload({
+      filter,
+      page,
+      pageSize,
+      provider: options.provider,
+    }),
   });
 
   const debriefQuery = useQuery({
@@ -123,6 +136,7 @@ export const useDashboardData = (
     totalSubscriptions: payload.pagination.total,
     filterCounts: payload.pagination.counts,
     alerts: payload.alerts,
+    providers: payload.providers,
     debrief: includeDebrief ? debriefQuery.data ?? null : null,
     isLoading: dashboardQuery.isLoading,
     isDebriefLoading: includeDebrief ? debriefQuery.isLoading : false,

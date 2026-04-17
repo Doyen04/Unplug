@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { Bell, Flame, Layers, Link as LinkIcon, TrendingUp, AlertTriangle, Check, Search, ArrowRight, X, ArrowUpRight, ArrowDownRight, Receipt } from 'lucide-react';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer, Cell, ReferenceLine } from 'recharts';
 
 import { fetchCurrentUser, fetchRecentTransactions } from '../../lib/client/dashboard-api';
@@ -12,27 +12,36 @@ import { DASHBOARD_FILTER_OPTIONS } from '../../lib/constants/dashboard';
 import { formatCurrency, getNameInitials } from '../../lib/utils/format';
 import { useDashboardData } from '../../hooks/useDashboardData';
 import { interpolateScoreColor } from '../../lib/utils/shameScore';
-import type { DashboardFilter } from '../../types/subscription';
+import type { DashboardFilter, DashboardProvider } from '../../types/subscription';
 import { SubscriptionRow } from '../../components/features/subscriptions/SubscriptionRow';
 
-const MOCK_CHART_DATA = [
-  { name: 'Nov', spend: 12000 },
-  { name: 'Dec', spend: 18000 },
-  { name: 'Jan', spend: 13500 },
-  { name: 'Feb', spend: 20000 },
-  { name: 'Mar', spend: 16000 },
-  { name: 'Apr', spend: 28000 },
-];
+const startOfWeek = (date: Date): Date => {
+  const normalized = new Date(date);
+  const day = normalized.getDay();
+  const diff = (day + 6) % 7;
+  normalized.setDate(normalized.getDate() - diff);
+  normalized.setHours(0, 0, 0, 0);
+  return normalized;
+};
+
+const providerLabel = (provider: DashboardProvider): string =>
+  provider === 'plaid' ? 'Plaid' : 'Mono';
 
 export default function DashboardPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const pathname = usePathname();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [isAlertsOpen, setIsAlertsOpen] = useState(false);
   const [ledgerTab, setLedgerTab] = useState<'subscriptions' | 'transactions'>('subscriptions');
   const [userInitials, setUserInitials] = useState('?');
+
+  const initialProviderParam = searchParams.get('provider');
+  const initialProvider =
+    initialProviderParam === 'plaid' || initialProviderParam === 'mono'
+      ? initialProviderParam
+      : undefined;
+  const [selectedProvider, setSelectedProvider] = useState<DashboardProvider | undefined>(initialProvider);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -51,6 +60,7 @@ export default function DashboardPage() {
 
   const {
     summary,
+    providers,
     subscriptions,
     totalSubscriptions,
     filterCounts,
@@ -70,12 +80,23 @@ export default function DashboardPage() {
   } = useDashboardData({
     initialFilter,
     initialPage,
+    provider: selectedProvider,
   });
 
-  const transactionsProvider =
-    summary.dataSource === 'plaid' || summary.dataSource === 'mono'
-      ? summary.dataSource
-      : undefined;
+  useEffect(() => {
+    if (!providers.active) {
+      if (selectedProvider) {
+        setSelectedProvider(undefined);
+      }
+      return;
+    }
+
+    if (!selectedProvider || !providers.connected.includes(selectedProvider)) {
+      setSelectedProvider(providers.active);
+    }
+  }, [providers.active, providers.connected, selectedProvider]);
+
+  const transactionsProvider = providers.active ?? undefined;
 
   const {
     data: transactionsData,
@@ -83,23 +104,67 @@ export default function DashboardPage() {
   } = useQuery({
     queryKey: ['dashboard-transactions', transactionsProvider],
     queryFn: () => fetchRecentTransactions(60, transactionsProvider),
-    enabled: summary.linkedAccounts > 0,
+    enabled: Boolean(transactionsProvider),
     retry: false,
   });
 
   const recentTransactions = (transactionsData?.transactions ?? []).slice(0, 5);
 
+  const chartData = useMemo(() => {
+    const buckets = new Map<string, { name: string; spend: number; order: number }>();
+
+    for (const transaction of transactionsData?.transactions ?? []) {
+      if (transaction.amount <= 0) continue;
+
+      const date = new Date(transaction.date);
+      if (Number.isNaN(date.getTime())) continue;
+
+      const weekStart = startOfWeek(date);
+      const key = weekStart.toISOString().slice(0, 10);
+      const existing = buckets.get(key);
+
+      if (existing) {
+        existing.spend += transaction.amount;
+        continue;
+      }
+
+      buckets.set(key, {
+        name: weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        spend: transaction.amount,
+        order: weekStart.getTime(),
+      });
+    }
+
+    return Array.from(buckets.values())
+      .sort((a, b) => a.order - b.order)
+      .slice(-6)
+      .map(({ name, spend }) => ({ name, spend: Number(spend.toFixed(2)) }));
+  }, [transactionsData?.transactions]);
+
   useEffect(() => {
     const currentFilter = searchParams.get('filter') ?? 'all';
     const currentPage = Number(searchParams.get('page') ?? '1') || 1;
 
-    if (currentFilter === filter && currentPage === page) return;
+    const currentProviderParam = searchParams.get('provider');
+    const currentProvider =
+      currentProviderParam === 'plaid' || currentProviderParam === 'mono'
+        ? currentProviderParam
+        : undefined;
+
+    if (currentFilter === filter && currentPage === page && currentProvider === selectedProvider) return;
 
     const params = new URLSearchParams(searchParams.toString());
     params.set('filter', filter);
     params.set('page', String(page));
+
+    if (selectedProvider) {
+      params.set('provider', selectedProvider);
+    } else {
+      params.delete('provider');
+    }
+
     router.replace(`?${params.toString()}`);
-  }, [filter, page, pathname, router, searchParams]);
+  }, [filter, page, router, searchParams, selectedProvider]);
 
   useEffect(() => {
     if (!pendingUndoId) return;
@@ -112,8 +177,14 @@ export default function DashboardPage() {
   const scoreAngleRadians = (summary.shameScore / 100) * Math.PI * 2 - Math.PI / 2;
   const dialX = 22 + 20 * Math.cos(scoreAngleRadians);
   const dialY = 22 + 20 * Math.sin(scoreAngleRadians);
-  const previousPeriodSpend = 9200;
-  const spendDelta = summary.monthlySpend - previousPeriodSpend;
+  const comparisonSplitIndex = Math.ceil(chartData.length / 2);
+  const previousPeriodSpend = chartData
+    .slice(0, comparisonSplitIndex)
+    .reduce((sum, bucket) => sum + bucket.spend, 0);
+  const currentPeriodSpend = chartData
+    .slice(comparisonSplitIndex)
+    .reduce((sum, bucket) => sum + bucket.spend, 0);
+  const spendDelta = currentPeriodSpend - previousPeriodSpend;
   const spendDeltaPercent = previousPeriodSpend > 0 ? Math.round((spendDelta / previousPeriodSpend) * 100) : 0;
 
   return (
@@ -161,8 +232,14 @@ export default function DashboardPage() {
             <p className="mt-1.5 text-xs text-[#A9A79E]">burning every month</p>
           </div>
           <div className="inline-flex items-center gap-1.5 text-[11px] text-[#B56B6B]">
-            <ArrowUpRight size={12} />
-            <span>12% vs last month</span>
+            {summary.recentTransactionCount > 0 ? (
+              <>
+                <ArrowUpRight size={12} />
+                <span>{summary.recentTransactionCount} recent charges analyzed</span>
+              </>
+            ) : (
+              <span>Waiting for transaction data</span>
+            )}
           </div>
         </article>
 
@@ -179,7 +256,7 @@ export default function DashboardPage() {
           </div>
           <div className="inline-flex items-center gap-1.5 text-[11px] text-[#6B6960]">
             <ArrowUpRight size={12} />
-            <span>2 added this month</span>
+            <span>{filterCounts.active} active in this provider</span>
           </div>
         </article>
 
@@ -196,7 +273,7 @@ export default function DashboardPage() {
           </div>
           <div className="inline-flex items-center gap-1.5 text-[11px] text-[#6B6960]">
             <ArrowUpRight size={12} />
-            <span>Last synced 2h ago</span>
+            <span>{providers.active ? `${providerLabel(providers.active)} feed selected` : 'No provider connected'}</span>
           </div>
         </article>
 
@@ -238,8 +315,21 @@ export default function DashboardPage() {
             </div>
           </div>
           <div className="inline-flex items-center gap-1.5 text-[11px] text-[#5E9273]">
-            <ArrowDownRight size={12} />
-            <span>Improving</span>
+            {chartData.length > 1 ? (
+              spendDelta <= 0 ? (
+                <>
+                  <ArrowDownRight size={12} />
+                  <span>Improving</span>
+                </>
+              ) : (
+                <>
+                  <ArrowUpRight size={12} />
+                  <span>Trend is rising</span>
+                </>
+              )
+            ) : (
+              <span>Needs more transaction history</span>
+            )}
           </div>
         </article>
       </section>
@@ -257,38 +347,48 @@ export default function DashboardPage() {
             <div className="text-right">
               <p className="font-display text-2xl font-bold text-[#1A1A17]">{formatCurrency(summary.monthlySpend)}</p>
               <p className="mt-1 text-[11px] uppercase tracking-[0.08em] text-[#A9A79E]">total this period</p>
-              <p className="mt-1 inline-flex items-center gap-1 text-[11px] text-[#A9A79E]">
-                vs {formatCurrency(previousPeriodSpend)} last period
-                {spendDelta >= 0 ? <ArrowUpRight size={11} className="text-[#E8860A]" /> : <ArrowDownRight size={11} className="text-[#1C9E5B]" />}
-                <span className={spendDelta >= 0 ? 'text-[#E8860A]' : 'text-[#1C9E5B]'}>{Math.abs(spendDeltaPercent)}%</span>
-              </p>
+              {previousPeriodSpend > 0 && currentPeriodSpend > 0 ? (
+                <p className="mt-1 inline-flex items-center gap-1 text-[11px] text-[#A9A79E]">
+                  vs {formatCurrency(previousPeriodSpend)} previous period
+                  {spendDelta >= 0 ? <ArrowUpRight size={11} className="text-[#E8860A]" /> : <ArrowDownRight size={11} className="text-[#1C9E5B]" />}
+                  <span className={spendDelta >= 0 ? 'text-[#E8860A]' : 'text-[#1C9E5B]'}>{Math.abs(spendDeltaPercent)}%</span>
+                </p>
+              ) : (
+                <p className="mt-1 text-[11px] text-[#A9A79E]">Need more transactions for trend comparison.</p>
+              )}
             </div>
           </div>
           <div className="mt-6">
             <div className="h-55 w-full min-w-0 sm:h-60 lg:h-65 group-hover:opacity-100 transition-opacity">
-              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={160}>
-                <BarChart data={MOCK_CHART_DATA} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
-                  <ReferenceLine y={0} stroke="#E8E7E0" strokeWidth={1} />
-                  <XAxis
-                    dataKey="name"
-                    axisLine={false}
-                    tickLine={false}
-                    style={{ textTransform: 'uppercase' }}
-                    tick={{ fill: '#A9A79E', fontSize: 10, fontWeight: 500 }}
-                    dy={22}
-                  />
-                  <Tooltip
-                    cursor={{ fill: 'transparent' }}
-                    contentStyle={{ borderRadius: '10px', border: '1px solid #E8E7E0', boxShadow: '0 4px 16px rgba(0,0,0,0.04)', fontSize: '12px', fontWeight: 600, color: '#1A1A17' }}
-                    formatter={(value: any) => [formatCurrency(Number(value) || 0), 'Spend']}
-                  />
-                  <Bar dataKey="spend" radius={[4, 4, 0, 0]}>
-                    {MOCK_CHART_DATA.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill="#FF5C35" className="opacity-80 hover:opacity-100 transition-opacity duration-300" />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+              {chartData.length === 0 ? (
+                <div className="flex h-full items-center justify-center text-sm text-[#6B6960]">
+                  No provider transactions yet.
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={160}>
+                  <BarChart data={chartData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+                    <ReferenceLine y={0} stroke="#E8E7E0" strokeWidth={1} />
+                    <XAxis
+                      dataKey="name"
+                      axisLine={false}
+                      tickLine={false}
+                      style={{ textTransform: 'uppercase' }}
+                      tick={{ fill: '#A9A79E', fontSize: 10, fontWeight: 500 }}
+                      dy={22}
+                    />
+                    <Tooltip
+                      cursor={{ fill: 'transparent' }}
+                      contentStyle={{ borderRadius: '10px', border: '1px solid #E8E7E0', boxShadow: '0 4px 16px rgba(0,0,0,0.04)', fontSize: '12px', fontWeight: 600, color: '#1A1A17' }}
+                      formatter={(value: number) => [formatCurrency(Number(value) || 0), 'Spend']}
+                    />
+                    <Bar dataKey="spend" radius={[4, 4, 0, 0]}>
+                      {chartData.map((_, index) => (
+                        <Cell key={`cell-${index}`} fill="#FF5C35" className="opacity-80 hover:opacity-100 transition-opacity duration-300" />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
             </div>
           </div>
         </article>
@@ -332,7 +432,7 @@ export default function DashboardPage() {
       </section>
 
       {/* ROW 3: BANNER (If no accounts linked) */}
-      {summary.linkedAccounts === 0 && !isLoading && (
+      {providers.connected.length === 0 && !isLoading && (
         <section className="flex flex-col gap-5 rounded-2xl border border-[#E8E7E0] bg-[#1A1A17] p-6 text-white sm:flex-row sm:items-center sm:justify-between shadow-[0_8px_32px_rgba(26,26,23,0.12)] transition-all hover:shadow-[0_8px_32px_rgba(26,26,23,0.2)]">
           <div className="flex items-center gap-5">
             <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#31302A] text-[#FF5C35] ring-1 ring-[#FF5C35]/20">
@@ -351,38 +451,73 @@ export default function DashboardPage() {
 
       {/* ROW 4: SUBSCRIPTIONS + TRANSACTIONS (TABBED) */}
       <section id="subscriptions" className="group rounded-2xl border border-[#E8E7E0] bg-white shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] transition-all duration-300 hover:shadow-[0_4px_24px_rgba(0,0,0,0.06)] hover:border-[#D0CFC7]">
-        <div className="flex flex-col justify-between border-b border-[#E8E7E0] p-6 sm:flex-row sm:items-center">
-          <div className="flex items-center gap-2 rounded-full bg-[#F4F3EE] p-1">
-            <button
-              type="button"
-              onClick={() => setLedgerTab('subscriptions')}
-              className={`rounded-full border px-5 py-1.5 text-xs font-semibold uppercase tracking-[0.06em] transition-colors ${ledgerTab === 'subscriptions' ? 'border-[#FF5C35] bg-[#FF5C35] text-white' : 'border-[#D0CFC7] text-[#6B6960] hover:border-[#FF5C35] hover:text-[#C93A1A]'}`}
-            >
-              Your Subscriptions
-            </button>
-            <button
-              type="button"
-              onClick={() => setLedgerTab('transactions')}
-              className={`rounded-full border px-5 py-1.5 text-xs font-semibold uppercase tracking-[0.06em] transition-colors ${ledgerTab === 'transactions' ? 'border-[#FF5C35] bg-[#FF5C35] text-white' : 'border-[#D0CFC7] text-[#6B6960] hover:border-[#FF5C35] hover:text-[#C93A1A]'}`}
-            >
-              Recent Transactions
-            </button>
-          </div>
-
-          {ledgerTab === 'subscriptions' ? (
-            <div className="mt-4 flex w-full max-w-sm items-center gap-2 rounded-[10px] border border-[#D0CFC7] bg-[#FAFAF7] px-3 py-2 sm:mt-0 focus-within:border-[#FF5C35] focus-within:bg-white transition-colors">
-              <Search size={16} className="text-[#A9A79E]" />
-              <input
-                type="text"
-                placeholder="Search subscriptions..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full border-none bg-transparent text-sm text-[#1A1A17] outline-none placeholder:text-[#A9A79E]"
-              />
+        <div className="border-b border-[#E8E7E0] p-6">
+          {providers.hasBoth ? (
+            <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-[11px] uppercase tracking-[0.08em] text-[#A9A79E]">Choose data source</p>
+              <div className="flex items-center gap-2 rounded-full bg-[#F4F3EE] p-1">
+                {providers.connected.map((provider) => (
+                  <button
+                    key={provider}
+                    type="button"
+                    onClick={() => {
+                      setSelectedProvider(provider);
+                      setPage(1);
+                    }}
+                    className={`rounded-full border px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.06em] transition-colors ${providers.active === provider
+                      ? 'border-[#FF5C35] bg-[#FF5C35] text-white'
+                      : 'border-[#D0CFC7] text-[#6B6960] hover:border-[#FF5C35] hover:text-[#C93A1A]'
+                      }`}
+                  >
+                    {providerLabel(provider)}
+                  </button>
+                ))}
+              </div>
             </div>
-          ) : (
-            <Link href="/dashboard/transactions" className="mt-4 text-xs font-bold uppercase tracking-[0.08em] text-[#FF5C35] hover:text-[#C93A1A] sm:mt-0">View all &rarr;</Link>
-          )}
+          ) : providers.active ? (
+            <p className="mb-4 text-[11px] uppercase tracking-[0.08em] text-[#A9A79E]">
+              Using {providerLabel(providers.active)} data
+            </p>
+          ) : null}
+
+          <div className="flex flex-col justify-between sm:flex-row sm:items-center">
+            <div className="flex items-center gap-2 rounded-full bg-[#F4F3EE] p-1">
+              <button
+                type="button"
+                onClick={() => setLedgerTab('subscriptions')}
+                className={`rounded-full border px-5 py-1.5 text-xs font-semibold uppercase tracking-[0.06em] transition-colors ${ledgerTab === 'subscriptions' ? 'border-[#FF5C35] bg-[#FF5C35] text-white' : 'border-[#D0CFC7] text-[#6B6960] hover:border-[#FF5C35] hover:text-[#C93A1A]'}`}
+              >
+                Your Subscriptions
+              </button>
+              <button
+                type="button"
+                onClick={() => setLedgerTab('transactions')}
+                className={`rounded-full border px-5 py-1.5 text-xs font-semibold uppercase tracking-[0.06em] transition-colors ${ledgerTab === 'transactions' ? 'border-[#FF5C35] bg-[#FF5C35] text-white' : 'border-[#D0CFC7] text-[#6B6960] hover:border-[#FF5C35] hover:text-[#C93A1A]'}`}
+              >
+                Recent Transactions
+              </button>
+            </div>
+
+            {ledgerTab === 'subscriptions' ? (
+              <div className="mt-4 flex w-full max-w-sm items-center gap-2 rounded-[10px] border border-[#D0CFC7] bg-[#FAFAF7] px-3 py-2 sm:mt-0 focus-within:border-[#FF5C35] focus-within:bg-white transition-colors">
+                <Search size={16} className="text-[#A9A79E]" />
+                <input
+                  type="text"
+                  placeholder="Search subscriptions..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full border-none bg-transparent text-sm text-[#1A1A17] outline-none placeholder:text-[#A9A79E]"
+                />
+              </div>
+            ) : (
+              <Link
+                href={selectedProvider ? `/dashboard/transactions?provider=${selectedProvider}` : '/dashboard/transactions'}
+                className="mt-4 text-xs font-bold uppercase tracking-[0.08em] text-[#FF5C35] hover:text-[#C93A1A] sm:mt-0"
+              >
+                View all &rarr;
+              </Link>
+            )}
+          </div>
         </div>
 
         {ledgerTab === 'subscriptions' ? (

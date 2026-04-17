@@ -2,6 +2,7 @@ import type {
     DashboardFilter,
     DashboardSummary,
     DashboardAlert,
+    DashboardProvider,
     Subscription,
 } from '../../types/subscription';
 import { calculateUsageScore } from '../usage-signals/calculateUsageScore';
@@ -18,6 +19,11 @@ import {
 
 export interface DashboardPayload {
     summary: DashboardSummary;
+    providers: {
+        connected: DashboardProvider[];
+        active: DashboardProvider | null;
+        hasBoth: boolean;
+    };
     subscriptions: Subscription[];
     alerts: DashboardAlert[];
     pagination: {
@@ -41,6 +47,7 @@ interface DashboardQueryOptions {
     page?: number;
     pageSize?: number;
     userId?: string;
+    provider?: DashboardProvider;
 }
 
 interface BankTransaction {
@@ -53,7 +60,7 @@ interface BankTransaction {
 }
 
 interface BankSnapshot {
-    provider: 'plaid' | 'mono';
+    provider: DashboardProvider;
     linkedAccounts: number;
     transactions: BankTransaction[];
     noAccount?: boolean;
@@ -543,6 +550,11 @@ const applyFilter = (subscriptions: Subscription[], filter: DashboardFilter): Su
     );
 };
 
+const filterStoredSubscriptionsByProvider = (
+    subscriptions: StoredSubscription[],
+    provider: DashboardProvider
+): StoredSubscription[] => subscriptions.filter((item) => item.id.startsWith(`${provider}-`));
+
 export const getDashboardPayload = async (
     options: DashboardQueryOptions = {}
 ): Promise<DashboardPayload> => {
@@ -550,47 +562,40 @@ export const getDashboardPayload = async (
     const pageSize = Math.min(20, Math.max(1, options.pageSize ?? 4));
     const requestedPage = Math.max(1, options.page ?? 1);
 
-    const storedSubscriptions = await readStoredSubscriptions();
-    const plaidSnapshot = options.userId ? await fetchPlaidSnapshot(options.userId) : null;
-    const monoSnapshot = options.userId ? await fetchMonoSnapshot(options.userId) : null;
     const userAccounts = options.userId ? await listConnectedAccountsByUser(options.userId) : [];
+    const connectedProviders = Array.from(
+        new Set(userAccounts.map((account) => account.provider))
+    ) as DashboardProvider[];
 
-    const preferredProvider = userAccounts[0]?.provider;
-    const providerPriority: Array<'plaid' | 'mono'> =
-        preferredProvider === 'mono' ? ['mono', 'plaid'] : ['plaid', 'mono'];
+    const activeProvider: DashboardProvider | null =
+        options.provider && connectedProviders.includes(options.provider)
+            ? options.provider
+            : connectedProviders[0] ?? null;
 
-    const snapshotByProvider: Record<'plaid' | 'mono', BankSnapshot | null> = {
-        plaid: plaidSnapshot,
-        mono: monoSnapshot,
+    const providers = {
+        connected: connectedProviders,
+        active: activeProvider,
+        hasBoth: connectedProviders.length > 1,
     };
 
-    const activeSnapshot =
-        providerPriority
-            .map((provider) => snapshotByProvider[provider])
-            .find((snapshot): snapshot is BankSnapshot => Boolean(snapshot && !snapshot.noAccount))
-        ?? null;
-
-    // If the user has not connected any supported account, return empty dashboard
-    if (options.userId && !activeSnapshot && plaidSnapshot?.noAccount && monoSnapshot?.noAccount) {
-        const summary: DashboardSummary = {
-            monthlySpend: 0,
-            unusedCount: 0,
-            saveablePerYear: 0,
-            shameScore: 0,
-            previousShameScore: 0,
-            linkedAccounts: 0,
-            recentTransactionCount: 0,
-            dataSource: 'seeded',
-        };
-
-        const page = 1;
+    if (!options.userId || !activeProvider) {
         return {
-            summary,
+            summary: {
+                monthlySpend: 0,
+                unusedCount: 0,
+                saveablePerYear: 0,
+                shameScore: 0,
+                previousShameScore: 0,
+                linkedAccounts: 0,
+                recentTransactionCount: 0,
+                dataSource: 'none',
+            },
+            providers,
             subscriptions: [],
             alerts: [],
             pagination: {
                 filter,
-                page,
+                page: 1,
                 pageSize,
                 pageCount: 1,
                 total: 0,
@@ -605,16 +610,26 @@ export const getDashboardPayload = async (
         };
     }
 
-    const detectedSubscriptions = activeSnapshot
-        ? detectSubscriptionsFromTransactions(activeSnapshot.provider, activeSnapshot.transactions)
+    const storedSubscriptions = await readStoredSubscriptions();
+    const storedForActiveProvider = filterStoredSubscriptionsByProvider(storedSubscriptions, activeProvider);
+
+    const activeSnapshot = activeProvider === 'plaid'
+        ? await fetchPlaidSnapshot(options.userId)
+        : await fetchMonoSnapshot(options.userId);
+
+    const detectedSubscriptions = activeSnapshot && !activeSnapshot.noAccount
+        ? detectSubscriptionsFromTransactions(activeProvider, activeSnapshot.transactions)
         : [];
 
     const effectiveStoredSubscriptions = detectedSubscriptions.length > 0
-        ? mergeDetectedWithStored(detectedSubscriptions, storedSubscriptions)
-        : storedSubscriptions;
+        ? mergeDetectedWithStored(detectedSubscriptions, storedForActiveProvider)
+        : storedForActiveProvider;
 
     if (detectedSubscriptions.length > 0) {
-        await writeStoredSubscriptions(effectiveStoredSubscriptions);
+        const otherProviders = storedSubscriptions.filter(
+            (item) => !item.id.startsWith(`${activeProvider}-`)
+        );
+        await writeStoredSubscriptions([...otherProviders, ...effectiveStoredSubscriptions]);
     }
 
     const subscriptions: Subscription[] = effectiveStoredSubscriptions.map(({ previousStatus, ...item }) => item);
@@ -645,9 +660,9 @@ export const getDashboardPayload = async (
         saveablePerYear,
         shameScore,
         previousShameScore: Math.min(100, shameScore + 8),
-        linkedAccounts: activeSnapshot?.linkedAccounts ?? 0,
+        linkedAccounts: userAccounts.filter((account) => account.provider === activeProvider).length,
         recentTransactionCount: activeSnapshot?.transactions.length ?? 0,
-        dataSource: detectedSubscriptions.length > 0 ? (activeSnapshot?.provider ?? 'seeded') : 'seeded',
+        dataSource: activeProvider,
     };
 
     const alerts: DashboardAlert[] = subscriptions
@@ -668,6 +683,7 @@ export const getDashboardPayload = async (
 
     return {
         summary,
+        providers,
         subscriptions: pagedSubscriptions,
         alerts,
         pagination: {

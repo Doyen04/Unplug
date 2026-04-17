@@ -13,6 +13,8 @@ export type AlertType = 'unused' | 'trial-ending' | 'price-hike' | 'dormant';
 
 export type DashboardFilter = 'all' | 'at-risk' | 'active' | 'cancelled' | 'unused';
 
+export type DashboardProvider = 'plaid' | 'mono';
+
 export interface Subscription {
   id: string;
   serviceName: string;
@@ -36,7 +38,7 @@ export interface DashboardSummary {
   previousShameScore: number;
   linkedAccounts: number;
   recentTransactionCount: number;
-  dataSource: 'plaid' | 'mono' | 'seeded';
+  dataSource: DashboardProvider | 'none';
 }
 
 export interface DashboardAlert {
@@ -47,6 +49,11 @@ export interface DashboardAlert {
 
 export interface DashboardPayload {
   summary: DashboardSummary;
+  providers: {
+    connected: DashboardProvider[];
+    active: DashboardProvider | null;
+    hasBoth: boolean;
+  };
   subscriptions: Subscription[];
   alerts: DashboardAlert[];
   pagination: {

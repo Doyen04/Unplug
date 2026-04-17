@@ -1,4 +1,8 @@
-import type { DashboardFilter, DashboardPayload } from '../../types/subscription';
+import type {
+  DashboardFilter,
+  DashboardPayload,
+  DashboardProvider,
+} from '../../types/subscription';
 
 export interface DashboardDebrief {
   month: string;
@@ -19,8 +23,6 @@ export interface TransactionsPayload {
   transactions: PlaidTransaction[];
 }
 
-export type TransactionProvider = 'plaid' | 'mono';
-
 export interface UserPayload {
   name?: string;
 }
@@ -29,18 +31,24 @@ interface DashboardRequest {
   filter: DashboardFilter;
   page: number;
   pageSize: number;
+  provider?: DashboardProvider;
 }
 
 export const fetchDashboardPayload = async ({
   filter,
   page,
   pageSize,
+  provider,
 }: DashboardRequest): Promise<DashboardPayload> => {
   const query = new URLSearchParams({
     filter,
     page: String(page),
     pageSize: String(pageSize),
   });
+
+  if (provider) {
+    query.set('provider', provider);
+  }
 
   const response = await fetch(`/api/dashboard?${query.toString()}`, {
     cache: 'no-store',
@@ -85,7 +93,7 @@ export const postUndoSubscription = async (id: string): Promise<void> => {
 
 export const fetchRecentTransactions = async (
   days = 60,
-  provider?: TransactionProvider
+  provider?: DashboardProvider
 ): Promise<TransactionsPayload> => {
   const query = new URLSearchParams({ days: String(days) });
   if (provider) {
