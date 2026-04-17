@@ -13,6 +13,9 @@ const MONO_DEFAULT_BASE_URL = 'https://api.withmono.com/v2';
 const toStringOrNull = (value: unknown): string | null =>
     typeof value === 'string' && value.trim().length > 0 ? value.trim() : null;
 
+const toRecordOrNull = (value: unknown): Record<string, unknown> | null =>
+    value && typeof value === 'object' ? (value as Record<string, unknown>) : null;
+
 const readNestedString = (record: Record<string, unknown>, keys: string[]): string | null => {
     for (const key of keys) {
         const value = toStringOrNull(record[key]);
@@ -62,18 +65,23 @@ export async function POST(request: Request) {
     }
 
     const payload = (await exchangeResponse.json()) as Record<string, unknown>;
+    const payloadData = toRecordOrNull(payload.data);
+    const exchangePayload = payloadData ?? payload;
+
     const accountObject =
-        payload.account && typeof payload.account === 'object'
-            ? (payload.account as Record<string, unknown>)
-            : null;
+        toRecordOrNull(exchangePayload.account)
+        ?? toRecordOrNull(payload.account);
+
     const institutionObject =
-        payload.institution && typeof payload.institution === 'object'
-            ? (payload.institution as Record<string, unknown>)
-            : null;
+        toRecordOrNull(exchangePayload.institution)
+        ?? toRecordOrNull(payload.institution);
 
     const accountRef =
-        readNestedString(payload, ['account_id', 'accountId', '_id', 'id'])
-        ?? (accountObject ? readNestedString(accountObject, ['id', '_id']) : null);
+        (accountObject ? readNestedString(accountObject, ['id', '_id', 'account_id', 'accountId']) : null)
+        ?? readNestedString(exchangePayload, ['account_id', 'accountId'])
+        ?? readNestedString(payload, ['account_id', 'accountId'])
+        ?? readNestedString(exchangePayload, ['_id', 'id'])
+        ?? readNestedString(payload, ['_id', 'id']);
 
     if (!accountRef) {
         return NextResponse.json({ error: 'Mono exchange succeeded but no account reference was returned' }, { status: 502 });

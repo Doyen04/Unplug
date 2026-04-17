@@ -3,6 +3,13 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 
+import {
+  fetchDashboardDebrief,
+  fetchDashboardPayload,
+  postCancelSubscription,
+  postUndoSubscription,
+  type DashboardDebrief,
+} from '../lib/client/dashboard-api';
 import type {
   DashboardFilter,
   DashboardPayload,
@@ -15,15 +22,17 @@ export interface DashboardData {
   totalSubscriptions: number;
   filterCounts: DashboardPayload['pagination']['counts'];
   alerts: DashboardPayload['alerts'];
-  debrief: { month: string; content: string } | null;
+  debrief: DashboardDebrief | null;
   isLoading: boolean;
   isDebriefLoading: boolean;
   isError: boolean;
+  isFetching: boolean;
   filter: DashboardFilter;
   setFilter: (filter: DashboardFilter) => void;
   page: number;
   pageCount: number;
   setPage: (page: number) => void;
+  refetch: () => Promise<void>;
   cancelSubscription: (id: string) => Promise<void>;
   undoCancel: () => Promise<void>;
   clearPendingUndo: () => void;
@@ -60,39 +69,11 @@ const EMPTY_PAYLOAD: DashboardPayload = {
   },
 };
 
-const fetchDashboard = async (
-  filter: DashboardFilter,
-  page: number
-): Promise<DashboardPayload> => {
-  const query = new URLSearchParams({
-    filter,
-    page: String(page),
-    pageSize: '4',
-  });
-  const response = await fetch(`/api/dashboard?${query.toString()}`, { cache: 'no-store' });
-  if (!response.ok) throw new Error('Failed to load dashboard');
-  return response.json();
-};
-
-const fetchDebrief = async (): Promise<{ month: string; content: string }> => {
-  const response = await fetch('/api/debrief', { cache: 'no-store' });
-  if (!response.ok) throw new Error('Failed to load debrief');
-  return response.json();
-};
-
-const postCancel = async (id: string): Promise<void> => {
-  const response = await fetch(`/api/subscriptions/${id}/cancel`, { method: 'POST' });
-  if (!response.ok) throw new Error('Failed to cancel subscription');
-};
-
-const postUndo = async (id: string): Promise<void> => {
-  const response = await fetch(`/api/subscriptions/${id}/undo`, { method: 'POST' });
-  if (!response.ok) throw new Error('Failed to undo cancellation');
-};
-
 interface UseDashboardDataOptions {
   initialFilter?: DashboardFilter;
   initialPage?: number;
+  pageSize?: number;
+  includeDebrief?: boolean;
 }
 
 export const useDashboardData = (
@@ -102,19 +83,22 @@ export const useDashboardData = (
   const [filter, setFilter] = useState<DashboardFilter>(options.initialFilter ?? 'all');
   const [page, setPage] = useState(options.initialPage ?? 1);
   const [pendingUndoId, setPendingUndoId] = useState<string | null>(null);
+  const pageSize = Math.min(20, Math.max(1, options.pageSize ?? 4));
+  const includeDebrief = options.includeDebrief ?? true;
 
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ['dashboard', filter, page],
-    queryFn: () => fetchDashboard(filter, page),
+  const dashboardQuery = useQuery({
+    queryKey: ['dashboard', filter, page, pageSize],
+    queryFn: () => fetchDashboardPayload({ filter, page, pageSize }),
   });
 
-  const { data: debrief, isLoading: isDebriefLoading } = useQuery({
+  const debriefQuery = useQuery({
     queryKey: ['dashboard-debrief'],
-    queryFn: fetchDebrief,
+    queryFn: fetchDashboardDebrief,
+    enabled: includeDebrief,
   });
 
   const cancelMutation = useMutation({
-    mutationFn: postCancel,
+    mutationFn: postCancelSubscription,
     onSuccess: (_, id) => {
       setPendingUndoId(id);
       void queryClient.invalidateQueries({ queryKey: ['dashboard'] });
@@ -123,7 +107,7 @@ export const useDashboardData = (
   });
 
   const undoMutation = useMutation({
-    mutationFn: postUndo,
+    mutationFn: postUndoSubscription,
     onSuccess: () => {
       setPendingUndoId(null);
       void queryClient.invalidateQueries({ queryKey: ['dashboard'] });
@@ -131,7 +115,7 @@ export const useDashboardData = (
     },
   });
 
-  const payload = data ?? EMPTY_PAYLOAD;
+  const payload = dashboardQuery.data ?? EMPTY_PAYLOAD;
 
   return {
     summary: payload.summary,
@@ -139,10 +123,11 @@ export const useDashboardData = (
     totalSubscriptions: payload.pagination.total,
     filterCounts: payload.pagination.counts,
     alerts: payload.alerts,
-    debrief: debrief ?? null,
-    isLoading,
-    isDebriefLoading,
-    isError,
+    debrief: includeDebrief ? debriefQuery.data ?? null : null,
+    isLoading: dashboardQuery.isLoading,
+    isDebriefLoading: includeDebrief ? debriefQuery.isLoading : false,
+    isError: dashboardQuery.isError,
+    isFetching: dashboardQuery.isFetching,
     filter,
     setFilter: (nextFilter) => {
       setFilter(nextFilter);
@@ -152,6 +137,9 @@ export const useDashboardData = (
     pageCount: payload.pagination.pageCount,
     setPage: (nextPage) =>
       setPage(Math.min(Math.max(1, nextPage), payload.pagination.pageCount || 1)),
+    refetch: async () => {
+      await dashboardQuery.refetch();
+    },
     cancelSubscription: async (id: string) => {
       await cancelMutation.mutateAsync(id);
     },

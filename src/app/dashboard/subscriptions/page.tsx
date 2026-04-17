@@ -1,88 +1,52 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
 import { Search, AlertTriangle, RefreshCcw } from 'lucide-react';
 
 import { SubscriptionRow } from '../../../components/features/subscriptions/SubscriptionRow';
-import type { DashboardFilter, DashboardPayload } from '../../../types/subscription';
-
-const FILTERS: Array<{ key: DashboardFilter; label: string }> = [
-    { key: 'all', label: 'All' },
-    { key: 'active', label: 'Active' },
-    { key: 'unused', label: 'Unused' },
-    { key: 'at-risk', label: 'Risky' },
-    { key: 'cancelled', label: 'Cancelled' },
-];
-
-const fetchSubscriptionsPage = async (
-    filter: DashboardFilter,
-    page: number
-): Promise<DashboardPayload> => {
-    const query = new URLSearchParams({
-        filter,
-        page: String(page),
-        pageSize: '20',
-    });
-
-    const response = await fetch(`/api/dashboard?${query.toString()}`, { cache: 'no-store' });
-    if (!response.ok) throw new Error('Failed to load subscriptions');
-    return response.json();
-};
-
-const postCancel = async (id: string): Promise<void> => {
-    const response = await fetch(`/api/subscriptions/${id}/cancel`, { method: 'POST' });
-    if (!response.ok) throw new Error('Failed to cancel subscription');
-};
-
-const postUndo = async (id: string): Promise<void> => {
-    const response = await fetch(`/api/subscriptions/${id}/undo`, { method: 'POST' });
-    if (!response.ok) throw new Error('Failed to undo cancellation');
-};
+import { useDashboardData } from '../../../hooks/useDashboardData';
+import { DASHBOARD_FILTER_OPTIONS } from '../../../lib/constants/dashboard';
 
 export default function SubscriptionsPage() {
-    const queryClient = useQueryClient();
-    const [filter, setFilter] = useState<DashboardFilter>('all');
-    const [page, setPage] = useState(1);
     const [search, setSearch] = useState('');
-    const [pendingUndoId, setPendingUndoId] = useState<string | null>(null);
-
-    const { data, isLoading, isError, isFetching, refetch } = useQuery({
-        queryKey: ['subscriptions-page', filter, page],
-        queryFn: () => fetchSubscriptionsPage(filter, page),
-    });
-
-    const cancelMutation = useMutation({
-        mutationFn: postCancel,
-        onSuccess: (_, id) => {
-            setPendingUndoId(id);
-            void queryClient.invalidateQueries({ queryKey: ['subscriptions-page'] });
-        },
-    });
-
-    const undoMutation = useMutation({
-        mutationFn: postUndo,
-        onSuccess: () => {
-            setPendingUndoId(null);
-            void queryClient.invalidateQueries({ queryKey: ['subscriptions-page'] });
-        },
+    const {
+        subscriptions,
+        totalSubscriptions,
+        isLoading,
+        isError,
+        isFetching,
+        filter,
+        setFilter,
+        page,
+        pageCount,
+        setPage,
+        refetch,
+        cancelSubscription,
+        undoCancel,
+        clearPendingUndo,
+        pendingUndoId,
+        isCancelling,
+    } = useDashboardData({
+        initialFilter: 'all',
+        initialPage: 1,
+        pageSize: 20,
+        includeDebrief: false,
     });
 
     useEffect(() => {
         if (!pendingUndoId) return;
-        const timeoutId = setTimeout(() => setPendingUndoId(null), 5000);
+        const timeoutId = setTimeout(() => {
+            clearPendingUndo();
+        }, 5000);
         return () => clearTimeout(timeoutId);
-    }, [pendingUndoId]);
+    }, [pendingUndoId, clearPendingUndo]);
 
-    const subscriptions = data?.subscriptions ?? [];
     const filteredBySearch = useMemo(() => {
         const normalizedSearch = search.trim().toLowerCase();
         if (!normalizedSearch) return subscriptions;
         return subscriptions.filter((item) => item.serviceName.toLowerCase().includes(normalizedSearch));
     }, [subscriptions, search]);
-
-    const pagination = data?.pagination;
 
     return (
         <div className="space-y-6">
@@ -103,7 +67,7 @@ export default function SubscriptionsPage() {
             </header>
 
             <div className="flex gap-2 overflow-x-auto pb-1">
-                {FILTERS.map((item) => (
+                {DASHBOARD_FILTER_OPTIONS.map((item) => (
                     <button
                         key={item.key}
                         type="button"
@@ -160,31 +124,31 @@ export default function SubscriptionsPage() {
                                 subscription={subscription}
                                 index={index}
                                 onCancel={async (id) => {
-                                    await cancelMutation.mutateAsync(id);
+                                    await cancelSubscription(id);
                                 }}
                             />
                         ))}
                     </div>
                 )}
 
-                {pagination && pagination.total > 0 && (
+                {totalSubscriptions > 0 && (
                     <div className="mt-4 flex items-center justify-between border-t border-[#E8E7E0] pt-4">
                         <span className="text-xs uppercase tracking-[0.06em] text-[#A9A79E]">
-                            Page {pagination.page} / {pagination.pageCount} · {pagination.total} total
+                            Page {page} / {pageCount} · {totalSubscriptions} total
                         </span>
                         <div className="flex gap-2">
                             <button
                                 type="button"
-                                onClick={() => setPage((current) => Math.max(1, current - 1))}
-                                disabled={pagination.page <= 1}
+                                onClick={() => setPage(page - 1)}
+                                disabled={page <= 1}
                                 className="rounded-lg border border-[#D0CFC7] px-3 py-1.5 text-xs text-[#1A1A17] disabled:opacity-40"
                             >
                                 Prev
                             </button>
                             <button
                                 type="button"
-                                onClick={() => setPage((current) => Math.min(pagination.pageCount, current + 1))}
-                                disabled={pagination.page >= pagination.pageCount}
+                                onClick={() => setPage(page + 1)}
+                                disabled={page >= pageCount}
                                 className="rounded-lg border border-[#D0CFC7] px-3 py-1.5 text-xs text-[#1A1A17] disabled:opacity-40"
                             >
                                 Next
@@ -199,7 +163,8 @@ export default function SubscriptionsPage() {
                     <span>Subscription cancelled.</span>
                     <button
                         type="button"
-                        onClick={() => void undoMutation.mutateAsync(pendingUndoId)}
+                        onClick={() => void undoCancel()}
+                        disabled={isCancelling}
                         className="rounded-[10px] bg-white px-3 py-1.5 text-xs font-bold uppercase tracking-[0.06em] text-[#1A1A17]"
                     >
                         Undo

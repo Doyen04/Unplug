@@ -15,8 +15,6 @@ import {
     writeStoredSubscriptions,
     type StoredSubscription,
 } from './subscriptions-store';
-import { writeFile } from 'fs/promises';
-import path from 'path';
 
 export interface DashboardPayload {
     summary: DashboardSummary;
@@ -354,6 +352,31 @@ const normalizeMonoTransactions = (input: unknown[]): BankTransaction[] => {
         .filter((value): value is BankTransaction => Boolean(value));
 };
 
+const extractMonoTransactions = (payload: Record<string, unknown>): unknown[] => {
+    const payloadData = payload.data && typeof payload.data === 'object'
+        ? (payload.data as Record<string, unknown>)
+        : null;
+
+    const candidates: unknown[] = [
+        payload.transactions,
+        payload.data,
+        payload.items,
+        payload.history,
+        payloadData?.transactions,
+        payloadData?.data,
+        payloadData?.items,
+        payloadData?.history,
+    ];
+
+    for (const candidate of candidates) {
+        if (Array.isArray(candidate)) {
+            return candidate;
+        }
+    }
+
+    return [];
+};
+
 const fetchPlaidSnapshot = async (userId: string): Promise<BankSnapshot | null> => {
     const userAccounts = await listConnectedAccountsByUser(userId);
     const plaidAccounts = userAccounts.filter((item) => item.provider === 'plaid');
@@ -433,29 +456,9 @@ const fetchPlaidSnapshot = async (userId: string): Promise<BankSnapshot | null> 
 
         await markConnectedAccountAuthStatus(userId, 'plaid', plaidAccount.accountRef, 'active');
 
-        const accountsPayload = (await accountsResponse.json()) as {
-            accounts: Array<{ account_id: string }>;
-        };
-
         const transactionsPayload = (await transactionsResponse.json()) as {
             transactions: BankTransaction[];
         };
-
-        // Write fetched transactions to a text file for inspection
-        try {
-            const outPath = path.resolve(process.cwd(), 'data', `plaid-transactions-${userId}.txt`);
-            const content = [
-                `Plaid Snapshot for user: ${userId}`,
-                `Fetched at: ${new Date().toISOString()}`,
-                `Connected Plaid records: ${plaidAccounts.length}`,
-                `Plaid API accounts returned: ${accountsPayload.accounts.length}`,
-                'Transactions:',
-                JSON.stringify(transactionsPayload.transactions, null, 2),
-            ].join('\n\n');
-            await writeFile(outPath, content, 'utf8');
-        } catch {
-            // ignore file write errors - we still return the snapshot
-        }
 
         return {
             provider: 'plaid',
@@ -498,7 +501,13 @@ const fetchMonoSnapshot = async (userId: string): Promise<BankSnapshot | null> =
         );
 
         if (!response.ok) {
-            if (response.status === 401 || response.status === 403) {
+            const shouldReconnect =
+                response.status === 401
+                || response.status === 403
+                || response.status === 404
+                || response.status === 422;
+
+            if (shouldReconnect) {
                 await markConnectedAccountAuthStatus(userId, 'mono', monoAccount.accountRef, 'reconnect_required');
             }
             return null;
@@ -507,14 +516,7 @@ const fetchMonoSnapshot = async (userId: string): Promise<BankSnapshot | null> =
         await markConnectedAccountAuthStatus(userId, 'mono', monoAccount.accountRef, 'active');
 
         const payload = (await response.json()) as Record<string, unknown>;
-        const rawTransactions =
-            Array.isArray(payload.data)
-                ? payload.data
-                : Array.isArray(payload.transactions)
-                    ? payload.transactions
-                    : payload.data && typeof payload.data === 'object' && Array.isArray((payload.data as Record<string, unknown>).transactions)
-                        ? ((payload.data as Record<string, unknown>).transactions as unknown[])
-                        : [];
+        const rawTransactions = extractMonoTransactions(payload);
 
         return {
             provider: 'mono',
@@ -551,10 +553,22 @@ export const getDashboardPayload = async (
     const storedSubscriptions = await readStoredSubscriptions();
     const plaidSnapshot = options.userId ? await fetchPlaidSnapshot(options.userId) : null;
     const monoSnapshot = options.userId ? await fetchMonoSnapshot(options.userId) : null;
+    const userAccounts = options.userId ? await listConnectedAccountsByUser(options.userId) : [];
+
+    const preferredProvider = userAccounts[0]?.provider;
+    const providerPriority: Array<'plaid' | 'mono'> =
+        preferredProvider === 'mono' ? ['mono', 'plaid'] : ['plaid', 'mono'];
+
+    const snapshotByProvider: Record<'plaid' | 'mono', BankSnapshot | null> = {
+        plaid: plaidSnapshot,
+        mono: monoSnapshot,
+    };
 
     const activeSnapshot =
-        (plaidSnapshot && !plaidSnapshot.noAccount ? plaidSnapshot : null)
-        ?? (monoSnapshot && !monoSnapshot.noAccount ? monoSnapshot : null);
+        providerPriority
+            .map((provider) => snapshotByProvider[provider])
+            .find((snapshot): snapshot is BankSnapshot => Boolean(snapshot && !snapshot.noAccount))
+        ?? null;
 
     // If the user has not connected any supported account, return empty dashboard
     if (options.userId && !activeSnapshot && plaidSnapshot?.noAccount && monoSnapshot?.noAccount) {

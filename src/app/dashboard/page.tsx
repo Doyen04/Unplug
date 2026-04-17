@@ -7,18 +7,13 @@ import { Bell, Flame, Layers, Link as LinkIcon, TrendingUp, AlertTriangle, Check
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer, Cell, ReferenceLine } from 'recharts';
 
-import { formatCurrency } from '../../lib/utils/format';
+import { fetchCurrentUser, fetchRecentTransactions } from '../../lib/client/dashboard-api';
+import { DASHBOARD_FILTER_OPTIONS } from '../../lib/constants/dashboard';
+import { formatCurrency, getNameInitials } from '../../lib/utils/format';
 import { useDashboardData } from '../../hooks/useDashboardData';
 import { interpolateScoreColor } from '../../lib/utils/shameScore';
 import type { DashboardFilter } from '../../types/subscription';
 import { SubscriptionRow } from '../../components/features/subscriptions/SubscriptionRow';
-
-const getInitials = (name: string): string => {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-  if (parts.length === 0) return '?';
-  if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
-  return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
-};
 
 const MOCK_CHART_DATA = [
   { name: 'Nov', spend: 12000 },
@@ -28,32 +23,6 @@ const MOCK_CHART_DATA = [
   { name: 'Mar', spend: 16000 },
   { name: 'Apr', spend: 28000 },
 ];
-
-const FILTERS: Array<{ key: DashboardFilter; label: string }> = [
-  { key: 'all', label: 'All' },
-  { key: 'active', label: 'Active' },
-  { key: 'unused', label: 'Unused' },
-  { key: 'at-risk', label: 'Risky' },
-  { key: 'cancelled', label: 'Cancelled' },
-];
-
-interface PlaidTransaction {
-  transaction_id: string;
-  name: string;
-  amount: number;
-  date: string;
-  merchant_name: string | null;
-  category: string[] | null;
-}
-
-const fetchRecentTransactions = async (): Promise<{ total: number; transactions: PlaidTransaction[] }> => {
-  const response = await fetch('/api/connect/plaid/transactions?days=60', { cache: 'no-store' });
-  if (!response.ok) {
-    throw new Error('Failed to load transactions');
-  }
-
-  return response.json();
-};
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -68,11 +37,8 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await fetch('/api/user');
-        if (response.ok) {
-          const data = await response.json();
-          setUserInitials(getInitials(data.name));
-        }
+        const data = await fetchCurrentUser();
+        setUserInitials(getNameInitials(data.name ?? ''));
       } catch {
         // Silently fail, default initials will be used
       }
@@ -106,12 +72,18 @@ export default function DashboardPage() {
     initialPage,
   });
 
+  const transactionsProvider =
+    summary.dataSource === 'plaid' || summary.dataSource === 'mono'
+      ? summary.dataSource
+      : undefined;
+
   const {
     data: transactionsData,
     isLoading: isTransactionsLoading,
   } = useQuery({
-    queryKey: ['dashboard-transactions'],
-    queryFn: fetchRecentTransactions,
+    queryKey: ['dashboard-transactions', transactionsProvider],
+    queryFn: () => fetchRecentTransactions(60, transactionsProvider),
+    enabled: summary.linkedAccounts > 0,
     retry: false,
   });
 
@@ -415,7 +387,7 @@ export default function DashboardPage() {
 
         {ledgerTab === 'subscriptions' ? (
           <div className="flex gap-4 overflow-x-auto border-b border-[#E8E7E0] px-5 py-3">
-            {FILTERS.map((f) => (
+            {DASHBOARD_FILTER_OPTIONS.map((f) => (
               <button
                 key={f.key}
                 onClick={() => setFilter(f.key)}

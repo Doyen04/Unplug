@@ -138,9 +138,9 @@ const ConnectAccountsPage = async ({ searchParams }: ConnectAccountsPageProps) =
                                     </div>
 
                                     <div className="flex items-center gap-2">
-                                        {account.provider === 'plaid' && account.authStatus === 'reconnect_required' ? (
+                                        {account.authStatus === 'reconnect_required' ? (
                                             <ConnectProviderButtons
-                                                provider="plaid"
+                                                provider={account.provider}
                                                 preferredProvider={preferredProvider}
                                                 accountId={account.id}
                                                 compact

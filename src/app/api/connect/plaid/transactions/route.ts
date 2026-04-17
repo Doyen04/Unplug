@@ -109,6 +109,31 @@ const normalizeMonoTransactions = (input: unknown[]): NormalizedTransaction[] =>
         .filter((value): value is NormalizedTransaction => Boolean(value));
 };
 
+const extractMonoTransactions = (payload: Record<string, unknown>): unknown[] => {
+    const payloadData = payload.data && typeof payload.data === 'object'
+        ? (payload.data as Record<string, unknown>)
+        : null;
+
+    const candidates: unknown[] = [
+        payload.transactions,
+        payload.data,
+        payload.items,
+        payload.history,
+        payloadData?.transactions,
+        payloadData?.data,
+        payloadData?.items,
+        payloadData?.history,
+    ];
+
+    for (const candidate of candidates) {
+        if (Array.isArray(candidate)) {
+            return candidate;
+        }
+    }
+
+    return [];
+};
+
 export async function GET(request: Request) {
     const session = await getServerSession();
     if (!session) {
@@ -139,8 +164,7 @@ export async function GET(request: Request) {
         ? await getConnectedAccountById(userId, accountId)
         : requestedProvider
             ? allUserAccounts.find((item) => item.provider === requestedProvider)
-            : allUserAccounts.find((item) => item.provider === 'plaid')
-                ?? allUserAccounts.find((item) => item.provider === 'mono');
+            : allUserAccounts[0] ?? null;
 
     if (!connectedAccount) {
         return NextResponse.json({ error: 'No connected account found' }, { status: 404 });
@@ -169,7 +193,13 @@ export async function GET(request: Request) {
         });
 
         if (!monoResponse.ok) {
-            if (monoResponse.status === 401 || monoResponse.status === 403) {
+            const shouldReconnect =
+                monoResponse.status === 401
+                || monoResponse.status === 403
+                || monoResponse.status === 404
+                || monoResponse.status === 422;
+
+            if (shouldReconnect) {
                 await markConnectedAccountAuthStatus(userId, 'mono', connectedAccount.accountRef, 'reconnect_required');
                 return NextResponse.json(
                     { error: 'Mono connection requires relink', code: 'RECONNECT_REQUIRED' },
@@ -187,14 +217,7 @@ export async function GET(request: Request) {
         await markConnectedAccountAuthStatus(userId, 'mono', connectedAccount.accountRef, 'active');
 
         const monoPayload = (await monoResponse.json()) as Record<string, unknown>;
-        const rawTransactions =
-            Array.isArray(monoPayload.data)
-                ? monoPayload.data
-                : Array.isArray(monoPayload.transactions)
-                    ? monoPayload.transactions
-                    : monoPayload.data && typeof monoPayload.data === 'object' && Array.isArray((monoPayload.data as Record<string, unknown>).transactions)
-                        ? ((monoPayload.data as Record<string, unknown>).transactions as unknown[])
-                        : [];
+        const rawTransactions = extractMonoTransactions(monoPayload);
 
         const normalized = normalizeMonoTransactions(rawTransactions).sort((a, b) => b.date.localeCompare(a.date));
         const offset = (currentPage - 1) * safePageSize;
