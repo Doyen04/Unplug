@@ -1,17 +1,42 @@
-export const formatCurrency = (value: number, currency = 'USD'): string =>
-  new Intl.NumberFormat('en-US', {
+const getCurrencyFormatOptions = (currency: string): {
+  locale: string;
+  currencyDisplay: Intl.NumberFormatOptions['currencyDisplay'];
+} => {
+  if (currency === 'NGN') {
+    return {
+      locale: 'en-NG',
+      currencyDisplay: 'symbol',
+    };
+  }
+
+  return {
+    locale: 'en-US',
+    currencyDisplay: 'symbol',
+  };
+};
+
+export const formatCurrency = (value: number, currency = 'USD'): string => {
+  const { locale, currencyDisplay } = getCurrencyFormatOptions(currency);
+
+  return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency,
+    currencyDisplay,
     maximumFractionDigits: 0,
   }).format(value);
+};
 
-export const formatCurrencyPrecise = (value: number, currency = 'USD'): string =>
-  new Intl.NumberFormat('en-US', {
+export const formatCurrencyPrecise = (value: number, currency = 'USD'): string => {
+  const { locale, currencyDisplay } = getCurrencyFormatOptions(currency);
+
+  return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency,
+    currencyDisplay,
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(value);
+};
 
 export const getNameInitials = (name: string): string => {
   const parts = name.trim().split(/\s+/).filter(Boolean);

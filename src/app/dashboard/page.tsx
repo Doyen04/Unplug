@@ -12,6 +12,7 @@ import { DASHBOARD_FILTER_OPTIONS } from '../../lib/constants/dashboard';
 import { formatCurrency, getNameInitials } from '../../lib/utils/format';
 import { useDashboardData } from '../../hooks/useDashboardData';
 import { interpolateScoreColor } from '../../lib/utils/shameScore';
+import { providerCurrency } from '../../lib/utils/provider';
 import type { DashboardFilter, DashboardProvider } from '../../types/subscription';
 import { SubscriptionRow } from '../../components/features/subscriptions/SubscriptionRow';
 
@@ -171,6 +172,7 @@ export default function DashboardPage() {
     return () => clearTimeout(timeoutId);
   }, [pendingUndoId, clearPendingUndo]);
 
+  const currency = providerCurrency(providers.active);
   const scoreColor = interpolateScoreColor(summary.shameScore);
   const strokeDashoffset = 125.6 * (1 - summary.shameScore / 100);
   const scoreAngleRadians = (summary.shameScore / 100) * Math.PI * 2 - Math.PI / 2;
@@ -227,7 +229,7 @@ export default function DashboardPage() {
             <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#6B6960]">Monthly Burn</p>
           </div>
           <div className="">
-            <p className="font-display text-4xl font-semibold leading-none text-[#1A1A17]">{formatCurrency(summary.monthlySpend)}</p>
+            <p className="font-display text-4xl font-semibold leading-none text-[#1A1A17]">{formatCurrency(summary.monthlySpend, currency)}</p>
             <p className="mt-1.5 text-xs text-[#A9A79E]">burning every month</p>
           </div>
           <div className="inline-flex items-center gap-1.5 text-[11px] text-[#B56B6B]">
@@ -344,11 +346,11 @@ export default function DashboardPage() {
               <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#6B6960]">Monthly Spend</p>
             </div>
             <div className="text-right">
-              <p className="font-display text-2xl font-bold text-[#1A1A17]">{formatCurrency(summary.monthlySpend)}</p>
+              <p className="font-display text-2xl font-bold text-[#1A1A17]">{formatCurrency(summary.monthlySpend, currency)}</p>
               <p className="mt-1 text-[11px] uppercase tracking-[0.08em] text-[#A9A79E]">total this period</p>
               {previousPeriodSpend > 0 && currentPeriodSpend > 0 ? (
                 <p className="mt-1 inline-flex items-center gap-1 text-[11px] text-[#A9A79E]">
-                  vs {formatCurrency(previousPeriodSpend)} previous period
+                  vs {formatCurrency(previousPeriodSpend, currency)} previous period
                   {spendDelta >= 0 ? <ArrowUpRight size={11} className="text-[#E8860A]" /> : <ArrowDownRight size={11} className="text-[#1C9E5B]" />}
                   <span className={spendDelta >= 0 ? 'text-[#E8860A]' : 'text-[#1C9E5B]'}>{Math.abs(spendDeltaPercent)}%</span>
                 </p>
@@ -378,7 +380,7 @@ export default function DashboardPage() {
                     <Tooltip
                       cursor={{ fill: 'transparent' }}
                       contentStyle={{ borderRadius: '10px', border: '1px solid #E8E7E0', boxShadow: '0 4px 16px rgba(0,0,0,0.04)', fontSize: '12px', fontWeight: 600, color: '#1A1A17' }}
-                      formatter={(value: number) => [formatCurrency(Number(value) || 0), 'Spend']}
+                      formatter={(value: number) => [formatCurrency(Number(value) || 0, currency), 'Spend']}
                     />
                     <Bar dataKey="spend" radius={[4, 4, 0, 0]}>
                       {chartData.map((_, index) => (
@@ -418,7 +420,7 @@ export default function DashboardPage() {
               <div className="flex items-center gap-2 text-[#E53434]">
                 <p className="text-[11px] font-bold uppercase tracking-[0.08em]">You could save</p>
               </div>
-              <p className="mt-4 font-display text-4xl font-bold text-[#E53434]">{formatCurrency(summary.saveablePerYear)}</p>
+              <p className="mt-4 font-display text-4xl font-bold text-[#E53434]">{formatCurrency(summary.saveablePerYear, currency)}</p>
               <p className="mt-1.5 text-xs text-[#E53434]/80 font-medium">
                 {summary.saveablePerYear === 0 ? 'Nothing to cut right now' : 'by cutting unused subs'}
               </p>
@@ -593,7 +595,7 @@ export default function DashboardPage() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-bold text-[#1A1A17]">{formatCurrency(tx.amount)}</p>
+                    <p className="text-sm font-bold text-[#1A1A17]">{formatCurrency(tx.amount, currency)}</p>
                     <span className={`inline-block rounded-md px-2 py-0.5 mt-1.5 text-[10px] font-bold uppercase tracking-[0.08em] ${tx.amount > 0
                       ? 'bg-[#FEF6EC] text-[#E8860A] border border-[#E8860A]/20'
                       : 'bg-[#EDFAF3] text-[#1C9E5B] border border-[#1C9E5B]/20'

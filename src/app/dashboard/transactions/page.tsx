@@ -8,6 +8,7 @@ import { Search, Receipt } from 'lucide-react';
 
 import { useDashboardData } from '../../../hooks/useDashboardData';
 import { formatCurrency } from '../../../lib/utils/format';
+import { providerCurrency } from '../../../lib/utils/provider';
 import type { DashboardProvider } from '../../../types/subscription';
 
 const providerLabel = (provider: DashboardProvider): string =>
@@ -230,7 +231,7 @@ export default function TransactionsPage() {
 
                                 <div className="text-right">
                                     <p className="text-sm font-semibold text-[#1A1A17]">
-                                        {formatCurrency(Math.abs(transaction.amount))}
+                                        {formatCurrency(Math.abs(transaction.amount), transaction.iso_currency_code ?? providerCurrency(selectedProvider))}
                                     </p>
                                     <span className={`mt-1 inline-block rounded-md border px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.08em] ${transaction.amount > 0
                                         ? 'border-[#E8860A]/20 bg-[#FEF6EC] text-[#E8860A]'

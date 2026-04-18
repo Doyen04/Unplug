@@ -8,6 +8,7 @@ import { Search, AlertTriangle, RefreshCcw } from 'lucide-react';
 import { SubscriptionRow } from '../../../components/features/subscriptions/SubscriptionRow';
 import { useDashboardData } from '../../../hooks/useDashboardData';
 import { DASHBOARD_FILTER_OPTIONS } from '../../../lib/constants/dashboard';
+import { providerCurrency } from '../../../lib/utils/provider';
 import type { DashboardProvider } from '../../../types/subscription';
 
 const providerLabel = (provider: DashboardProvider): string =>
@@ -49,6 +50,8 @@ export default function SubscriptionsPage() {
         includeDebrief: false,
         provider: selectedProvider,
     });
+
+    const currency = providerCurrency(providers.active);
 
     useEffect(() => {
         if (providers.connected.length === 0) {
@@ -201,6 +204,7 @@ export default function SubscriptionsPage() {
                                 key={subscription.id}
                                 subscription={subscription}
                                 index={index}
+                                currency={currency}
                                 onCancel={async (id) => {
                                     await cancelSubscription(id);
                                 }}
