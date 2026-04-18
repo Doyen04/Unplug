@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { Bell, Flame, Layers, Link as LinkIcon, TrendingUp, AlertTriangle, Check, Search, ArrowRight, X, ArrowUpRight, ArrowDownRight, Receipt, Sparkles, BarChart3, ShieldCheck } from 'lucide-react';
+import { Bell, Flame, Layers, Link as LinkIcon, TrendingUp, AlertTriangle, Check, Search, ArrowRight, X, ArrowUpRight, ArrowDownRight, Receipt } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer, Cell, ReferenceLine } from 'recharts';
 
@@ -14,8 +14,18 @@ import { useDashboardData } from '../../hooks/useDashboardData';
 import { interpolateScoreColor } from '../../lib/utils/shameScore';
 import type { DashboardFilter, DashboardProvider } from '../../types/subscription';
 import { SubscriptionRow } from '../../components/features/subscriptions/SubscriptionRow';
-import { startOfWeek } from '../../lib/utils/date';
-import { providerLabel, providerCurrency } from '../../lib/utils/provider';
+
+const startOfWeek = (date: Date): Date => {
+  const normalized = new Date(date);
+  const day = normalized.getDay();
+  const diff = (day + 6) % 7;
+  normalized.setDate(normalized.getDate() - diff);
+  normalized.setHours(0, 0, 0, 0);
+  return normalized;
+};
+
+const providerLabel = (provider: DashboardProvider): string =>
+  provider === 'plaid' ? 'Plaid' : 'Mono';
 
 export default function DashboardPage() {
   const searchParams = useSearchParams();
@@ -73,17 +83,17 @@ export default function DashboardPage() {
   });
 
   useEffect(() => {
-    if (!providers.active) {
-      if (selectedProvider) {
+    if (providers.connected.length === 0) {
+      if (!isLoading && selectedProvider) {
         setSelectedProvider(undefined);
       }
       return;
     }
 
     if (!selectedProvider || !providers.connected.includes(selectedProvider)) {
-      setSelectedProvider(providers.active);
+      setSelectedProvider(providers.active ?? providers.connected[0]);
     }
-  }, [providers.active, providers.connected, selectedProvider]);
+  }, [isLoading, providers.active, providers.connected, selectedProvider]);
 
   const transactionsProvider = providers.active ?? undefined;
 
@@ -152,7 +162,7 @@ export default function DashboardPage() {
       params.delete('provider');
     }
 
-    window.history.replaceState(null, '', `?${params.toString()}`);
+    window.history.replaceState(null, '', `/dashboard?${params.toString()}`);
   }, [filter, page, searchParams, selectedProvider]);
 
   useEffect(() => {
@@ -161,7 +171,6 @@ export default function DashboardPage() {
     return () => clearTimeout(timeoutId);
   }, [pendingUndoId, clearPendingUndo]);
 
-  const currency = providerCurrency(providers.active);
   const scoreColor = interpolateScoreColor(summary.shameScore);
   const strokeDashoffset = 125.6 * (1 - summary.shameScore / 100);
   const scoreAngleRadians = (summary.shameScore / 100) * Math.PI * 2 - Math.PI / 2;
@@ -208,8 +217,6 @@ export default function DashboardPage() {
         </div>
       </header>
 
-      {providers.connected.length > 0 && (
-      <>
       {/* ROW 1: STAT CARDS */}
       <section className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
         <article className="group flex flex-col gap-5 rounded-2xl border border-[#E8E7E0] border-l-4 border-l-[#E53434] bg-white p-5 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_4px_24px_rgba(0,0,0,0.08)] hover:border-[#D0CFC7] hover:border-l-[#E53434]">
@@ -220,7 +227,7 @@ export default function DashboardPage() {
             <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#6B6960]">Monthly Burn</p>
           </div>
           <div className="">
-            <p className="font-display text-4xl font-semibold leading-none text-[#1A1A17]">{formatCurrency(summary.monthlySpend, currency)}</p>
+            <p className="font-display text-4xl font-semibold leading-none text-[#1A1A17]">{formatCurrency(summary.monthlySpend)}</p>
             <p className="mt-1.5 text-xs text-[#A9A79E]">burning every month</p>
           </div>
           <div className="inline-flex items-center gap-1.5 text-[11px] text-[#B56B6B]">
@@ -337,11 +344,11 @@ export default function DashboardPage() {
               <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#6B6960]">Monthly Spend</p>
             </div>
             <div className="text-right">
-              <p className="font-display text-2xl font-bold text-[#1A1A17]">{formatCurrency(summary.monthlySpend, currency)}</p>
+              <p className="font-display text-2xl font-bold text-[#1A1A17]">{formatCurrency(summary.monthlySpend)}</p>
               <p className="mt-1 text-[11px] uppercase tracking-[0.08em] text-[#A9A79E]">total this period</p>
               {previousPeriodSpend > 0 && currentPeriodSpend > 0 ? (
                 <p className="mt-1 inline-flex items-center gap-1 text-[11px] text-[#A9A79E]">
-                  vs {formatCurrency(previousPeriodSpend, currency)} previous period
+                  vs {formatCurrency(previousPeriodSpend)} previous period
                   {spendDelta >= 0 ? <ArrowUpRight size={11} className="text-[#E8860A]" /> : <ArrowDownRight size={11} className="text-[#1C9E5B]" />}
                   <span className={spendDelta >= 0 ? 'text-[#E8860A]' : 'text-[#1C9E5B]'}>{Math.abs(spendDeltaPercent)}%</span>
                 </p>
@@ -371,7 +378,7 @@ export default function DashboardPage() {
                     <Tooltip
                       cursor={{ fill: 'transparent' }}
                       contentStyle={{ borderRadius: '10px', border: '1px solid #E8E7E0', boxShadow: '0 4px 16px rgba(0,0,0,0.04)', fontSize: '12px', fontWeight: 600, color: '#1A1A17' }}
-                      formatter={(value: any) => [formatCurrency(Number(value) || 0, currency), 'Spend']}
+                      formatter={(value: number) => [formatCurrency(Number(value) || 0), 'Spend']}
                     />
                     <Bar dataKey="spend" radius={[4, 4, 0, 0]}>
                       {chartData.map((_, index) => (
@@ -411,7 +418,7 @@ export default function DashboardPage() {
               <div className="flex items-center gap-2 text-[#E53434]">
                 <p className="text-[11px] font-bold uppercase tracking-[0.08em]">You could save</p>
               </div>
-              <p className="mt-4 font-display text-4xl font-bold text-[#E53434]">{formatCurrency(summary.saveablePerYear, currency)}</p>
+              <p className="mt-4 font-display text-4xl font-bold text-[#E53434]">{formatCurrency(summary.saveablePerYear)}</p>
               <p className="mt-1.5 text-xs text-[#E53434]/80 font-medium">
                 {summary.saveablePerYear === 0 ? 'Nothing to cut right now' : 'by cutting unused subs'}
               </p>
@@ -422,12 +429,9 @@ export default function DashboardPage() {
           </article>
         </div>
       </section>
-      </>
-      )}
 
       {/* ROW 3: BANNER (If no accounts linked) */}
       {providers.connected.length === 0 && !isLoading && (
-        <>
         <section className="flex flex-col gap-5 rounded-2xl border border-[#E8E7E0] bg-[#1A1A17] p-6 text-white sm:flex-row sm:items-center sm:justify-between shadow-[0_8px_32px_rgba(26,26,23,0.12)] transition-all hover:shadow-[0_8px_32px_rgba(26,26,23,0.2)]">
           <div className="flex items-center gap-5">
             <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#31302A] text-[#FF5C35] ring-1 ring-[#FF5C35]/20">
@@ -442,59 +446,9 @@ export default function DashboardPage() {
             Connect Account
           </Link>
         </section>
-
-        {/* EMPTY STATE — rich visual when no provider is connected */}
-        <section className="rounded-2xl border border-[#E8E7E0] bg-white p-8 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)]">
-          <div className="mx-auto flex max-w-2xl flex-col items-center text-center">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-[#FF5C35]/10 to-[#FF5C35]/5 text-[#FF5C35] ring-1 ring-[#FF5C35]/15">
-              <Sparkles size={28} />
-            </div>
-            <h2 className="mt-5 text-xl font-bold text-[#1A1A17]">Your dashboard is waiting</h2>
-            <p className="mt-2.5 max-w-md text-sm leading-relaxed text-[#6B6960]">
-              Once you connect a bank account, we'll scan your transactions for recurring subscriptions, score your usage, and show you exactly where you're burning money.
-            </p>
-          </div>
-
-          <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <div className="group flex flex-col items-center gap-3 rounded-xl border border-[#E8E7E0] bg-[#FAFAF7] p-5 transition-all hover:border-[#FF5C35]/30 hover:bg-[#FFF8F6]">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FEF0F0] text-[#E53434] ring-1 ring-[#FEE2E2] transition-colors group-hover:bg-[#E53434] group-hover:text-white">
-                <BarChart3 size={18} />
-              </div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[#6B6960]">Spend Analytics</p>
-              <p className="text-xs leading-relaxed text-[#A9A79E]">See weekly burn charts and spending trends at a glance.</p>
-            </div>
-
-            <div className="group flex flex-col items-center gap-3 rounded-xl border border-[#E8E7E0] bg-[#FAFAF7] p-5 transition-all hover:border-[#FF5C35]/30 hover:bg-[#FFF8F6]">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FFF0EB] text-[#FF5C35] ring-1 ring-[#FFE0D6] transition-colors group-hover:bg-[#FF5C35] group-hover:text-white">
-                <Layers size={18} />
-              </div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[#6B6960]">Subscription Detection</p>
-              <p className="text-xs leading-relaxed text-[#A9A79E]">Auto-detect recurring charges and flag unused ones.</p>
-            </div>
-
-            <div className="group flex flex-col items-center gap-3 rounded-xl border border-[#E8E7E0] bg-[#FAFAF7] p-5 transition-all hover:border-[#FF5C35]/30 hover:bg-[#FFF8F6]">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#EDFAF3] text-[#1C9E5B] ring-1 ring-[#D1F4E0] transition-colors group-hover:bg-[#1C9E5B] group-hover:text-white">
-                <ShieldCheck size={18} />
-              </div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[#6B6960]">Smart Alerts</p>
-              <p className="text-xs leading-relaxed text-[#A9A79E]">Get notified about price hikes, trials ending, and dormant subs.</p>
-            </div>
-          </div>
-
-          <div className="mt-6 flex justify-center">
-            <Link
-              href="/dashboard/connect"
-              className="inline-flex items-center gap-2 rounded-xl bg-[#1A1A17] px-6 py-3 text-xs font-bold uppercase tracking-[0.08em] text-white transition-all hover:bg-[#31302A] focus:ring-2 focus:ring-[#FF5C35] focus:ring-offset-2"
-            >
-              Get started <ArrowRight size={14} />
-            </Link>
-          </div>
-        </section>
-        </>
       )}
 
       {/* ROW 4: SUBSCRIPTIONS + TRANSACTIONS (TABBED) */}
-      {providers.connected.length > 0 && (
       <section id="subscriptions" className="group rounded-2xl border border-[#E8E7E0] bg-white shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] transition-all duration-300 hover:shadow-[0_4px_24px_rgba(0,0,0,0.06)] hover:border-[#D0CFC7]">
         <div className="border-b border-[#E8E7E0] p-6">
           {providers.hasBoth ? (
@@ -519,6 +473,10 @@ export default function DashboardPage() {
                 ))}
               </div>
             </div>
+          ) : providers.active ? (
+            <p className="mb-4 text-[11px] uppercase tracking-[0.08em] text-[#A9A79E]">
+              Using {providerLabel(providers.active)} data
+            </p>
           ) : null}
 
           <div className="flex flex-col justify-between sm:flex-row sm:items-center">
@@ -596,7 +554,6 @@ export default function DashboardPage() {
                         subscription={subscription}
                         onCancel={cancelSubscription}
                         index={index}
-                        currency={currency}
                       />
                     ))
                 )}
@@ -636,7 +593,7 @@ export default function DashboardPage() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-bold text-[#1A1A17]">{formatCurrency(tx.amount, currency)}</p>
+                    <p className="text-sm font-bold text-[#1A1A17]">{formatCurrency(tx.amount)}</p>
                     <span className={`inline-block rounded-md px-2 py-0.5 mt-1.5 text-[10px] font-bold uppercase tracking-[0.08em] ${tx.amount > 0
                       ? 'bg-[#FEF6EC] text-[#E8860A] border border-[#E8860A]/20'
                       : 'bg-[#EDFAF3] text-[#1C9E5B] border border-[#1C9E5B]/20'
@@ -650,7 +607,6 @@ export default function DashboardPage() {
           )}
         </div>
       </section>
-      )}
 
       {/* UNDO TOAST */}
       {pendingUndoId ? (

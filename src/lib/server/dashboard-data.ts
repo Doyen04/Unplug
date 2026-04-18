@@ -11,6 +11,7 @@ import {
     markConnectedAccountAuthStatus,
 } from './connected-accounts-store';
 import { decryptToken } from './token-crypto';
+import {
     readStoredSubscriptions,
     writeStoredSubscriptions,
     type StoredSubscription,
@@ -218,7 +219,8 @@ const detectSubscriptionsFromTransactions = (
     const grouped = new Map<string, { label: string; transactions: BankTransaction[] }>();
 
     for (const transaction of recurringCandidates) {
-        const label = normalizeMerchantLabel(transaction);
+        const rawLabel = transaction.merchant_name ?? transaction.name ?? 'Unknown service';
+        const label = normalizeMerchantLabel(rawLabel);
         const merchantKey = toMerchantKey(label);
 
         if (!merchantKey) continue;

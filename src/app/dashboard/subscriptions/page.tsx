@@ -9,7 +9,9 @@ import { SubscriptionRow } from '../../../components/features/subscriptions/Subs
 import { useDashboardData } from '../../../hooks/useDashboardData';
 import { DASHBOARD_FILTER_OPTIONS } from '../../../lib/constants/dashboard';
 import type { DashboardProvider } from '../../../types/subscription';
-import { providerLabel, providerCurrency } from '../../../lib/utils/provider';
+
+const providerLabel = (provider: DashboardProvider): string =>
+    provider === 'plaid' ? 'Plaid' : 'Mono';
 
 export default function SubscriptionsPage() {
     const searchParams = useSearchParams();
@@ -48,20 +50,18 @@ export default function SubscriptionsPage() {
         provider: selectedProvider,
     });
 
-    const currency = providerCurrency(providers.active);
-
     useEffect(() => {
-        if (!providers.active) {
-            if (selectedProvider) {
+        if (providers.connected.length === 0) {
+            if (!isLoading && selectedProvider) {
                 setSelectedProvider(undefined);
             }
             return;
         }
 
         if (!selectedProvider || !providers.connected.includes(selectedProvider)) {
-            setSelectedProvider(providers.active);
+            setSelectedProvider(providers.active ?? providers.connected[0]);
         }
-    }, [providers.active, providers.connected, selectedProvider]);
+    }, [isLoading, providers.active, providers.connected, selectedProvider]);
 
     useEffect(() => {
         const currentProviderParam = searchParams.get('provider');
@@ -201,7 +201,6 @@ export default function SubscriptionsPage() {
                                 key={subscription.id}
                                 subscription={subscription}
                                 index={index}
-                                currency={currency}
                                 onCancel={async (id) => {
                                     await cancelSubscription(id);
                                 }}

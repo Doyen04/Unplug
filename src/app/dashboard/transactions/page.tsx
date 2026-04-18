@@ -9,7 +9,9 @@ import { Search, Receipt } from 'lucide-react';
 import { useDashboardData } from '../../../hooks/useDashboardData';
 import { formatCurrency } from '../../../lib/utils/format';
 import type { DashboardProvider } from '../../../types/subscription';
-import { providerLabel, providerCurrency } from '../../../lib/utils/provider';
+
+const providerLabel = (provider: DashboardProvider): string =>
+    provider === 'plaid' ? 'Plaid' : 'Mono';
 
 interface PlaidTransaction {
     transaction_id: string;
@@ -65,7 +67,7 @@ export default function TransactionsPage() {
             : undefined;
     const [selectedProvider, setSelectedProvider] = useState<DashboardProvider | undefined>(initialProvider);
 
-    const { providers } = useDashboardData({
+    const { providers, isLoading: isDashboardLoading } = useDashboardData({
         initialFilter: 'all',
         initialPage: 1,
         pageSize: 1,
@@ -74,17 +76,17 @@ export default function TransactionsPage() {
     });
 
     useEffect(() => {
-        if (!providers.active) {
-            if (selectedProvider) {
+        if (providers.connected.length === 0) {
+            if (!isDashboardLoading && selectedProvider) {
                 setSelectedProvider(undefined);
             }
             return;
         }
 
         if (!selectedProvider || !providers.connected.includes(selectedProvider)) {
-            setSelectedProvider(providers.active);
+            setSelectedProvider(providers.active ?? providers.connected[0]);
         }
-    }, [providers.active, providers.connected, selectedProvider]);
+    }, [isDashboardLoading, providers.active, providers.connected, selectedProvider]);
 
     useEffect(() => {
         const currentProviderParam = searchParams.get('provider');
@@ -228,7 +230,7 @@ export default function TransactionsPage() {
 
                                 <div className="text-right">
                                     <p className="text-sm font-semibold text-[#1A1A17]">
-                                        {formatCurrency(Math.abs(transaction.amount), providerCurrency(selectedProvider))}
+                                        {formatCurrency(Math.abs(transaction.amount))}
                                     </p>
                                     <span className={`mt-1 inline-block rounded-md border px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.08em] ${transaction.amount > 0
                                         ? 'border-[#E8860A]/20 bg-[#FEF6EC] text-[#E8860A]'

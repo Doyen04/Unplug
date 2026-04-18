@@ -1,6 +1,6 @@
 'use client';
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 
 import {
@@ -102,6 +102,7 @@ export const useDashboardData = (
       pageSize,
       provider: options.provider,
     }),
+    placeholderData: keepPreviousData,
   });
 
   const debriefQuery = useQuery({

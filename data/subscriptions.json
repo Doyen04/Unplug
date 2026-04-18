@@ -1,1 +1,12 @@
-[]
+[
+  {
+    "id": "mono-nipkudasamuelol",
+    "serviceName": "NIP/KUDA/SAMUEL OLAMIDE/TRANSFER 2",
+    "amountMonthly": 16014470.36,
+    "frequencyLabel": "weekly",
+    "status": "healthy",
+    "confidence": "high",
+    "usageScore": 78,
+    "verdict": "active"
+  }
+]
