@@ -25,6 +25,8 @@ export interface DashboardData {
   alerts: DashboardPayload['alerts'];
   providers: DashboardPayload['providers'];
   debrief: DashboardDebrief | null;
+  hasData: boolean;
+  isInitialLoading: boolean;
   isLoading: boolean;
   isDebriefLoading: boolean;
   isError: boolean;
@@ -130,6 +132,8 @@ export const useDashboardData = (
   });
 
   const payload = dashboardQuery.data ?? EMPTY_PAYLOAD;
+  const hasData = Boolean(dashboardQuery.data);
+  const isInitialLoading = dashboardQuery.isLoading && !dashboardQuery.data;
 
   return {
     summary: payload.summary,
@@ -139,6 +143,8 @@ export const useDashboardData = (
     alerts: payload.alerts,
     providers: payload.providers,
     debrief: includeDebrief ? debriefQuery.data ?? null : null,
+    hasData,
+    isInitialLoading,
     isLoading: dashboardQuery.isLoading,
     isDebriefLoading: includeDebrief ? debriefQuery.isLoading : false,
     isError: dashboardQuery.isError,

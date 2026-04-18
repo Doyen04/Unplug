@@ -178,7 +178,15 @@ export default function SubscriptionsPage() {
                 ) : null}
 
                 {isLoading ? (
-                    <p className="text-sm text-[#6B6960]">Loading subscriptions...</p>
+                    <div className="space-y-3" aria-busy="true" aria-live="polite">
+                        {Array.from({ length: 4 }, (_, index) => (
+                            <div key={`subscriptions-skeleton-${index}`} className="animate-pulse rounded-xl border border-[#E8E7E0] bg-[#FAFAF7] p-4">
+                                <div className="h-3 w-32 rounded bg-[#E8E7E0]" />
+                                <div className="mt-3 h-5 w-40 rounded bg-[#EEEDE8]" />
+                                <div className="mt-3 h-3 w-24 rounded bg-[#E8E7E0]" />
+                            </div>
+                        ))}
+                    </div>
                 ) : filteredBySearch.length === 0 ? (
                     isError ? (
                         <div className="rounded-xl border border-[#E8E7E0] bg-[#FAFAF7] p-4 text-sm text-[#6B6960]">
@@ -194,8 +202,19 @@ export default function SubscriptionsPage() {
                                 Connect account
                             </Link>
                         </div>
+                    ) : subscriptions.length === 0 ? (
+                        <div className="rounded-xl border border-[#E8E7E0] bg-[#FAFAF7] p-4 text-sm text-[#6B6960]">
+                            <p>No recurring subscriptions detected for this provider yet.</p>
+                            <p className="mt-1 text-xs text-[#A9A79E]">Try switching providers or review your transactions to verify recent recurring charges.</p>
+                            <Link href="/dashboard/transactions" className="mt-2 inline-block text-xs font-semibold uppercase tracking-[0.06em] text-[#FF5C35] hover:text-[#C93A1A]">
+                                View transactions
+                            </Link>
+                        </div>
                     ) : (
-                        <p className="text-sm text-[#6B6960]">No subscriptions found for this provider.</p>
+                        <div className="rounded-xl border border-[#E8E7E0] bg-[#FAFAF7] p-4 text-sm text-[#6B6960]">
+                            <p>No subscriptions match your search.</p>
+                            <p className="mt-1 text-xs text-[#A9A79E]">Try another keyword or clear filters.</p>
+                        </div>
                     )
                 ) : (
                     <div className="space-y-3">

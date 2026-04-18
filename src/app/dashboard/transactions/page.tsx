@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import { Search, Receipt } from 'lucide-react';
+import { Search, Receipt, AlertTriangle, RefreshCcw } from 'lucide-react';
 
 import { useDashboardData } from '../../../hooks/useDashboardData';
 import { formatCurrency } from '../../../lib/utils/format';
@@ -108,7 +108,7 @@ export default function TransactionsPage() {
         window.history.replaceState(null, '', `/dashboard/transactions?${params.toString()}`);
     }, [searchParams, selectedProvider]);
 
-    const { data, isLoading, isError } = useQuery({
+    const { data, isLoading, isError, isFetching, refetch } = useQuery({
         queryKey: ['transactions-page', days, page, pageSize, selectedProvider ?? 'auto'],
         queryFn: () => fetchTransactions(days, page, pageSize, selectedProvider),
         retry: false,
@@ -193,17 +193,54 @@ export default function TransactionsPage() {
                 </div>
 
                 {isLoading ? (
-                    <div className="px-5 py-6 text-sm text-[#6B6960]">Loading transactions...</div>
+                    <div className="px-5 py-6" aria-busy="true" aria-live="polite">
+                        <div className="space-y-3">
+                            {Array.from({ length: 5 }, (_, index) => (
+                                <div key={`transactions-skeleton-${index}`} className="animate-pulse rounded-xl border border-[#E8E7E0] bg-[#FAFAF7] p-4">
+                                    <div className="h-3 w-28 rounded bg-[#E8E7E0]" />
+                                    <div className="mt-3 h-5 w-44 rounded bg-[#EEEDE8]" />
+                                    <div className="mt-3 h-3 w-20 rounded bg-[#E8E7E0]" />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
                 ) : isError ? (
-                    <div className="px-5 py-6 text-sm text-[#E53434]">Unable to load transactions. Connect or relink a supported provider and try again.</div>
+                    <div className="px-5 py-6 text-sm text-[#8E5C5C]">
+                        <div className="rounded-xl border border-[#F3D8D8] bg-[#FEF6F6] p-4">
+                            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                <div className="flex items-start gap-2">
+                                    <AlertTriangle size={14} className="mt-0.5 text-[#E53434]" />
+                                    <p>Unable to load transactions. Connect or relink a supported provider and try again.</p>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => void refetch()}
+                                    className="inline-flex items-center gap-1 rounded-lg border border-[#D0CFC7] bg-white px-2.5 py-1.5 text-[11px] font-medium text-[#1A1A17] hover:bg-[#F4F3EE]"
+                                >
+                                    <RefreshCcw size={12} className={isFetching ? 'animate-spin' : ''} />
+                                    Retry
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 ) : !selectedProvider ? (
                     <div className="px-5 py-6 text-sm text-[#6B6960]">
                         No connected provider yet. <Link href="/dashboard/connect" className="font-semibold text-[#FF5C35] hover:text-[#C93A1A]">Connect an account</Link> to view transactions.
                     </div>
                 ) : (data?.transactions.length ?? 0) === 0 ? (
-                    <div className="px-5 py-6 text-sm text-[#6B6960]">No transactions in this time window.</div>
+                    <div className="px-5 py-6 text-sm text-[#6B6960]">
+                        <div className="rounded-xl border border-[#E8E7E0] bg-[#FAFAF7] p-4">
+                            <p>No transactions in this time window.</p>
+                            <p className="mt-1 text-xs text-[#A9A79E]">Try a broader range (60d or 90d) to fetch more records.</p>
+                        </div>
+                    </div>
                 ) : filteredTransactions.length === 0 ? (
-                    <div className="px-5 py-6 text-sm text-[#6B6960]">No transactions match your search on this page.</div>
+                    <div className="px-5 py-6 text-sm text-[#6B6960]">
+                        <div className="rounded-xl border border-[#E8E7E0] bg-[#FAFAF7] p-4">
+                            <p>No transactions match your search on this page.</p>
+                            <p className="mt-1 text-xs text-[#A9A79E]">Try a different keyword or clear the search field.</p>
+                        </div>
+                    </div>
                 ) : (
                     <div className="divide-y divide-[#E8E7E0]">
                         {filteredTransactions.map((transaction) => (

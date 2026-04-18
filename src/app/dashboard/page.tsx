@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { Bell, Flame, Layers, Link as LinkIcon, TrendingUp, AlertTriangle, Check, Search, ArrowRight, X, ArrowUpRight, ArrowDownRight, Receipt } from 'lucide-react';
+import { Bell, Flame, Layers, Link as LinkIcon, TrendingUp, AlertTriangle, Check, Search, ArrowRight, X, ArrowUpRight, ArrowDownRight, Receipt, RefreshCcw } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 
@@ -66,13 +66,17 @@ export default function DashboardPage() {
     totalSubscriptions,
     filterCounts,
     alerts,
+    hasData,
+    isInitialLoading,
     isLoading,
     isError,
+    isFetching,
     filter,
     setFilter,
     page,
     pageCount,
     setPage,
+    refetch,
     cancelSubscription,
     undoCancel,
     clearPendingUndo,
@@ -102,6 +106,9 @@ export default function DashboardPage() {
   const {
     data: transactionsData,
     isLoading: isTransactionsLoading,
+    isError: isTransactionsError,
+    isFetching: isTransactionsFetching,
+    refetch: refetchTransactions,
   } = useQuery({
     queryKey: ['dashboard-transactions', transactionsProvider],
     queryFn: () => fetchRecentTransactions(365, transactionsProvider),
@@ -189,6 +196,98 @@ export default function DashboardPage() {
     .reduce((sum, bucket) => sum + bucket.spend, 0);
   const spendDelta = currentPeriodSpend - previousPeriodSpend;
   const spendDeltaPercent = previousPeriodSpend > 0 ? Math.round((spendDelta / previousPeriodSpend) * 100) : 0;
+  const hasAnyTransactions = (transactionsData?.transactions.length ?? 0) > 0;
+  const hasAnySummaryData =
+    summary.monthlySpend > 0
+    || summary.linkedAccounts > 0
+    || summary.recentTransactionCount > 0
+    || summary.unusedCount > 0
+    || summary.saveablePerYear > 0;
+  const showConnectedEmptyState =
+    providers.connected.length > 0
+    && !isLoading
+    && !isTransactionsLoading
+    && !isError
+    && !isTransactionsError
+    && totalSubscriptions === 0
+    && !hasAnyTransactions
+    && !hasAnySummaryData;
+
+  if (isInitialLoading) {
+    return (
+      <div className="space-y-6" aria-busy="true" aria-live="polite">
+        <header className="flex items-center justify-between">
+          <h1 className="text-2xl font-extrabold tracking-tight text-[#1A1A17]">Dashboard</h1>
+        </header>
+
+        <section className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {Array.from({ length: 4 }, (_, index) => (
+            <article key={`stat-skeleton-${index}`} className="animate-pulse rounded-2xl border border-[#E8E7E0] bg-white p-3.5 shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
+              <div className="h-3 w-24 rounded bg-[#EEEDE8]" />
+              <div className="mt-5 h-9 w-28 rounded bg-[#E8E7E0]" />
+              <div className="mt-4 h-3 w-36 rounded bg-[#EEEDE8]" />
+            </article>
+          ))}
+        </section>
+
+        <section className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+          <article className="lg:col-span-2 animate-pulse rounded-2xl border border-[#E8E7E0] bg-white p-5 shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
+            <div className="h-4 w-36 rounded bg-[#EEEDE8]" />
+            <div className="mt-6 h-48 rounded-xl bg-[#F4F3EE]" />
+          </article>
+          <div className="grid gap-4 lg:grid-rows-2">
+            <article className="animate-pulse rounded-2xl border border-[#E8E7E0] bg-white p-4 shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
+              <div className="h-3 w-20 rounded bg-[#EEEDE8]" />
+              <div className="mt-4 h-10 w-14 rounded bg-[#E8E7E0]" />
+            </article>
+            <article className="animate-pulse rounded-2xl border border-[#E8E7E0] bg-white p-4 shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
+              <div className="h-3 w-24 rounded bg-[#EEEDE8]" />
+              <div className="mt-4 h-8 w-32 rounded bg-[#E8E7E0]" />
+            </article>
+          </div>
+        </section>
+
+        <section className="animate-pulse rounded-2xl border border-[#E8E7E0] bg-white p-5 shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
+          <div className="h-10 w-full rounded bg-[#F4F3EE]" />
+          <div className="mt-4 space-y-3">
+            <div className="h-14 w-full rounded-xl bg-[#FAFAF7]" />
+            <div className="h-14 w-full rounded-xl bg-[#FAFAF7]" />
+            <div className="h-14 w-full rounded-xl bg-[#FAFAF7]" />
+          </div>
+        </section>
+      </div>
+    );
+  }
+
+  if (isError && !hasData) {
+    return (
+      <div className="space-y-6">
+        <header className="flex items-center justify-between">
+          <h1 className="text-2xl font-extrabold tracking-tight text-[#1A1A17]">Dashboard</h1>
+        </header>
+
+        <section className="rounded-2xl border border-[#F3D8D8] bg-[#FEF6F6] px-5 py-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-3">
+              <AlertTriangle size={16} className="mt-0.5 text-[#E53434]" />
+              <div>
+                <p className="text-sm font-semibold text-[#1A1A17]">We could not load your dashboard.</p>
+                <p className="mt-1 text-xs text-[#8E5C5C]">Check your connection or reconnect your provider, then try again.</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => void refetch()}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-[#D0CFC7] bg-white px-3 py-1.5 text-xs font-medium text-[#1A1A17] hover:bg-[#F4F3EE]"
+            >
+              <RefreshCcw size={12} className={isFetching ? 'animate-spin' : ''} />
+              Retry
+            </button>
+          </div>
+        </section>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -333,6 +432,32 @@ export default function DashboardPage() {
         </article>
       </section>
 
+      {showConnectedEmptyState ? (
+        <section className="rounded-2xl border border-[#E8E7E0] bg-white p-6 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)]">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-[11px] uppercase tracking-[0.08em] text-[#A9A79E]">No recurring subscriptions detected</p>
+              <p className="mt-2 text-sm text-[#6B6960] max-w-2xl">
+                Your account is connected, but we have not found recurring subscription patterns yet. This can happen when there are no recent recurring charges.
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => void refetch()}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-[#D0CFC7] bg-white px-3 py-1.5 text-xs font-medium text-[#1A1A17] hover:bg-[#F4F3EE]"
+              >
+                <RefreshCcw size={12} className={isFetching ? 'animate-spin' : ''} />
+                Refresh
+              </button>
+              <Link href="/dashboard/connect" className="rounded-lg border border-[#FF5C35] bg-[#FF5C35] px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.06em] text-white hover:bg-[#C93A1A]">
+                Manage Connections
+              </Link>
+            </div>
+          </div>
+        </section>
+      ) : null}
+
       {/* ROW 2: CHART + SECONDARY INSIGHT CARDS */}
       <section className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <article className="col-span-1 min-w-0 lg:col-span-2 group flex h-full flex-col justify-between rounded-2xl border border-[#E8E7E0] bg-white p-5 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] transition-all duration-300 hover:shadow-[0_4px_24px_rgba(0,0,0,0.08)] hover:border-[#D0CFC7]">
@@ -359,7 +484,21 @@ export default function DashboardPage() {
           </div>
           <div className="mt-6">
             <div className="h-55 w-full min-w-0 sm:h-60 lg:h-65 group-hover:opacity-100 transition-opacity">
-              {chartData.length === 0 ? (
+              {isTransactionsLoading ? (
+                <div className="h-full animate-pulse rounded-xl bg-[#F4F3EE]" />
+              ) : isTransactionsError ? (
+                <div className="flex h-full flex-col items-center justify-center gap-3 text-sm text-[#8E5C5C]">
+                  <p>Could not load transaction trend.</p>
+                  <button
+                    type="button"
+                    onClick={() => void refetchTransactions()}
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-[#D0CFC7] bg-white px-3 py-1.5 text-xs font-medium text-[#1A1A17] hover:bg-[#F4F3EE]"
+                  >
+                    <RefreshCcw size={12} className={isTransactionsFetching ? 'animate-spin' : ''} />
+                    Retry
+                  </button>
+                </div>
+              ) : chartData.length === 0 ? (
                 <div className="flex h-full items-center justify-center text-sm text-[#6B6960]">
                   No provider transactions yet.
                 </div>
@@ -562,6 +701,18 @@ export default function DashboardPage() {
                   </div>
                 ) : isLoading ? (
                   <div className="text-sm text-[#6B6960] py-4">Scanning transactions...</div>
+                ) : isError && subscriptions.length === 0 ? (
+                  <div className="rounded-xl border border-[#F3D8D8] bg-[#FEF6F6] p-4 text-sm text-[#8E5C5C]">
+                    <p>Could not load subscriptions for this provider.</p>
+                    <button
+                      type="button"
+                      onClick={() => void refetch()}
+                      className="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-[#D0CFC7] bg-white px-2.5 py-1.5 text-xs font-medium text-[#1A1A17] hover:bg-[#F4F3EE]"
+                    >
+                      <RefreshCcw size={12} className={isFetching ? 'animate-spin' : ''} />
+                      Retry
+                    </button>
+                  </div>
                 ) : subscriptions.filter((subscription) => subscription.serviceName.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 ? (
                   <div className="text-sm text-[#6B6960] py-4">No subscriptions matched this filter.</div>
                 ) : (
@@ -598,6 +749,18 @@ export default function DashboardPage() {
             <div className="divide-y divide-[#E8E7E0]/60">
               {isTransactionsLoading ? (
                 <div className="py-4 text-sm text-[#6B6960]">Loading transactions...</div>
+              ) : isTransactionsError ? (
+                <div className="py-4 text-sm text-[#8E5C5C]">
+                  <p>Unable to load recent transactions.</p>
+                  <button
+                    type="button"
+                    onClick={() => void refetchTransactions()}
+                    className="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-[#D0CFC7] bg-white px-2.5 py-1.5 text-xs font-medium text-[#1A1A17] hover:bg-[#F4F3EE]"
+                  >
+                    <RefreshCcw size={12} className={isTransactionsFetching ? 'animate-spin' : ''} />
+                    Retry
+                  </button>
+                </div>
               ) : recentTransactions.length === 0 ? (
                 <div className="py-4 text-sm text-[#6B6960]">No live transactions found. Connect an account to populate this list.</div>
               ) : recentTransactions.map((tx) => (
