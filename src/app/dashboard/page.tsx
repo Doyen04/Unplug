@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { Bell, Flame, Layers, Link as LinkIcon, TrendingUp, AlertTriangle, Check, Search, ArrowRight, X, ArrowUpRight, ArrowDownRight, Receipt } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
-import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer, Cell, ReferenceLine } from 'recharts';
+import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 
 import { fetchCurrentUser, fetchRecentTransactions } from '../../lib/client/dashboard-api';
 import { DASHBOARD_FILTER_OPTIONS } from '../../lib/constants/dashboard';
@@ -16,14 +16,15 @@ import { providerCurrency } from '../../lib/utils/provider';
 import type { DashboardFilter, DashboardProvider } from '../../types/subscription';
 import { SubscriptionRow } from '../../components/features/subscriptions/SubscriptionRow';
 
-const startOfWeek = (date: Date): Date => {
+const startOfMonth = (date: Date): Date => {
   const normalized = new Date(date);
-  const day = normalized.getDay();
-  const diff = (day + 6) % 7;
-  normalized.setDate(normalized.getDate() - diff);
+  normalized.setDate(1);
   normalized.setHours(0, 0, 0, 0);
   return normalized;
 };
+
+const getMonthKey = (date: Date): string =>
+  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
 
 const providerLabel = (provider: DashboardProvider): string =>
   provider === 'plaid' ? 'Plaid' : 'Mono';
@@ -103,7 +104,7 @@ export default function DashboardPage() {
     isLoading: isTransactionsLoading,
   } = useQuery({
     queryKey: ['dashboard-transactions', transactionsProvider],
-    queryFn: () => fetchRecentTransactions(60, transactionsProvider),
+    queryFn: () => fetchRecentTransactions(365, transactionsProvider),
     enabled: Boolean(transactionsProvider),
     retry: false,
   });
@@ -111,7 +112,11 @@ export default function DashboardPage() {
   const recentTransactions = (transactionsData?.transactions ?? []).slice(0, 5);
 
   const chartData = useMemo(() => {
-    const buckets = new Map<string, { name: string; spend: number; order: number }>();
+    if (!transactionsProvider) {
+      return [];
+    }
+
+    const spendByMonth = new Map<string, number>();
 
     for (const transaction of transactionsData?.transactions ?? []) {
       if (transaction.amount <= 0) continue;
@@ -119,27 +124,24 @@ export default function DashboardPage() {
       const date = new Date(transaction.date);
       if (Number.isNaN(date.getTime())) continue;
 
-      const weekStart = startOfWeek(date);
-      const key = weekStart.toISOString().slice(0, 10);
-      const existing = buckets.get(key);
-
-      if (existing) {
-        existing.spend += transaction.amount;
-        continue;
-      }
-
-      buckets.set(key, {
-        name: weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-        spend: transaction.amount,
-        order: weekStart.getTime(),
-      });
+      const monthStart = startOfMonth(date);
+      const key = getMonthKey(monthStart);
+      const existing = spendByMonth.get(key) ?? 0;
+      spendByMonth.set(key, existing + transaction.amount);
     }
 
-    return Array.from(buckets.values())
-      .sort((a, b) => a.order - b.order)
-      .slice(-6)
-      .map(({ name, spend }) => ({ name, spend: Number(spend.toFixed(2)) }));
-  }, [transactionsData?.transactions]);
+    const currentMonth = startOfMonth(new Date());
+
+    return Array.from({ length: 12 }, (_, index) => {
+      const monthDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - (11 - index), 1);
+      const key = getMonthKey(monthDate);
+
+      return {
+        name: monthDate.toLocaleDateString('en-US', { month: 'short' }),
+        spend: Number((spendByMonth.get(key) ?? 0).toFixed(2)),
+      };
+    });
+  }, [transactionsData?.transactions, transactionsProvider]);
 
   useEffect(() => {
     const currentFilter = searchParams.get('filter') ?? 'all';
@@ -172,7 +174,7 @@ export default function DashboardPage() {
     return () => clearTimeout(timeoutId);
   }, [pendingUndoId, clearPendingUndo]);
 
-  const currency = providerCurrency(providers.active);
+  const currency = providerCurrency(providers.active ?? selectedProvider);
   const scoreColor = interpolateScoreColor(summary.shameScore);
   const strokeDashoffset = 125.6 * (1 - summary.shameScore / 100);
   const scoreAngleRadians = (summary.shameScore / 100) * Math.PI * 2 - Math.PI / 2;
@@ -198,7 +200,7 @@ export default function DashboardPage() {
 
       {/* TOP BAR */}
       <header className="flex items-center justify-between">
-        <h1 className="text-3xl font-extrabold tracking-tight text-[#1A1A17]">Dashboard</h1>
+        <h1 className="text-2xl font-extrabold tracking-tight text-[#1A1A17]">Dashboard</h1>
         <div className="hidden lg:flex items-center gap-5">
           <div className="relative group">
             <button
@@ -220,17 +222,16 @@ export default function DashboardPage() {
       </header>
 
       {/* ROW 1: STAT CARDS */}
-      <section className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
-        <article className="group flex flex-col gap-5 rounded-2xl border border-[#E8E7E0] border-l-4 border-l-[#E53434] bg-white p-5 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_4px_24px_rgba(0,0,0,0.08)] hover:border-[#D0CFC7] hover:border-l-[#E53434]">
+      <section className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <article className="group flex flex-col gap-3 rounded-2xl border border-[#E8E7E0] bg-white p-3.5 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_4px_24px_rgba(0,0,0,0.08)] hover:border-[#D0CFC7]">
           <div className="flex items-center gap-3">
             <div className="flex h-9.5 w-9.5 items-center justify-center rounded-full bg-[#FEF0F0] text-[#E53434] ring-1 ring-[#FEE2E2] transition-colors group-hover:bg-[#E53434] group-hover:text-white">
               <Flame size={20} />
             </div>
             <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#6B6960]">Monthly Burn</p>
           </div>
-          <div className="">
-            <p className="font-display text-4xl font-semibold leading-none text-[#1A1A17]">{formatCurrency(summary.monthlySpend, currency)}</p>
-            <p className="mt-1.5 text-xs text-[#A9A79E]">burning every month</p>
+          <div className="flex min-h-14 items-center">
+            <p className="font-display text-3xl font-semibold leading-none text-[#1A1A17]">{formatCurrency(summary.monthlySpend, currency)}</p>
           </div>
           <div className="inline-flex items-center gap-1.5 text-[11px] text-[#B56B6B]">
             {summary.recentTransactionCount > 0 ? (
@@ -244,16 +245,15 @@ export default function DashboardPage() {
           </div>
         </article>
 
-        <article className="group flex flex-col gap-5 rounded-2xl border border-[#E8E7E0] border-l-4 border-l-[#FF5C35] bg-white p-5 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_4px_24px_rgba(0,0,0,0.08)] hover:border-[#D0CFC7] hover:border-l-[#FF5C35]">
+        <article className="group flex flex-col gap-3 rounded-2xl border border-[#E8E7E0] bg-white p-3.5 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_4px_24px_rgba(0,0,0,0.08)] hover:border-[#D0CFC7]">
           <div className="flex items-center gap-3">
             <div className="flex h-9.5 w-9.5 items-center justify-center rounded-full bg-[#FFF0EB] text-[#FF5C35] ring-1 ring-[#FFE0D6] transition-colors group-hover:bg-[#FF5C35] group-hover:text-white">
               <Layers size={20} />
             </div>
             <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#6B6960]">Tracked Subs</p>
           </div>
-          <div className="">
-            <p className="font-display text-4xl font-semibold leading-none text-[#1A1A17]">{totalSubscriptions}</p>
-            <p className="mt-1.5 text-xs text-[#A9A79E]">active subscriptions</p>
+          <div className="flex min-h-14 items-center">
+            <p className="font-display text-3xl font-semibold leading-none text-[#1A1A17]">{totalSubscriptions}</p>
           </div>
           <div className="inline-flex items-center gap-1.5 text-[11px] text-[#6B6960]">
             <ArrowUpRight size={12} />
@@ -261,16 +261,15 @@ export default function DashboardPage() {
           </div>
         </article>
 
-        <article className="group flex flex-col gap-5 rounded-2xl border border-[#E8E7E0] border-l-4 border-l-[#1C9E5B] bg-white p-5 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_4px_24px_rgba(0,0,0,0.08)] hover:border-[#D0CFC7] hover:border-l-[#1C9E5B]">
+        <article className="group flex flex-col gap-3 rounded-2xl border border-[#E8E7E0] bg-white p-3.5 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_4px_24px_rgba(0,0,0,0.08)] hover:border-[#D0CFC7]">
           <div className="flex items-center gap-3">
             <div className="flex h-9.5 w-9.5 items-center justify-center rounded-full bg-[#EDFAF3] text-[#1C9E5B] ring-1 ring-[#D1F4E0] transition-colors group-hover:bg-[#1C9E5B] group-hover:text-white">
               <LinkIcon size={20} />
             </div>
             <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#6B6960]">Linked Accounts</p>
           </div>
-          <div className="">
-            <p className="font-display text-4xl font-semibold leading-none text-[#1A1A17]">{summary.linkedAccounts}</p>
-            <p className="mt-1.5 text-xs text-[#A9A79E]">bank accounts connected</p>
+          <div className="flex min-h-14 items-center">
+            <p className="font-display text-3xl font-semibold leading-none text-[#1A1A17]">{summary.linkedAccounts}</p>
           </div>
           <div className="inline-flex items-center gap-1.5 text-[11px] text-[#6B6960]">
             <ArrowUpRight size={12} />
@@ -278,17 +277,16 @@ export default function DashboardPage() {
           </div>
         </article>
 
-        <article className="group relative flex flex-col gap-5 overflow-hidden rounded-2xl border border-[#E8E7E0] border-l-4 border-l-[#1A1A17] bg-white p-5 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_4px_24px_rgba(0,0,0,0.08)] hover:border-[#D0CFC7] hover:border-l-[#1A1A17]">
+        <article className="group relative flex flex-col gap-3 overflow-hidden rounded-2xl border border-[#E8E7E0] bg-white p-3.5 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_4px_24px_rgba(0,0,0,0.08)] hover:border-[#D0CFC7]">
           <div className="z-10 flex items-center gap-3">
             <div className="flex h-9.5 w-9.5 items-center justify-center rounded-full bg-[#FAFAF7] text-[#1A1A17] ring-1 ring-[#E8E7E0] transition-colors group-hover:bg-[#1A1A17] group-hover:text-white">
               <Check size={20} />
             </div>
             <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#6B6960]">Shame Score</p>
           </div>
-          <div className="z-10 flex items-center justify-between">
+          <div className="z-10 flex min-h-14 items-center justify-between">
             <div>
-              <p className="font-display text-4xl font-semibold leading-none text-[#1A1A17]">{summary.shameScore}</p>
-              <p className="mt-1.5 text-xs text-[#A9A79E]">subscription guilt index</p>
+              <p className="font-display text-3xl font-semibold leading-none text-[#1A1A17]">{summary.shameScore}</p>
             </div>
             <div className="relative flex h-14 w-14 items-center justify-center transition-transform duration-500 group-hover:scale-110">
               <svg className="absolute inset-0 h-full w-full -rotate-90 transform" viewBox="0 0 44 44">
@@ -336,7 +334,7 @@ export default function DashboardPage() {
       </section>
 
       {/* ROW 2: CHART + SECONDARY INSIGHT CARDS */}
-      <section className="grid grid-cols-1 gap-5 lg:grid-cols-3">
+      <section className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <article className="col-span-1 min-w-0 lg:col-span-2 group flex h-full flex-col justify-between rounded-2xl border border-[#E8E7E0] bg-white p-5 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] transition-all duration-300 hover:shadow-[0_4px_24px_rgba(0,0,0,0.08)] hover:border-[#D0CFC7]">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -346,7 +344,7 @@ export default function DashboardPage() {
               <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#6B6960]">Monthly Spend</p>
             </div>
             <div className="text-right">
-              <p className="font-display text-2xl font-bold text-[#1A1A17]">{formatCurrency(summary.monthlySpend, currency)}</p>
+              <p className="font-display text-xl font-bold text-[#1A1A17]">{formatCurrency(summary.monthlySpend, currency)}</p>
               <p className="mt-1 text-[11px] uppercase tracking-[0.08em] text-[#A9A79E]">total this period</p>
               {previousPeriodSpend > 0 && currentPeriodSpend > 0 ? (
                 <p className="mt-1 inline-flex items-center gap-1 text-[11px] text-[#A9A79E]">
@@ -367,7 +365,14 @@ export default function DashboardPage() {
                 </div>
               ) : (
                 <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={160}>
-                  <BarChart data={chartData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+                  <AreaChart data={chartData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="spendGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#FF5C35" stopOpacity={0.35} />
+                        <stop offset="75%" stopColor="#FF5C35" stopOpacity={0.08} />
+                        <stop offset="100%" stopColor="#FF5C35" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
                     <ReferenceLine y={0} stroke="#E8E7E0" strokeWidth={1} />
                     <XAxis
                       dataKey="name"
@@ -378,24 +383,29 @@ export default function DashboardPage() {
                       dy={22}
                     />
                     <Tooltip
-                      cursor={{ fill: 'transparent' }}
+                      cursor={{ stroke: '#FFE0D6', strokeWidth: 2 }}
                       contentStyle={{ borderRadius: '10px', border: '1px solid #E8E7E0', boxShadow: '0 4px 16px rgba(0,0,0,0.04)', fontSize: '12px', fontWeight: 600, color: '#1A1A17' }}
                       formatter={(value: number) => [formatCurrency(Number(value) || 0, currency), 'Spend']}
                     />
-                    <Bar dataKey="spend" radius={[4, 4, 0, 0]}>
-                      {chartData.map((_, index) => (
-                        <Cell key={`cell-${index}`} fill="#FF5C35" className="opacity-80 hover:opacity-100 transition-opacity duration-300" />
-                      ))}
-                    </Bar>
-                  </BarChart>
+                    <Area
+                      type="monotone"
+                      dataKey="spend"
+                      stroke="#FF5C35"
+                      strokeWidth={3}
+                      fill="url(#spendGradient)"
+                      fillOpacity={1}
+                      dot={{ r: 3, fill: '#FF5C35', stroke: '#FFFFFF', strokeWidth: 1.5 }}
+                      activeDot={{ r: 5, fill: '#FF5C35', stroke: '#FFFFFF', strokeWidth: 2 }}
+                    />
+                  </AreaChart>
                 </ResponsiveContainer>
               )}
             </div>
           </div>
         </article>
 
-        <div className="col-span-1 grid h-full gap-5 lg:grid-rows-2">
-          <article className="group flex h-full flex-col justify-between rounded-2xl border border-[#E8E7E0] bg-white p-4 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] transition-all duration-300 hover:shadow-[0_4px_24px_rgba(0,0,0,0.08)] hover:border-[#D0CFC7]">
+        <div className="col-span-1 grid h-full gap-4 lg:grid-rows-2">
+          <article className="group flex h-full flex-col justify-between rounded-2xl border border-[#E8E7E0] bg-white p-3 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] transition-all duration-300 hover:shadow-[0_4px_24px_rgba(0,0,0,0.08)] hover:border-[#D0CFC7]">
             <div>
               <div className="flex items-center gap-3">
                 <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#FAFAF7] text-[#1A1A17] ring-1 ring-[#E8E7E0] transition-colors group-hover:bg-[#1A1A17] group-hover:text-white">
@@ -403,29 +413,29 @@ export default function DashboardPage() {
                 </div>
                 <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[#6B6960]">Unused</p>
               </div>
-              <p className="mt-4 font-display text-5xl font-semibold leading-none text-[#1A1A17]">{summary.unusedCount}</p>
+              <p className="mt-3 font-display text-4xl font-semibold leading-none text-[#1A1A17]">{summary.unusedCount}</p>
               {summary.unusedCount === 0 ? (
                 <p className="mt-2 inline-flex items-center gap-1.5 text-sm text-[#6B6960]"><Check size={14} /> You're clean</p>
               ) : (
                 <p className="mt-2 text-sm text-[#6B6960] max-w-xs">subscriptions you haven't used proactively in 30+ days.</p>
               )}
             </div>
-            <Link href="#subscriptions" onClick={() => setFilter('unused')} className="mt-4 flex w-max items-center rounded-lg bg-transparent px-3 py-1.5 text-xs font-bold uppercase tracking-[0.08em] text-[#FF5C35] transition-colors hover:bg-[#FEF6EC] hover:text-[#C93A1A] hover:underline hover:decoration-[#FF5C35]/60 hover:underline-offset-4 -ml-3">
+            <Link href="#subscriptions" onClick={() => setFilter('unused')} className="mt-3 flex w-max items-center rounded-lg bg-transparent px-3 py-1.5 text-xs font-bold uppercase tracking-[0.08em] text-[#FF5C35] transition-colors hover:bg-[#FEF6EC] hover:text-[#C93A1A] hover:underline hover:decoration-[#FF5C35]/60 hover:underline-offset-4 -ml-3">
               Review unused <ArrowRight size={14} className="ml-1.5 transition-transform group-hover:translate-x-1" />
             </Link>
           </article>
 
-          <article className="group flex h-full flex-col justify-between rounded-2xl border border-[#FFE8E2] border-t border-t-[#E8E7E0] bg-[#FEF6F4] p-4 shadow-[0_1px_4px_rgba(229,52,52,0.04),0_4px_16px_rgba(229,52,52,0.04)] transition-all duration-300 hover:shadow-[0_4px_24px_rgba(229,52,52,0.08)] hover:border-[#FCA5A5]">
+          <article className="group flex h-full flex-col justify-between rounded-2xl border border-[#FFE8E2] border-t border-t-[#E8E7E0] bg-[#FEF6F4] p-3 shadow-[0_1px_4px_rgba(229,52,52,0.04),0_4px_16px_rgba(229,52,52,0.04)] transition-all duration-300 hover:shadow-[0_4px_24px_rgba(229,52,52,0.08)] hover:border-[#FCA5A5]">
             <div>
               <div className="flex items-center gap-2 text-[#E53434]">
                 <p className="text-[11px] font-bold uppercase tracking-[0.08em]">You could save</p>
               </div>
-              <p className="mt-4 font-display text-4xl font-bold text-[#E53434]">{formatCurrency(summary.saveablePerYear, currency)}</p>
+              <p className="mt-3 font-display text-3xl font-bold text-[#E53434]">{formatCurrency(summary.saveablePerYear, currency)}</p>
               <p className="mt-1.5 text-xs text-[#E53434]/80 font-medium">
                 {summary.saveablePerYear === 0 ? 'Nothing to cut right now' : 'by cutting unused subs'}
               </p>
             </div>
-            <button onClick={() => setFilter('unused')} className="mt-4 flex h-11.5 w-full items-center justify-center rounded-xl border-[1.5px] border-[#E53434] bg-white px-4 text-center text-xs font-semibold uppercase tracking-[0.04em] text-[#E53434] transition-all duration-150 ease-in-out hover:bg-[#E53434] hover:text-white focus:ring-2 focus:ring-offset-2 focus:ring-[#E53434] shadow-sm hover:shadow-md">
+            <button onClick={() => setFilter('unused')} className="mt-3 flex h-11.5 w-full items-center justify-center rounded-xl border-[1.5px] border-[#E53434] bg-white px-4 text-center text-xs font-semibold uppercase tracking-[0.04em] text-[#E53434] transition-all duration-150 ease-in-out hover:bg-[#E53434] hover:text-white focus:ring-2 focus:ring-offset-2 focus:ring-[#E53434] shadow-sm hover:shadow-md">
               See what to cut
             </button>
           </article>
@@ -543,7 +553,14 @@ export default function DashboardPage() {
           {ledgerTab === 'subscriptions' ? (
             <>
               <div className="flex flex-col gap-3">
-                {isLoading ? (
+                {providers.connected.length === 0 ? (
+                  <div className="rounded-xl border border-[#E8E7E0] bg-[#FAFAF7] p-4 text-sm text-[#6B6960]">
+                    <p>No connected provider yet, so there are no subscriptions to analyze.</p>
+                    <Link href="/dashboard/connect" className="mt-2 inline-block text-xs font-semibold uppercase tracking-[0.06em] text-[#FF5C35] hover:text-[#C93A1A]">
+                      Connect account
+                    </Link>
+                  </div>
+                ) : isLoading ? (
                   <div className="text-sm text-[#6B6960] py-4">Scanning transactions...</div>
                 ) : subscriptions.filter((subscription) => subscription.serviceName.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 ? (
                   <div className="text-sm text-[#6B6960] py-4">No subscriptions matched this filter.</div>

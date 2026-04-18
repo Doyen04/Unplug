@@ -15,11 +15,16 @@ export interface PlaidTransaction {
     amount: number;
     date: string;
     merchant_name: string | null;
+    iso_currency_code?: string | null;
     category: string[] | null;
 }
 
 export interface TransactionsPayload {
+    provider?: DashboardProvider;
     total: number;
+    page?: number;
+    pageSize?: number;
+    pageCount?: number;
     transactions: PlaidTransaction[];
 }
 
@@ -91,24 +96,69 @@ export const postUndoSubscription = async (id: string): Promise<void> => {
     }
 };
 
-export const fetchRecentTransactions = async (
-    days = 60,
-    provider?: DashboardProvider
-): Promise<TransactionsPayload> => {
+const buildTransactionsUrl = (
+    days: number,
+    provider?: DashboardProvider,
+    page?: number,
+    pageSize?: number
+): string => {
     const query = new URLSearchParams({ days: String(days) });
+
     if (provider) {
         query.set('provider', provider);
     }
 
-    const response = await fetch(`/api/connect/plaid/transactions?${query.toString()}`, {
-        cache: 'no-store',
-    });
-
-    if (!response.ok) {
-        throw new Error('Failed to load transactions');
+    if (page) {
+        query.set('page', String(page));
     }
 
-    return (await response.json()) as TransactionsPayload;
+    if (pageSize) {
+        query.set('pageSize', String(pageSize));
+    }
+
+    return `/api/connect/plaid/transactions?${query.toString()}`;
+};
+
+export const fetchRecentTransactions = async (
+    days = 60,
+    provider?: DashboardProvider
+): Promise<TransactionsPayload> => {
+    const pageSize = 100;
+    const maxPages = 25;
+    const allTransactions: PlaidTransaction[] = [];
+
+    let page = 1;
+    let pageCount = 1;
+    let total = 0;
+
+    do {
+        const response = await fetch(buildTransactionsUrl(days, provider, page, pageSize), {
+            cache: 'no-store',
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to load transactions');
+        }
+
+        const payload = (await response.json()) as TransactionsPayload;
+
+        if (page === 1) {
+            total = payload.total;
+            pageCount = Math.max(1, payload.pageCount ?? 1);
+        }
+
+        allTransactions.push(...payload.transactions);
+        page += 1;
+    } while (page <= pageCount && page <= maxPages);
+
+    const dedupedTransactions = Array.from(
+        new Map(allTransactions.map((transaction) => [transaction.transaction_id, transaction])).values()
+    ).sort((a, b) => b.date.localeCompare(a.date));
+
+    return {
+        total: total || dedupedTransactions.length,
+        transactions: dedupedTransactions,
+    };
 };
 
 export const fetchCurrentUser = async (): Promise<UserPayload> => {
