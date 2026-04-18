@@ -82,6 +82,12 @@ const isoDateDaysAgo = (days: number): string => {
     return date.toISOString().slice(0, 10);
 };
 
+/** Convert ISO yyyy-mm-dd to Mono's required dd-mm-yyyy format */
+const toMonoDate = (isoDate: string): string => {
+    const [year, month, day] = isoDate.split('-');
+    return `${day}-${month}-${year}`;
+};
+
 const clamp = (value: number, min: number, max: number): number => Math.min(max, Math.max(min, value));
 
 const normalizeMerchantLabel = (transaction: BankTransaction): string => {
@@ -495,7 +501,7 @@ const fetchMonoSnapshot = async (userId: string): Promise<BankSnapshot | null> =
 
     try {
         const response = await fetch(
-            `${monoBaseUrl}/accounts/${monoAccount.accountRef}/transactions?start=${isoDateDaysAgo(90)}&end=${new Date().toISOString().slice(0, 10)}`,
+            `${monoBaseUrl}/accounts/${monoAccount.accountRef}/transactions?start=${toMonoDate(isoDateDaysAgo(90))}&end=${toMonoDate(new Date().toISOString().slice(0, 10))}`,
             {
                 method: 'GET',
                 headers: {
@@ -508,6 +514,12 @@ const fetchMonoSnapshot = async (userId: string): Promise<BankSnapshot | null> =
         );
 
         if (!response.ok) {
+            const errorText = await response.text().catch(() => '');
+            console.error(
+                `[Mono] Transactions fetch failed for account ${monoAccount.accountRef} — ${response.status} ${response.statusText}:`,
+                errorText,
+            );
+
             const shouldReconnect =
                 response.status === 401
                 || response.status === 403
@@ -524,13 +536,19 @@ const fetchMonoSnapshot = async (userId: string): Promise<BankSnapshot | null> =
 
         const payload = (await response.json()) as Record<string, unknown>;
         const rawTransactions = extractMonoTransactions(payload);
+        const normalized = normalizeMonoTransactions(rawTransactions);
+
+        console.log(
+            `[Mono] Account ${monoAccount.accountRef}: payload keys=[${Object.keys(payload)}], raw=${rawTransactions.length}, normalized=${normalized.length}`,
+        );
 
         return {
             provider: 'mono',
             linkedAccounts: monoAccounts.length,
-            transactions: normalizeMonoTransactions(rawTransactions),
+            transactions: normalized,
         };
-    } catch {
+    } catch (err) {
+        console.error('[Mono] Exception in fetchMonoSnapshot:', err);
         return null;
     }
 };

@@ -24,6 +24,12 @@ const isoDateDaysAgo = (days: number): string => {
     return date.toISOString().slice(0, 10);
 };
 
+/** Convert ISO yyyy-mm-dd to Mono's required dd-mm-yyyy format */
+const toMonoDate = (isoDate: string): string => {
+    const [year, month, day] = isoDate.split('-');
+    return `${day}-${month}-${year}`;
+};
+
 type NormalizedTransaction = {
     transaction_id: string;
     name: string;
@@ -179,8 +185,8 @@ export async function GET(request: Request) {
         }
 
         const monoUrl = new URL(`${monoBaseUrl}/accounts/${connectedAccount.accountRef}/transactions`);
-        monoUrl.searchParams.set('start', isoDateDaysAgo(lookbackDays));
-        monoUrl.searchParams.set('end', new Date().toISOString().slice(0, 10));
+        monoUrl.searchParams.set('start', toMonoDate(isoDateDaysAgo(lookbackDays)));
+        monoUrl.searchParams.set('end', toMonoDate(new Date().toISOString().slice(0, 10)));
 
         const monoResponse = await fetch(monoUrl.toString(), {
             method: 'GET',
@@ -193,6 +199,12 @@ export async function GET(request: Request) {
         });
 
         if (!monoResponse.ok) {
+            const errorBody = await monoResponse.text();
+            console.error(
+                `[Mono] Transactions API error (${monoResponse.status}):`,
+                errorBody,
+            );
+
             const shouldReconnect =
                 monoResponse.status === 401
                 || monoResponse.status === 403
@@ -207,7 +219,6 @@ export async function GET(request: Request) {
                 );
             }
 
-            const errorBody = await monoResponse.text();
             return NextResponse.json(
                 { error: errorBody || 'Failed to fetch Mono transactions' },
                 { status: 502 }

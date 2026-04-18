@@ -47,7 +47,7 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Missing MONO_SECRET_KEY' }, { status: 500 });
     }
 
-    const exchangeResponse = await fetch(`${monoBaseUrl}/account/auth`, {
+    const exchangeResponse = await fetch(`${monoBaseUrl}/accounts/auth`, {
         method: 'POST',
         headers: {
             'content-type': 'application/json',
@@ -65,6 +65,7 @@ export async function POST(request: Request) {
     }
 
     const payload = (await exchangeResponse.json()) as Record<string, unknown>;
+    console.log('[Mono] Exchange response payload:', JSON.stringify(payload));
     const payloadData = toRecordOrNull(payload.data);
     const exchangePayload = payloadData ?? payload;
 

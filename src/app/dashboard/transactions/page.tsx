@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { Search, Receipt } from 'lucide-react';
 
@@ -54,7 +54,6 @@ const fetchTransactions = async (
 };
 
 export default function TransactionsPage() {
-    const router = useRouter();
     const searchParams = useSearchParams();
     const [days, setDays] = useState(90);
     const [page, setPage] = useState(1);
@@ -105,8 +104,8 @@ export default function TransactionsPage() {
             params.delete('provider');
         }
 
-        router.replace(`/dashboard/transactions?${params.toString()}`);
-    }, [router, searchParams, selectedProvider]);
+        window.history.replaceState(null, '', `/dashboard/transactions?${params.toString()}`);
+    }, [searchParams, selectedProvider]);
 
     const { data, isLoading, isError } = useQuery({
         queryKey: ['transactions-page', days, page, pageSize, selectedProvider ?? 'auto'],

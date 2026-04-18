@@ -64,45 +64,22 @@ export const ConnectProviderButtons = ({
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        let isMounted = true;
-
-        const bootstrap = async () => {
+        const loadSdk = async () => {
             try {
                 if (provider === 'plaid') {
                     await loadScript(PLAID_SCRIPT_ID, 'https://cdn.plaid.com/link/v2/stable/link-initialize.js');
-
-                    const response = await fetch('/api/connect/plaid/link-token', {
-                        method: 'POST',
-                        headers: { 'content-type': 'application/json' },
-                        body: JSON.stringify(accountId ? { accountId } : {}),
-                    });
-
-                    if (!response.ok) {
-                        throw new Error('Unable to initialize Plaid.');
-                    }
-
-                    const payload = (await response.json()) as { linkToken: string };
-                    if (isMounted) {
-                        setPlaidToken(payload.linkToken);
-                    }
                 }
 
                 if (provider === 'mono') {
                     await loadScript(MONO_SCRIPT_ID, 'https://connect.withmono.com/connect.js');
                 }
             } catch {
-                if (isMounted) {
-                    setError('Bank linking initialization failed. Check provider keys and try again.');
-                }
+                // SDK script load failures are handled at interaction time
             }
         };
 
-        void bootstrap();
-
-        return () => {
-            isMounted = false;
-        };
-    }, [accountId, provider]);
+        void loadSdk();
+    }, [provider]);
 
     const plaidButtonClasses = useMemo(
         () =>
@@ -124,36 +101,60 @@ export const ConnectProviderButtons = ({
 
     const handlePlaidSetup = async () => {
         setError(null);
-        if (!plaidToken || !window.Plaid) {
+
+        if (!window.Plaid) {
             setError('Plaid is not ready yet. Refresh and try again.');
             return;
         }
 
         setIsPlaidBusy(true);
 
-        const handler = window.Plaid.create({
-            token: plaidToken,
-            onSuccess: async (publicToken, metadata) => {
-                const response = await fetch('/api/connect/plaid/exchange', {
+        try {
+            let token = plaidToken;
+
+            if (!token) {
+                const tokenResponse = await fetch('/api/connect/plaid/link-token', {
                     method: 'POST',
                     headers: { 'content-type': 'application/json' },
-                    body: JSON.stringify({ publicToken, metadata }),
+                    body: JSON.stringify(accountId ? { accountId } : {}),
                 });
 
-                if (!response.ok) {
-                    setError('Plaid exchange failed. Try again.');
-                    setIsPlaidBusy(false);
-                    return;
+                if (!tokenResponse.ok) {
+                    throw new Error('Unable to initialize Plaid.');
                 }
 
-                window.location.assign('/dashboard/connect?connected=plaid');
-            },
-            onExit: () => {
-                setIsPlaidBusy(false);
-            },
-        });
+                const payload = (await tokenResponse.json()) as { linkToken: string };
+                token = payload.linkToken;
+                setPlaidToken(token);
+            }
 
-        handler.open();
+            const handler = window.Plaid.create({
+                token,
+                onSuccess: async (publicToken, metadata) => {
+                    const response = await fetch('/api/connect/plaid/exchange', {
+                        method: 'POST',
+                        headers: { 'content-type': 'application/json' },
+                        body: JSON.stringify({ publicToken, metadata }),
+                    });
+
+                    if (!response.ok) {
+                        setError('Plaid exchange failed. Try again.');
+                        setIsPlaidBusy(false);
+                        return;
+                    }
+
+                    window.location.assign('/dashboard/connect?connected=plaid');
+                },
+                onExit: () => {
+                    setIsPlaidBusy(false);
+                },
+            });
+
+            handler.open();
+        } catch {
+            setError('Unable to initialize Plaid. Try again.');
+            setIsPlaidBusy(false);
+        }
     };
 
     const handleMonoSetup = async () => {

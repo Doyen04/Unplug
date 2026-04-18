@@ -1,7 +1,7 @@
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import { dirname, join } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
+
+import { db } from './db';
 
 export type ConnectedProvider = 'plaid' | 'mono';
 export type ConnectedAccountAuthStatus = 'active' | 'reconnect_required';
@@ -17,7 +17,22 @@ export interface ConnectedAccount {
     encryptedAccessToken?: string;
 }
 
-const dataFilePath = join(process.cwd(), 'data', 'connected-accounts.json');
+interface ConnectedAccountRow {
+    id: string;
+    user_id: string;
+    provider: string;
+    account_ref: string;
+    display_name: string;
+    connected_at: Date;
+    auth_status: string;
+    encrypted_access_token: string | null;
+    created_at: Date;
+    updated_at: Date;
+}
+
+interface ConnectedAccountsTable {
+    connected_accounts: ConnectedAccountRow;
+}
 
 const connectedAccountSchema: z.ZodType<ConnectedAccount> = z.object({
     id: z.string(),
@@ -30,43 +45,35 @@ const connectedAccountSchema: z.ZodType<ConnectedAccount> = z.object({
     encryptedAccessToken: z.string().optional(),
 });
 
-const connectedAccountsSchema = z.array(connectedAccountSchema);
+const rowToConnectedAccount = (row: ConnectedAccountRow): ConnectedAccount => {
+    const raw: ConnectedAccount = {
+        id: row.id,
+        userId: row.user_id,
+        provider: row.provider as ConnectedProvider,
+        accountRef: row.account_ref,
+        displayName: row.display_name,
+        connectedAt: row.connected_at instanceof Date
+            ? row.connected_at.toISOString()
+            : String(row.connected_at),
+        authStatus: row.auth_status as ConnectedAccountAuthStatus | undefined,
+        encryptedAccessToken: row.encrypted_access_token ?? undefined,
+    };
 
-const ensureDataFile = async (): Promise<void> => {
-    await mkdir(dirname(dataFilePath), { recursive: true });
-
-    try {
-        await readFile(dataFilePath, 'utf-8');
-    } catch {
-        await writeFile(dataFilePath, JSON.stringify([], null, 2), 'utf-8');
-    }
+    const parsed = connectedAccountSchema.safeParse(raw);
+    return parsed.success ? parsed.data : raw;
 };
 
-const readAllConnectedAccounts = async (): Promise<ConnectedAccount[]> => {
-    await ensureDataFile();
-
-    const raw = await readFile(dataFilePath, 'utf-8');
-    const parsed = connectedAccountsSchema.safeParse(JSON.parse(raw) as unknown);
-
-    if (!parsed.success) {
-        await writeFile(dataFilePath, JSON.stringify([], null, 2), 'utf-8');
-        return [];
-    }
-
-    return parsed.data;
-};
-
-const writeAllConnectedAccounts = async (accounts: ConnectedAccount[]): Promise<void> => {
-    await ensureDataFile();
-    await writeFile(dataFilePath, JSON.stringify(accounts, null, 2), 'utf-8');
-};
+const typedDb = db as unknown as import('kysely').Kysely<ConnectedAccountsTable>;
 
 export const listConnectedAccountsByUser = async (userId: string): Promise<ConnectedAccount[]> => {
-    const accounts = await readAllConnectedAccounts();
+    const rows = await typedDb
+        .selectFrom('connected_accounts')
+        .selectAll()
+        .where('user_id', '=', userId)
+        .orderBy('connected_at', 'desc')
+        .execute();
 
-    return accounts
-        .filter((account) => account.userId === userId)
-        .sort((a, b) => b.connectedAt.localeCompare(a.connectedAt));
+    return rows.map(rowToConnectedAccount);
 };
 
 interface UpsertConnectedAccountInput {
@@ -81,62 +88,93 @@ interface UpsertConnectedAccountInput {
 export const upsertConnectedAccount = async (
     input: UpsertConnectedAccountInput
 ): Promise<ConnectedAccount> => {
-    const accounts = await readAllConnectedAccounts();
+    const now = new Date();
 
-    const existing = accounts.find(
-        (account) =>
-            account.userId === input.userId
-            && account.provider === input.provider
-            && account.accountRef === input.accountRef
-    );
+    // Check for existing account first
+    const existing = await typedDb
+        .selectFrom('connected_accounts')
+        .selectAll()
+        .where('user_id', '=', input.userId)
+        .where('provider', '=', input.provider)
+        .where('account_ref', '=', input.accountRef)
+        .executeTakeFirst();
 
     if (existing) {
-        existing.displayName = input.displayName;
-        existing.connectedAt = new Date().toISOString();
-        existing.authStatus = input.authStatus ?? existing.authStatus ?? 'active';
+        const updateValues: Record<string, unknown> = {
+            display_name: input.displayName,
+            connected_at: now,
+            auth_status: input.authStatus ?? existing.auth_status ?? 'active',
+            updated_at: now,
+        };
+
         if (input.encryptedAccessToken) {
-            existing.encryptedAccessToken = input.encryptedAccessToken;
+            updateValues.encrypted_access_token = input.encryptedAccessToken;
         }
-        await writeAllConnectedAccounts(accounts);
-        return existing;
+
+        await typedDb
+            .updateTable('connected_accounts')
+            .set(updateValues)
+            .where('id', '=', existing.id)
+            .execute();
+
+        const updated = await typedDb
+            .selectFrom('connected_accounts')
+            .selectAll()
+            .where('id', '=', existing.id)
+            .executeTakeFirstOrThrow();
+
+        return rowToConnectedAccount(updated);
     }
 
-    const next: ConnectedAccount = {
-        id: randomUUID(),
-        userId: input.userId,
-        provider: input.provider,
-        accountRef: input.accountRef,
-        displayName: input.displayName,
-        connectedAt: new Date().toISOString(),
-        authStatus: input.authStatus ?? 'active',
-        encryptedAccessToken: input.encryptedAccessToken,
-    };
+    const id = randomUUID();
 
-    accounts.push(next);
-    await writeAllConnectedAccounts(accounts);
-    return next;
+    await typedDb
+        .insertInto('connected_accounts')
+        .values({
+            id,
+            user_id: input.userId,
+            provider: input.provider,
+            account_ref: input.accountRef,
+            display_name: input.displayName,
+            connected_at: now,
+            auth_status: input.authStatus ?? 'active',
+            encrypted_access_token: input.encryptedAccessToken ?? null,
+            created_at: now,
+            updated_at: now,
+        })
+        .execute();
+
+    const inserted = await typedDb
+        .selectFrom('connected_accounts')
+        .selectAll()
+        .where('id', '=', id)
+        .executeTakeFirstOrThrow();
+
+    return rowToConnectedAccount(inserted);
 };
 
 export const disconnectConnectedAccount = async (userId: string, id: string): Promise<boolean> => {
-    const accounts = await readAllConnectedAccounts();
-    const before = accounts.length;
+    const result = await typedDb
+        .deleteFrom('connected_accounts')
+        .where('user_id', '=', userId)
+        .where('id', '=', id)
+        .executeTakeFirst();
 
-    const next = accounts.filter((account) => !(account.userId === userId && account.id === id));
-
-    if (next.length === before) {
-        return false;
-    }
-
-    await writeAllConnectedAccounts(next);
-    return true;
+    return (result?.numDeletedRows ?? BigInt(0)) > BigInt(0);
 };
 
 export const getConnectedAccountById = async (
     userId: string,
     id: string
 ): Promise<ConnectedAccount | null> => {
-    const accounts = await readAllConnectedAccounts();
-    return accounts.find((account) => account.userId === userId && account.id === id) ?? null;
+    const row = await typedDb
+        .selectFrom('connected_accounts')
+        .selectAll()
+        .where('user_id', '=', userId)
+        .where('id', '=', id)
+        .executeTakeFirst();
+
+    return row ? rowToConnectedAccount(row) : null;
 };
 
 export const getConnectedAccountByRef = async (
@@ -144,13 +182,15 @@ export const getConnectedAccountByRef = async (
     provider: ConnectedProvider,
     accountRef: string
 ): Promise<ConnectedAccount | null> => {
-    const accounts = await readAllConnectedAccounts();
-    return accounts.find(
-        (account) =>
-            account.userId === userId
-            && account.provider === provider
-            && account.accountRef === accountRef
-    ) ?? null;
+    const row = await typedDb
+        .selectFrom('connected_accounts')
+        .selectAll()
+        .where('user_id', '=', userId)
+        .where('provider', '=', provider)
+        .where('account_ref', '=', accountRef)
+        .executeTakeFirst();
+
+    return row ? rowToConnectedAccount(row) : null;
 };
 
 export const markConnectedAccountAuthStatus = async (
@@ -159,16 +199,14 @@ export const markConnectedAccountAuthStatus = async (
     accountRef: string,
     authStatus: ConnectedAccountAuthStatus
 ): Promise<void> => {
-    const accounts = await readAllConnectedAccounts();
-    const target = accounts.find(
-        (account) =>
-            account.userId === userId
-            && account.provider === provider
-            && account.accountRef === accountRef
-    );
-
-    if (!target) return;
-
-    target.authStatus = authStatus;
-    await writeAllConnectedAccounts(accounts);
+    await typedDb
+        .updateTable('connected_accounts')
+        .set({
+            auth_status: authStatus,
+            updated_at: new Date(),
+        })
+        .where('user_id', '=', userId)
+        .where('provider', '=', provider)
+        .where('account_ref', '=', accountRef)
+        .execute();
 };

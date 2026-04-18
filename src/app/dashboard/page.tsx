@@ -3,8 +3,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { Bell, Flame, Layers, Link as LinkIcon, TrendingUp, AlertTriangle, Check, Search, ArrowRight, X, ArrowUpRight, ArrowDownRight, Receipt } from 'lucide-react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { Bell, Flame, Layers, Link as LinkIcon, TrendingUp, AlertTriangle, Check, Search, ArrowRight, X, ArrowUpRight, ArrowDownRight, Receipt, Sparkles, BarChart3, ShieldCheck } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
 import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer, Cell, ReferenceLine } from 'recharts';
 
 import { fetchCurrentUser, fetchRecentTransactions } from '../../lib/client/dashboard-api';
@@ -28,7 +28,6 @@ const providerLabel = (provider: DashboardProvider): string =>
   provider === 'plaid' ? 'Plaid' : 'Mono';
 
 export default function DashboardPage() {
-  const router = useRouter();
   const searchParams = useSearchParams();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -163,8 +162,8 @@ export default function DashboardPage() {
       params.delete('provider');
     }
 
-    router.replace(`?${params.toString()}`);
-  }, [filter, page, router, searchParams, selectedProvider]);
+    window.history.replaceState(null, '', `?${params.toString()}`);
+  }, [filter, page, searchParams, selectedProvider]);
 
   useEffect(() => {
     if (!pendingUndoId) return;
@@ -218,6 +217,8 @@ export default function DashboardPage() {
         </div>
       </header>
 
+      {providers.connected.length > 0 && (
+      <>
       {/* ROW 1: STAT CARDS */}
       <section className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
         <article className="group flex flex-col gap-5 rounded-2xl border border-[#E8E7E0] border-l-4 border-l-[#E53434] bg-white p-5 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_4px_24px_rgba(0,0,0,0.08)] hover:border-[#D0CFC7] hover:border-l-[#E53434]">
@@ -430,9 +431,12 @@ export default function DashboardPage() {
           </article>
         </div>
       </section>
+      </>
+      )}
 
       {/* ROW 3: BANNER (If no accounts linked) */}
       {providers.connected.length === 0 && !isLoading && (
+        <>
         <section className="flex flex-col gap-5 rounded-2xl border border-[#E8E7E0] bg-[#1A1A17] p-6 text-white sm:flex-row sm:items-center sm:justify-between shadow-[0_8px_32px_rgba(26,26,23,0.12)] transition-all hover:shadow-[0_8px_32px_rgba(26,26,23,0.2)]">
           <div className="flex items-center gap-5">
             <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#31302A] text-[#FF5C35] ring-1 ring-[#FF5C35]/20">
@@ -447,9 +451,59 @@ export default function DashboardPage() {
             Connect Account
           </Link>
         </section>
+
+        {/* EMPTY STATE — rich visual when no provider is connected */}
+        <section className="rounded-2xl border border-[#E8E7E0] bg-white p-8 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)]">
+          <div className="mx-auto flex max-w-2xl flex-col items-center text-center">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-[#FF5C35]/10 to-[#FF5C35]/5 text-[#FF5C35] ring-1 ring-[#FF5C35]/15">
+              <Sparkles size={28} />
+            </div>
+            <h2 className="mt-5 text-xl font-bold text-[#1A1A17]">Your dashboard is waiting</h2>
+            <p className="mt-2.5 max-w-md text-sm leading-relaxed text-[#6B6960]">
+              Once you connect a bank account, we'll scan your transactions for recurring subscriptions, score your usage, and show you exactly where you're burning money.
+            </p>
+          </div>
+
+          <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div className="group flex flex-col items-center gap-3 rounded-xl border border-[#E8E7E0] bg-[#FAFAF7] p-5 transition-all hover:border-[#FF5C35]/30 hover:bg-[#FFF8F6]">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FEF0F0] text-[#E53434] ring-1 ring-[#FEE2E2] transition-colors group-hover:bg-[#E53434] group-hover:text-white">
+                <BarChart3 size={18} />
+              </div>
+              <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[#6B6960]">Spend Analytics</p>
+              <p className="text-xs leading-relaxed text-[#A9A79E]">See weekly burn charts and spending trends at a glance.</p>
+            </div>
+
+            <div className="group flex flex-col items-center gap-3 rounded-xl border border-[#E8E7E0] bg-[#FAFAF7] p-5 transition-all hover:border-[#FF5C35]/30 hover:bg-[#FFF8F6]">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FFF0EB] text-[#FF5C35] ring-1 ring-[#FFE0D6] transition-colors group-hover:bg-[#FF5C35] group-hover:text-white">
+                <Layers size={18} />
+              </div>
+              <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[#6B6960]">Subscription Detection</p>
+              <p className="text-xs leading-relaxed text-[#A9A79E]">Auto-detect recurring charges and flag unused ones.</p>
+            </div>
+
+            <div className="group flex flex-col items-center gap-3 rounded-xl border border-[#E8E7E0] bg-[#FAFAF7] p-5 transition-all hover:border-[#FF5C35]/30 hover:bg-[#FFF8F6]">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#EDFAF3] text-[#1C9E5B] ring-1 ring-[#D1F4E0] transition-colors group-hover:bg-[#1C9E5B] group-hover:text-white">
+                <ShieldCheck size={18} />
+              </div>
+              <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[#6B6960]">Smart Alerts</p>
+              <p className="text-xs leading-relaxed text-[#A9A79E]">Get notified about price hikes, trials ending, and dormant subs.</p>
+            </div>
+          </div>
+
+          <div className="mt-6 flex justify-center">
+            <Link
+              href="/dashboard/connect"
+              className="inline-flex items-center gap-2 rounded-xl bg-[#1A1A17] px-6 py-3 text-xs font-bold uppercase tracking-[0.08em] text-white transition-all hover:bg-[#31302A] focus:ring-2 focus:ring-[#FF5C35] focus:ring-offset-2"
+            >
+              Get started <ArrowRight size={14} />
+            </Link>
+          </div>
+        </section>
+        </>
       )}
 
       {/* ROW 4: SUBSCRIPTIONS + TRANSACTIONS (TABBED) */}
+      {providers.connected.length > 0 && (
       <section id="subscriptions" className="group rounded-2xl border border-[#E8E7E0] bg-white shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] transition-all duration-300 hover:shadow-[0_4px_24px_rgba(0,0,0,0.06)] hover:border-[#D0CFC7]">
         <div className="border-b border-[#E8E7E0] p-6">
           {providers.hasBoth ? (
@@ -608,6 +662,7 @@ export default function DashboardPage() {
           )}
         </div>
       </section>
+      )}
 
       {/* UNDO TOAST */}
       {pendingUndoId ? (

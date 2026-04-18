@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { Search, AlertTriangle, RefreshCcw } from 'lucide-react';
 
 import { SubscriptionRow } from '../../../components/features/subscriptions/SubscriptionRow';
@@ -14,7 +14,6 @@ const providerLabel = (provider: DashboardProvider): string =>
     provider === 'plaid' ? 'Plaid' : 'Mono';
 
 export default function SubscriptionsPage() {
-    const router = useRouter();
     const searchParams = useSearchParams();
     const [search, setSearch] = useState('');
 
@@ -80,8 +79,8 @@ export default function SubscriptionsPage() {
             params.delete('provider');
         }
 
-        router.replace(`/dashboard/subscriptions?${params.toString()}`);
-    }, [router, searchParams, selectedProvider]);
+        window.history.replaceState(null, '', `/dashboard/subscriptions?${params.toString()}`);
+    }, [searchParams, selectedProvider]);
 
     useEffect(() => {
         if (!pendingUndoId) return;
