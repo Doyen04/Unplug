@@ -7,6 +7,8 @@ import {
 } from '../../../../../lib/server/connected-accounts-store';
 import { getServerSession } from '../../../../../lib/server/auth-session';
 import { decryptToken } from '../../../../../lib/server/token-crypto';
+import { isoDateDaysAgo, toMonoDate } from '../../../../../lib/utils/date';
+
 
 const PLAID_BASE_URLS: Record<string, string> = {
     sandbox: 'https://sandbox.plaid.com',
@@ -17,18 +19,6 @@ const PLAID_BASE_URLS: Record<string, string> = {
 const MONO_DEFAULT_BASE_URL = 'https://api.withmono.com/v2';
 
 const RECONNECT_ERROR_CODES = new Set(['INVALID_ACCESS_TOKEN', 'ITEM_LOGIN_REQUIRED']);
-
-const isoDateDaysAgo = (days: number): string => {
-    const date = new Date();
-    date.setUTCDate(date.getUTCDate() - days);
-    return date.toISOString().slice(0, 10);
-};
-
-/** Convert ISO yyyy-mm-dd to Mono's required dd-mm-yyyy format */
-const toMonoDate = (isoDate: string): string => {
-    const [year, month, day] = isoDate.split('-');
-    return `${day}-${month}-${year}`;
-};
 
 type NormalizedTransaction = {
     transaction_id: string;

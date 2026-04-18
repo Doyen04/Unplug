@@ -11,11 +11,13 @@ import {
     markConnectedAccountAuthStatus,
 } from './connected-accounts-store';
 import { decryptToken } from './token-crypto';
-import {
     readStoredSubscriptions,
     writeStoredSubscriptions,
     type StoredSubscription,
 } from './subscriptions-store';
+import { isoDateDaysAgo, toMonoDate } from '../utils/date';
+import { clamp } from '../utils/math';
+import { normalizeMerchantLabel, toMerchantKey } from '../utils/format';
 
 export interface DashboardPayload {
     summary: DashboardSummary;
@@ -75,32 +77,6 @@ const PLAID_BASE_URLS: Record<string, string> = {
 const MONO_DEFAULT_BASE_URL = 'https://api.withmono.com/v2';
 
 const RECONNECT_ERROR_CODES = new Set(['INVALID_ACCESS_TOKEN', 'ITEM_LOGIN_REQUIRED']);
-
-const isoDateDaysAgo = (days: number): string => {
-    const date = new Date();
-    date.setUTCDate(date.getUTCDate() - days);
-    return date.toISOString().slice(0, 10);
-};
-
-/** Convert ISO yyyy-mm-dd to Mono's required dd-mm-yyyy format */
-const toMonoDate = (isoDate: string): string => {
-    const [year, month, day] = isoDate.split('-');
-    return `${day}-${month}-${year}`;
-};
-
-const clamp = (value: number, min: number, max: number): number => Math.min(max, Math.max(min, value));
-
-const normalizeMerchantLabel = (transaction: BankTransaction): string => {
-    const raw = (transaction.merchant_name ?? transaction.name ?? 'Unknown service').trim();
-    return raw.replace(/\s+/g, ' ');
-};
-
-const toMerchantKey = (label: string): string =>
-    label
-        .toLowerCase()
-        .replace(/[^a-z0-9 ]+/g, ' ')
-        .replace(/\s+/g, ' ')
-        .trim();
 
 const daysBetween = (a: string, b: string): number => {
     const first = new Date(a).getTime();

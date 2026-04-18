@@ -9,12 +9,7 @@ import { Search, Receipt } from 'lucide-react';
 import { useDashboardData } from '../../../hooks/useDashboardData';
 import { formatCurrency } from '../../../lib/utils/format';
 import type { DashboardProvider } from '../../../types/subscription';
-
-const providerLabel = (provider: DashboardProvider): string =>
-    provider === 'plaid' ? 'Plaid' : 'Mono';
-
-const providerCurrency = (provider: DashboardProvider | null | undefined): string =>
-    provider === 'mono' ? 'NGN' : 'USD';
+import { providerLabel, providerCurrency } from '../../../lib/utils/provider';
 
 interface PlaidTransaction {
     transaction_id: string;

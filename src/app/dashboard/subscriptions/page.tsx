@@ -9,12 +9,7 @@ import { SubscriptionRow } from '../../../components/features/subscriptions/Subs
 import { useDashboardData } from '../../../hooks/useDashboardData';
 import { DASHBOARD_FILTER_OPTIONS } from '../../../lib/constants/dashboard';
 import type { DashboardProvider } from '../../../types/subscription';
-
-const providerLabel = (provider: DashboardProvider): string =>
-    provider === 'plaid' ? 'Plaid' : 'Mono';
-
-const providerCurrency = (provider: DashboardProvider | null | undefined): string =>
-    provider === 'mono' ? 'NGN' : 'USD';
+import { providerLabel, providerCurrency } from '../../../lib/utils/provider';
 
 export default function SubscriptionsPage() {
     const searchParams = useSearchParams();

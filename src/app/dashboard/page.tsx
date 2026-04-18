@@ -14,21 +14,8 @@ import { useDashboardData } from '../../hooks/useDashboardData';
 import { interpolateScoreColor } from '../../lib/utils/shameScore';
 import type { DashboardFilter, DashboardProvider } from '../../types/subscription';
 import { SubscriptionRow } from '../../components/features/subscriptions/SubscriptionRow';
-
-const startOfWeek = (date: Date): Date => {
-  const normalized = new Date(date);
-  const day = normalized.getDay();
-  const diff = (day + 6) % 7;
-  normalized.setDate(normalized.getDate() - diff);
-  normalized.setHours(0, 0, 0, 0);
-  return normalized;
-};
-
-const providerLabel = (provider: DashboardProvider): string =>
-  provider === 'plaid' ? 'Plaid' : 'Mono';
-
-const providerCurrency = (provider: DashboardProvider | 'none' | null | undefined): string =>
-  provider === 'mono' ? 'NGN' : 'USD';
+import { startOfWeek } from '../../lib/utils/date';
+import { providerLabel, providerCurrency } from '../../lib/utils/provider';
 
 export default function DashboardPage() {
   const searchParams = useSearchParams();
