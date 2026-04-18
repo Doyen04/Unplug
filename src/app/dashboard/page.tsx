@@ -384,7 +384,7 @@ export default function DashboardPage() {
                     <Tooltip
                       cursor={{ fill: 'transparent' }}
                       contentStyle={{ borderRadius: '10px', border: '1px solid #E8E7E0', boxShadow: '0 4px 16px rgba(0,0,0,0.04)', fontSize: '12px', fontWeight: 600, color: '#1A1A17' }}
-                      formatter={(value: number) => [formatCurrency(Number(value) || 0, currency), 'Spend']}
+                      formatter={(value: any) => [formatCurrency(Number(value) || 0, currency), 'Spend']}
                     />
                     <Bar dataKey="spend" radius={[4, 4, 0, 0]}>
                       {chartData.map((_, index) => (
