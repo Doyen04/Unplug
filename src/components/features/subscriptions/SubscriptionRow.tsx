@@ -10,6 +10,7 @@ interface SubscriptionRowProps {
   onCancel: (id: string) => void | Promise<void>;
   index: number;
   showAlerts?: boolean;
+  currency?: string;
 }
 
 const avatarStyleByInitial: Record<string, string> = {
@@ -37,7 +38,9 @@ export const SubscriptionRow = ({
   onCancel,
   index,
   showAlerts = true,
+  currency,
 }: SubscriptionRowProps) => {
+  const currencyCode = currency ?? 'USD';
   const hasAlert = Boolean(showAlerts && subscription.alert);
 
   return (
@@ -73,7 +76,7 @@ export const SubscriptionRow = ({
       </div>
 
       <div className="w-full text-left sm:w-auto sm:text-right">
-        <p className="font-display text-[15px] text-[#1A1A17]">{formatCurrencyPrecise(subscription.amountMonthly)}</p>
+        <p className="font-display text-[15px] text-[#1A1A17]">{formatCurrencyPrecise(subscription.amountMonthly, currencyCode)}</p>
         <p className="text-xs uppercase tracking-[0.06em] text-[#A9A79E]">{subscription.frequencyLabel}</p>
       </div>
 

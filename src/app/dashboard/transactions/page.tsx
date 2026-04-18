@@ -13,6 +13,9 @@ import type { DashboardProvider } from '../../../types/subscription';
 const providerLabel = (provider: DashboardProvider): string =>
     provider === 'plaid' ? 'Plaid' : 'Mono';
 
+const providerCurrency = (provider: DashboardProvider | null | undefined): string =>
+    provider === 'mono' ? 'NGN' : 'USD';
+
 interface PlaidTransaction {
     transaction_id: string;
     name: string;
@@ -230,7 +233,7 @@ export default function TransactionsPage() {
 
                                 <div className="text-right">
                                     <p className="text-sm font-semibold text-[#1A1A17]">
-                                        {formatCurrency(Math.abs(transaction.amount))}
+                                        {formatCurrency(Math.abs(transaction.amount), providerCurrency(selectedProvider))}
                                     </p>
                                     <span className={`mt-1 inline-block rounded-md border px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.08em] ${transaction.amount > 0
                                         ? 'border-[#E8860A]/20 bg-[#FEF6EC] text-[#E8860A]'

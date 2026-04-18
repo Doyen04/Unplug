@@ -13,6 +13,9 @@ import type { DashboardProvider } from '../../../types/subscription';
 const providerLabel = (provider: DashboardProvider): string =>
     provider === 'plaid' ? 'Plaid' : 'Mono';
 
+const providerCurrency = (provider: DashboardProvider | null | undefined): string =>
+    provider === 'mono' ? 'NGN' : 'USD';
+
 export default function SubscriptionsPage() {
     const searchParams = useSearchParams();
     const [search, setSearch] = useState('');
@@ -49,6 +52,8 @@ export default function SubscriptionsPage() {
         includeDebrief: false,
         provider: selectedProvider,
     });
+
+    const currency = providerCurrency(providers.active);
 
     useEffect(() => {
         if (!providers.active) {
@@ -201,6 +206,7 @@ export default function SubscriptionsPage() {
                                 key={subscription.id}
                                 subscription={subscription}
                                 index={index}
+                                currency={currency}
                                 onCancel={async (id) => {
                                     await cancelSubscription(id);
                                 }}

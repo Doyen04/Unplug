@@ -1,14 +1,14 @@
-export const formatCurrency = (value: number): string =>
+export const formatCurrency = (value: number, currency = 'USD'): string =>
   new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: 'USD',
+    currency,
     maximumFractionDigits: 0,
   }).format(value);
 
-export const formatCurrencyPrecise = (value: number): string =>
+export const formatCurrencyPrecise = (value: number, currency = 'USD'): string =>
   new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: 'USD',
+    currency,
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(value);
