@@ -426,10 +426,10 @@ const fetchPlaidSnapshot = async (userId: string): Promise<BankSnapshot | null> 
                 client_id: clientId,
                 secret,
                 access_token: accessToken,
-                start_date: isoDateDaysAgo(90),
+                start_date: isoDateDaysAgo(365),
                 end_date: new Date().toISOString().slice(0, 10),
                 options: {
-                    count: 250,
+                    count: 500,
                     offset: 0,
                 },
             }),
@@ -479,7 +479,7 @@ const fetchMonoSnapshot = async (userId: string): Promise<BankSnapshot | null> =
 
     try {
         const response = await fetch(
-            `${monoBaseUrl}/accounts/${monoAccount.accountRef}/transactions?start=${toMonoDate(isoDateDaysAgo(90))}&end=${toMonoDate(new Date().toISOString().slice(0, 10))}`,
+            `${monoBaseUrl}/accounts/${monoAccount.accountRef}/transactions?start=${toMonoDate(isoDateDaysAgo(365))}&end=${toMonoDate(new Date().toISOString().slice(0, 10))}`,
             {
                 method: 'GET',
                 headers: {
@@ -606,7 +606,7 @@ export const getDashboardPayload = async (
         };
     }
 
-    const storedSubscriptions = await readStoredSubscriptions();
+    const storedSubscriptions = await readStoredSubscriptions(options.userId);
     const storedForActiveProvider = filterStoredSubscriptionsByProvider(storedSubscriptions, activeProvider);
 
     const activeSnapshot = activeProvider === 'plaid'
@@ -625,7 +625,7 @@ export const getDashboardPayload = async (
         const otherProviders = storedSubscriptions.filter(
             (item) => !item.id.startsWith(`${activeProvider}-`)
         );
-        await writeStoredSubscriptions([...otherProviders, ...effectiveStoredSubscriptions]);
+        await writeStoredSubscriptions(options.userId, [...otherProviders, ...effectiveStoredSubscriptions]);
     }
 
     const subscriptions: Subscription[] = effectiveStoredSubscriptions.map(({ previousStatus, ...item }) => item);
@@ -693,26 +693,26 @@ export const getDashboardPayload = async (
     };
 };
 
-export const cancelSubscriptionById = async (id: string): Promise<Subscription | null> => {
-    const subscriptionsStore = await readStoredSubscriptions();
+export const cancelSubscriptionById = async (id: string, userId: string): Promise<Subscription | null> => {
+    const subscriptionsStore = await readStoredSubscriptions(userId);
     const target = subscriptionsStore.find((item) => item.id === id);
     if (!target) return null;
     if (target.status !== 'cancelled') {
         target.previousStatus = target.status;
         target.status = 'cancelled';
-        await writeStoredSubscriptions(subscriptionsStore);
+        await writeStoredSubscriptions(userId, subscriptionsStore);
     }
     return { ...target };
 };
 
-export const undoCancelSubscriptionById = async (id: string): Promise<Subscription | null> => {
-    const subscriptionsStore = await readStoredSubscriptions();
+export const undoCancelSubscriptionById = async (id: string, userId: string): Promise<Subscription | null> => {
+    const subscriptionsStore = await readStoredSubscriptions(userId);
     const target = subscriptionsStore.find((item) => item.id === id);
     if (!target) return null;
     if (target.status === 'cancelled') {
         target.status = target.previousStatus ?? 'healthy';
         target.previousStatus = undefined;
-        await writeStoredSubscriptions(subscriptionsStore);
+        await writeStoredSubscriptions(userId, subscriptionsStore);
     }
     return { ...target };
 };

@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { AppWindow } from 'lucide-react';
 
 import { CancelButton } from './CancelButton';
+import { CancellationGuideModal } from './CancellationGuideModal';
 import { formatCurrencyPrecise, toSentenceCase } from '../../../lib/utils/format';
 import { getAvatarClass } from '../../../lib/utils/avatar';
 import type { Subscription } from '../../../types/subscription';
@@ -23,8 +25,10 @@ export const SubscriptionRow = ({
 }: SubscriptionRowProps) => {
   const currencyCode = currency ?? 'USD';
   const hasAlert = Boolean(showAlerts && subscription.alert);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
+    <>
     <motion.article
       initial={{ opacity: 0, y: 12 }}
       animate={{
@@ -74,11 +78,18 @@ export const SubscriptionRow = ({
           <CancelButton
             subscriptionId={subscription.id}
             serviceName={subscription.serviceName}
-            onSuccess={() => onCancel(subscription.id)}
+            onSuccess={() => setIsModalOpen(true)}
             disabled={subscription.status === 'cancelled'}
           />
         </div>
       </div>
     </motion.article>
+    <CancellationGuideModal 
+      isOpen={isModalOpen}
+      onClose={() => setIsModalOpen(false)}
+      onConfirmCancel={() => onCancel(subscription.id)}
+      serviceName={subscription.serviceName}
+    />
+    </>
   );
 };

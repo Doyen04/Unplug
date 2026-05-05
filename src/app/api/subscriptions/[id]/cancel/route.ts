@@ -14,7 +14,7 @@ export async function POST(_: Request, context: RouteContext) {
     }
 
     const { id } = await context.params;
-    const updated = await cancelSubscriptionById(id);
+    const updated = await cancelSubscriptionById(id, session.user.id);
 
     if (!updated) {
         return NextResponse.json({ error: 'Subscription not found' }, { status: 404 });
