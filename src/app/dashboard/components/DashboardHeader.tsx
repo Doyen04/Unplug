@@ -1,4 +1,4 @@
-import { Bell } from 'lucide-react';
+import { Bell, LayoutDashboard } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
 interface DashboardHeaderProps {
@@ -14,7 +14,10 @@ export function DashboardHeader({
 }: DashboardHeaderProps) {
   return (
     <header className="flex items-center justify-between">
-      <h1 className="text-2xl font-extrabold tracking-tight text-text-primary">Dashboard</h1>
+      <div className="flex items-center gap-3">
+        <LayoutDashboard size={24} className="text-brand" />
+        <h1 className="text-2xl font-extrabold tracking-tight text-text-primary">Dashboard</h1>
+      </div>
       <div className="hidden lg:flex items-center gap-5">
         <div className="relative group">
           <Button
@@ -30,11 +33,6 @@ export function DashboardHeader({
               </span>
             )}
           </Button>
-        </div>
-        <div className="h-10 w-10 overflow-hidden rounded-full border border-border-strong ring-2 ring-brand/45">
-          <div className="flex h-full w-full items-center justify-center bg-text-primary text-sm font-medium text-white">
-            {userInitials}
-          </div>
         </div>
       </div>
     </header>

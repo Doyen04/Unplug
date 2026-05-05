@@ -119,7 +119,7 @@ export default function DashboardPage() {
         <div className="border-b border-border p-6 flex flex-col sm:flex-row justify-between gap-4">
           <div className="flex gap-1 bg-bg-muted p-1 rounded-full">
             {(['subscriptions', 'transactions'] as const).map(t => (
-              <Button key={t} variant={ledgerTab === t ? 'primary' : 'ghost'} size="sm" className="rounded-full px-5 lowercase" onClick={() => setLedgerTab(t)}>
+              <Button key={t} variant={ledgerTab === t ? 'primary' : 'ghost'} size="sm" className="rounded-full px-5 uppercase text-[10px] tracking-widest font-bold" onClick={() => setLedgerTab(t)}>
                 {t}
               </Button>
             ))}

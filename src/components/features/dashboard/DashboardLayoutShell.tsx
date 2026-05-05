@@ -14,6 +14,8 @@ import {
     LogOut,
     Bell,
     Menu,
+    Zap,
+    User,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -71,12 +73,13 @@ const Sidebar = ({ expanded, toggleExpanded, isMobileOpen, setIsMobileOpen }: Si
             >
                 <div className="flex h-24 items-end justify-between px-4 pb-3 pt-7">
                     {expanded ? (
-                        <Link href="/" className="text-sm font-extrabold uppercase tracking-[0.08em] text-text-primary">
+                        <Link href="/" className="flex items-center gap-2 text-sm font-extrabold uppercase tracking-[0.08em] text-text-primary">
+                            <Zap size={18} className="text-brand fill-brand" />
                             Unplug
                         </Link>
                     ) : (
-                        <Link href="/" className="mx-auto flex h-8 w-8 items-center justify-center rounded-full bg-text-primary text-xs font-bold text-white">
-                            U
+                        <Link href="/" className="mx-auto flex h-9 w-9 items-center justify-center rounded-btn bg-text-primary shadow-lg shadow-brand/10 transition-transform hover:scale-105">
+                            <Zap size={20} className="text-brand fill-brand" />
                         </Link>
                     )}
 
@@ -117,8 +120,8 @@ const Sidebar = ({ expanded, toggleExpanded, isMobileOpen, setIsMobileOpen }: Si
 
                 <div className="border-t border-border p-4">
                     <div className={`mb-4 flex items-center gap-3 ${!expanded ? 'justify-center' : ''}`}>
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-text-primary text-xs font-semibold text-white">
-                            {userInitial}
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-bg-muted text-text-secondary ring-1 ring-border transition-colors group-hover:bg-text-primary group-hover:text-white">
+                            <User size={18} />
                         </div>
                         {expanded ? (
                             <div className="min-w-0">
@@ -166,7 +169,6 @@ export const DashboardLayoutShell = ({ children }: { children: React.ReactNode }
                     </span>
                     <div className="flex items-center gap-4">
                         <Bell size={20} className="text-[#6B6960]" />
-                        <div className="h-8 w-8 rounded-full bg-[#E8E7E0]" />
                     </div>
                 </div>
 

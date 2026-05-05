@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Search, AlertTriangle, RefreshCcw } from 'lucide-react';
+import { Search, AlertTriangle, RefreshCcw, ChevronLeft, ChevronRight } from 'lucide-react';
 
 import { SubscriptionRow } from '@/components/features/subscriptions/SubscriptionRow';
 import { useDashboardData } from '@/hooks/useDashboardData';
@@ -192,8 +192,12 @@ export default function SubscriptionsPage() {
                             Page {page} / {pageCount} · {totalSubscriptions} total
                         </span>
                         <div className="flex gap-2">
-                            <Button variant="secondary" size="sm" onClick={() => setPage(page - 1)} disabled={page <= 1}>Prev</Button>
-                            <Button variant="secondary" size="sm" onClick={() => setPage(page + 1)} disabled={page >= pageCount}>Next</Button>
+                            <Button variant="secondary" size="sm" onClick={() => setPage(page - 1)} disabled={page <= 1} className="w-10">
+                                <ChevronLeft size={16} />
+                            </Button>
+                            <Button variant="secondary" size="sm" onClick={() => setPage(page + 1)} disabled={page >= pageCount} className="w-10">
+                                <ChevronRight size={16} />
+                            </Button>
                         </div>
                     </div>
                 )}

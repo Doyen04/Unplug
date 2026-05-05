@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { AppWindow, AlertTriangle } from 'lucide-react';
+import { AppWindow, AlertTriangle, Shield, Calendar } from 'lucide-react';
 
 import { CancelButton } from './CancelButton';
 import { CancellationGuideModal } from './CancellationGuideModal';
@@ -58,7 +58,7 @@ export const SubscriptionRow = ({
             </div>
 
             <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-medium text-text-secondary uppercase tracking-wider">
-              <span>Confidence: {subscription.confidence}</span>
+              <span className="flex items-center gap-1" title="Confidence Level"><Shield size={12} /> {subscription.confidence}</span>
               <span className="h-1 w-1 rounded-full bg-border" aria-hidden="true" />
               <span>{subscription.frequencyLabel}</span>
             </div>
@@ -77,7 +77,7 @@ export const SubscriptionRow = ({
             <p className="font-ui text-lg font-bold text-text-primary">
               {formatCurrencyPrecise(subscription.amountMonthly, currencyCode)}
             </p>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted mt-0.5">Monthly</p>
+            <p className="flex items-center justify-end gap-1 text-[10px] font-bold uppercase tracking-widest text-text-muted mt-0.5"><Calendar size={10} /> Monthly</p>
           </div>
 
           <div className="w-full sm:w-auto">

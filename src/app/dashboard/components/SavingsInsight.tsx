@@ -1,4 +1,4 @@
-import { AlertTriangle, Check, ArrowRight } from 'lucide-react';
+import { AlertTriangle, Check, ArrowRight, Coins } from 'lucide-react';
 import Link from 'next/link';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -51,7 +51,12 @@ export function SavingsInsight({
       {/* Potential Savings */}
       <Card className="group flex h-full flex-col justify-between border-brand-light bg-brand-light/20 p-3">
         <div>
+        <div className="flex flex-col gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-danger/10 text-danger ring-1 ring-danger/20">
+            <Coins size={16} />
+          </div>
           <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-danger">You could save</p>
+        </div>
           <p className="mt-3 font-ui text-3xl font-bold tabular-nums text-danger">{formatCurrency(saveablePerYear, currency)}</p>
           <p className="mt-1.5 text-xs text-danger/80 font-medium">
             {saveablePerYear === 0 ? 'Nothing to cut right now' : 'by cutting unused subs'}

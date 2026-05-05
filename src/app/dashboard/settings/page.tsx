@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { Shield, CreditCard, Bell, AlertOctagon, LogOut, Key, ArrowRight } from 'lucide-react';
+import { Shield, CreditCard, Bell, AlertOctagon, LogOut, Key, ArrowRight, User, Mail } from 'lucide-react';
 
 import { FormSubmitButton } from '@/components/features/auth/FormSubmitButton';
 import { auth } from '@/lib/auth';
@@ -93,11 +93,11 @@ export default async function DashboardSettingsPage({ searchParams }: SettingsPa
                         <div className="p-6 sm:p-8 grid gap-8 md:grid-cols-5">
                             <div className="md:col-span-2 space-y-6">
                                 <div>
-                                    <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted">Display Name</p>
+                                    <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-text-muted"><User size={12} /> Display Name</p>
                                     <p className="mt-1.5 text-base font-bold text-text-primary">{name}</p>
                                 </div>
                                 <div>
-                                    <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted">Email Address</p>
+                                    <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-text-muted"><Mail size={12} /> Email Address</p>
                                     <p className="mt-1.5 text-base font-bold text-text-primary">{email}</p>
                                 </div>
                             </div>

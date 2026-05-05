@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import { Search, Receipt, AlertTriangle, RefreshCcw } from 'lucide-react';
+import { Search, Receipt, AlertTriangle, RefreshCcw, ChevronLeft, ChevronRight } from 'lucide-react';
 
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { formatCurrency } from '@/lib/utils/format';
@@ -232,8 +232,12 @@ export default function TransactionsPage() {
                             Showing {(data!.page - 1) * data!.pageSize + 1}-{Math.min(data!.page * data!.pageSize, data!.total)} of {data!.total}
                         </span>
                         <div className="flex gap-2">
-                            <Button variant="secondary" size="sm" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1}>Prev</Button>
-                            <Button variant="secondary" size="sm" onClick={() => setPage(p => Math.min(data!.pageCount, p + 1))} disabled={page >= data!.pageCount}>Next</Button>
+                            <Button variant="secondary" size="sm" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1} className="w-10">
+                                <ChevronLeft size={16} />
+                            </Button>
+                            <Button variant="secondary" size="sm" onClick={() => setPage(p => Math.min(data!.pageCount, p + 1))} disabled={page >= data!.pageCount} className="w-10">
+                                <ChevronRight size={16} />
+                            </Button>
                         </div>
                     </div>
                 )}

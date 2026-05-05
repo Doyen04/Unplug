@@ -1,5 +1,6 @@
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
+import { Globe, Trash2 } from 'lucide-react';
 
 import { ConnectProviderButtons } from '@/components/features/connect/ConnectProviderButtons';
 import {
@@ -59,7 +60,8 @@ const ConnectAccountsPage = async ({ searchParams }: ConnectAccountsPageProps) =
             <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight text-text-primary">Connect Accounts</h1>
-                    <p className="text-sm text-text-secondary">
+                    <p className="flex items-center gap-1.5 text-sm text-text-secondary">
+                        <Globe size={14} className="text-text-muted" />
                         Region detected: <span className="text-text-primary font-bold">{countryCode}</span>. Choose your bank linking provider.
                     </p>
                 </div>
@@ -109,8 +111,8 @@ const ConnectAccountsPage = async ({ searchParams }: ConnectAccountsPageProps) =
                                             )}
                                             <form action={disconnectAccountAction}>
                                                 <input type="hidden" name="accountId" value={account.id} />
-                                                <Button variant="dangerOutline" size="sm" type="submit" className="h-8">
-                                                    Disconnect
+                                                <Button variant="dangerOutline" size="icon" type="submit" className="h-8 w-8" title="Disconnect account">
+                                                    <Trash2 size={14} />
                                                 </Button>
                                             </form>
                                         </div>
