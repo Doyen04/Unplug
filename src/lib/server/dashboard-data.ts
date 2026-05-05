@@ -5,7 +5,7 @@ import type {
     DashboardProvider,
     Subscription,
 } from '@/types/subscription';
-import { calculateUsageScore } from '@/usage-signals/calculateUsageScore';
+import { calculateUsageScore } from '@/lib/usage-signals/calculateUsageScore';
 import {
     listConnectedAccountsByUser,
     markConnectedAccountAuthStatus,
@@ -16,9 +16,9 @@ import {
     writeStoredSubscriptions,
     type StoredSubscription,
 } from './subscriptions-store';
-import { isoDateDaysAgo, toMonoDate } from '@/utils/date';
-import { clamp } from '@/utils/math';
-import { normalizeMerchantLabel, toMerchantKey } from '@/utils/format';
+import { isoDateDaysAgo, toMonoDate } from '@/lib/utils/date';
+import { clamp } from '@/lib/utils/math';
+import { normalizeMerchantLabel, toMerchantKey } from '@/lib/utils/format';
 
 export interface DashboardPayload {
     summary: DashboardSummary;
