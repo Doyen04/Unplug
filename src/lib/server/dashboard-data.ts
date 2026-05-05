@@ -656,7 +656,7 @@ export const getDashboardPayload = async (
         saveablePerYear,
         shameScore,
         previousShameScore: Math.min(100, shameScore + 8),
-        linkedAccounts: userAccounts.filter((account) => account.provider === activeProvider).length,
+        linkedAccounts: userAccounts.length,
         recentTransactionCount: activeSnapshot?.transactions.length ?? 0,
         dataSource: activeProvider,
     };
