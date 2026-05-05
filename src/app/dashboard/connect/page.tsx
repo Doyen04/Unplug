@@ -8,42 +8,29 @@ import {
 } from '../../../lib/server/connected-accounts-store';
 import { getServerSession } from '../../../lib/server/auth-session';
 
+import { Card } from '../../../components/ui/Card';
+import { Button } from '../../../components/ui/Button';
+import { Badge } from '../../../components/ui/Badge';
+
 const MONO_COUNTRIES = new Set(['NG', 'GH', 'KE', 'ZA', 'UG', 'TZ']);
 
 const resolveCountry = (countryHeader: string | null, languageHeader: string | null): string => {
-    if (countryHeader && countryHeader.length === 2) {
-        return countryHeader.toUpperCase();
-    }
-
+    if (countryHeader && countryHeader.length === 2) return countryHeader.toUpperCase();
     const languageSuffix = languageHeader?.split(',')[0]?.split('-')[1];
-    if (languageSuffix && languageSuffix.length === 2) {
-        return languageSuffix.toUpperCase();
-    }
-
+    if (languageSuffix && languageSuffix.length === 2) return languageSuffix.toUpperCase();
     return 'US';
 };
 
 const disconnectAccountAction = async (formData: FormData) => {
     'use server';
-
     const session = await getServerSession();
-    if (!session) {
-        redirect('/login');
-    }
-
+    if (!session) redirect('/login');
     const sessionAny = session as { user?: { id?: string } };
     const userId = sessionAny.user?.id ?? 'local-user';
     const accountId = String(formData.get('accountId') ?? '').trim();
-
-    if (!accountId) {
-        redirect('/dashboard/connect?error=disconnect_failed');
-    }
-
+    if (!accountId) redirect('/dashboard/connect?error=disconnect_failed');
     const ok = await disconnectConnectedAccount(userId, accountId);
-    if (!ok) {
-        redirect('/dashboard/connect?error=disconnect_failed');
-    }
-
+    if (!ok) redirect('/dashboard/connect?error=disconnect_failed');
     redirect('/dashboard/connect?disconnected=1');
 };
 
@@ -53,13 +40,9 @@ interface ConnectAccountsPageProps {
 
 const ConnectAccountsPage = async ({ searchParams }: ConnectAccountsPageProps) => {
     const session = await getServerSession();
-    if (!session) {
-        redirect('/login');
-    }
-
+    if (!session) redirect('/login');
     const sessionAny = session as { user?: { id?: string } };
     const userId = sessionAny.user?.id ?? 'local-user';
-
     const accounts = await listConnectedAccountsByUser(userId);
     const params = (await searchParams) ?? {};
     const hasDisconnected = params.disconnected === '1';
@@ -67,11 +50,7 @@ const ConnectAccountsPage = async ({ searchParams }: ConnectAccountsPageProps) =
     const hasDisconnectError = params.error === 'disconnect_failed';
 
     const requestHeaders = await headers();
-    const countryCode = resolveCountry(
-        requestHeaders.get('x-vercel-ip-country'),
-        requestHeaders.get('accept-language')
-    );
-
+    const countryCode = resolveCountry(requestHeaders.get('x-vercel-ip-country'), requestHeaders.get('accept-language'));
     const preferredProvider = MONO_COUNTRIES.has(countryCode) ? 'mono' : 'plaid';
     const monoPublicKey = process.env.MONO_PUBLIC_KEY ?? process.env.NEXT_PUBLIC_MONO_PUBLIC_KEY ?? '';
 
@@ -79,128 +58,92 @@ const ConnectAccountsPage = async ({ searchParams }: ConnectAccountsPageProps) =
         <div className="space-y-6">
             <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-[#1A1A17]">Connect Accounts</h1>
-                    <p className="text-sm text-[#6B6960]">
-                        Region detected: <span className="text-[#1A1A17] font-semibold">{countryCode}</span>. Choose your bank linking provider below.
+                    <h1 className="text-3xl font-bold tracking-tight text-text-primary">Connect Accounts</h1>
+                    <p className="text-sm text-text-secondary">
+                        Region detected: <span className="text-text-primary font-bold">{countryCode}</span>. Choose your bank linking provider.
                     </p>
                 </div>
             </header>
 
             {(hasConnectSuccess || hasDisconnected || hasDisconnectError) && (
                 <div className="space-y-3">
-                    {hasConnectSuccess && (
-                        <div className="rounded-[10px] border border-[#1C9E5B] bg-[#EDFAF3] p-3 text-xs uppercase tracking-[0.08em] text-[#1C9E5B]">
-                            Account connected.
-                        </div>
-                    )}
-                    {hasDisconnected && (
-                        <div className="rounded-[10px] border border-[#1C9E5B] bg-[#EDFAF3] p-3 text-xs uppercase tracking-[0.08em] text-[#1C9E5B]">
-                            Account disconnected.
-                        </div>
-                    )}
-                    {hasDisconnectError && (
-                        <div className="rounded-[10px] border border-[#E53434] bg-[#FEF0F0] p-3 text-xs uppercase tracking-[0.08em] text-[#E53434]">
-                            Could not disconnect account.
-                        </div>
-                    )}
+                    {hasConnectSuccess && <Badge variant="success" className="w-full justify-center py-3 h-auto">Account connected successfully.</Badge>}
+                    {hasDisconnected && <Badge variant="secondary" className="w-full justify-center py-3 h-auto">Account disconnected.</Badge>}
+                    {hasDisconnectError && <Badge variant="danger" className="w-full justify-center py-3 h-auto">Could not disconnect account.</Badge>}
                 </div>
             )}
 
-            <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
-                <section className="rounded-2xl border border-[#E8E7E0] bg-white p-5 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] sm:p-6">
-                    <div className="flex items-center justify-between gap-3">
-                        <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#A9A79E]">Connected accounts</p>
-                        <p className="text-xs uppercase tracking-[0.08em] text-[#A9A79E]">{accounts.length}</p>
+            <div className="grid gap-6 lg:grid-cols-5">
+                <Card className="lg:col-span-3 p-0 overflow-hidden">
+                    <div className="p-6 border-b border-border bg-bg-muted/30 flex items-center justify-between">
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted">Connected accounts</p>
+                        <Badge variant="secondary">{accounts.length}</Badge>
                     </div>
 
+                    <div className="p-6">
                     {accounts.length === 0 ? (
-                        <p className="mt-4 rounded-2xl border border-[#E8E7E0] bg-[#FAFAF7] p-4 text-sm text-[#6B6960]">No linked accounts yet.</p>
+                        <div className="rounded-xl border border-dashed border-border p-12 text-center text-text-secondary">
+                            <p className="font-semibold">No linked accounts yet</p>
+                            <p className="text-sm mt-1">Choose a provider to get started.</p>
+                        </div>
                     ) : (
-                        <ul className="mt-4 space-y-2">
+                        <ul className="space-y-4">
                             {accounts.map((account) => (
-                                <li
-                                    key={account.id}
-                                    className="flex flex-col gap-3 rounded-2xl border border-[#E8E7E0] bg-[#FAFAF7] p-3 sm:flex-row sm:items-center sm:justify-between"
-                                >
+                                <li key={account.id} className="flex flex-col gap-4 rounded-xl border border-border bg-bg-base/50 p-4 sm:flex-row sm:items-center sm:justify-between transition-colors hover:bg-bg-base">
                                     <div>
-                                        <p className="text-sm text-[#1A1A17]">{account.displayName}</p>
-                                        <p className="text-[11px] uppercase tracking-[0.08em] text-[#A9A79E]">
+                                        <p className="text-sm font-bold text-text-primary">{account.displayName}</p>
+                                        <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted">
                                             {account.provider} · {account.accountRef}
                                         </p>
-                                        <p
-                                            className={`mt-1 text-[11px] uppercase tracking-[0.08em] ${account.authStatus === 'reconnect_required'
-                                                ? 'text-[#E8860A]'
-                                                : 'text-[#1C9E5B]'
-                                                }`}
-                                        >
-                                            {account.authStatus === 'reconnect_required' ? 'Reconnect required' : 'Active'}
-                                        </p>
+                                        <Badge variant={account.authStatus === 'reconnect_required' ? 'warning' : 'success'} className="mt-2 text-[8px] px-1.5">
+                                            {account.authStatus === 'reconnect_required' ? 'Reconnect' : 'Active'}
+                                        </Badge>
                                     </div>
 
-                                    <div className="flex items-center gap-2">
-                                        {account.authStatus === 'reconnect_required' ? (
+                                    <div className="flex items-center gap-3">
+                                        {account.authStatus === 'reconnect_required' && (
                                             <ConnectProviderButtons
-                                                provider={account.provider}
-                                                preferredProvider={preferredProvider}
-                                                accountId={account.id}
-                                                compact
-                                                monoPublicKey={monoPublicKey}
+                                                provider={account.provider} preferredProvider={preferredProvider}
+                                                accountId={account.id} compact monoPublicKey={monoPublicKey}
                                             />
-                                        ) : null}
-
+                                        )}
                                         <form action={disconnectAccountAction}>
                                             <input type="hidden" name="accountId" value={account.id} />
-                                            <button
-                                                type="submit"
-                                                className="rounded-[10px] border border-[#E53434] px-3 py-1 text-xs font-semibold uppercase tracking-[0.08em] text-[#E53434] hover:bg-[#FEF0F0] focus-visible:outline-2 focus-visible:outline-[#FF5C35]"
-                                            >
+                                            <Button variant="dangerOutline" size="sm" type="submit" className="h-8">
                                                 Disconnect
-                                            </button>
+                                            </Button>
                                         </form>
                                     </div>
                                 </li>
                             ))}
                         </ul>
                     )}
-                </section>
+                    </div>
+                </Card>
 
-                <section className="space-y-3">
-                    <article
-                        className={`rounded-2xl border p-4 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] ${preferredProvider === 'plaid'
-                            ? 'border-[#FF5C35] bg-[#FFF0EC]'
-                            : 'border-[#E8E7E0] bg-white'
-                            }`}
-                    >
-                        <p className="text-[11px] uppercase tracking-[0.08em] text-[#A9A79E]">Recommended in US/Canada</p>
-                        <h2 className="font-display mt-2 text-3xl text-[#1A1A17]">Plaid</h2>
-                        <p className="mt-3 text-sm leading-7 text-[#6B6960]">
-                            Best for US-focused bank connections with broad institution support.
+                <div className="lg:col-span-2 space-y-4">
+                    <Card className={`relative overflow-hidden ${preferredProvider === 'plaid' ? 'ring-2 ring-brand' : ''}`}>
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted">North America / Europe</p>
+                        <h2 className="font-display mt-2 text-3xl font-bold text-text-primary">Plaid</h2>
+                        <p className="mt-3 text-sm leading-relaxed text-text-secondary">
+                            Best for US, Canada, and UK bank connections with broad institution support.
                         </p>
-                        <ConnectProviderButtons
-                            provider="plaid"
-                            preferredProvider={preferredProvider}
-                            monoPublicKey={monoPublicKey}
-                        />
-                    </article>
+                        <div className="mt-6">
+                            <ConnectProviderButtons provider="plaid" preferredProvider={preferredProvider} monoPublicKey={monoPublicKey} />
+                        </div>
+                    </Card>
 
-                    <article
-                        className={`rounded-2xl border p-4 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] ${preferredProvider === 'mono'
-                            ? 'border-[#FF5C35] bg-[#FFF0EC]'
-                            : 'border-[#E8E7E0] bg-white'
-                            }`}
-                    >
-                        <p className="text-[11px] uppercase tracking-[0.08em] text-[#A9A79E]">Recommended in Africa</p>
-                        <h2 className="font-display mt-2 text-3xl text-[#1A1A17]">Mono</h2>
-                        <p className="mt-3 text-sm leading-7 text-[#6B6960]">
-                            Best for Nigeria and supported African markets with regional banking coverage.
+                    <Card className={`relative overflow-hidden ${preferredProvider === 'mono' ? 'ring-2 ring-brand' : ''}`}>
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted">Africa</p>
+                        <h2 className="font-display mt-2 text-3xl font-bold text-text-primary">Mono</h2>
+                        <p className="mt-3 text-sm leading-relaxed text-text-secondary">
+                            Preferred for Nigeria, Kenya, and South African markets with regional coverage.
                         </p>
-                        <ConnectProviderButtons
-                            provider="mono"
-                            preferredProvider={preferredProvider}
-                            monoPublicKey={monoPublicKey}
-                        />
-                    </article>
-                </section>
+                        <div className="mt-6">
+                            <ConnectProviderButtons provider="mono" preferredProvider={preferredProvider} monoPublicKey={monoPublicKey} />
+                        </div>
+                    </Card>
+                </div>
             </div>
         </div>
     );

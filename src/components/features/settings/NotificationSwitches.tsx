@@ -14,14 +14,12 @@ export const NotificationSwitches = ({ initialSettings }: { initialSettings: Set
   const [settings, setSettings] = useState<SettingState>(initialSettings);
 
   const handleToggle = (key: keyof SettingState) => {
-    // Optimistic UI update
     const newValue = !settings[key];
     setSettings(prev => ({ ...prev, [key]: newValue }));
 
     startTransition(async () => {
       const res = await toggleNotificationAction(key, newValue);
       if (!res.success) {
-        // Revert on error
         setSettings(prev => ({ ...prev, [key]: !newValue }));
       }
     });
@@ -52,11 +50,11 @@ export const NotificationSwitches = ({ initialSettings }: { initialSettings: Set
         return (
           <label 
             key={sw.id} 
-            className={`flex items-center justify-between gap-4 cursor-pointer p-4 rounded-xl hover:bg-[#FAFAF7] transition-colors border border-transparent ${isPending ? 'opacity-80 pointer-events-none' : ''}`}
+            className={`flex items-center justify-between gap-4 cursor-pointer p-4 transition-colors border border-transparent ${isPending ? 'opacity-80 pointer-events-none' : ''}`}
           >
             <div>
-              <p className="text-sm font-bold text-[#1A1A17] hover:text-[#1A1A17]">{sw.title}</p>
-              <p className="text-xs text-[#6B6960] mt-1.5 leading-relaxed">{sw.description}</p>
+              <p className="text-sm font-bold text-text-primary">{sw.title}</p>
+              <p className="text-xs text-text-secondary mt-1 leading-relaxed">{sw.description}</p>
             </div>
             
             <button
@@ -64,8 +62,8 @@ export const NotificationSwitches = ({ initialSettings }: { initialSettings: Set
                role="switch"
                aria-checked={isOn}
                onClick={() => handleToggle(sw.id)}
-               className={`relative inline-flex h-6 w-11 items-center rounded-full shrink-0 border shadow-inner transition-colors duration-300 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#1A1A17] ${
-                  isOn ? 'bg-[#1C9E5B] border-[#1C9E5B]' : 'bg-[#E8E7E0] border-[#D0CFC7]'
+               className={`relative inline-flex h-6 w-11 items-center rounded-full shrink-0 border transition-colors duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand ${
+                  isOn ? 'bg-success border-success' : 'bg-bg-muted border-border'
                }`}
             >
               <span className="sr-only">Enable {sw.title}</span>

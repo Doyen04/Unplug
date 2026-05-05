@@ -2,6 +2,7 @@
 
 import { useTransition } from 'react';
 import { deleteAccountAction } from '../../../app/dashboard/settings/actions';
+import { Button } from '../../ui/Button';
 
 export const DeleteAccountButton = () => {
     const [isPending, startTransition] = useTransition();
@@ -20,13 +21,14 @@ export const DeleteAccountButton = () => {
     };
 
     return (
-        <button 
+        <Button 
             type="button" 
+            variant="danger"
             onClick={handleDelete}
             disabled={isPending}
-            className="flex items-center justify-center w-full sm:w-auto rounded-xl bg-[#E53434] px-5 py-2.5 text-xs font-bold uppercase tracking-[0.08em] text-white hover:bg-[#C92929] focus:ring-2 focus:ring-offset-1 focus:ring-[#E53434] transition-all shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full sm:w-auto"
         >
             {isPending ? 'Deleting...' : 'Delete Account'}
-        </button>
+        </Button>
     );
 };

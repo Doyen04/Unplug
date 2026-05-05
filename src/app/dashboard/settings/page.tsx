@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { Shield, CreditCard, Bell, AlertOctagon, LogOut, Key } from 'lucide-react';
+import { Shield, CreditCard, Bell, AlertOctagon, LogOut, Key, ArrowRight } from 'lucide-react';
 
 import { FormSubmitButton } from '../../../components/features/auth/FormSubmitButton';
 import { auth } from '../../../lib/auth';
@@ -11,58 +11,42 @@ import { db } from '../../../lib/server/db';
 import { NotificationSwitches } from '../../../components/features/settings/NotificationSwitches';
 import { DeleteAccountButton } from '../../../components/features/settings/DeleteAccountButton';
 
+import { Card } from '../../../components/ui/Card';
+import { Button } from '../../../components/ui/Button';
+import { Badge } from '../../../components/ui/Badge';
+import { Input } from '../../../components/ui/Input';
+
 const getSessionUserField = (session: unknown, key: 'email' | 'name'): string | undefined => {
     if (!session || typeof session !== 'object') return undefined;
-
     const user = (session as { user?: unknown }).user;
     if (!user || typeof user !== 'object') return undefined;
-
     const value = (user as Record<string, unknown>)[key];
     return typeof value === 'string' ? value : undefined;
 };
 
 const changePasswordAction = async (formData: FormData) => {
     'use server';
-
     const currentPassword = String(formData.get('currentPassword') ?? '').trim();
     const newPassword = String(formData.get('newPassword') ?? '').trim();
-
-    if (!currentPassword || newPassword.length < 8) {
-        redirect('/dashboard/settings?error=invalid_input');
-    }
-
+    if (!currentPassword || newPassword.length < 8) redirect('/dashboard/settings?error=invalid_input');
     try {
         await auth.api.changePassword({
-            body: {
-                currentPassword,
-                newPassword,
-                revokeOtherSessions: true,
-            },
+            body: { currentPassword, newPassword, revokeOtherSessions: true },
             headers: await headers(),
         });
-    } catch {
-        redirect('/dashboard/settings?error=change_failed');
-    }
-
+    } catch { redirect('/dashboard/settings?error=change_failed'); }
     redirect('/dashboard/settings?success=password_changed');
 };
 
 interface SettingsPageProps {
-    searchParams?: Promise<{
-        error?: string;
-        success?: string;
-    }>;
+    searchParams?: Promise<{ error?: string; success?: string; }>;
 }
 
 export default async function DashboardSettingsPage({ searchParams }: SettingsPageProps) {
     const session = await getServerSession();
-
-    if (!session) {
-        redirect('/login');
-    }
+    if (!session) redirect('/login');
 
     const params = (await searchParams) ?? {};
-
     const userId = session.user.id;
     let userSettings = { new_subscriptions_alerts: true, monthly_summary: true, price_increase_alert: false };
 
@@ -76,9 +60,8 @@ export default async function DashboardSettingsPage({ searchParams }: SettingsPa
                 price_increase_alert: Boolean(row.price_increase_alert),
             };
         }
-    } catch {
-        // use defaults
-    }
+    } catch { /* use defaults */ }
+
     const hasInvalidInputError = params.error === 'invalid_input';
     const hasChangeFailedError = params.error === 'change_failed';
     const hasPasswordChanged = params.success === 'password_changed';
@@ -88,167 +71,142 @@ export default async function DashboardSettingsPage({ searchParams }: SettingsPa
 
     return (
         <div className="space-y-6">
-            <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-[#1A1A17]">Settings</h1>
-                    <p className="text-sm text-[#6B6960]">Manage your personal information and preferences.</p>
-                </div>
+            <header>
+                <h1 className="text-3xl font-bold tracking-tight text-text-primary">Settings</h1>
+                <p className="text-sm text-text-secondary">Manage your personal information and preferences.</p>
             </header>
 
             <div className="space-y-6">
-
                 {/* PROFILE SECTION */}
-                <section className="rounded-2xl border border-[#E8E7E0] bg-white shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] overflow-hidden transition-all hover:shadow-[0_4px_24px_rgba(0,0,0,0.06)] hover:border-[#D0CFC7]">
-                    <div className="border-b border-[#E8E7E0] bg-[#FAFAF7] px-6 py-5 flex items-center gap-4 sm:px-8">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-[#1A1A17] border border-[#E8E7E0] shadow-sm">
-                            <Shield size={20} />
-                        </div>
-                        <div>
-                            <h2 className="text-base font-bold text-[#1A1A17]">Profile & Security</h2>
-                            <p className="text-xs text-[#6B6960] mt-0.5">Manage your personal information and password.</p>
-                        </div>
-                    </div>
-
-                    <div className="p-6 sm:p-8 grid gap-8 md:grid-cols-2">
-                        <div className="space-y-6">
-                            <div>
-                                <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#A9A79E]">Name</p>
-                                <p className="mt-1.5 text-base font-medium text-[#1A1A17]">{name}</p>
+                <section>
+                    <Card className="p-0 overflow-hidden">
+                        <div className="border-b border-border bg-bg-muted/30 px-6 py-5 flex items-center gap-4 sm:px-8">
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-text-primary border border-border">
+                                <Shield size={20} />
                             </div>
                             <div>
-                                <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#A9A79E]">Email</p>
-                                <p className="mt-1.5 text-base font-medium text-[#1A1A17]">{email}</p>
+                                <h2 className="text-base font-bold text-text-primary">Profile & Security</h2>
+                                <p className="text-xs text-text-secondary mt-0.5">Manage your personal information and password.</p>
                             </div>
                         </div>
 
-                        <div className="rounded-xl border border-[#E8E7E0] p-6 bg-[#FAFAF7] transition-all hover:border-[#D0CFC7] hover:bg-white hover:shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
-                            <div className="flex items-center gap-2 mb-5">
-                                <Key className="text-[#6B6960]" size={16} />
-                                <p className="text-sm font-bold text-[#1A1A17]">Change Password</p>
+                        <div className="p-6 sm:p-8 grid gap-8 md:grid-cols-5">
+                            <div className="md:col-span-2 space-y-6">
+                                <div>
+                                    <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted">Name</p>
+                                    <p className="mt-1.5 text-base font-bold text-text-primary">{name}</p>
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted">Email</p>
+                                    <p className="mt-1.5 text-base font-bold text-text-primary">{email}</p>
+                                </div>
                             </div>
 
-                            {hasInvalidInputError && (
-                                <div className="mb-5 rounded-lg border border-[#E53434] bg-[#FEF0F0] p-3 text-xs text-[#E53434]">
-                                    Enter current password and a new password (min 8 chars).
+                            <div className="md:col-span-3 rounded-xl border border-dashed border-border p-6 bg-bg-base/50">
+                                <div className="flex items-center gap-2 mb-5">
+                                    <Key className="text-text-secondary" size={16} />
+                                    <p className="text-sm font-bold text-text-primary">Change Password</p>
                                 </div>
-                            )}
 
-                            {hasChangeFailedError && (
-                                <div className="mb-5 rounded-lg border border-[#E53434] bg-[#FEF0F0] p-3 text-xs text-[#E53434]">
-                                    Update failed. Check your current password.
-                                </div>
-                            )}
+                                {hasInvalidInputError && <Badge variant="danger" className="mb-5 w-full justify-center">Enter valid current and new password (min 8 chars).</Badge>}
+                                {hasChangeFailedError && <Badge variant="danger" className="mb-5 w-full justify-center">Update failed. Check your current password.</Badge>}
+                                {hasPasswordChanged && <Badge variant="success" className="mb-5 w-full justify-center">Password updated successfully.</Badge>}
 
-                            {hasPasswordChanged && (
-                                <div className="mb-5 rounded-lg border border-[#1C9E5B] bg-[#EDFAF3] p-3 text-xs text-[#1C9E5B]">
-                                    Password updated successfully.
-                                </div>
-                            )}
-
-                            <form className="space-y-4" action={changePasswordAction}>
-                                <div>
-                                    <input
-                                        name="currentPassword"
-                                        type="password"
-                                        required
-                                        className="w-full rounded-lg border border-[#D0CFC7] bg-white px-3 py-2.5 text-sm text-[#1A1A17] placeholder:text-[#A9A79E] outline-none focus:border-[#FF5C35] focus:ring-1 focus:ring-[#FF5C35] transition-all"
-                                        placeholder="Current password"
-                                    />
-                                </div>
-                                <div>
-                                    <input
-                                        name="newPassword"
-                                        type="password"
-                                        minLength={8}
-                                        required
-                                        className="w-full rounded-lg border border-[#D0CFC7] bg-white px-3 py-2.5 text-sm text-[#1A1A17] placeholder:text-[#A9A79E] outline-none focus:border-[#FF5C35] focus:ring-1 focus:ring-[#FF5C35] transition-all"
-                                        placeholder="New password"
-                                    />
-                                </div>
-                                <div className="flex items-center justify-between pt-2">
-                                    <Link href="/forgot-password" className="text-xs font-semibold text-[#6B6960] hover:text-[#1A1A17] transition-colors">
-                                        Forgot password?
-                                    </Link>
-                                    <FormSubmitButton
-                                        idleLabel="Update"
-                                        pendingLabel="Updating..."
-                                        className="rounded-lg bg-[#FF5C35] px-5 py-2.5 text-xs font-bold text-white hover:bg-[#C93A1A] focus:ring-2 focus:ring-offset-1 focus:ring-[#FF5C35] transition-all"
-                                    />
-                                </div>
-                            </form>
+                                <form className="space-y-4" action={changePasswordAction}>
+                                    <div className="space-y-4">
+                                        <Input name="currentPassword" type="password" required placeholder="Current password" />
+                                        <Input name="newPassword" type="password" minLength={8} required placeholder="New password" />
+                                    </div>
+                                    <div className="flex items-center justify-between pt-2">
+                                        <Link href="/forgot-password" className="text-xs font-bold text-text-secondary hover:text-text-primary transition-colors">
+                                            Forgot password?
+                                        </Link>
+                                        <FormSubmitButton
+                                            idleLabel="Update Password"
+                                            pendingLabel="Updating..."
+                                            className="rounded-btn bg-text-primary px-5 py-2.5 text-xs font-bold text-white hover:bg-black transition-all"
+                                        />
+                                    </div>
+                                </form>
+                            </div>
                         </div>
-                    </div>
+                    </Card>
                 </section>
 
                 {/* CONNECTED ACCOUNTS SECTION */}
-                <section className="group rounded-2xl border border-[#E8E7E0] bg-white shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] overflow-hidden transition-all hover:shadow-[0_4px_24px_rgba(0,0,0,0.06)] hover:border-[#D0CFC7]">
-                    <div className="border-b border-[#E8E7E0] bg-white px-6 py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:px-8">
-                        <div className="flex items-center gap-4">
-                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#FAFAF7] text-[#1A1A17] border border-[#E8E7E0] group-hover:bg-[#1A1A17] group-hover:text-white transition-colors duration-300">
-                                <CreditCard size={18} />
+                <section>
+                    <Card className="p-0 overflow-hidden group">
+                        <div className="p-6 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div className="flex items-center gap-4">
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-bg-muted text-text-muted group-hover:bg-text-primary group-hover:text-white transition-colors">
+                                    <CreditCard size={18} />
+                                </div>
+                                <div>
+                                    <h2 className="text-base font-bold text-text-primary">Connected Accounts</h2>
+                                    <p className="text-xs text-text-secondary mt-0.5">Banks and financial connections mapped to your profile.</p>
+                                </div>
                             </div>
-                            <div>
-                                <h2 className="text-base font-bold text-[#1A1A17]">Connected Accounts</h2>
-                                <p className="text-xs text-[#6B6960] mt-0.5">Banks and financial connections mapped to your profile.</p>
+                            <Button variant="ghost" size="sm" asChild className="group-hover:translate-x-1 transition-transform">
+                                <Link href="/dashboard/connect">Manage <ArrowRight size={14} className="ml-2" /></Link>
+                            </Button>
+                        </div>
+                        <div className="p-8 flex flex-col items-center justify-center text-center bg-bg-muted/10">
+                            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white border border-border mb-4">
+                                <CreditCard size={24} className="text-text-muted" />
                             </div>
+                            <p className="text-sm font-bold text-text-primary">Control your synced data</p>
+                            <p className="text-xs text-text-secondary mt-1.5 max-w-sm leading-relaxed">Connect new accounts or update existing credentials safely through our encrypted providers.</p>
+                            <Button variant="primary" asChild className="mt-6 px-8">
+                                <Link href="/dashboard/connect">Go to Connections</Link>
+                            </Button>
                         </div>
-                        <Link href="/dashboard/connect" className="flex w-fit items-center gap-1.5 text-xs font-bold uppercase tracking-[0.08em] text-[#FF5C35] hover:text-[#C93A1A] bg-transparent hover:bg-[#FEF6EC] px-3 py-1.5 rounded-lg transition-colors">
-                            Manage &rarr;
-                        </Link>
-                    </div>
-                    <div className="px-6 py-12 sm:px-8 flex flex-col items-center justify-center text-center bg-[#FAFAF7] group-hover:bg-white transition-colors duration-500">
-                        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white border border-[#E8E7E0] shadow-sm mb-4 transition-transform duration-500 group-hover:scale-110">
-                            <CreditCard size={24} className="text-[#A9A79E]" />
-                        </div>
-                        <p className="text-sm font-bold text-[#1A1A17]">Control your synced data</p>
-                        <p className="text-xs text-[#6B6960] mt-1.5 max-w-sm leading-relaxed">Connect new accounts or update existing credentials safely through our encrypted providers.</p>
-                        <Link href="/dashboard/connect" className="mt-6 rounded-xl bg-[#FF5C35] px-6 py-3 text-xs font-bold uppercase tracking-[0.08em] text-white hover:bg-[#C93A1A] focus:ring-2 focus:ring-offset-2 focus:ring-[#FF5C35] transition-all shadow-sm hover:shadow-md">
-                            Go to Connections
-                        </Link>
-                    </div>
+                    </Card>
                 </section>
 
                 {/* NOTIFICATIONS SECTION */}
-                <section className="rounded-2xl border border-[#E8E7E0] bg-white shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)] overflow-hidden transition-all hover:shadow-[0_4px_24px_rgba(0,0,0,0.06)] hover:border-[#D0CFC7]">
-                    <div className="border-b border-[#E8E7E0] bg-white px-6 py-5 flex items-center gap-4 sm:px-8">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#FAFAF7] text-[#1A1A17] border border-[#E8E7E0] shadow-sm">
-                            <Bell size={18} />
+                <section>
+                    <Card className="p-0 overflow-hidden">
+                        <div className="border-b border-border px-6 py-5 flex items-center gap-4">
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-bg-muted text-text-primary border border-border">
+                                <Bell size={18} />
+                            </div>
+                            <div>
+                                <h2 className="text-base font-bold text-text-primary">Notifications</h2>
+                                <p className="text-xs text-text-secondary mt-0.5">Control how and when we send you updates.</p>
+                            </div>
                         </div>
-                        <div>
-                            <h2 className="text-base font-bold text-[#1A1A17]">Notifications</h2>
-                            <p className="text-xs text-[#6B6960] mt-0.5">Control how and when we send you updates.</p>
+                        <div className="px-6 py-2 divide-y divide-border/50">
+                            <NotificationSwitches initialSettings={userSettings} />
                         </div>
-                    </div>
-                    <div className="px-4 py-4 sm:px-6 divide-y divide-[#E8E7E0]/50">
-                        <NotificationSwitches initialSettings={userSettings} />
-                    </div>
+                    </Card>
                 </section>
 
                 {/* DANGER ZONE SECTION */}
-                <section className="rounded-2xl border border-[#FEE2E2] bg-white shadow-[0_1px_4px_rgba(229,52,52,0.06),0_4px_16px_rgba(229,52,52,0.04)] overflow-hidden transition-all hover:shadow-[0_4px_24px_rgba(229,52,52,0.08)] hover:border-[#FCA5A5]">
-                    <div className="border-b border-[#FEE2E2] bg-[#FEF0F0]/50 px-6 py-5 flex items-center gap-4 sm:px-8">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#FEF0F0] text-[#E53434] border border-[#FEE2E2] shadow-sm">
-                            <AlertOctagon size={18} />
+                <section>
+                    <Card className="border-danger-light bg-danger-light/5 p-0 overflow-hidden">
+                        <div className="border-b border-danger-light bg-danger-light/10 px-6 py-5 flex items-center gap-4">
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-danger border border-danger-light">
+                                <AlertOctagon size={18} />
+                            </div>
+                            <div>
+                                <h2 className="text-base font-bold text-danger">Danger Zone</h2>
+                                <p className="text-xs text-danger/70 mt-0.5">Destructive actions and account deletion.</p>
+                            </div>
                         </div>
-                        <div>
-                            <h2 className="text-base font-bold text-[#E53434]">Danger Zone</h2>
-                            <p className="text-xs text-[#E53434]/80 mt-0.5">Destructive actions and account deletion.</p>
+                        <div className="p-6 sm:p-8 flex flex-col gap-6 sm:flex-row sm:items-center justify-between">
+                            <div>
+                                <p className="text-sm font-bold text-text-primary">Account Actions</p>
+                                <p className="text-xs text-text-secondary mt-1.5 max-w-sm leading-relaxed">Sign out of this session or permanently delete your account and all financial data.</p>
+                            </div>
+                            <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0">
+                                <Button variant="secondary" asChild className="w-full sm:w-auto">
+                                    <Link href="/logout"><LogOut size={14} className="mr-2" /> Log Out</Link>
+                                </Button>
+                                <DeleteAccountButton />
+                            </div>
                         </div>
-                    </div>
-                    <div className="px-6 py-6 sm:px-8 sm:py-8 flex flex-col gap-6 sm:flex-row sm:items-center justify-between bg-[#FEF6F4]">
-                        <div>
-                            <p className="text-sm font-bold text-[#1A1A17]">Account Actions</p>
-                            <p className="text-xs text-[#6B6960] mt-1.5 max-w-sm leading-relaxed">Sign out of this session or permanently delete your account and all associated financial data.</p>
-                        </div>
-                        <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0 w-full sm:w-auto">
-                            <Link href="/logout" className="flex items-center justify-center gap-2 w-full sm:w-auto rounded-xl border border-[#D0CFC7] bg-white px-5 py-2.5 text-xs font-bold uppercase tracking-[0.08em] text-[#1A1A17] hover:bg-[#FAFAF7] hover:border-[#1A1A17] focus:ring-2 focus:ring-offset-1 focus:ring-[#1A1A17] transition-all shadow-sm hover:shadow-md">
-                                <LogOut size={14} /> Log Out
-                            </Link>
-                            <DeleteAccountButton />
-                        </div>
-                    </div>
+                    </Card>
                 </section>
-
             </div>
         </div>
     );
