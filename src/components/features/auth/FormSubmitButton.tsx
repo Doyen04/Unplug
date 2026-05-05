@@ -1,15 +1,21 @@
 'use client';
 
 import { useFormStatus } from 'react-dom';
-import { Button } from '../../ui/Button';
+import { Button, type ButtonProps } from '../../ui/Button';
 
-interface FormSubmitButtonProps {
+interface FormSubmitButtonProps extends ButtonProps {
     idleLabel: string;
     pendingLabel: string;
-    className?: string;
 }
 
-export const FormSubmitButton = ({ idleLabel, pendingLabel, className }: FormSubmitButtonProps) => {
+export const FormSubmitButton = ({ 
+    idleLabel, 
+    pendingLabel, 
+    className, 
+    variant, 
+    size, 
+    ...props 
+}: FormSubmitButtonProps) => {
     const { pending } = useFormStatus();
 
     return (
@@ -17,6 +23,9 @@ export const FormSubmitButton = ({ idleLabel, pendingLabel, className }: FormSub
             type="submit"
             disabled={pending}
             className={className}
+            variant={variant}
+            size={size}
+            {...props}
         >
             {pending ? pendingLabel : idleLabel}
         </Button>
