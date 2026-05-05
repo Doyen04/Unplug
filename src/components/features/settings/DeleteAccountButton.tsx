@@ -2,7 +2,7 @@
 
 import { useTransition } from 'react';
 import { deleteAccountAction } from '@/app/dashboard/settings/actions';
-import { Button } from '@/ui/Button';
+import { Button } from '@/components/ui/Button';
 
 export const DeleteAccountButton = () => {
     const [isPending, startTransition] = useTransition();

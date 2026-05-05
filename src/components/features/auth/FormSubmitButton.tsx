@@ -1,7 +1,7 @@
 'use client';
 
 import { useFormStatus } from 'react-dom';
-import { Button, type ButtonProps } from '@/ui/Button';
+import { Button, type ButtonProps } from '@/components/ui/Button';
 
 interface FormSubmitButtonProps extends ButtonProps {
     idleLabel: string;

@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Button } from '@/ui/Button';
-import { Badge } from '@/ui/Badge';
+import { Button } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Badge';
 
 interface ConnectProviderButtonsProps {
     provider: 'plaid' | 'mono';
