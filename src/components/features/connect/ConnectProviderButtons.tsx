@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Button } from '../../ui/Button';
-import { Badge } from '../../ui/Badge';
+import { Button } from '@/ui/Button';
+import { Badge } from '@/ui/Badge';
 
 interface ConnectProviderButtonsProps {
     provider: 'plaid' | 'mono';
@@ -178,8 +178,8 @@ export const ConnectProviderButtons = ({
                 disabled={isBusy}
                 className={compact ? "h-8" : "w-full mt-4"}
             >
-                {isBusy 
-                    ? `Opening ${provider}...` 
+                {isBusy
+                    ? `Opening ${provider}...`
                     : accountId ? `Reconnect ${provider}` : `Setup ${provider}`}
             </Button>
         </div>

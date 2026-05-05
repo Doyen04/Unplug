@@ -4,7 +4,7 @@ import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import { Plus_Jakarta_Sans, Playfair_Display } from 'next/font/google';
 
-import { QueryProvider } from '../components/providers/QueryProvider';
+import { QueryProvider } from '@/components/providers/QueryProvider';
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ['latin'],

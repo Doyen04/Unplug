@@ -4,9 +4,9 @@ import {
     getConnectedAccountById,
     listConnectedAccountsByUser,
     markConnectedAccountAuthStatus,
-} from '@/../../lib/server/connected-accounts-store';
-import { getServerSession } from '@/../../lib/server/auth-session';
-import { decryptToken } from '@/../../lib/server/token-crypto';
+} from '@/lib/server/connected-accounts-store';
+import { getServerSession } from '@/lib/server/auth-session';
+import { decryptToken } from '@/lib/server/token-crypto';
 
 const PLAID_BASE_URLS: Record<string, string> = {
     sandbox: 'https://sandbox.plaid.com',

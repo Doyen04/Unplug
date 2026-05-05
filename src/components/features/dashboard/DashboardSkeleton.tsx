@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Card } from "../../ui/Card";
+import { Card } from "@/components/ui/Card";
 
 export function DashboardSkeleton() {
   return (

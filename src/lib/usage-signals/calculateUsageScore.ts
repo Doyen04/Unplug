@@ -1,4 +1,4 @@
-import type { UsageConfidence, UsageVerdict } from '../../types/subscription';
+import type { UsageConfidence, UsageVerdict } from '@/types/subscription';
 
 export interface UsageSignalInput {
   transactionGap: number;

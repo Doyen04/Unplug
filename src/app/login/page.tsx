@@ -2,13 +2,13 @@ import Link from 'next/link';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 
-import { FormSubmitButton } from '../../components/features/auth/FormSubmitButton';
-import { auth } from '../../lib/auth';
-import { getServerSession } from '../../lib/server/auth-session';
-import { Button } from '../../components/ui/Button';
-import { Card } from '../../components/ui/Card';
-import { Input } from '../../components/ui/Input';
-import { Badge } from '../../components/ui/Badge';
+import { FormSubmitButton } from '@/components/features/auth/FormSubmitButton';
+import { auth } from '@/lib/auth';
+import { getServerSession } from '@/lib/server/auth-session';
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
+import { Input } from '@/components/ui/Input';
+import { Badge } from '@/components/ui/Badge';
 
 const loginAction = async (formData: FormData) => {
     'use server';
@@ -38,20 +38,20 @@ export default async function LoginPage({ searchParams }: { searchParams?: Promi
             <div className="auth-page-pattern" />
             <div className="relative z-10 w-full max-w-5xl grid lg:grid-cols-2 gap-4 items-stretch">
                 <Card className="hidden lg:flex flex-col justify-between p-10 bg-bg-surface">
-                   <div>
-                    <Badge variant="outline" className="mb-6">Unplug</Badge>
-                    <h1 className="font-display text-5xl leading-tight tracking-tight">Log in and face<br />your subscriptions.</h1>
-                    <p className="mt-6 text-text-secondary leading-7">No fluff. No fake optimism. Just a clear view of what you pay, what you use, and what should have been cancelled months ago.</p>
-                   </div>
-                   <div className="border-l-4 border-brand pl-6">
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted">Recoverable Waste</p>
-                      <p className="text-3xl font-bold mt-1">$1,320<span className="text-sm font-normal text-text-muted"> / year</span></p>
-                   </div>
+                    <div>
+                        <Badge variant="outline" className="mb-6">Unplug</Badge>
+                        <h1 className="font-display text-5xl leading-tight tracking-tight">Log in and face<br />your subscriptions.</h1>
+                        <p className="mt-6 text-text-secondary leading-7">No fluff. No fake optimism. Just a clear view of what you pay, what you use, and what should have been cancelled months ago.</p>
+                    </div>
+                    <div className="border-l-4 border-brand pl-6">
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted">Recoverable Waste</p>
+                        <p className="text-3xl font-bold mt-1">$1,320<span className="text-sm font-normal text-text-muted"> / year</span></p>
+                    </div>
                 </Card>
 
                 <Card className="p-8 lg:p-12 flex flex-col justify-center">
                     <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted mb-8">Account Access</p>
-                    
+
                     {params.error === 'invalid_credentials' && (
                         <Badge variant="danger" className="w-full justify-center py-3 mb-6">Invalid email or password</Badge>
                     )}
@@ -68,16 +68,16 @@ export default async function LoginPage({ searchParams }: { searchParams?: Promi
                             <label className="text-[10px] font-bold uppercase tracking-widest text-text-muted ml-1">Password</label>
                             <Input name="password" type="password" placeholder="••••••••" required />
                         </div>
-                        <FormSubmitButton 
-                           idleLabel="Log in" 
-                           pendingLabel="Logging in..." 
-                           className="w-full h-12 text-[10px] font-bold uppercase tracking-widest"
+                        <FormSubmitButton
+                            idleLabel="Log in"
+                            pendingLabel="Logging in..."
+                            className="w-full h-12 text-[10px] font-bold uppercase tracking-widest"
                         />
                     </form>
 
                     <div className="mt-8 flex justify-between items-center text-[10px] font-bold uppercase tracking-widest">
-                       <Link href="/signup" className="text-brand hover:underline">Create account</Link>
-                       <Link href="/forgot-password" title="Coming soon" className="text-text-muted hover:text-text-primary">Forgot password</Link>
+                        <Link href="/signup" className="text-brand hover:underline">Create account</Link>
+                        <Link href="/forgot-password" title="Coming soon" className="text-text-muted hover:text-text-primary">Forgot password</Link>
                     </div>
                 </Card>
             </div>

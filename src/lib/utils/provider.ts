@@ -1,4 +1,4 @@
-import type { DashboardProvider } from '../../types/subscription';
+import type { DashboardProvider } from '@/types/subscription';
 
 export const providerLabel = (provider: DashboardProvider): string =>
   provider === 'plaid' ? 'Plaid' : 'Mono';

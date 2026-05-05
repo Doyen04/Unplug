@@ -2,13 +2,13 @@ import Link from 'next/link';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 
-import { FormSubmitButton } from '../../components/features/auth/FormSubmitButton';
-import { auth } from '../../lib/auth';
-import { getServerSession } from '../../lib/server/auth-session';
-import { Button } from '../../components/ui/Button';
-import { Card } from '../../components/ui/Card';
-import { Input } from '../../components/ui/Input';
-import { Badge } from '../../components/ui/Badge';
+import { FormSubmitButton } from '@/components/features/auth/FormSubmitButton';
+import { auth } from '@/lib/auth';
+import { getServerSession } from '@/lib/server/auth-session';
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
+import { Input } from '@/components/ui/Input';
+import { Badge } from '@/components/ui/Badge';
 
 const signupAction = async (formData: FormData) => {
     'use server';
@@ -39,23 +39,23 @@ export default async function SignupPage({ searchParams }: { searchParams?: Prom
             <div className="auth-page-pattern" />
             <div className="relative z-10 w-full max-w-5xl grid lg:grid-cols-2 gap-4 items-stretch">
                 <Card className="hidden lg:flex flex-col justify-between p-10 bg-bg-surface">
-                   <div>
-                    <Badge variant="outline" className="mb-6">Unplug</Badge>
-                    <h1 className="font-display text-5xl leading-tight tracking-tight">Stop paying for<br />things you forgot.</h1>
-                    <p className="mt-6 text-text-secondary leading-7">The average person wastes $1,320 a year on subscriptions they don't use. We make the waste impossible to ignore.</p>
-                   </div>
-                   <div className="space-y-4">
-                      {["Automatic detection", "Usage scoring", "Monthly debriefs"].map(item => (
-                        <div key={item} className="flex items-center gap-3 text-sm font-medium text-text-secondary">
-                          <span className="h-2 w-2 rounded-full bg-brand" /> {item}
-                        </div>
-                      ))}
-                   </div>
+                    <div>
+                        <Badge variant="outline" className="mb-6">Unplug</Badge>
+                        <h1 className="font-display text-5xl leading-tight tracking-tight">Stop paying for<br />things you forgot.</h1>
+                        <p className="mt-6 text-text-secondary leading-7">The average person wastes $1,320 a year on subscriptions they don't use. We make the waste impossible to ignore.</p>
+                    </div>
+                    <div className="space-y-4">
+                        {["Automatic detection", "Usage scoring", "Monthly debriefs"].map(item => (
+                            <div key={item} className="flex items-center gap-3 text-sm font-medium text-text-secondary">
+                                <span className="h-2 w-2 rounded-full bg-brand" /> {item}
+                            </div>
+                        ))}
+                    </div>
                 </Card>
 
                 <Card className="p-8 lg:p-12 flex flex-col justify-center">
                     <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted mb-8">Create Account</p>
-                    
+
                     {params.error === 'signup_failed' && (
                         <Badge variant="danger" className="w-full justify-center py-3 mb-6">Sign-up failed. Try again.</Badge>
                     )}
@@ -73,10 +73,10 @@ export default async function SignupPage({ searchParams }: { searchParams?: Prom
                             <label className="text-[10px] font-bold uppercase tracking-widest text-text-muted ml-1">Password</label>
                             <Input name="password" type="password" placeholder="At least 8 characters" required />
                         </div>
-                        <FormSubmitButton 
-                           idleLabel="Create account" 
-                           pendingLabel="Creating..." 
-                           className="w-full h-12 text-[10px] font-bold uppercase tracking-widest mt-4"
+                        <FormSubmitButton
+                            idleLabel="Create account"
+                            pendingLabel="Creating..."
+                            className="w-full h-12 text-[10px] font-bold uppercase tracking-widest mt-4"
                         />
                     </form>
 

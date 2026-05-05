@@ -2,7 +2,7 @@ import type {
     DashboardFilter,
     DashboardPayload,
     DashboardProvider,
-} from '../../types/subscription';
+} from '@/types/subscription';
 
 export interface DashboardDebrief {
     month: string;

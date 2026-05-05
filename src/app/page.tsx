@@ -1,11 +1,11 @@
 import Link from 'next/link';
 import { Playfair_Display, Plus_Jakarta_Sans } from 'next/font/google';
 
-import { getDashboardPayload } from '../lib/server/dashboard-data';
-import { formatCurrency } from '../lib/utils/format';
-import { Button } from '../components/ui/Button';
-import { Card } from '../components/ui/Card';
-import { Badge } from '../components/ui/Badge';
+import { getDashboardPayload } from '@/lib/server/dashboard-data';
+import { formatCurrency } from '@/lib/utils/format';
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
+import { Badge } from '@/components/ui/Badge';
 
 const playfair = Playfair_Display({ subsets: ['latin'], weight: ['700', '900'] });
 const jakarta = Plus_Jakarta_Sans({ subsets: ['latin'], weight: ['400', '500', '600'] });
@@ -56,7 +56,7 @@ export default async function HomePage() {
   return (
     <main className={`${jakarta.className} relative min-h-screen bg-bg-base text-text-primary`}>
       <div className="auth-page-pattern opacity-30" />
-      
+
       <div className="relative z-10 mx-auto w-full max-w-6xl px-4 pb-16 pt-6 lg:px-8">
         <header className="flex items-center justify-between rounded-2xl border border-border bg-bg-surface px-4 py-3 shadow-md">
           <p className={`${playfair.className} text-3xl tracking-[-0.02em]`}>Unplug</p>
@@ -149,19 +149,19 @@ export default async function HomePage() {
         </section>
 
         <footer className="mt-4 rounded-2xl border border-border bg-bg-muted px-6 py-8 shadow-sm">
-           <div className="flex flex-col md:flex-row justify-between gap-8">
-              <div>
-                <p className={`${playfair.className} text-2xl`}>Unplug</p>
-                <p className="text-xs uppercase tracking-widest text-text-muted mt-1">Audit. Score. Cut. Recover.</p>
-              </div>
-              <div className="flex flex-wrap gap-6 text-[10px] font-bold uppercase tracking-widest text-text-secondary">
-                 <Link href="/signup">Get Started</Link>
-                 <Link href="/login">Log in</Link>
-                 <a href="#how">How it works</a>
-                 <a href="#pricing">Pricing</a>
-              </div>
-           </div>
-           <p className="mt-8 pt-4 border-t border-border-strong text-[10px] text-text-muted uppercase tracking-widest">© {new Date().getFullYear()} Unplug. Securely audited.</p>
+          <div className="flex flex-col md:flex-row justify-between gap-8">
+            <div>
+              <p className={`${playfair.className} text-2xl`}>Unplug</p>
+              <p className="text-xs uppercase tracking-widest text-text-muted mt-1">Audit. Score. Cut. Recover.</p>
+            </div>
+            <div className="flex flex-wrap gap-6 text-[10px] font-bold uppercase tracking-widest text-text-secondary">
+              <Link href="/signup">Get Started</Link>
+              <Link href="/login">Log in</Link>
+              <a href="#how">How it works</a>
+              <a href="#pricing">Pricing</a>
+            </div>
+          </div>
+          <p className="mt-8 pt-4 border-t border-border-strong text-[10px] text-text-muted uppercase tracking-widest">© {new Date().getFullYear()} Unplug. Securely audited.</p>
         </footer>
       </div>
     </main>

@@ -1,20 +1,20 @@
 'use client';
 
 import { useFormStatus } from 'react-dom';
-import { Button, type ButtonProps } from '../../ui/Button';
+import { Button, type ButtonProps } from '@/ui/Button';
 
 interface FormSubmitButtonProps extends ButtonProps {
     idleLabel: string;
     pendingLabel: string;
 }
 
-export const FormSubmitButton = ({ 
-    idleLabel, 
-    pendingLabel, 
-    className, 
-    variant, 
-    size, 
-    ...props 
+export const FormSubmitButton = ({
+    idleLabel,
+    pendingLabel,
+    className,
+    variant,
+    size,
+    ...props
 }: FormSubmitButtonProps) => {
     const { pending } = useFormStatus();
 

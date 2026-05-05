@@ -4,10 +4,10 @@ import {
     getConnectedAccountById,
     listConnectedAccountsByUser,
     markConnectedAccountAuthStatus,
-} from '@/../../lib/server/connected-accounts-store';
-import { getServerSession } from '@/../../lib/server/auth-session';
-import { decryptToken } from '@/../../lib/server/token-crypto';
-import { isoDateDaysAgo, toMonoDate } from '@/../../lib/utils/date';
+} from '@/lib/server/connected-accounts-store';
+import { getServerSession } from '@/lib/server/auth-session';
+import { decryptToken } from '@/lib/server/token-crypto';
+import { isoDateDaysAgo, toMonoDate } from '@/lib/utils/date';
 
 
 const PLAID_BASE_URLS: Record<string, string> = {

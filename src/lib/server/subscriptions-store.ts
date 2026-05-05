@@ -1,6 +1,6 @@
 import { sql } from 'kysely';
 import { db } from './db';
-import type { Subscription, SubscriptionStatus } from '../../types/subscription';
+import type { Subscription, SubscriptionStatus } from '@/types/subscription';
 
 export interface StoredSubscription extends Subscription {
     previousStatus?: Exclude<SubscriptionStatus, 'cancelled'>;
@@ -27,7 +27,7 @@ export const readStoredSubscriptions = async (userId: string): Promise<StoredSub
     `.execute(db);
 
     const rows = result.rows as any[];
-    
+
     return rows.map((row) => ({
         id: row.id,
         serviceName: row.serviceName,

@@ -2,9 +2,9 @@ import Link from 'next/link';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 
-import { FormSubmitButton } from '../../components/features/auth/FormSubmitButton';
-import { auth } from '../../lib/auth';
-import { getServerSession } from '../../lib/server/auth-session';
+import { FormSubmitButton } from '@/components/features/auth/FormSubmitButton';
+import { auth } from '@/lib/auth';
+import { getServerSession } from '@/lib/server/auth-session';
 
 const requestResetCodeAction = async (formData: FormData) => {
     'use server';

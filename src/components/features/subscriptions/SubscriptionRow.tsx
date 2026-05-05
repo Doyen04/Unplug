@@ -7,9 +7,9 @@ import { CancellationGuideModal } from './CancellationGuideModal';
 import { formatCurrencyPrecise, toSentenceCase } from '@/lib/utils/format';
 import { getAvatarClass } from '@/lib/utils/avatar';
 import type { Subscription } from '@/types/subscription';
-import { Badge } from '../../ui/Badge';
-import { Button } from '../../ui/Button';
-import { Card } from '../../ui/Card';
+import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
 
 interface SubscriptionRowProps {
   subscription: Subscription;

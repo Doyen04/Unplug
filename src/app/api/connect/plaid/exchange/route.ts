@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
-import { getServerSession } from '@/../../lib/server/auth-session';
-import { upsertConnectedAccount } from '@/../../lib/server/connected-accounts-store';
-import { encryptToken } from '@/../../lib/server/token-crypto';
+import { getServerSession } from '@/lib/server/auth-session';
+import { upsertConnectedAccount } from '@/lib/server/connected-accounts-store';
+import { encryptToken } from '@/lib/server/token-crypto';
 
 const exchangeSchema = z.object({
     publicToken: z.string(),
