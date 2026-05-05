@@ -1,20 +1,19 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { Search, Receipt, AlertTriangle, RefreshCcw } from 'lucide-react';
 
-import { useDashboardData } from '../../../hooks/useDashboardData';
-import { formatCurrency } from '../../../lib/utils/format';
-import { providerCurrency } from '../../../lib/utils/provider';
-import type { DashboardProvider } from '../../../types/subscription';
+import { useDashboardData } from '@/hooks/useDashboardData';
+import { formatCurrency } from '@/lib/utils/format';
+import { providerCurrency } from '@/lib/utils/provider';
+import type { DashboardProvider } from '@/types/subscription';
 
-import { Card } from '../../../components/ui/Card';
-import { Button } from '../../../components/ui/Button';
-import { Badge } from '../../../components/ui/Badge';
-import { Input } from '../../../components/ui/Input';
+import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Badge';
+import { Input } from '@/components/ui/Input';
 
 const providerLabel = (provider: DashboardProvider): string =>
     provider === 'plaid' ? 'Plaid' : 'Mono';
@@ -101,7 +100,7 @@ export default function TransactionsPage() {
         const list = data?.transactions ?? [];
         const normalized = search.trim().toLowerCase();
         if (!normalized) return list;
-        return list.filter((item) => {
+        return list.filter((item: PlaidTransaction) => {
             const merchant = (item.merchant_name ?? item.name).toLowerCase();
             const category = (item.category ?? []).join(' ').toLowerCase();
             return merchant.includes(normalized) || category.includes(normalized);
@@ -109,13 +108,13 @@ export default function TransactionsPage() {
     }, [data?.transactions, search]);
 
     if (isLoading) return (
-      <div className="space-y-6 animate-shimmer">
-        <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-           <div className="space-y-2"><div className="h-8 w-48 bg-bg-muted rounded-pill" /><div className="h-4 w-72 bg-bg-muted/60 rounded" /></div>
-           <div className="h-8 w-48 bg-bg-muted rounded-pill" />
-        </header>
-        <Card className="h-96 border-dashed bg-bg-surface/50" />
-      </div>
+        <div className="space-y-6 animate-shimmer">
+            <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <div className="space-y-2"><div className="h-8 w-48 bg-bg-muted rounded-pill" /><div className="h-4 w-72 bg-bg-muted/60 rounded" /></div>
+                <div className="h-8 w-48 bg-bg-muted rounded-pill" />
+            </header>
+            <Card className="h-96 border-dashed bg-bg-surface/50" />
+        </div>
     );
 
     return (
@@ -126,7 +125,7 @@ export default function TransactionsPage() {
                     <p className="text-sm text-text-secondary">Real transaction feed from your linked bank account.</p>
                 </div>
                 <div className="flex items-center gap-2 bg-bg-muted p-1 rounded-pill">
-                    {[30, 60, 90].map((window) => (
+                    {[30, 60, 90].map((window: number) => (
                         <Button
                             key={window}
                             variant={days === window ? 'primary' : 'ghost'}
@@ -142,31 +141,31 @@ export default function TransactionsPage() {
 
             <div className="flex flex-wrap items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
-                  {providers.hasBoth && (
-                      <div className="flex items-center gap-1 rounded-pill bg-bg-muted p-1">
-                          {providers.connected.map((p) => (
-                              <Button
-                                  key={p}
-                                  variant={selectedProvider === p ? 'primary' : 'ghost'}
-                                  size="sm"
-                                  onClick={() => { setSelectedProvider(p); setPage(1); }}
-                                  className="rounded-pill"
-                              >
-                                  {providerLabel(p)}
-                              </Button>
-                          ))}
-                      </div>
-                  )}
-                  {!providers.hasBoth && providers.active && (
-                      <Badge variant="secondary">Using {providerLabel(providers.active)} data</Badge>
-                  )}
+                    {providers.hasBoth && (
+                        <div className="flex items-center gap-1 rounded-pill bg-bg-muted p-1">
+                            {providers.connected.map((p: DashboardProvider) => (
+                                <Button
+                                    key={p}
+                                    variant={selectedProvider === p ? 'primary' : 'ghost'}
+                                    size="sm"
+                                    onClick={() => { setSelectedProvider(p); setPage(1); }}
+                                    className="rounded-pill"
+                                >
+                                    {providerLabel(p)}
+                                </Button>
+                            ))}
+                        </div>
+                    )}
+                    {!providers.hasBoth && providers.active && (
+                        <Badge variant="secondary">Using {providerLabel(providers.active)} data</Badge>
+                    )}
                 </div>
 
                 <div className="relative w-full sm:w-72">
                     <Search size={16} className="absolute left-3 top-3 text-text-muted transition-colors group-focus-within:text-brand" />
-                    <Input 
+                    <Input
                         value={search}
-                        onChange={(e) => setSearch(e.target.value)}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearch(e.target.value)}
                         placeholder="Search transactions"
                         className="pl-10"
                     />
@@ -197,7 +196,7 @@ export default function TransactionsPage() {
                     </div>
                 ) : (
                     <div className="divide-y divide-border">
-                        {filteredTransactions.map((transaction) => (
+                        {filteredTransactions.map((transaction: PlaidTransaction) => (
                             <article key={transaction.transaction_id} className="flex items-center justify-between gap-4 px-5 py-4 hover:bg-bg-base/50 transition-colors group">
                                 <div className="flex min-w-0 items-center gap-4">
                                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-text-primary text-white">

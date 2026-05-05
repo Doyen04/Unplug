@@ -1,7 +1,7 @@
 import { TrendingUp, RefreshCcw, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
-import { Card } from '../../../components/ui/Card';
-import { formatCurrency } from '../../../lib/utils/format';
+import { Card } from '@/components/ui/Card';
+import { formatCurrency } from '@/lib/utils/format';
 
 interface SpendChartProps {
   monthlySpend: number;
@@ -45,8 +45,8 @@ export function SpendChart({
           {previousPeriodSpend > 0 && currentPeriodSpend > 0 ? (
             <p className="mt-1 inline-flex items-center gap-1 text-[11px] text-text-muted">
               vs {formatCurrency(previousPeriodSpend, currency)} prev
-              {spendDelta >= 0 ? 
-                <ArrowUpRight size={11} className="text-warning" /> : 
+              {spendDelta >= 0 ?
+                <ArrowUpRight size={11} className="text-warning" /> :
                 <ArrowDownRight size={11} className="text-success" />
               }
               <span className={spendDelta >= 0 ? 'text-warning' : 'text-success'}>{Math.abs(spendDeltaPercent)}%</span>
@@ -97,15 +97,15 @@ export function SpendChart({
                 />
                 <Tooltip
                   cursor={{ stroke: '#FFE0D6', strokeWidth: 2 }}
-                  contentStyle={{ 
-                    borderRadius: 'var(--radius-btn)', 
-                    border: '1px solid var(--color-border)', 
-                    boxShadow: 'none', 
-                    fontSize: '12px', 
-                    fontWeight: 700, 
+                  contentStyle={{
+                    borderRadius: 'var(--radius-btn)',
+                    border: '1px solid var(--color-border)',
+                    boxShadow: 'none',
+                    fontSize: '12px',
+                    fontWeight: 700,
                     fontFamily: 'var(--font-ui)',
                     fontVariantNumeric: 'tabular-nums',
-                    color: 'var(--color-text-primary)' 
+                    color: 'var(--color-text-primary)'
                   }}
                   formatter={(value: any) => [formatCurrency(Number(value) || 0, currency), 'Spend']}
                 />

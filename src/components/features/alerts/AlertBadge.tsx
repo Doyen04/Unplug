@@ -1,4 +1,4 @@
-import type { AlertType } from '../../../types/subscription';
+import type { AlertType } from '@/types/subscription';
 
 interface AlertBadgeProps {
   type: AlertType;

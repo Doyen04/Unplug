@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { ExternalLink, Search, X, CheckCircle } from 'lucide-react';
-import { toSentenceCase } from '../../../lib/utils/format';
+import { toSentenceCase } from '@/lib/utils/format';
 import { useState } from 'react';
 
 interface CancellationGuideModalProps {

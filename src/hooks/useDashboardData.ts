@@ -9,13 +9,13 @@ import {
   postCancelSubscription,
   postUndoSubscription,
   type DashboardDebrief,
-} from '../lib/client/dashboard-api';
+} from '@/lib/client/dashboard-api';
 import type {
   DashboardFilter,
   DashboardProvider,
   DashboardPayload,
   Subscription,
-} from '../types/subscription';
+} from '@/types/subscription';
 
 export interface DashboardData {
   summary: DashboardPayload['summary'];

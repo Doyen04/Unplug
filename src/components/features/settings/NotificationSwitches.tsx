@@ -1,7 +1,7 @@
 'use client';
 
 import { useTransition, useState } from 'react';
-import { toggleNotificationAction } from '../../../app/dashboard/settings/actions';
+import { toggleNotificationAction } from '@/app/dashboard/settings/actions';
 
 interface SettingState {
   new_subscriptions_alerts: boolean;
@@ -48,29 +48,27 @@ export const NotificationSwitches = ({ initialSettings }: { initialSettings: Set
       {switches.map((sw) => {
         const isOn = settings[sw.id];
         return (
-          <label 
-            key={sw.id} 
+          <label
+            key={sw.id}
             className={`flex items-center justify-between gap-4 cursor-pointer p-4 transition-colors border border-transparent ${isPending ? 'opacity-80 pointer-events-none' : ''}`}
           >
             <div>
               <p className="text-sm font-bold text-text-primary">{sw.title}</p>
               <p className="text-xs text-text-secondary mt-1 leading-relaxed">{sw.description}</p>
             </div>
-            
+
             <button
-               type="button"
-               role="switch"
-               aria-checked={isOn}
-               onClick={() => handleToggle(sw.id)}
-               className={`relative inline-flex h-6 w-11 items-center rounded-full shrink-0 border transition-colors duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand ${
-                  isOn ? 'bg-success border-success' : 'bg-bg-muted border-border'
-               }`}
+              type="button"
+              role="switch"
+              aria-checked={isOn}
+              onClick={() => handleToggle(sw.id)}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full shrink-0 border transition-colors duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand ${isOn ? 'bg-success border-success' : 'bg-bg-muted border-border'
+                }`}
             >
               <span className="sr-only">Enable {sw.title}</span>
-              <span 
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition duration-300 ease-in-out shadow-sm ${
-                   isOn ? 'translate-x-6' : 'translate-x-1'
-                }`} 
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition duration-300 ease-in-out shadow-sm ${isOn ? 'translate-x-6' : 'translate-x-1'
+                  }`}
               />
             </button>
           </label>

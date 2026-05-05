@@ -3,18 +3,18 @@ import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { Shield, CreditCard, Bell, AlertOctagon, LogOut, Key, ArrowRight } from 'lucide-react';
 
-import { FormSubmitButton } from '../../../components/features/auth/FormSubmitButton';
-import { auth } from '../../../lib/auth';
-import { getServerSession } from '../../../lib/server/auth-session';
+import { FormSubmitButton } from '@/components/features/auth/FormSubmitButton';
+import { auth } from '@/lib/auth';
+import { getServerSession } from '@/lib/server/auth-session';
 import { sql } from 'kysely';
-import { db } from '../../../lib/server/db';
-import { NotificationSwitches } from '../../../components/features/settings/NotificationSwitches';
-import { DeleteAccountButton } from '../../../components/features/settings/DeleteAccountButton';
+import { db } from '@/lib/server/db';
+import { NotificationSwitches } from '@/components/features/settings/NotificationSwitches';
+import { DeleteAccountButton } from '@/components/features/settings/DeleteAccountButton';
 
-import { Card } from '../../../components/ui/Card';
-import { Button } from '../../../components/ui/Button';
-import { Badge } from '../../../components/ui/Badge';
-import { Input } from '../../../components/ui/Input';
+import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Badge';
+import { Input } from '@/components/ui/Input';
 
 const getSessionUserField = (session: unknown, key: 'email' | 'name'): string | undefined => {
     if (!session || typeof session !== 'object') return undefined;

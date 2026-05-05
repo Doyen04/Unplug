@@ -1,16 +1,16 @@
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 
-import { ConnectProviderButtons } from '../../../components/features/connect/ConnectProviderButtons';
+import { ConnectProviderButtons } from '@/components/features/connect/ConnectProviderButtons';
 import {
     disconnectConnectedAccount,
     listConnectedAccountsByUser,
-} from '../../../lib/server/connected-accounts-store';
-import { getServerSession } from '../../../lib/server/auth-session';
+} from '@/lib/server/connected-accounts-store';
+import { getServerSession } from '@/lib/server/auth-session';
 
-import { Card } from '../../../components/ui/Card';
-import { Button } from '../../../components/ui/Button';
-import { Badge } from '../../../components/ui/Badge';
+import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Badge';
 
 const MONO_COUNTRIES = new Set(['NG', 'GH', 'KE', 'ZA', 'UG', 'TZ']);
 
@@ -81,43 +81,43 @@ const ConnectAccountsPage = async ({ searchParams }: ConnectAccountsPageProps) =
                     </div>
 
                     <div className="p-6">
-                    {accounts.length === 0 ? (
-                        <div className="rounded-xl border border-dashed border-border p-12 text-center text-text-secondary">
-                            <p className="font-semibold">No linked accounts yet</p>
-                            <p className="text-sm mt-1">Choose a provider to get started.</p>
-                        </div>
-                    ) : (
-                        <ul className="space-y-4">
-                            {accounts.map((account) => (
-                                <li key={account.id} className="flex flex-col gap-4 rounded-xl border border-border bg-bg-base/50 p-4 sm:flex-row sm:items-center sm:justify-between transition-colors hover:bg-bg-base">
-                                    <div>
-                                        <p className="text-sm font-bold text-text-primary">{account.displayName}</p>
-                                        <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted">
-                                            {account.provider} · {account.accountRef}
-                                        </p>
-                                        <Badge variant={account.authStatus === 'reconnect_required' ? 'warning' : 'success'} className="mt-2 text-[8px] px-1.5">
-                                            {account.authStatus === 'reconnect_required' ? 'Reconnect' : 'Active'}
-                                        </Badge>
-                                    </div>
+                        {accounts.length === 0 ? (
+                            <div className="rounded-xl border border-dashed border-border p-12 text-center text-text-secondary">
+                                <p className="font-semibold">No linked accounts yet</p>
+                                <p className="text-sm mt-1">Choose a provider to get started.</p>
+                            </div>
+                        ) : (
+                            <ul className="space-y-4">
+                                {accounts.map((account) => (
+                                    <li key={account.id} className="flex flex-col gap-4 rounded-xl border border-border bg-bg-base/50 p-4 sm:flex-row sm:items-center sm:justify-between transition-colors hover:bg-bg-base">
+                                        <div>
+                                            <p className="text-sm font-bold text-text-primary">{account.displayName}</p>
+                                            <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted">
+                                                {account.provider} · {account.accountRef}
+                                            </p>
+                                            <Badge variant={account.authStatus === 'reconnect_required' ? 'warning' : 'success'} className="mt-2 text-[8px] px-1.5">
+                                                {account.authStatus === 'reconnect_required' ? 'Reconnect' : 'Active'}
+                                            </Badge>
+                                        </div>
 
-                                    <div className="flex items-center gap-3">
-                                        {account.authStatus === 'reconnect_required' && (
-                                            <ConnectProviderButtons
-                                                provider={account.provider} preferredProvider={preferredProvider}
-                                                accountId={account.id} compact monoPublicKey={monoPublicKey}
-                                            />
-                                        )}
-                                        <form action={disconnectAccountAction}>
-                                            <input type="hidden" name="accountId" value={account.id} />
-                                            <Button variant="dangerOutline" size="sm" type="submit" className="h-8">
-                                                Disconnect
-                                            </Button>
-                                        </form>
-                                    </div>
-                                </li>
-                            ))}
-                        </ul>
-                    )}
+                                        <div className="flex items-center gap-3">
+                                            {account.authStatus === 'reconnect_required' && (
+                                                <ConnectProviderButtons
+                                                    provider={account.provider} preferredProvider={preferredProvider}
+                                                    accountId={account.id} compact monoPublicKey={monoPublicKey}
+                                                />
+                                            )}
+                                            <form action={disconnectAccountAction}>
+                                                <input type="hidden" name="accountId" value={account.id} />
+                                                <Button variant="dangerOutline" size="sm" type="submit" className="h-8">
+                                                    Disconnect
+                                                </Button>
+                                            </form>
+                                        </div>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
                     </div>
                 </Card>
 

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 
-import { getShameLabel, interpolateScoreColor } from '../../../lib/utils/shameScore';
+import { getShameLabel, interpolateScoreColor } from '@/lib/utils/shameScore';
 
 interface ShameScoreMeterProps {
   score: number;

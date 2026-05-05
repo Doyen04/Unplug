@@ -1,20 +1,19 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Search, AlertTriangle, RefreshCcw } from 'lucide-react';
 
-import { SubscriptionRow } from '../../../components/features/subscriptions/SubscriptionRow';
-import { useDashboardData } from '../../../hooks/useDashboardData';
-import { DASHBOARD_FILTER_OPTIONS } from '../../../lib/constants/dashboard';
-import { providerCurrency } from '../../../lib/utils/provider';
-import type { DashboardProvider } from '../../../types/subscription';
+import { SubscriptionRow } from '@/components/features/subscriptions/SubscriptionRow';
+import { useDashboardData } from '@/hooks/useDashboardData';
+import { DASHBOARD_FILTER_OPTIONS } from '@/lib/constants/dashboard';
+import { providerCurrency } from '@/lib/utils/provider';
+import type { DashboardProvider, Subscription } from '@/types/subscription';
 
-import { Card } from '../../../components/ui/Card';
-import { Button } from '../../../components/ui/Button';
-import { Badge } from '../../../components/ui/Badge';
-import { Input } from '../../../components/ui/Input';
+import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Badge';
+import { Input } from '@/components/ui/Input';
 
 const providerLabel = (provider: DashboardProvider): string =>
     provider === 'plaid' ? 'Plaid' : 'Mono';
@@ -91,7 +90,9 @@ export default function SubscriptionsPage() {
     const filteredBySearch = useMemo(() => {
         const normalizedSearch = search.trim().toLowerCase();
         if (!normalizedSearch) return subscriptions;
-        return subscriptions.filter((item) => item.serviceName.toLowerCase().includes(normalizedSearch));
+        return subscriptions.filter((item: Subscription) => 
+            item.serviceName.toLowerCase().includes(normalizedSearch)
+        );
     }, [subscriptions, search]);
 
     if (isLoading) return (
@@ -117,9 +118,9 @@ export default function SubscriptionsPage() {
                 </div>
                 <div className="relative w-full sm:w-72">
                     <Search size={16} className="absolute left-3 top-3 text-text-muted transition-colors group-focus-within:text-brand" />
-                    <Input 
+                    <Input
                         value={search}
-                        onChange={(e) => setSearch(e.target.value)}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearch(e.target.value)}
                         placeholder="Search subscriptions"
                         className="pl-10"
                     />
@@ -129,7 +130,7 @@ export default function SubscriptionsPage() {
             <div className="flex flex-wrap items-center gap-4">
                 {providers.hasBoth && (
                     <div className="flex items-center gap-1 rounded-pill bg-bg-muted p-1 w-max">
-                        {providers.connected.map((p) => (
+                        {providers.connected.map((p: DashboardProvider) => (
                             <Button
                                 key={p}
                                 variant={selectedProvider === p ? 'primary' : 'ghost'}
@@ -160,29 +161,29 @@ export default function SubscriptionsPage() {
 
             <Card className="p-0 overflow-hidden">
                 <div className="p-6">
-                {isError && (
-                    <Badge variant="warning" className="w-full justify-center py-2 mb-4 h-auto">
-                      Live refresh failed. Showing cached data.
-                      <Button variant="ghost" size="sm" onClick={() => refetch()} className="ml-4 h-8 bg-white/20 hover:bg-white/40">
-                        <RefreshCcw size={12} className={isFetching ? 'animate-spin' : ''} />
-                      </Button>
-                    </Badge>
-                )}
+                    {isError && (
+                        <Badge variant="warning" className="w-full justify-center py-2 mb-4 h-auto">
+                            Live refresh failed. Showing cached data.
+                            <Button variant="ghost" size="sm" onClick={() => refetch()} className="ml-4 h-8 bg-white/20 hover:bg-white/40">
+                                <RefreshCcw size={12} className={isFetching ? 'animate-spin' : ''} />
+                            </Button>
+                        </Badge>
+                    )}
 
-                {filteredBySearch.length === 0 ? (
-                    <div className="rounded-xl border border-dashed border-border p-12 text-center text-text-secondary">
-                        <AlertTriangle size={32} className="mx-auto mb-4 opacity-20" />
-                        <p className="font-semibold">No subscriptions found</p>
-                        <p className="text-sm mt-1 mb-6">Try broadening your search or adjusting filters.</p>
-                        <Button variant="secondary" onClick={() => { setSearch(''); setFilter('all'); }}>Clear all filters</Button>
-                    </div>
-                ) : (
-                    <div className="space-y-4">
-                        {filteredBySearch.map((s, i) => (
-                            <SubscriptionRow key={s.id} subscription={s} index={i} currency={currency} onCancel={cancelSubscription} />
-                        ))}
-                    </div>
-                )}
+                    {filteredBySearch.length === 0 ? (
+                        <div className="rounded-xl border border-dashed border-border p-12 text-center text-text-secondary">
+                            <AlertTriangle size={32} className="mx-auto mb-4 opacity-20" />
+                            <p className="font-semibold">No subscriptions found</p>
+                            <p className="text-sm mt-1 mb-6">Try broadening your search or adjusting filters.</p>
+                            <Button variant="secondary" onClick={() => { setSearch(''); setFilter('all'); }}>Clear all filters</Button>
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            {filteredBySearch.map((s: Subscription, i: number) => (
+                                <SubscriptionRow key={s.id} subscription={s} index={i} currency={currency} onCancel={cancelSubscription} />
+                            ))}
+                        </div>
+                    )}
                 </div>
 
                 {totalSubscriptions > 0 && pageCount > 1 && (
@@ -200,8 +201,8 @@ export default function SubscriptionsPage() {
 
             {pendingUndoId && (
                 <Card className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-text-primary text-white border-none shadow-2xl p-4 flex items-center gap-6 z-50">
-                   <span className="text-sm">Subscription cancelled.</span>
-                   <Button variant="secondary" size="sm" className="bg-white text-text-primary border-none" onClick={undoCancel} disabled={isCancelling}>Undo</Button>
+                    <span className="text-sm">Subscription cancelled.</span>
+                    <Button variant="secondary" size="sm" className="bg-white text-text-primary border-none" onClick={undoCancel} disabled={isCancelling}>Undo</Button>
                 </Card>
             )}
         </div>

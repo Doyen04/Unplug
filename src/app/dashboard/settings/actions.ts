@@ -2,9 +2,9 @@
 
 import { redirect } from 'next/navigation';
 import { headers } from 'next/headers';
-import { db } from '../../../lib/server/db';
-import { auth } from '../../../lib/auth';
-import { getServerSession } from '../../../lib/server/auth-session';
+import { db } from '@/lib/server/db';
+import { auth } from '@/lib/auth';
+import { getServerSession } from '@/lib/server/auth-session';
 import { sql } from 'kysely';
 
 export async function toggleNotificationAction(setting: string, value: boolean) {

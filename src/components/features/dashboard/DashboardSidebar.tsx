@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { Settings } from 'lucide-react';
 
-import { formatCurrency } from '../../../lib/utils/format';
+import { formatCurrency } from '@/lib/utils/format';
 
 interface DashboardSidebarProps {
   monthlySpend: number;

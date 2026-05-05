@@ -1,8 +1,8 @@
 import { AlertTriangle, Check, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
-import { Card } from '../../../components/ui/Card';
-import { Button } from '../../../components/ui/Button';
-import { formatCurrency } from '../../../lib/utils/format';
+import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
+import { formatCurrency } from '@/lib/utils/format';
 
 interface SavingsInsightProps {
   unusedCount: number;
@@ -39,9 +39,9 @@ export function SavingsInsight({
             </p>
           )}
         </div>
-        <Link 
-          href="#subscriptions" 
-          onClick={onFilterUnused} 
+        <Link
+          href="#subscriptions"
+          onClick={onFilterUnused}
           className="mt-3 flex w-max items-center rounded-lg bg-transparent px-3 py-1.5 text-xs font-bold uppercase tracking-[0.08em] text-brand transition-colors hover:bg-brand-light hover:text-brand-dark hover:underline hover:underline-offset-4 -ml-3"
         >
           Review unused <ArrowRight size={14} className="ml-1.5 transition-transform group-hover:translate-x-1" />
@@ -57,8 +57,8 @@ export function SavingsInsight({
             {saveablePerYear === 0 ? 'Nothing to cut right now' : 'by cutting unused subs'}
           </p>
         </div>
-        <Button 
-          variant="dangerOutline" 
+        <Button
+          variant="dangerOutline"
           onClick={onFilterUnused}
           className="mt-3 h-11.5 w-full"
         >

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 
-import { cancelSubscriptionById } from '../../../../../lib/server/dashboard-data';
-import { getServerSession } from '../../../../../lib/server/auth-session';
+import { cancelSubscriptionById } from '@/../../lib/server/dashboard-data';
+import { getServerSession } from '@/../../lib/server/auth-session';
 
 interface RouteContext {
     params: Promise<{ id: string }>;

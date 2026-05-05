@@ -1,7 +1,7 @@
 'use client';
 
 import { useTransition } from 'react';
-import { deleteAccountAction } from '../../../app/dashboard/settings/actions';
+import { deleteAccountAction } from '@/app/dashboard/settings/actions';
 import { Button } from '../../ui/Button';
 
 export const DeleteAccountButton = () => {
@@ -21,8 +21,8 @@ export const DeleteAccountButton = () => {
     };
 
     return (
-        <Button 
-            type="button" 
+        <Button
+            type="button"
             variant="danger"
             onClick={handleDelete}
             disabled={isPending}

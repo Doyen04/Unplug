@@ -1,6 +1,6 @@
 import { Flame, Layers, Link as LinkIcon, Check, ArrowUpRight, ArrowDownRight } from 'lucide-react';
-import { Card } from '../../../components/ui/Card';
-import { formatCurrency } from '../../../lib/utils/format';
+import { Card } from '@/components/ui/Card';
+import { formatCurrency } from '@/lib/utils/format';
 
 interface DashboardStatsProps {
   summary: {
@@ -119,11 +119,11 @@ export function DashboardStats({
                   fill="none"
                   strokeWidth="4"
                   strokeLinecap="round"
-                  style={{ 
-                    stroke: scoreColor, 
-                    strokeDasharray: 125.6, 
-                    strokeDashoffset, 
-                    transition: 'stroke-dashoffset 1s ease-out' 
+                  style={{
+                    stroke: scoreColor,
+                    strokeDasharray: 125.6,
+                    strokeDashoffset,
+                    transition: 'stroke-dashoffset 1s ease-out'
                   }}
                 />
               )}
@@ -139,7 +139,7 @@ export function DashboardStats({
           </div>
         </div>
         <div className="inline-flex items-center gap-1.5 text-[11px] text-[#5E9273]">
-           <span>Trend analysis coming soon</span>
+          <span>Trend analysis coming soon</span>
         </div>
       </Card>
     </section>

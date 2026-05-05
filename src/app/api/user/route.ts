@@ -1,4 +1,4 @@
-import { getServerSession } from '../../../lib/server/auth-session';
+import { getServerSession } from '@/lib/server/auth-session';
 
 export async function GET() {
     const session = await getServerSession();

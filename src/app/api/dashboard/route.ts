@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
-import { getDashboardPayload } from '../../../lib/server/dashboard-data';
-import { getServerSession } from '../../../lib/server/auth-session';
+import { getDashboardPayload } from '@/lib/server/dashboard-data';
+import { getServerSession } from '@/lib/server/auth-session';
 
 const filterSchema = z.enum(['all', 'at-risk', 'active', 'cancelled', 'unused']);
 const providerSchema = z.enum(['plaid', 'mono']);
