@@ -6,6 +6,10 @@ import { Shield, CreditCard, Bell, AlertOctagon, LogOut, Key } from 'lucide-reac
 import { FormSubmitButton } from '../../../components/features/auth/FormSubmitButton';
 import { auth } from '../../../lib/auth';
 import { getServerSession } from '../../../lib/server/auth-session';
+import { sql } from 'kysely';
+import { db } from '../../../lib/server/db';
+import { NotificationSwitches } from '../../../components/features/settings/NotificationSwitches';
+import { DeleteAccountButton } from '../../../components/features/settings/DeleteAccountButton';
 
 const getSessionUserField = (session: unknown, key: 'email' | 'name'): string | undefined => {
     if (!session || typeof session !== 'object') return undefined;
@@ -58,6 +62,23 @@ export default async function DashboardSettingsPage({ searchParams }: SettingsPa
     }
 
     const params = (await searchParams) ?? {};
+
+    const userId = session.user.id;
+    let userSettings = { new_subscriptions_alerts: true, monthly_summary: true, price_increase_alert: false };
+
+    try {
+        const result = await sql`SELECT new_subscriptions_alerts, monthly_summary, price_increase_alert FROM user_settings WHERE user_id = ${userId}`.execute(db);
+        if (result.rows.length > 0) {
+            const row = result.rows[0] as any;
+            userSettings = {
+                new_subscriptions_alerts: Boolean(row.new_subscriptions_alerts),
+                monthly_summary: Boolean(row.monthly_summary),
+                price_increase_alert: Boolean(row.price_increase_alert),
+            };
+        }
+    } catch {
+        // use defaults
+    }
     const hasInvalidInputError = params.error === 'invalid_input';
     const hasChangeFailedError = params.error === 'change_failed';
     const hasPasswordChanged = params.success === 'password_changed';
@@ -199,33 +220,7 @@ export default async function DashboardSettingsPage({ searchParams }: SettingsPa
                         </div>
                     </div>
                     <div className="px-4 py-4 sm:px-6 divide-y divide-[#E8E7E0]/50">
-                        <label className="flex items-center justify-between gap-4 cursor-pointer p-4 rounded-xl hover:bg-[#FAFAF7] transition-colors border border-transparent">
-                            <div>
-                                <p className="text-sm font-bold text-[#1A1A17] hover:text-[#1A1A17]">New Subscriptions Detected</p>
-                                <p className="text-xs text-[#6B6960] mt-1.5 leading-relaxed">Receive an email when we notice a new recurring charge.</p>
-                            </div>
-                            <div className="relative inline-flex h-6 w-11 items-center rounded-full bg-[#1C9E5B] shrink-0 border border-[#1C9E5B] shadow-inner">
-                                <span className="inline-block h-4 w-4 translate-x-6 transform rounded-full bg-white transition shadow-sm" />
-                            </div>
-                        </label>
-                        <label className="flex items-center justify-between gap-4 cursor-pointer p-4 rounded-xl hover:bg-[#FAFAF7] transition-colors border border-transparent">
-                            <div>
-                                <p className="text-sm font-bold text-[#1A1A17]">Monthly Unplug Summary</p>
-                                <p className="text-xs text-[#6B6960] mt-1.5 leading-relaxed">Get a monthly report of your burn rate and shame score.</p>
-                            </div>
-                            <div className="relative inline-flex h-6 w-11 items-center rounded-full bg-[#1C9E5B] shrink-0 border border-[#1C9E5B] shadow-inner">
-                                <span className="inline-block h-4 w-4 translate-x-6 transform rounded-full bg-white transition shadow-sm" />
-                            </div>
-                        </label>
-                        <label className="flex items-center justify-between gap-4 cursor-pointer p-4 rounded-xl hover:bg-[#FAFAF7] transition-colors border border-transparent">
-                            <div>
-                                <p className="text-sm font-bold text-[#1A1A17]">Price Increase Alerts</p>
-                                <p className="text-xs text-[#6B6960] mt-1.5 leading-relaxed">Notify me when a subscription increases its price.</p>
-                            </div>
-                            <div className="relative inline-flex h-6 w-11 items-center rounded-full bg-[#E8E7E0] shrink-0 border border-[#D0CFC7] shadow-inner">
-                                <span className="inline-block h-4 w-4 translate-x-1 transform rounded-full bg-white transition shadow-sm" />
-                            </div>
-                        </label>
+                        <NotificationSwitches initialSettings={userSettings} />
                     </div>
                 </section>
 
@@ -249,9 +244,7 @@ export default async function DashboardSettingsPage({ searchParams }: SettingsPa
                             <Link href="/logout" className="flex items-center justify-center gap-2 w-full sm:w-auto rounded-xl border border-[#D0CFC7] bg-white px-5 py-2.5 text-xs font-bold uppercase tracking-[0.08em] text-[#1A1A17] hover:bg-[#FAFAF7] hover:border-[#1A1A17] focus:ring-2 focus:ring-offset-1 focus:ring-[#1A1A17] transition-all shadow-sm hover:shadow-md">
                                 <LogOut size={14} /> Log Out
                             </Link>
-                            <button className="flex items-center justify-center w-full sm:w-auto rounded-xl bg-[#E53434] px-5 py-2.5 text-xs font-bold uppercase tracking-[0.08em] text-white hover:bg-[#C92929] focus:ring-2 focus:ring-offset-1 focus:ring-[#E53434] transition-all shadow-sm hover:shadow-md">
-                                Delete Account
-                            </button>
+                            <DeleteAccountButton />
                         </div>
                     </div>
                 </section>
