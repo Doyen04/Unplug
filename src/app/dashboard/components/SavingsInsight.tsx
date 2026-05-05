@@ -28,7 +28,7 @@ export function SavingsInsight({
             </div>
             <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-text-secondary">Unused</p>
           </div>
-          <p className="mt-3 font-display text-4xl font-semibold leading-none text-text-primary">{unusedCount}</p>
+          <p className="mt-3 font-ui text-4xl font-bold tabular-nums leading-none text-text-primary">{unusedCount}</p>
           {unusedCount === 0 ? (
             <p className="mt-2 inline-flex items-center gap-1.5 text-sm text-text-secondary">
               <Check size={14} /> You're clean
@@ -52,7 +52,7 @@ export function SavingsInsight({
       <Card className="group flex h-full flex-col justify-between border-brand-light bg-brand-light/20 p-3">
         <div>
           <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-danger">You could save</p>
-          <p className="mt-3 font-display text-3xl font-bold text-danger">{formatCurrency(saveablePerYear, currency)}</p>
+          <p className="mt-3 font-ui text-3xl font-bold tabular-nums text-danger">{formatCurrency(saveablePerYear, currency)}</p>
           <p className="mt-1.5 text-xs text-danger/80 font-medium">
             {saveablePerYear === 0 ? 'Nothing to cut right now' : 'by cutting unused subs'}
           </p>

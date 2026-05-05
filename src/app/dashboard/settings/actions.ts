@@ -15,9 +15,9 @@ export async function toggleNotificationAction(setting: string, value: boolean) 
 
   const userId = session.user.id;
   const col = setting === 'new_subscriptions_alerts' ? 'new_subscriptions_alerts'
-            : setting === 'monthly_summary' ? 'monthly_summary'
-            : setting === 'price_increase_alert' ? 'price_increase_alert'
-            : null;
+    : setting === 'monthly_summary' ? 'monthly_summary'
+      : setting === 'price_increase_alert' ? 'price_increase_alert'
+        : null;
 
   if (!col) return { success: false, error: 'Invalid setting' };
 

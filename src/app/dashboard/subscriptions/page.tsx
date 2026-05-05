@@ -11,6 +11,11 @@ import { DASHBOARD_FILTER_OPTIONS } from '../../../lib/constants/dashboard';
 import { providerCurrency } from '../../../lib/utils/provider';
 import type { DashboardProvider } from '../../../types/subscription';
 
+import { Card } from '../../../components/ui/Card';
+import { Button } from '../../../components/ui/Button';
+import { Badge } from '../../../components/ui/Badge';
+import { Input } from '../../../components/ui/Input';
+
 const providerLabel = (provider: DashboardProvider): string =>
     provider === 'plaid' ? 'Plaid' : 'Mono';
 
@@ -60,7 +65,6 @@ export default function SubscriptionsPage() {
             }
             return;
         }
-
         if (!selectedProvider || !providers.connected.includes(selectedProvider)) {
             setSelectedProvider(providers.active ?? providers.connected[0]);
         }
@@ -68,28 +72,19 @@ export default function SubscriptionsPage() {
 
     useEffect(() => {
         const currentProviderParam = searchParams.get('provider');
-        const currentProvider =
-            currentProviderParam === 'plaid' || currentProviderParam === 'mono'
-                ? currentProviderParam
-                : undefined;
-
+        const currentProvider = currentProviderParam === 'plaid' || currentProviderParam === 'mono' ? currentProviderParam : undefined;
         if (currentProvider === selectedProvider) return;
 
         const params = new URLSearchParams(searchParams.toString());
-        if (selectedProvider) {
-            params.set('provider', selectedProvider);
-        } else {
-            params.delete('provider');
-        }
+        if (selectedProvider) params.set('provider', selectedProvider);
+        else params.delete('provider');
 
         window.history.replaceState(null, '', `/dashboard/subscriptions?${params.toString()}`);
     }, [searchParams, selectedProvider]);
 
     useEffect(() => {
         if (!pendingUndoId) return;
-        const timeoutId = setTimeout(() => {
-            clearPendingUndo();
-        }, 5000);
+        const timeoutId = setTimeout(() => clearPendingUndo(), 5000);
         return () => clearTimeout(timeoutId);
     }, [pendingUndoId, clearPendingUndo]);
 
@@ -99,179 +94,116 @@ export default function SubscriptionsPage() {
         return subscriptions.filter((item) => item.serviceName.toLowerCase().includes(normalizedSearch));
     }, [subscriptions, search]);
 
+    if (isLoading) return (
+        <div className="space-y-6 animate-shimmer">
+            <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <div className="space-y-2">
+                    <div className="h-8 w-48 bg-bg-muted rounded-pill" />
+                    <div className="h-4 w-72 bg-bg-muted/60 rounded" />
+                </div>
+                <div className="h-10 w-full sm:w-72 bg-bg-muted rounded-btn" />
+            </header>
+            <div className="h-8 w-48 bg-bg-muted rounded-pill" />
+            <Card className="h-96 border-dashed bg-bg-surface/50" />
+        </div>
+    );
+
     return (
         <div className="space-y-6">
             <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-[#1A1A17]">Subscriptions</h1>
-                    <p className="text-sm text-[#6B6960]">Live subscription data inferred from your connected transaction feed.</p>
+                    <h1 className="text-3xl font-bold tracking-tight text-text-primary">Subscriptions</h1>
+                    <p className="text-sm text-text-secondary">Live subscription data inferred from your connected transaction feed.</p>
                 </div>
-                <div className="flex w-full items-center gap-2 rounded-lg border border-[#D0CFC7] bg-white px-3 py-2 focus-within:border-[#FF5C35] sm:w-72">
-                    <Search size={16} className="text-[#A9A79E]" />
-                    <input
+                <div className="relative w-full sm:w-72">
+                    <Search size={16} className="absolute left-3 top-3 text-text-muted transition-colors group-focus-within:text-brand" />
+                    <Input 
                         value={search}
-                        onChange={(event) => setSearch(event.target.value)}
+                        onChange={(e) => setSearch(e.target.value)}
                         placeholder="Search subscriptions"
-                        className="w-full border-none bg-transparent text-sm text-[#1A1A17] outline-none"
+                        className="pl-10"
                     />
                 </div>
             </header>
 
-            {providers.hasBoth ? (
-                <div className="flex items-center gap-2 rounded-full bg-[#F4F3EE] p-1 w-max">
-                    {providers.connected.map((provider) => (
+            <div className="flex flex-wrap items-center gap-4">
+                {providers.hasBoth && (
+                    <div className="flex items-center gap-1 rounded-pill bg-bg-muted p-1 w-max">
+                        {providers.connected.map((p) => (
+                            <Button
+                                key={p}
+                                variant={selectedProvider === p ? 'primary' : 'ghost'}
+                                size="sm"
+                                onClick={() => { setSelectedProvider(p); setPage(1); }}
+                                className="rounded-pill"
+                            >
+                                {providerLabel(p)}
+                            </Button>
+                        ))}
+                    </div>
+                )}
+                <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+                    {DASHBOARD_FILTER_OPTIONS.map((item) => (
                         <button
-                            key={provider}
-                            type="button"
-                            onClick={() => {
-                                setSelectedProvider(provider);
-                                setPage(1);
-                            }}
-                            className={`rounded-full border px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.06em] ${providers.active === provider
-                                ? 'border-[#FF5C35] bg-[#FF5C35] text-white'
-                                : 'border-[#D0CFC7] text-[#6B6960] hover:border-[#FF5C35] hover:text-[#C93A1A]'
+                            key={item.key}
+                            onClick={() => { setFilter(item.key); setPage(1); }}
+                            className={`rounded-pill px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest transition-all ${item.key === filter
+                                ? 'bg-brand text-white shadow-md'
+                                : 'bg-bg-muted text-text-secondary hover:bg-bg-subtle border border-border'
                                 }`}
                         >
-                            {providerLabel(provider)}
+                            {item.label}
                         </button>
                     ))}
                 </div>
-            ) : providers.active ? (
-                <p className="text-[11px] uppercase tracking-[0.08em] text-[#A9A79E]">Using {providerLabel(providers.active)} data</p>
-            ) : null}
-
-            <div className="flex gap-2 overflow-x-auto pb-1">
-                {DASHBOARD_FILTER_OPTIONS.map((item) => (
-                    <button
-                        key={item.key}
-                        type="button"
-                        onClick={() => {
-                            setFilter(item.key);
-                            setPage(1);
-                        }}
-                        className={`rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.06em] ${item.key === filter
-                            ? 'bg-[#FF5C35] text-white'
-                            : 'bg-[#F4F3EE] text-[#6B6960] hover:bg-[#E8E7E0]'
-                            }`}
-                    >
-                        {item.label}
-                    </button>
-                ))}
             </div>
 
-            <section className="rounded-2xl border border-[#E8E7E0] bg-white p-5 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)]">
-                {isError ? (
-                    <div className="mb-4 flex items-center justify-between gap-3 rounded-xl border border-[#F3D8D8] bg-[#FEF6F6] px-3 py-2 text-xs text-[#8E5C5C]">
-                        <div className="flex items-center gap-2">
-                            <AlertTriangle size={14} className="text-[#E53434]" />
-                            <span>Live refresh failed. Showing latest available data when possible.</span>
-                        </div>
-                        <button
-                            type="button"
-                            onClick={() => void refetch()}
-                            className="inline-flex items-center gap-1 rounded-lg border border-[#D0CFC7] bg-white px-2 py-1 text-[11px] font-medium text-[#1A1A17] hover:bg-[#F4F3EE]"
-                        >
-                            <RefreshCcw size={12} className={isFetching ? 'animate-spin' : ''} />
-                            Retry
-                        </button>
-                    </div>
-                ) : null}
+            <Card className="p-0 overflow-hidden">
+                <div className="p-6">
+                {isError && (
+                    <Badge variant="warning" className="w-full justify-center py-2 mb-4 h-auto">
+                      Live refresh failed. Showing cached data.
+                      <Button variant="ghost" size="sm" onClick={() => refetch()} className="ml-4 h-8 bg-white/20 hover:bg-white/40">
+                        <RefreshCcw size={12} className={isFetching ? 'animate-spin' : ''} />
+                      </Button>
+                    </Badge>
+                )}
 
-                {isLoading ? (
-                    <div className="space-y-3" aria-busy="true" aria-live="polite">
-                        {Array.from({ length: 4 }, (_, index) => (
-                            <div key={`subscriptions-skeleton-${index}`} className="animate-pulse rounded-xl border border-[#E8E7E0] bg-[#FAFAF7] p-4">
-                                <div className="h-3 w-32 rounded bg-[#E8E7E0]" />
-                                <div className="mt-3 h-5 w-40 rounded bg-[#EEEDE8]" />
-                                <div className="mt-3 h-3 w-24 rounded bg-[#E8E7E0]" />
-                            </div>
-                        ))}
+                {filteredBySearch.length === 0 ? (
+                    <div className="rounded-xl border border-dashed border-border p-12 text-center text-text-secondary">
+                        <AlertTriangle size={32} className="mx-auto mb-4 opacity-20" />
+                        <p className="font-semibold">No subscriptions found</p>
+                        <p className="text-sm mt-1 mb-6">Try broadening your search or adjusting filters.</p>
+                        <Button variant="secondary" onClick={() => { setSearch(''); setFilter('all'); }}>Clear all filters</Button>
                     </div>
-                ) : filteredBySearch.length === 0 ? (
-                    isError ? (
-                        <div className="rounded-xl border border-[#E8E7E0] bg-[#FAFAF7] p-4 text-sm text-[#6B6960]">
-                            <p>We couldn’t load subscriptions right now.</p>
-                            <Link href="/dashboard/connect" className="mt-2 inline-block text-xs font-semibold uppercase tracking-[0.06em] text-[#FF5C35] hover:text-[#C93A1A]">
-                                Check connections
-                            </Link>
-                        </div>
-                    ) : providers.connected.length === 0 ? (
-                        <div className="rounded-xl border border-[#E8E7E0] bg-[#FAFAF7] p-4 text-sm text-[#6B6960]">
-                            <p>No connected providers yet, so there are no subscriptions to analyze.</p>
-                            <Link href="/dashboard/connect" className="mt-2 inline-block text-xs font-semibold uppercase tracking-[0.06em] text-[#FF5C35] hover:text-[#C93A1A]">
-                                Connect account
-                            </Link>
-                        </div>
-                    ) : subscriptions.length === 0 ? (
-                        <div className="rounded-xl border border-[#E8E7E0] bg-[#FAFAF7] p-4 text-sm text-[#6B6960]">
-                            <p>No recurring subscriptions detected for this provider yet.</p>
-                            <p className="mt-1 text-xs text-[#A9A79E]">Try switching providers or review your transactions to verify recent recurring charges.</p>
-                            <Link href="/dashboard/transactions" className="mt-2 inline-block text-xs font-semibold uppercase tracking-[0.06em] text-[#FF5C35] hover:text-[#C93A1A]">
-                                View transactions
-                            </Link>
-                        </div>
-                    ) : (
-                        <div className="rounded-xl border border-[#E8E7E0] bg-[#FAFAF7] p-4 text-sm text-[#6B6960]">
-                            <p>No subscriptions match your search.</p>
-                            <p className="mt-1 text-xs text-[#A9A79E]">Try another keyword or clear filters.</p>
-                        </div>
-                    )
                 ) : (
-                    <div className="space-y-3">
-                        {filteredBySearch.map((subscription, index) => (
-                            <SubscriptionRow
-                                key={subscription.id}
-                                subscription={subscription}
-                                index={index}
-                                currency={currency}
-                                onCancel={async (id) => {
-                                    await cancelSubscription(id);
-                                }}
-                            />
+                    <div className="space-y-4">
+                        {filteredBySearch.map((s, i) => (
+                            <SubscriptionRow key={s.id} subscription={s} index={i} currency={currency} onCancel={cancelSubscription} />
                         ))}
                     </div>
                 )}
+                </div>
 
-                {totalSubscriptions > 0 && (
-                    <div className="mt-4 flex items-center justify-between border-t border-[#E8E7E0] pt-4">
-                        <span className="text-xs uppercase tracking-[0.06em] text-[#A9A79E]">
+                {totalSubscriptions > 0 && pageCount > 1 && (
+                    <div className="flex items-center justify-between p-6 border-t border-border bg-bg-muted/30">
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted">
                             Page {page} / {pageCount} · {totalSubscriptions} total
                         </span>
                         <div className="flex gap-2">
-                            <button
-                                type="button"
-                                onClick={() => setPage(page - 1)}
-                                disabled={page <= 1}
-                                className="rounded-lg border border-[#D0CFC7] px-3 py-1.5 text-xs text-[#1A1A17] disabled:opacity-40"
-                            >
-                                Prev
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => setPage(page + 1)}
-                                disabled={page >= pageCount}
-                                className="rounded-lg border border-[#D0CFC7] px-3 py-1.5 text-xs text-[#1A1A17] disabled:opacity-40"
-                            >
-                                Next
-                            </button>
+                            <Button variant="secondary" size="sm" onClick={() => setPage(page - 1)} disabled={page <= 1}>Prev</Button>
+                            <Button variant="secondary" size="sm" onClick={() => setPage(page + 1)} disabled={page >= pageCount}>Next</Button>
                         </div>
                     </div>
                 )}
-            </section>
+            </Card>
 
-            {pendingUndoId ? (
-                <div className="fixed bottom-4 left-1/2 z-50 w-[92%] max-w-md -translate-x-1/2 rounded-2xl bg-[#1A1A17] p-4 text-sm text-white shadow-2xl flex items-center justify-between">
-                    <span>Subscription cancelled.</span>
-                    <button
-                        type="button"
-                        onClick={() => void undoCancel()}
-                        disabled={isCancelling}
-                        className="rounded-[10px] bg-white px-3 py-1.5 text-xs font-bold uppercase tracking-[0.06em] text-[#1A1A17]"
-                    >
-                        Undo
-                    </button>
-                </div>
-            ) : null}
+            {pendingUndoId && (
+                <Card className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-text-primary text-white border-none shadow-2xl p-4 flex items-center gap-6 z-50">
+                   <span className="text-sm">Subscription cancelled.</span>
+                   <Button variant="secondary" size="sm" className="bg-white text-text-primary border-none" onClick={undoCancel} disabled={isCancelling}>Undo</Button>
+                </Card>
+            )}
         </div>
     );
 }

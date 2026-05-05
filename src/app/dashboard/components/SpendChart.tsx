@@ -39,8 +39,8 @@ export function SpendChart({
           </div>
           <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-text-secondary">Monthly Spend</p>
         </div>
-        <div className="text-right">
-          <p className="font-display text-xl font-bold text-text-primary">{formatCurrency(monthlySpend, currency)}</p>
+        <div className="text-right tabular-nums">
+          <p className="font-ui text-xl font-bold text-text-primary">{formatCurrency(monthlySpend, currency)}</p>
           <p className="mt-1 text-[11px] uppercase tracking-[0.08em] text-text-muted">total this period</p>
           {previousPeriodSpend > 0 && currentPeriodSpend > 0 ? (
             <p className="mt-1 inline-flex items-center gap-1 text-[11px] text-text-muted">
@@ -102,7 +102,9 @@ export function SpendChart({
                     border: '1px solid var(--color-border)', 
                     boxShadow: 'none', 
                     fontSize: '12px', 
-                    fontWeight: 600, 
+                    fontWeight: 700, 
+                    fontFamily: 'var(--font-ui)',
+                    fontVariantNumeric: 'tabular-nums',
                     color: 'var(--color-text-primary)' 
                   }}
                   formatter={(value: any) => [formatCurrency(Number(value) || 0, currency), 'Spend']}

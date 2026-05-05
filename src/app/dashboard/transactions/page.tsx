@@ -11,6 +11,11 @@ import { formatCurrency } from '../../../lib/utils/format';
 import { providerCurrency } from '../../../lib/utils/provider';
 import type { DashboardProvider } from '../../../types/subscription';
 
+import { Card } from '../../../components/ui/Card';
+import { Button } from '../../../components/ui/Button';
+import { Badge } from '../../../components/ui/Badge';
+import { Input } from '../../../components/ui/Input';
+
 const providerLabel = (provider: DashboardProvider): string =>
     provider === 'plaid' ? 'Plaid' : 'Mono';
 
@@ -44,11 +49,7 @@ const fetchTransactions = async (
         page: String(page),
         pageSize: String(pageSize),
     });
-
-    if (provider) {
-        params.set('provider', provider);
-    }
-
+    if (provider) params.set('provider', provider);
     const response = await fetch(`/api/connect/plaid/transactions?${params.toString()}`, { cache: 'no-store' });
     if (!response.ok) throw new Error('Failed to load transactions');
     return response.json();
@@ -62,28 +63,18 @@ export default function TransactionsPage() {
     const pageSize = 20;
 
     const initialProviderParam = searchParams.get('provider');
-    const initialProvider =
-        initialProviderParam === 'plaid' || initialProviderParam === 'mono'
-            ? initialProviderParam
-            : undefined;
+    const initialProvider = initialProviderParam === 'plaid' || initialProviderParam === 'mono' ? initialProviderParam : undefined;
     const [selectedProvider, setSelectedProvider] = useState<DashboardProvider | undefined>(initialProvider);
 
     const { providers, isLoading: isDashboardLoading } = useDashboardData({
-        initialFilter: 'all',
-        initialPage: 1,
-        pageSize: 1,
-        includeDebrief: false,
-        provider: selectedProvider,
+        initialFilter: 'all', initialPage: 1, pageSize: 1, includeDebrief: false, provider: selectedProvider,
     });
 
     useEffect(() => {
         if (providers.connected.length === 0) {
-            if (!isDashboardLoading && selectedProvider) {
-                setSelectedProvider(undefined);
-            }
+            if (!isDashboardLoading && selectedProvider) setSelectedProvider(undefined);
             return;
         }
-
         if (!selectedProvider || !providers.connected.includes(selectedProvider)) {
             setSelectedProvider(providers.active ?? providers.connected[0]);
         }
@@ -91,20 +82,11 @@ export default function TransactionsPage() {
 
     useEffect(() => {
         const currentProviderParam = searchParams.get('provider');
-        const currentProvider =
-            currentProviderParam === 'plaid' || currentProviderParam === 'mono'
-                ? currentProviderParam
-                : undefined;
-
+        const currentProvider = currentProviderParam === 'plaid' || currentProviderParam === 'mono' ? currentProviderParam : undefined;
         if (currentProvider === selectedProvider) return;
-
         const params = new URLSearchParams(searchParams.toString());
-        if (selectedProvider) {
-            params.set('provider', selectedProvider);
-        } else {
-            params.delete('provider');
-        }
-
+        if (selectedProvider) params.set('provider', selectedProvider);
+        else params.delete('provider');
         window.history.replaceState(null, '', `/dashboard/transactions?${params.toString()}`);
     }, [searchParams, selectedProvider]);
 
@@ -126,156 +108,119 @@ export default function TransactionsPage() {
         });
     }, [data?.transactions, search]);
 
+    if (isLoading) return (
+      <div className="space-y-6 animate-shimmer">
+        <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+           <div className="space-y-2"><div className="h-8 w-48 bg-bg-muted rounded-pill" /><div className="h-4 w-72 bg-bg-muted/60 rounded" /></div>
+           <div className="h-8 w-48 bg-bg-muted rounded-pill" />
+        </header>
+        <Card className="h-96 border-dashed bg-bg-surface/50" />
+      </div>
+    );
+
     return (
         <div className="space-y-6">
             <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-[#1A1A17]">Transactions</h1>
-                    <p className="text-sm text-[#6B6960]">Real transaction feed from your linked bank account.</p>
+                    <h1 className="text-3xl font-bold tracking-tight text-text-primary">Transactions</h1>
+                    <p className="text-sm text-text-secondary">Real transaction feed from your linked bank account.</p>
                 </div>
-
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 bg-bg-muted p-1 rounded-pill">
                     {[30, 60, 90].map((window) => (
-                        <button
+                        <Button
                             key={window}
-                            type="button"
-                            onClick={() => {
-                                setDays(window);
-                                setPage(1);
-                            }}
-                            className={`rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.06em] ${days === window
-                                ? 'bg-[#FF5C35] text-white'
-                                : 'bg-[#F4F3EE] text-[#6B6960] hover:bg-[#E8E7E0]'
-                                }`}
+                            variant={days === window ? 'primary' : 'ghost'}
+                            size="sm"
+                            onClick={() => { setDays(window); setPage(1); }}
+                            className="rounded-pill px-4"
                         >
                             {window}d
-                        </button>
+                        </Button>
                     ))}
                 </div>
             </header>
 
-            {providers.hasBoth ? (
-                <div className="flex items-center gap-2 rounded-full bg-[#F4F3EE] p-1 w-max">
-                    {providers.connected.map((provider) => (
-                        <button
-                            key={provider}
-                            type="button"
-                            onClick={() => {
-                                setSelectedProvider(provider);
-                                setPage(1);
-                            }}
-                            className={`rounded-full border px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.06em] ${providers.active === provider
-                                ? 'border-[#FF5C35] bg-[#FF5C35] text-white'
-                                : 'border-[#D0CFC7] text-[#6B6960] hover:border-[#FF5C35] hover:text-[#C93A1A]'
-                                }`}
-                        >
-                            {providerLabel(provider)}
-                        </button>
-                    ))}
+            <div className="flex flex-wrap items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  {providers.hasBoth && (
+                      <div className="flex items-center gap-1 rounded-pill bg-bg-muted p-1">
+                          {providers.connected.map((p) => (
+                              <Button
+                                  key={p}
+                                  variant={selectedProvider === p ? 'primary' : 'ghost'}
+                                  size="sm"
+                                  onClick={() => { setSelectedProvider(p); setPage(1); }}
+                                  className="rounded-pill"
+                              >
+                                  {providerLabel(p)}
+                              </Button>
+                          ))}
+                      </div>
+                  )}
+                  {!providers.hasBoth && providers.active && (
+                      <Badge variant="secondary">Using {providerLabel(providers.active)} data</Badge>
+                  )}
                 </div>
-            ) : providers.active ? (
-                <p className="text-[11px] uppercase tracking-[0.08em] text-[#A9A79E]">Using {providerLabel(providers.active)} data</p>
-            ) : null}
 
-            <div className="flex w-full items-center gap-2 rounded-lg border border-[#D0CFC7] bg-white px-3 py-2 focus-within:border-[#FF5C35] sm:max-w-sm">
-                <Search size={16} className="text-[#A9A79E]" />
-                <input
-                    value={search}
-                    onChange={(event) => setSearch(event.target.value)}
-                    placeholder="Search transactions"
-                    className="w-full border-none bg-transparent text-sm text-[#1A1A17] outline-none"
-                />
+                <div className="relative w-full sm:w-72">
+                    <Search size={16} className="absolute left-3 top-3 text-text-muted transition-colors group-focus-within:text-brand" />
+                    <Input 
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        placeholder="Search transactions"
+                        className="pl-10"
+                    />
+                </div>
             </div>
 
-            <section className="overflow-hidden rounded-2xl border border-[#E8E7E0] bg-white shadow-[0_1px_4px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)]">
-                <div className="border-b border-[#E8E7E0] px-5 py-4 text-xs uppercase tracking-[0.06em] text-[#A9A79E]">
-                    {data?.total ?? 0} transactions · page {data?.page ?? 1} / {data?.pageCount ?? 1}
+            <Card className="p-0 overflow-hidden">
+                <div className="px-5 py-3 border-b border-border bg-bg-muted/30 flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-text-muted">
+                    <span>{data?.total ?? 0} transactions</span>
+                    <span>Page {data?.page ?? 1} / {data?.pageCount ?? 1}</span>
                 </div>
 
-                {isLoading ? (
-                    <div className="px-5 py-6" aria-busy="true" aria-live="polite">
-                        <div className="space-y-3">
-                            {Array.from({ length: 5 }, (_, index) => (
-                                <div key={`transactions-skeleton-${index}`} className="animate-pulse rounded-xl border border-[#E8E7E0] bg-[#FAFAF7] p-4">
-                                    <div className="h-3 w-28 rounded bg-[#E8E7E0]" />
-                                    <div className="mt-3 h-5 w-44 rounded bg-[#EEEDE8]" />
-                                    <div className="mt-3 h-3 w-20 rounded bg-[#E8E7E0]" />
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                ) : isError ? (
-                    <div className="px-5 py-6 text-sm text-[#8E5C5C]">
-                        <div className="rounded-xl border border-[#F3D8D8] bg-[#FEF6F6] p-4">
-                            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                                <div className="flex items-start gap-2">
-                                    <AlertTriangle size={14} className="mt-0.5 text-[#E53434]" />
-                                    <p>Unable to load transactions. Connect or relink a supported provider and try again.</p>
-                                </div>
-                                <button
-                                    type="button"
-                                    onClick={() => void refetch()}
-                                    className="inline-flex items-center gap-1 rounded-lg border border-[#D0CFC7] bg-white px-2.5 py-1.5 text-[11px] font-medium text-[#1A1A17] hover:bg-[#F4F3EE]"
-                                >
-                                    <RefreshCcw size={12} className={isFetching ? 'animate-spin' : ''} />
-                                    Retry
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                ) : !selectedProvider ? (
-                    <div className="px-5 py-6 text-sm text-[#6B6960]">
-                        No connected provider yet. <Link href="/dashboard/connect" className="font-semibold text-[#FF5C35] hover:text-[#C93A1A]">Connect an account</Link> to view transactions.
-                    </div>
-                ) : (data?.transactions.length ?? 0) === 0 ? (
-                    <div className="px-5 py-6 text-sm text-[#6B6960]">
-                        <div className="rounded-xl border border-[#E8E7E0] bg-[#FAFAF7] p-4">
-                            <p>No transactions in this time window.</p>
-                            <p className="mt-1 text-xs text-[#A9A79E]">Try a broader range (60d or 90d) to fetch more records.</p>
-                        </div>
+                {isError ? (
+                    <div className="p-12 text-center">
+                        <AlertTriangle size={32} className="mx-auto mb-4 text-danger opacity-20" />
+                        <p className="font-semibold text-text-primary">Failed to load transactions</p>
+                        <p className="text-sm text-text-secondary mt-1 mb-6">There was a problem connecting to your bank feed.</p>
+                        <Button variant="secondary" onClick={() => refetch()} className="mx-auto">
+                            <RefreshCcw size={14} className={`mr-2 ${isFetching ? 'animate-spin' : ''}`} />
+                            Try again
+                        </Button>
                     </div>
                 ) : filteredTransactions.length === 0 ? (
-                    <div className="px-5 py-6 text-sm text-[#6B6960]">
-                        <div className="rounded-xl border border-[#E8E7E0] bg-[#FAFAF7] p-4">
-                            <p>No transactions match your search on this page.</p>
-                            <p className="mt-1 text-xs text-[#A9A79E]">Try a different keyword or clear the search field.</p>
-                        </div>
+                    <div className="p-12 text-center text-text-secondary">
+                        <Receipt size={32} className="mx-auto mb-4 opacity-20" />
+                        <p className="font-semibold">No transactions found</p>
+                        <p className="text-sm mt-1">Try a different search or date range.</p>
                     </div>
                 ) : (
-                    <div className="divide-y divide-[#E8E7E0]">
+                    <div className="divide-y divide-border">
                         {filteredTransactions.map((transaction) => (
-                            <article key={transaction.transaction_id} className="flex items-center justify-between gap-4 px-5 py-4">
-                                <div className="flex min-w-0 items-center gap-3">
-                                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#1A1A17] text-white shadow-inner">
-                                        <Receipt size={14} aria-hidden="true" />
+                            <article key={transaction.transaction_id} className="flex items-center justify-between gap-4 px-5 py-4 hover:bg-bg-base/50 transition-colors group">
+                                <div className="flex min-w-0 items-center gap-4">
+                                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-text-primary text-white">
+                                        <Receipt size={16} />
                                     </div>
                                     <div className="min-w-0">
-                                        <p className="truncate text-sm font-semibold text-[#1A1A17]">
+                                        <p className="truncate text-sm font-bold text-text-primary">
                                             {transaction.merchant_name ?? transaction.name}
                                         </p>
-                                        <p className="mt-1 text-xs text-[#6B6960]">
-                                            {new Date(transaction.date).toLocaleDateString('en-US', {
-                                                month: 'short',
-                                                day: 'numeric',
-                                                year: 'numeric',
-                                            })}
-                                            {transaction.category?.length
-                                                ? ` · ${transaction.category[0]}`
-                                                : ''}
+                                        <p className="mt-0.5 text-[10px] font-bold uppercase tracking-widest text-text-muted">
+                                            {new Date(transaction.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                            {transaction.category?.length ? ` · ${transaction.category[0]}` : ''}
                                         </p>
                                     </div>
                                 </div>
 
-                                <div className="text-right">
-                                    <p className="text-sm font-semibold text-[#1A1A17]">
+                                <div className="text-right tabular-nums">
+                                    <p className="text-sm font-bold text-text-primary">
                                         {formatCurrency(Math.abs(transaction.amount), transaction.iso_currency_code ?? providerCurrency(selectedProvider))}
                                     </p>
-                                    <span className={`mt-1 inline-block rounded-md border px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.08em] ${transaction.amount > 0
-                                        ? 'border-[#E8860A]/20 bg-[#FEF6EC] text-[#E8860A]'
-                                        : 'border-[#1C9E5B]/20 bg-[#EDFAF3] text-[#1C9E5B]'
-                                        }`}>
+                                    <Badge variant={transaction.amount > 0 ? 'warning' : 'success'} className="mt-1">
                                         {transaction.amount > 0 ? 'Outflow' : 'Inflow'}
-                                    </span>
+                                    </Badge>
                                 </div>
                             </article>
                         ))}
@@ -283,31 +228,17 @@ export default function TransactionsPage() {
                 )}
 
                 {!isLoading && !isError && (data?.pageCount ?? 1) > 1 && (
-                    <div className="flex items-center justify-between border-t border-[#E8E7E0] px-5 py-4">
-                        <span className="text-xs uppercase tracking-[0.06em] text-[#A9A79E]">
+                    <div className="flex items-center justify-between border-t border-border px-5 py-4 bg-bg-muted/30">
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted">
                             Showing {(data!.page - 1) * data!.pageSize + 1}-{Math.min(data!.page * data!.pageSize, data!.total)} of {data!.total}
                         </span>
                         <div className="flex gap-2">
-                            <button
-                                type="button"
-                                onClick={() => setPage((current) => Math.max(1, current - 1))}
-                                disabled={(data?.page ?? 1) <= 1}
-                                className="rounded-lg border border-[#D0CFC7] px-3 py-1.5 text-xs text-[#1A1A17] disabled:opacity-40"
-                            >
-                                Prev
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => setPage((current) => Math.min(data!.pageCount, current + 1))}
-                                disabled={(data?.page ?? 1) >= (data?.pageCount ?? 1)}
-                                className="rounded-lg border border-[#D0CFC7] px-3 py-1.5 text-xs text-[#1A1A17] disabled:opacity-40"
-                            >
-                                Next
-                            </button>
+                            <Button variant="secondary" size="sm" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1}>Prev</Button>
+                            <Button variant="secondary" size="sm" onClick={() => setPage(p => Math.min(data!.pageCount, p + 1))} disabled={page >= data!.pageCount}>Next</Button>
                         </div>
                     </div>
                 )}
-            </section>
+            </Card>
         </div>
     );
 }
