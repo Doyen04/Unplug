@@ -524,7 +524,7 @@ export default function DashboardPage() {
                     <Tooltip
                       cursor={{ stroke: '#FFE0D6', strokeWidth: 2 }}
                       contentStyle={{ borderRadius: '10px', border: '1px solid #E8E7E0', boxShadow: '0 4px 16px rgba(0,0,0,0.04)', fontSize: '12px', fontWeight: 600, color: '#1A1A17' }}
-                      formatter={(value: number) => [formatCurrency(Number(value) || 0, currency), 'Spend']}
+                      formatter={(value: any) => [formatCurrency(Number(value) || 0, currency), 'Spend']}
                     />
                     <Area
                       type="monotone"
