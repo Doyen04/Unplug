@@ -66,23 +66,23 @@ const Sidebar = ({ expanded, toggleExpanded, isMobileOpen, setIsMobileOpen }: Si
             )}
 
             <aside
-                className={`fixed inset-y-0 left-0 z-50 flex flex-col border-r border-[#E2E1D9] bg-[#FAFAF7] transition-all duration-300 lg:static ${isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+                className={`fixed inset-y-0 left-0 z-50 flex flex-col border-r border-border bg-bg-base transition-all duration-300 lg:static ${isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
                     } ${expanded ? 'w-60' : 'w-16'}`}
             >
                 <div className="flex h-24 items-end justify-between px-4 pb-3 pt-7">
                     {expanded ? (
-                        <Link href="/" className="text-sm font-extrabold uppercase tracking-[0.08em] text-[#1A1A17]">
+                        <Link href="/" className="text-sm font-extrabold uppercase tracking-[0.08em] text-text-primary">
                             Unplug
                         </Link>
                     ) : (
-                        <Link href="/" className="mx-auto flex h-8 w-8 items-center justify-center rounded-full bg-[#1A1A17] text-xs font-bold text-white">
+                        <Link href="/" className="mx-auto flex h-8 w-8 items-center justify-center rounded-full bg-text-primary text-xs font-bold text-white">
                             U
                         </Link>
                     )}
 
                     <button
                         onClick={toggleExpanded}
-                        className="hidden h-8 w-8 items-center justify-center rounded-full text-[#6B6960] transition-colors hover:bg-[#E8E7E0] hover:text-[#1A1A17] lg:flex"
+                        className="hidden h-8 w-8 items-center justify-center rounded-full text-text-secondary transition-colors hover:bg-bg-muted hover:text-text-primary lg:flex"
                         aria-label={expanded ? 'Collapse sidebar' : 'Expand sidebar'}
                     >
                         {expanded ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
@@ -98,12 +98,12 @@ const Sidebar = ({ expanded, toggleExpanded, isMobileOpen, setIsMobileOpen }: Si
 
                         return (
                             <div key={item.href}>
-                                {index === 3 ? <div className="mx-4 my-4 h-px bg-[#E8E7E0]" /> : null}
+                                {index === 3 ? <div className="mx-4 my-4 h-px bg-border" /> : null}
                                 <Link
                                     href={item.href}
-                                    className={`mx-2 flex items-center rounded-xl px-3 py-3 transition-colors ${isActive
-                                        ? 'bg-[#FFE8E2] text-[#FF5C35]'
-                                        : 'text-[#6B6960] hover:bg-[#E8E7E0] hover:text-[#1A1A17]'
+                                    className={`mx-2 flex items-center rounded-btn px-3 py-3 transition-colors ${isActive
+                                        ? 'bg-brand-light text-brand'
+                                        : 'text-text-secondary hover:bg-bg-muted hover:text-text-primary'
                                         } ${!expanded ? 'justify-center' : ''}`}
                                     onClick={() => setIsMobileOpen(false)}
                                 >
@@ -115,22 +115,22 @@ const Sidebar = ({ expanded, toggleExpanded, isMobileOpen, setIsMobileOpen }: Si
                     })}
                 </nav>
 
-                <div className="border-t border-[#E8E7E0] p-4">
+                <div className="border-t border-border p-4">
                     <div className={`mb-4 flex items-center gap-3 ${!expanded ? 'justify-center' : ''}`}>
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#1A1A17] text-xs font-semibold text-white shadow-[0_1px_3px_rgba(0,0,0,0.2)]">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-text-primary text-xs font-semibold text-white">
                             {userInitial}
                         </div>
                         {expanded ? (
                             <div className="min-w-0">
-                                <p className="truncate text-sm font-medium text-[#1A1A17]">{userName}</p>
-                                <p className="truncate text-xs text-[#A9A79E]">{userEmail}</p>
+                                <p className="truncate text-sm font-medium text-text-primary">{userName}</p>
+                                <p className="truncate text-xs text-text-muted">{userEmail}</p>
                             </div>
                         ) : null}
                     </div>
 
                     <Link
                         href="/logout"
-                        className={`flex items-center rounded-lg px-2 py-2 text-[#6B6960] transition-colors hover:bg-[#E8E7E0] hover:text-[#E53434] ${!expanded ? 'justify-center' : ''
+                        className={`flex items-center rounded-btn px-2 py-2 text-text-secondary transition-colors hover:bg-bg-muted hover:text-danger ${!expanded ? 'justify-center' : ''
                             }`}
                     >
                         <LogOut size={18} className={expanded ? 'mr-3 shrink-0' : 'shrink-0'} />

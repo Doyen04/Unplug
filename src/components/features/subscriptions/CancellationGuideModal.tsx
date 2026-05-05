@@ -98,7 +98,7 @@ export const CancellationGuideModal = ({
                     className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[#E53434] px-4 py-2.5 text-sm font-bold uppercase tracking-[0.04em] text-white transition-colors hover:bg-[#C93A1A] disabled:opacity-50"
                   >
                     {isConfirming ? (
-                       <span className="animate-pulse">Marking...</span>
+                      <span className="animate-pulse">Marking...</span>
                     ) : (
                       <>
                         <CheckCircle size={16} /> Yes, mark as cancelled
