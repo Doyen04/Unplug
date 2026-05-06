@@ -232,11 +232,11 @@ export default function TransactionsPage() {
                             Showing {(data!.page - 1) * data!.pageSize + 1}-{Math.min(data!.page * data!.pageSize, data!.total)} of {data!.total}
                         </span>
                         <div className="flex gap-2">
-                            <Button variant="secondary" size="sm" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1} className="w-10">
-                                <ChevronLeft size={16} />
+                            <Button variant="secondary" size="icon" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1} className="h-9 w-9 rounded-full">
+                                <ChevronLeft size={18} className="text-text-primary" />
                             </Button>
-                            <Button variant="secondary" size="sm" onClick={() => setPage(p => Math.min(data!.pageCount, p + 1))} disabled={page >= data!.pageCount} className="w-10">
-                                <ChevronRight size={16} />
+                            <Button variant="secondary" size="icon" onClick={() => setPage(p => Math.min(data!.pageCount, p + 1))} disabled={page >= data!.pageCount} className="h-9 w-9 rounded-full">
+                                <ChevronRight size={18} className="text-text-primary" />
                             </Button>
                         </div>
                     </div>

@@ -127,40 +127,41 @@ export default function SubscriptionsPage() {
                 </div>
             </header>
 
-            <div className="flex flex-wrap items-center gap-4">
-                {providers.hasBoth && (
-                    <div className="flex items-center gap-1 rounded-pill bg-bg-muted p-1 w-max">
-                        {providers.connected.map((p: DashboardProvider) => (
-                            <Button
-                                key={p}
-                                variant={selectedProvider === p ? 'primary' : 'ghost'}
-                                size="sm"
-                                onClick={() => { setSelectedProvider(p); setPage(1); }}
-                                className="rounded-pill"
-                            >
-                                {providerLabel(p)}
-                            </Button>
-                        ))}
-                    </div>
-                )}
-                <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
-                    {DASHBOARD_FILTER_OPTIONS.map((item) => (
-                        <button
-                            key={item.key}
-                            onClick={() => { setFilter(item.key); setPage(1); }}
-                            className={`rounded-pill px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest transition-all ${item.key === filter
-                                ? 'bg-brand text-white shadow-md'
-                                : 'bg-bg-muted text-text-secondary hover:bg-bg-subtle border border-border'
-                                }`}
+            {providers.hasBoth && (
+                <div className="flex items-center gap-1 rounded-pill bg-bg-muted p-1 w-max">
+                    {providers.connected.map((p: DashboardProvider) => (
+                        <Button
+                            key={p}
+                            variant={selectedProvider === p ? 'primary' : 'ghost'}
+                            size="sm"
+                            onClick={() => { setSelectedProvider(p); setPage(1); }}
+                            className="rounded-pill"
                         >
-                            {item.label}
-                        </button>
+                            {providerLabel(p)}
+                        </Button>
                     ))}
                 </div>
-            </div>
+            )}
 
             <Card className="p-0 overflow-hidden">
-                <div className="p-6">
+                <div className="border-b border-border bg-bg-muted/30 px-6 h-14 flex items-center">
+                    <div className="flex items-center gap-2 overflow-x-auto no-scrollbar w-full">
+                        {DASHBOARD_FILTER_OPTIONS.map((item) => (
+                            <button
+                                key={item.key}
+                                onClick={() => { setFilter(item.key); setPage(1); }}
+                                className={`h-8 rounded-pill px-4 flex items-center justify-center text-[10px] font-bold uppercase tracking-widest transition-all ${item.key === filter
+                                    ? 'bg-brand text-white shadow-md'
+                                    : 'bg-bg-muted text-text-secondary hover:bg-bg-subtle border border-border bg-white'
+                                    }`}
+                            >
+                                {item.label}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="px-6 py-4">
                     {isError && (
                         <Badge variant="warning" className="w-full justify-center py-2 mb-4 h-auto">
                             Live refresh failed. Showing cached data.
@@ -187,16 +188,16 @@ export default function SubscriptionsPage() {
                 </div>
 
                 {totalSubscriptions > 0 && pageCount > 1 && (
-                    <div className="flex items-center justify-between p-6 border-t border-border bg-bg-muted/30">
+                    <div className="flex items-center justify-between px-6 py-4 border-t border-border bg-bg-muted/30">
                         <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted">
                             Page {page} / {pageCount} · {totalSubscriptions} total
                         </span>
                         <div className="flex gap-2">
-                            <Button variant="secondary" size="sm" onClick={() => setPage(page - 1)} disabled={page <= 1} className="w-10">
-                                <ChevronLeft size={16} />
+                            <Button variant="secondary" size="icon" onClick={() => setPage(page - 1)} disabled={page <= 1} className="h-9 w-9 rounded-full">
+                                <ChevronLeft size={18} className="text-text-primary" />
                             </Button>
-                            <Button variant="secondary" size="sm" onClick={() => setPage(page + 1)} disabled={page >= pageCount} className="w-10">
-                                <ChevronRight size={16} />
+                            <Button variant="secondary" size="icon" onClick={() => setPage(page + 1)} disabled={page >= pageCount} className="h-9 w-9 rounded-full">
+                                <ChevronRight size={18} className="text-text-primary" />
                             </Button>
                         </div>
                     </div>
