@@ -51,12 +51,21 @@ export default function DashboardPage() {
         summary, providers, subscriptions, totalSubscriptions, filterCounts, alerts,
         hasData, isInitialLoading, isLoading, isError, isFetching,
         filter, setFilter, page, pageCount, setPage, refetch,
-        cancelSubscription, undoCancel, clearPendingUndo, pendingUndoId, isCancelling
+        cancelSubscription, undoCancel, clearPendingUndo, pendingUndoId, isCancelling,
+        search, setSearch
     } = useDashboardData({
         initialFilter: (searchParams.get('filter') as DashboardFilter) || 'all',
         initialPage: Number(searchParams.get('page')) || 1,
         provider: initialProvider,
     });
+
+    // Debounce local search state to hook's search state
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            setSearch(searchQuery);
+        }, 300);
+        return () => clearTimeout(timeoutId);
+    }, [searchQuery, setSearch]);
 
     useEffect(() => {
         fetchCurrentUser().then(u => setUserInitials(getNameInitials(u.name || ''))).catch(() => { });
@@ -180,7 +189,7 @@ export default function DashboardPage() {
             <DataTable
                 className="overflow-hidden p-0"
                 data={(ledgerTab === 'subscriptions' 
-                    ? subscriptions.filter(s => s.serviceName.toLowerCase().includes(searchQuery.toLowerCase()))
+                    ? subscriptions
                     : (txData?.transactions.slice(0, 8) || [])) as any[]
                 }
                 isLoading={ledgerTab === 'subscriptions' ? (isLoading || isFetching) : (lux || fex)}

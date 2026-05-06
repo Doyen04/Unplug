@@ -37,6 +37,7 @@ interface DashboardRequest {
     page: number;
     pageSize: number;
     provider?: DashboardProvider;
+    search?: string;
 }
 
 export const fetchDashboardPayload = async ({
@@ -44,6 +45,7 @@ export const fetchDashboardPayload = async ({
     page,
     pageSize,
     provider,
+    search,
 }: DashboardRequest): Promise<DashboardPayload> => {
     const query = new URLSearchParams({
         filter,
@@ -51,9 +53,8 @@ export const fetchDashboardPayload = async ({
         pageSize: String(pageSize),
     });
 
-    if (provider) {
-        query.set('provider', provider);
-    }
+    if (provider) query.set('provider', provider);
+    if (search) query.set('q', search);
 
     const response = await fetch(`/api/dashboard?${query.toString()}`, {
         cache: 'no-store',

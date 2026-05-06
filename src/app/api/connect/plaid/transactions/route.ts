@@ -149,6 +149,8 @@ export async function GET(request: Request) {
         providerParam === 'plaid' || providerParam === 'mono'
             ? providerParam
             : null;
+    const search = url.searchParams.get('q') ?? url.searchParams.get('search') ?? null;
+    const normalizedSearch = search?.trim().toLowerCase();
 
     const lookbackDays = Number.isFinite(days) ? Math.min(Math.max(days, 1), 365) : 30;
     const currentPage = Number.isFinite(page) ? Math.max(1, Math.floor(page)) : 1;
@@ -220,7 +222,16 @@ export async function GET(request: Request) {
         const monoPayload = (await monoResponse.json()) as Record<string, unknown>;
         const rawTransactions = extractMonoTransactions(monoPayload);
 
-        const normalized = normalizeMonoTransactions(rawTransactions).sort((a, b) => b.date.localeCompare(a.date));
+        let normalized = normalizeMonoTransactions(rawTransactions).sort((a, b) => b.date.localeCompare(a.date));
+        
+        if (normalizedSearch) {
+            normalized = normalized.filter(tx => 
+                tx.name.toLowerCase().includes(normalizedSearch) || 
+                tx.category?.some(c => c.toLowerCase().includes(normalizedSearch)) ||
+                tx.merchant_name?.toLowerCase().includes(normalizedSearch)
+            );
+        }
+
         const offset = (currentPage - 1) * safePageSize;
         const paged = normalized.slice(offset, offset + safePageSize);
 
@@ -248,7 +259,11 @@ export async function GET(request: Request) {
     }
 
     const accessToken = decryptToken(connectedAccount.encryptedAccessToken);
-    const offset = (currentPage - 1) * safePageSize;
+    
+    // If searching, we fetch a larger batch first to filter in-memory since Plaid's /transactions/get 
+    // doesn't support text searching natively in a single call.
+    const internalPageSize = normalizedSearch ? 500 : safePageSize;
+    const internalOffset = normalizedSearch ? 0 : (currentPage - 1) * safePageSize;
 
     const response = await fetch(`${baseUrl}/transactions/get`, {
         method: 'POST',
@@ -260,8 +275,8 @@ export async function GET(request: Request) {
             start_date: isoDateDaysAgo(lookbackDays),
             end_date: new Date().toISOString().slice(0, 10),
             options: {
-                count: safePageSize,
-                offset,
+                count: internalPageSize,
+                offset: internalOffset,
             },
         }),
         cache: 'no-store',
@@ -300,12 +315,27 @@ export async function GET(request: Request) {
         total_transactions: number;
     };
 
+    let transactions = payload.transactions;
+    let total = payload.total_transactions;
+
+    if (normalizedSearch) {
+        transactions = transactions.filter(tx => 
+            tx.name.toLowerCase().includes(normalizedSearch) || 
+            tx.category?.some(c => c.toLowerCase().includes(normalizedSearch)) ||
+            tx.merchant_name?.toLowerCase().includes(normalizedSearch)
+        );
+        total = transactions.length;
+        // Paginate the filtered results
+        const offset = (currentPage - 1) * safePageSize;
+        transactions = transactions.slice(offset, offset + safePageSize);
+    }
+
     return NextResponse.json({
         provider: 'plaid',
-        total: payload.total_transactions,
+        total,
         page: currentPage,
         pageSize: safePageSize,
-        pageCount: Math.max(1, Math.ceil(payload.total_transactions / safePageSize)),
-        transactions: payload.transactions,
+        pageCount: Math.max(1, Math.ceil(total / safePageSize)),
+        transactions,
     });
 }

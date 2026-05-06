@@ -43,7 +43,8 @@ const fetchTransactions = async (
     days: number,
     page: number,
     pageSize: number,
-    provider?: DashboardProvider
+    provider?: DashboardProvider,
+    search?: string
 ): Promise<TransactionsResponse> => {
     const params = new URLSearchParams({
         days: String(days),
@@ -51,6 +52,7 @@ const fetchTransactions = async (
         pageSize: String(pageSize),
     });
     if (provider) params.set('provider', provider);
+    if (search) params.set('q', search);
     const response = await fetch(`/api/connect/plaid/transactions?${params.toString()}`, { cache: 'no-store' });
     if (!response.ok) throw new Error('Failed to load transactions');
     return response.json();
@@ -62,6 +64,7 @@ export default function TransactionsPage() {
     const [days, setDays] = useState(90);
     const [page, setPage] = useState(1);
     const [search, setSearch] = useState('');
+    const [debouncedSearch, setDebouncedSearch] = useState('');
     const pageSize = 20;
 
     const initialProviderParam = searchParams.get('provider');
@@ -83,6 +86,14 @@ export default function TransactionsPage() {
     }, [isDashboardLoading, providers.active, providers.connected, selectedProvider]);
 
     useEffect(() => {
+        const timeout = setTimeout(() => {
+            setDebouncedSearch(search);
+            setPage(1);
+        }, 300);
+        return () => clearTimeout(timeout);
+    }, [search]);
+
+    useEffect(() => {
         const currentProvider = searchParams.get('provider') || undefined;
         if (currentProvider === selectedProvider) return;
 
@@ -93,22 +104,13 @@ export default function TransactionsPage() {
     }, [selectedProvider, router]);
 
     const { data, isLoading, isError, isFetching, refetch } = useQuery({
-        queryKey: ['transactions-page', days, page, pageSize, selectedProvider ?? 'auto'],
-        queryFn: () => fetchTransactions(days, page, pageSize, selectedProvider),
+        queryKey: ['transactions-page', days, page, pageSize, selectedProvider ?? 'auto', debouncedSearch],
+        queryFn: () => fetchTransactions(days, page, pageSize, selectedProvider, debouncedSearch),
         retry: false,
         enabled: Boolean(selectedProvider),
     });
 
-    const filteredTransactions = useMemo(() => {
-        const list = data?.transactions ?? [];
-        const normalized = search.trim().toLowerCase();
-        if (!normalized) return list;
-        return list.filter((item: PlaidTransaction) => {
-            const merchant = (item.merchant_name ?? item.name).toLowerCase();
-            const category = (item.category ?? []).join(' ').toLowerCase();
-            return merchant.includes(normalized) || category.includes(normalized);
-        });
-    }, [data?.transactions, search]);
+
 
     if (isDashboardLoading && !selectedProvider) return (
         <div className="space-y-6">
@@ -178,7 +180,7 @@ export default function TransactionsPage() {
             </div>
 
             <DataTable
-                data={filteredTransactions}
+                data={data?.transactions ?? []}
                 renderItem={(tx: PlaidTransaction, i: number) => (
                     <TransactionRow
                         key={tx.transaction_id}

@@ -28,6 +28,7 @@ export async function GET(request: Request) {
     const url = new URL(request.url);
     const filterParam = url.searchParams.get('filter');
     const providerParam = url.searchParams.get('provider');
+    const searchParam = url.searchParams.get('q') ?? url.searchParams.get('search') ?? undefined;
     const pageParam = Number(url.searchParams.get('page') ?? '1');
     const pageSizeParam = Number(url.searchParams.get('pageSize') ?? '4');
 
@@ -42,6 +43,7 @@ export async function GET(request: Request) {
     const payload = await getDashboardPayload({
         filter,
         provider,
+        search: searchParam,
         page: Number.isFinite(pageParam) ? pageParam : 1,
         pageSize: Number.isFinite(pageSizeParam) ? pageSizeParam : 4,
         userId,

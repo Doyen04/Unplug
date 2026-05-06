@@ -42,6 +42,8 @@ export interface DashboardData {
   clearPendingUndo: () => void;
   pendingUndoId: string | null;
   isCancelling: boolean;
+  search: string;
+  setSearch: (search: string) => void;
 }
 
 const EMPTY_PAYLOAD: DashboardPayload = {
@@ -84,6 +86,7 @@ interface UseDashboardDataOptions {
   pageSize?: number;
   includeDebrief?: boolean;
   provider?: DashboardProvider;
+  initialSearch?: string;
 }
 
 export const useDashboardData = (
@@ -92,17 +95,19 @@ export const useDashboardData = (
   const queryClient = useQueryClient();
   const [filter, setFilter] = useState<DashboardFilter>(options.initialFilter ?? 'all');
   const [page, setPage] = useState(options.initialPage ?? 1);
+  const [search, setSearch] = useState(options.initialSearch ?? '');
   const [pendingUndoId, setPendingUndoId] = useState<string | null>(null);
   const pageSize = Math.min(20, Math.max(1, options.pageSize ?? 4));
   const includeDebrief = options.includeDebrief ?? true;
 
   const dashboardQuery = useQuery({
-    queryKey: ['dashboard', filter, page, pageSize, options.provider ?? 'auto'],
+    queryKey: ['dashboard', filter, page, pageSize, search, options.provider ?? 'auto'],
     queryFn: () => fetchDashboardPayload({
       filter,
       page,
       pageSize,
       provider: options.provider,
+      search,
     }),
     placeholderData: keepPreviousData,
   });
@@ -171,5 +176,10 @@ export const useDashboardData = (
     clearPendingUndo: () => setPendingUndoId(null),
     pendingUndoId,
     isCancelling: cancelMutation.isPending || undoMutation.isPending,
+    search,
+    setSearch: (nextSearch) => {
+      setSearch(nextSearch);
+      setPage(1);
+    },
   };
 };

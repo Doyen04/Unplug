@@ -50,7 +50,8 @@ export default function SubscriptionsPage() {
         pendingUndoId,
         isCancelling,
         providers,
-        filterCounts
+        filterCounts,
+        setSearch: setHookSearch
     } = useDashboardData({
         initialFilter: 'all',
         initialPage: 1,
@@ -58,6 +59,11 @@ export default function SubscriptionsPage() {
         includeDebrief: false,
         provider: selectedProvider,
     });
+
+    useEffect(() => {
+        const timeout = setTimeout(() => setHookSearch(search), 300);
+        return () => clearTimeout(timeout);
+    }, [search, setHookSearch]);
 
     const currency = providerCurrency(providers.active);
 
@@ -89,13 +95,7 @@ export default function SubscriptionsPage() {
         return () => clearTimeout(timeoutId);
     }, [pendingUndoId, clearPendingUndo]);
 
-    const filteredBySearch = useMemo(() => {
-        const normalizedSearch = search.trim().toLowerCase();
-        if (!normalizedSearch) return subscriptions;
-        return subscriptions.filter((item: Subscription) => 
-            item.serviceName.toLowerCase().includes(normalizedSearch)
-        );
-    }, [subscriptions, search]);
+
 
     if (isLoading && subscriptions.length === 0) return (
         <div className="space-y-6">
@@ -148,7 +148,7 @@ export default function SubscriptionsPage() {
             )}
 
             <DataTable
-                data={filteredBySearch}
+                data={subscriptions}
                 renderItem={(s: Subscription, i: number) => (
                     <SubscriptionRow key={s.id} subscription={s} index={i} currency={currency} onCancel={cancelSubscription} />
                 )}

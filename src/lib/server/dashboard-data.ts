@@ -51,6 +51,7 @@ interface DashboardQueryOptions {
     pageSize?: number;
     userId?: string;
     provider?: DashboardProvider;
+    search?: string;
 }
 
 interface BankTransaction {
@@ -629,7 +630,13 @@ export const getDashboardPayload = async (
     }
 
     const subscriptions: Subscription[] = effectiveStoredSubscriptions.map(({ previousStatus, ...item }) => item);
-    const filteredSubscriptions = applyFilter(subscriptions, filter);
+    
+    const normalizedSearch = options.search?.trim().toLowerCase();
+    const searchedSubscriptions = normalizedSearch
+        ? subscriptions.filter((sub) => sub.serviceName.toLowerCase().includes(normalizedSearch))
+        : subscriptions;
+
+    const filteredSubscriptions = applyFilter(searchedSubscriptions, filter);
     const total = filteredSubscriptions.length;
     const pageCount = Math.max(1, Math.ceil(total / pageSize));
     const page = Math.min(requestedPage, pageCount);
