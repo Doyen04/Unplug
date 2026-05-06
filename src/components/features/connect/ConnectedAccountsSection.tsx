@@ -56,10 +56,10 @@ export const ConnectedAccountsSection = ({
     return (
         <Card className="lg:col-span-3 p-0 overflow-hidden relative">
             {isPending && (
-                <div className="absolute inset-0 z-10 bg-bg-surface/60 backdrop-blur-[2px] flex items-center justify-center">
-                    <div className="flex flex-col items-center gap-3">
-                        <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand border-t-transparent" />
-                        <p className="text-xs font-bold text-text-primary uppercase tracking-widest">Updating...</p>
+                <div className="absolute inset-0 z-10 bg-bg-surface/60 backdrop-blur-[4px] flex items-center justify-center">
+                    <div className="flex flex-col items-center gap-3 animate-pulse">
+                        <div className="h-8 w-8 animate-spin rounded-full border-[3px] border-brand border-t-transparent" />
+                        <p className="text-xs font-bold text-brand uppercase tracking-widest drop-shadow-sm">Updating...</p>
                     </div>
                 </div>
             )}
