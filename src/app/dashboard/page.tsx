@@ -24,6 +24,7 @@ import { SavingsInsight } from './components/SavingsInsight';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
+import { Input } from '@/components/ui/Input';
 import { DataTable } from '@/components/ui/DataTable';
 import { TransactionRow } from '@/components/features/transactions/TransactionRow';
 
@@ -128,19 +129,43 @@ export default function DashboardPage() {
                 onRetry={ledgerTab === 'subscriptions' ? refetch : rex}
                 header={
                     <div className="border-b border-border">
-                        <div className="p-6 flex flex-col sm:flex-row justify-between gap-4">
-                            <div className="flex gap-1 bg-bg-muted p-1 rounded-full">
-                                {(['subscriptions', 'transactions'] as const).map(t => (
-                                    <Button key={t} variant={ledgerTab === t ? 'primary' : 'ghost'} size="sm" className="rounded-full px-5 uppercase text-[10px] tracking-widest font-bold" onClick={() => setLedgerTab(t)}>
-                                        {t}
-                                    </Button>
-                                ))}
+                        <div className="p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+                            <div className="flex flex-wrap items-center gap-4">
+                                <div className="flex gap-1 bg-bg-muted p-1 rounded-full">
+                                    {(['subscriptions', 'transactions'] as const).map(t => (
+                                        <Button key={t} variant={ledgerTab === t ? 'primary' : 'ghost'} size="sm" className="rounded-full px-5 uppercase text-[10px] tracking-widest font-bold" onClick={() => setLedgerTab(t)}>
+                                            {t}
+                                        </Button>
+                                    ))}
+                                </div>
+
+                                {providers.hasBoth && (
+                                    <div className="flex gap-1 bg-bg-muted p-1 rounded-full">
+                                        {providers.connected.map((p: DashboardProvider) => (
+                                            <Button 
+                                                key={p} size="sm" variant={providers.active === p ? 'primary' : 'ghost'} 
+                                                className="rounded-full px-4 uppercase text-[10px] tracking-widest font-bold"
+                                                onClick={() => {
+                                                    const params = new URLSearchParams(searchParams.toString());
+                                                    params.set('provider', p);
+                                                    window.history.replaceState(null, '', `?${params.toString()}`);
+                                                    window.location.reload(); // Quickest way to sync providers for now
+                                                }}
+                                            >
+                                                {p}
+                                            </Button>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
-                            <div className="relative flex-1 max-w-sm">
-                                <Search size={16} className="absolute left-3 top-3 text-text-muted" />
-                                <input
-                                    className="w-full bg-bg-base border border-border-strong rounded-btn py-2 pl-10 pr-4 text-sm"
-                                    placeholder="Search..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
+
+                            <div className="relative w-full sm:w-64 h-10 group">
+                                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted transition-colors group-focus-within:text-brand z-10" />
+                                <Input
+                                    className="pl-10 h-full w-full"
+                                    placeholder="Search..." 
+                                    value={searchQuery} 
+                                    onChange={e => setSearchQuery(e.target.value)}
                                 />
                             </div>
                         </div>

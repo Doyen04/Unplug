@@ -164,13 +164,13 @@ export default function TransactionsPage() {
                     )}
                 </div>
 
-                <div className="relative w-full sm:w-72">
-                    <Search size={16} className="absolute left-3 top-3 text-text-muted transition-colors group-focus-within:text-brand" />
+                <div className="relative w-full sm:w-72 h-10 group">
+                    <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted transition-colors group-focus-within:text-brand z-10" />
                     <Input
                         value={search}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearch(e.target.value)}
                         placeholder="Search transactions"
-                        className="pl-10"
+                        className="pl-10 h-full w-full"
                     />
                 </div>
             </div>
