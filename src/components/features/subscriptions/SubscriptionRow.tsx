@@ -60,14 +60,14 @@ export const SubscriptionRow = ({
             <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-medium text-text-secondary uppercase tracking-wider">
               <span className="flex items-center gap-1" title="Confidence Level"><Shield size={12} /> {subscription.confidence}</span>
               <span className="h-1 w-1 rounded-full bg-border" aria-hidden="true" />
-              <span>{subscription.frequencyLabel}</span>
+              <span className="flex items-center gap-1"><Calendar size={12} /> {subscription.frequencyLabel}</span>
             </div>
 
-            {hasAlert && (
+            {hasAlert && !subscription.alert?.message.toLowerCase().includes(subscription.verdict.replace('_', ' ').toLowerCase()) && (
               <div className="mt-2.5 flex items-center gap-2 rounded-lg bg-warning-light/30 px-2 py-1.5 border border-warning/10">
                 <AlertTriangle size={12} className="text-warning" />
                 <span className="text-[11px] font-semibold text-warning uppercase tracking-tight">
-                  {toSentenceCase(subscription.alert!.message)}
+                  {subscription.alert!.message}
                 </span>
               </div>
             )}
@@ -77,20 +77,10 @@ export const SubscriptionRow = ({
             <p className="font-ui text-lg font-bold text-text-primary">
               {formatCurrencyPrecise(subscription.amountMonthly, currencyCode)}
             </p>
-            <p className="flex items-center justify-end gap-1 text-[10px] font-bold uppercase tracking-widest text-text-muted mt-0.5"><Calendar size={10} /> Monthly</p>
           </div>
 
           <div className="w-full sm:w-auto">
             <div className="flex w-full items-center gap-2 sm:w-auto sm:justify-end">
-              {subscription.status !== 'cancelled' && subscription.verdict === 'active' && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-9 px-4"
-                >
-                  Keep
-                </Button>
-              )}
               <CancelButton
                 subscriptionId={subscription.id}
                 serviceName={subscription.serviceName}

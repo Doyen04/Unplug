@@ -120,13 +120,13 @@ const Sidebar = ({ expanded, toggleExpanded, isMobileOpen, setIsMobileOpen }: Si
 
                 <div className="border-t border-border p-4">
                     <div className={`mb-4 flex items-center gap-3 ${!expanded ? 'justify-center' : ''}`}>
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-bg-muted text-text-secondary ring-1 ring-border transition-colors group-hover:bg-text-primary group-hover:text-white">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-bg-muted text-text-secondary ring-1 ring-border shadow-sm transition-colors group-hover:bg-text-primary group-hover:text-white">
                             <User size={18} />
                         </div>
                         {expanded ? (
                             <div className="min-w-0">
-                                <p className="truncate text-sm font-medium text-text-primary">{userName}</p>
-                                <p className="truncate text-xs text-text-muted">{userEmail}</p>
+                                <p className="truncate text-sm font-bold capitalize text-text-primary leading-tight">{userName}</p>
+                                <p className="truncate text-[11px] font-medium text-text-muted mt-0.5">{userEmail}</p>
                             </div>
                         ) : null}
                     </div>

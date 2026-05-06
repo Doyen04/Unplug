@@ -1,6 +1,5 @@
-'use client';
-
-import { useEffect, useState } from 'react';
+import { Trash2 } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
 
 interface CancelButtonProps {
   subscriptionId: string;
@@ -16,14 +15,15 @@ export const CancelButton = ({
   disabled = false,
 }: CancelButtonProps) => {
   return (
-    <button
-      type="button"
-      className="h-10 min-w-20 w-full rounded-lg border-[1.5px] border-[#E53434] bg-white px-3 py-2 text-center text-[12px] font-medium uppercase tracking-[0.04em] text-[#E53434] transition-all duration-150 ease-in-out hover:bg-[#E53434] hover:text-white disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+    <Button
+      variant="outline"
+      size="icon"
+      className="h-9 w-9 rounded-full border-danger/20 text-danger hover:bg-danger hover:text-white hover:border-danger transition-all"
       disabled={disabled}
       onClick={() => void onSuccess()}
-      aria-label={`Cancel ${serviceName} subscription (${subscriptionId})`}
+      aria-label={`Cancel ${serviceName} subscription`}
     >
-      CANCEL
-    </button>
+      <Trash2 size={16} />
+    </Button>
   );
 };
