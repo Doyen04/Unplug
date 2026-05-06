@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -16,14 +16,11 @@ import {
     Menu,
     Zap,
     User,
+    X,
 } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
 
-interface SidebarProps {
-    expanded: boolean;
-    toggleExpanded: () => void;
-    isMobileOpen: boolean;
-    setIsMobileOpen: (open: boolean) => void;
-}
+import { useDashboardData } from '@/hooks/useDashboardData';
 
 const NAV_ITEMS = [
     { href: '/dashboard', label: 'Dashboard', icon: Home },
@@ -32,6 +29,67 @@ const NAV_ITEMS = [
     { href: '/dashboard/connect', label: 'Linked Accounts', icon: LinkIcon },
     { href: '/dashboard/settings', label: 'Settings', icon: Settings },
 ];
+
+const NotificationsDrawer = ({ isOpen, onClose, alerts }: { isOpen: boolean; onClose: () => void; alerts: any[] }) => (
+    <AnimatePresence>
+        {isOpen && (
+            <>
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    onClick={onClose}
+                    className="fixed inset-0 z-[60] bg-black/20 backdrop-blur-sm"
+                />
+                <motion.div
+                    initial={{ x: '100%' }}
+                    animate={{ x: 0 }}
+                    exit={{ x: '100%' }}
+                    transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                    className="fixed inset-y-0 right-0 z-[70] w-full max-w-sm border-l border-border bg-bg-surface shadow-2xl"
+                >
+                    <div className="flex flex-col h-full">
+                        <div className="flex items-center justify-between border-b border-border p-4">
+                            <h2 className="text-lg font-bold text-text-primary">Notifications</h2>
+                            <button onClick={onClose} className="rounded-full p-2 hover:bg-bg-muted transition-colors">
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <div className="flex-1 overflow-y-auto p-4">
+                            {alerts.length > 0 ? (
+                                <div className="space-y-4">
+                                    {alerts.map((alert, i) => (
+                                        <div key={i} className="flex gap-3 rounded-xl border border-border bg-bg-base p-4 shadow-sm">
+                                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-warning-light/30 text-warning">
+                                                <Bell size={18} />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <p className="text-sm font-bold text-text-primary uppercase tracking-tight">{alert.type?.replace(/_/g, ' ') || 'Alert'}</p>
+                                                <p className="text-xs text-text-muted leading-relaxed">{alert.label}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="flex flex-col items-center justify-center h-40 text-center text-text-muted space-y-2">
+                                    <Bell size={32} className="opacity-20" />
+                                    <p className="text-sm">No new notifications</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </motion.div>
+            </>
+        )}
+    </AnimatePresence>
+);
+
+interface SidebarProps {
+    expanded: boolean;
+    toggleExpanded: () => void;
+    isMobileOpen: boolean;
+    setIsMobileOpen: (open: boolean) => void;
+}
 
 const Sidebar = ({ expanded, toggleExpanded, isMobileOpen, setIsMobileOpen }: SidebarProps) => {
     const pathname = usePathname();
@@ -55,8 +113,6 @@ const Sidebar = ({ expanded, toggleExpanded, isMobileOpen, setIsMobileOpen }: Si
         void fetchUser();
     }, []);
 
-    const userInitial = userName.trim().charAt(0).toUpperCase() || 'U';
-
     return (
         <>
             {/* Mobile overlay */}
@@ -71,26 +127,40 @@ const Sidebar = ({ expanded, toggleExpanded, isMobileOpen, setIsMobileOpen }: Si
                 className={`fixed inset-y-0 left-0 z-50 flex flex-col border-r border-border bg-bg-base transition-all duration-300 lg:static ${isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
                     } ${expanded ? 'w-60' : 'w-16'}`}
             >
-                <div className="flex h-24 items-end justify-between px-4 pb-3 pt-7">
+                <div className={`flex h-20 items-center justify-between pb-3 pt-7 transition-all ${expanded ? 'px-4' : 'px-2'}`}>
                     {expanded ? (
                         <Link href="/" className="flex items-center gap-2 text-sm font-extrabold uppercase tracking-[0.08em] text-text-primary">
                             <Zap size={18} className="text-brand fill-brand" />
                             Unplug
                         </Link>
                     ) : (
-                        <Link href="/" className="mx-auto flex h-9 w-9 items-center justify-center rounded-btn bg-text-primary shadow-lg shadow-brand/10 transition-transform hover:scale-105">
-                            <Zap size={20} className="text-brand fill-brand" />
+                        <Link href="/" className="mx-auto flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-text-primary shadow-lg shadow-brand/10 transition-transform hover:scale-105">
+                            <Zap size={22} className="text-brand fill-brand" />
                         </Link>
                     )}
 
-                    <button
-                        onClick={toggleExpanded}
-                        className="hidden h-8 w-8 items-center justify-center rounded-full text-text-secondary transition-colors hover:bg-bg-muted hover:text-text-primary lg:flex"
-                        aria-label={expanded ? 'Collapse sidebar' : 'Expand sidebar'}
-                    >
-                        {expanded ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
-                    </button>
+                    {expanded && (
+                        <button
+                            onClick={toggleExpanded}
+                            className="hidden h-8 w-8 items-center justify-center rounded-full text-text-secondary transition-colors hover:bg-bg-muted hover:text-text-primary lg:flex"
+                            aria-label="Collapse sidebar"
+                        >
+                            <ChevronLeft size={16} />
+                        </button>
+                    )}
                 </div>
+                
+                {!expanded && (
+                    <div className="flex justify-center py-2">
+                        <button
+                            onClick={toggleExpanded}
+                            className="hidden h-8 w-8 items-center justify-center rounded-full text-text-secondary transition-colors hover:bg-bg-muted hover:text-text-primary lg:flex"
+                            aria-label="Expand sidebar"
+                        >
+                            <ChevronRight size={16} />
+                        </button>
+                    </div>
+                )}
 
                 <nav className="flex-1 space-y-1 overflow-y-auto py-2">
                     {NAV_ITEMS.map((item, index) => {
@@ -118,8 +188,8 @@ const Sidebar = ({ expanded, toggleExpanded, isMobileOpen, setIsMobileOpen }: Si
                     })}
                 </nav>
 
-                <div className="border-t border-border p-4">
-                    <div className={`mb-4 flex items-center gap-3 ${!expanded ? 'justify-center' : ''}`}>
+                <div className="border-t border-border p-4 space-y-4">
+                    <div className={`flex items-center gap-3 py-2 ${!expanded ? 'justify-center' : ''}`}>
                         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-bg-muted text-text-secondary ring-1 ring-border shadow-sm transition-colors group-hover:bg-text-primary group-hover:text-white">
                             <User size={18} />
                         </div>
@@ -148,6 +218,8 @@ const Sidebar = ({ expanded, toggleExpanded, isMobileOpen, setIsMobileOpen }: Si
 export const DashboardLayoutShell = ({ children }: { children: React.ReactNode }) => {
     const [expanded, setExpanded] = useState(true);
     const [isMobileOpen, setIsMobileOpen] = useState(false);
+    const [isAlertsOpen, setIsAlertsOpen] = useState(false);
+    const { alerts } = useDashboardData({ includeDebrief: false });
 
     return (
         <div className="flex h-screen overflow-hidden bg-white text-[#1A1A17]">
@@ -156,6 +228,12 @@ export const DashboardLayoutShell = ({ children }: { children: React.ReactNode }
                 toggleExpanded={() => setExpanded(!expanded)}
                 isMobileOpen={isMobileOpen}
                 setIsMobileOpen={setIsMobileOpen}
+            />
+
+            <NotificationsDrawer 
+                isOpen={isAlertsOpen} 
+                onClose={() => setIsAlertsOpen(false)} 
+                alerts={alerts} 
             />
 
             <main className="flex-1 overflow-y-auto">
@@ -167,9 +245,15 @@ export const DashboardLayoutShell = ({ children }: { children: React.ReactNode }
                     <span className="text-sm font-bold uppercase tracking-[0.08em] text-[#1A1A17]">
                         Unplug
                     </span>
-                    <div className="flex items-center gap-4">
-                        <Bell size={20} className="text-[#6B6960]" />
-                    </div>
+                    <button 
+                        onClick={() => setIsAlertsOpen(true)} 
+                        className="relative p-2 text-[#6B6960]"
+                    >
+                        <Bell size={20} />
+                        {alerts.length > 0 && (
+                            <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-brand ring-2 ring-[#FAFAF7]" />
+                        )}
+                    </button>
                 </div>
 
                 <div className="mx-auto w-full max-w-7xl p-4 md:p-8">
