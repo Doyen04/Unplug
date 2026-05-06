@@ -42,7 +42,7 @@ export const SubscriptionRow = ({
         transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1], delay: index * 0.03 }}
         layout
       >
-        <Card className={`flex flex-col gap-4 p-4 sm:flex-row sm:items-center ${subscription.status === 'cancelled' ? 'opacity-60' : ''
+        <Card className={`group flex flex-col gap-4 p-4 sm:flex-row sm:items-center ${subscription.status === 'cancelled' ? 'opacity-60' : ''
           } ${hasAlert ? 'border-l-4 border-l-warning' : ''} ${subscription.status === 'unused' ? 'alert-pulse-border' : ''
           }`}>
           <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-btn shadow-sm ${getAvatarClass(subscription.serviceName)}`}>
@@ -80,7 +80,7 @@ export const SubscriptionRow = ({
           </div>
 
           <div className="w-full sm:w-auto">
-            <div className="flex w-full items-center gap-2 sm:w-auto sm:justify-end">
+            <div className="flex w-full items-center gap-2 sm:w-auto sm:justify-end opacity-0 group-hover:opacity-100 transition-opacity duration-200">
               <CancelButton
                 subscriptionId={subscription.id}
                 serviceName={subscription.serviceName}
