@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -66,6 +66,7 @@ export const ConnectProviderButtons = ({
     const [isBusy, setIsBusy] = useState(false);
     const [isPending, setIsPending] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const sdkLoadRef = useRef<Promise<void> | null>(null);
 
     useEffect(() => {
         const loadSdk = async () => {
@@ -79,16 +80,27 @@ export const ConnectProviderButtons = ({
                 // Handled at interaction
             }
         };
-        void loadSdk();
+        sdkLoadRef.current = loadSdk();
     }, [provider]);
+
+    const waitForSdk = async (): Promise<boolean> => {
+        try {
+            await sdkLoadRef.current;
+            return provider === 'plaid' ? Boolean(window.Plaid) : Boolean(window.Connect);
+        } catch {
+            return false;
+        }
+    };
 
     const handlePlaidSetup = async () => {
         setError(null);
-        if (!window.Plaid) {
-            setError('Plaid SDK not loaded');
+        setIsBusy(true);
+        const ready = await waitForSdk();
+        if (!ready) {
+            setError('Plaid SDK not loaded — please try again');
+            setIsBusy(false);
             return;
         }
-        setIsBusy(true);
         try {
             let token = plaidToken;
             if (!token) {
@@ -141,11 +153,13 @@ export const ConnectProviderButtons = ({
             setError('Mono key missing');
             return;
         }
-        if (!window.Connect) {
-            setError('Mono SDK not loaded');
+        setIsBusy(true);
+        const ready = await waitForSdk();
+        if (!ready) {
+            setError('Mono SDK not loaded — please try again');
+            setIsBusy(false);
             return;
         }
-        setIsBusy(true);
         try {
             const mono = new window.Connect({
                 key: monoPublicKey,
