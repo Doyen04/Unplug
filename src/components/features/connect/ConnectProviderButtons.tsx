@@ -64,6 +64,7 @@ export const ConnectProviderButtons = ({
     const router = useRouter();
     const [plaidToken, setPlaidToken] = useState<string | null>(null);
     const [isBusy, setIsBusy] = useState(false);
+    const [isPending, setIsPending] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
@@ -104,17 +105,26 @@ export const ConnectProviderButtons = ({
             const handler = window.Plaid.create({
                 token: token!,
                 onSuccess: async (publicToken, metadata) => {
-                    const res = await fetch('/api/connect/plaid/exchange', {
-                        method: 'POST',
-                        headers: { 'content-type': 'application/json' },
-                        body: JSON.stringify({ publicToken, metadata }),
-                    });
-                    if (!res.ok) {
-                        setError('Exchange failed');
+                    setIsPending(true);
+                    try {
+                        const res = await fetch('/api/connect/plaid/exchange', {
+                            method: 'POST',
+                            headers: { 'content-type': 'application/json' },
+                            body: JSON.stringify({ publicToken, metadata }),
+                        });
+                        if (!res.ok) {
+                            setError('Exchange failed');
+                            setIsBusy(false);
+                            return;
+                        }
+                        router.push('/dashboard/connect?connected=plaid');
+                        router.refresh();
+                    } catch {
+                        setError('Exchange error');
                         setIsBusy(false);
-                        return;
+                    } finally {
+                        setIsPending(false);
                     }
-                    router.push('/dashboard/connect?connected=plaid');
                 },
                 onExit: () => setIsBusy(false),
             });
@@ -140,17 +150,26 @@ export const ConnectProviderButtons = ({
             const mono = new window.Connect({
                 key: monoPublicKey,
                 onSuccess: async ({ code }) => {
-                    const res = await fetch('/api/connect/mono/exchange', {
-                        method: 'POST',
-                        headers: { 'content-type': 'application/json' },
-                        body: JSON.stringify({ code }),
-                    });
-                    if (!res.ok) {
-                        setError('Exchange failed');
+                    setIsPending(true);
+                    try {
+                        const res = await fetch('/api/connect/mono/exchange', {
+                            method: 'POST',
+                            headers: { 'content-type': 'application/json' },
+                            body: JSON.stringify({ code }),
+                        });
+                        if (!res.ok) {
+                            setError('Exchange failed');
+                            setIsBusy(false);
+                            return;
+                        }
+                        router.push('/dashboard/connect?connected=mono');
+                        router.refresh();
+                    } catch {
+                        setError('Exchange error');
                         setIsBusy(false);
-                        return;
+                    } finally {
+                        setIsPending(false);
                     }
-                    router.push('/dashboard/connect?connected=mono');
                 },
                 onClose: () => setIsBusy(false),
             });
@@ -166,6 +185,15 @@ export const ConnectProviderButtons = ({
 
     return (
         <div className={compact ? "" : "w-full"}>
+            {isPending && (
+                <div className="absolute inset-0 z-10 bg-bg-surface/60 backdrop-blur-[2px] flex items-center justify-center">
+                    <div className="flex flex-col items-center gap-3">
+                        <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand border-t-transparent" />
+                        <p className="text-xs font-bold text-text-primary uppercase tracking-widest">Connecting...</p>
+                    </div>
+                </div>
+            )}
+
             {error && (
                 <Badge variant="danger" className="mb-3 w-full justify-center">
                     {error}
@@ -177,10 +205,10 @@ export const ConnectProviderButtons = ({
                 variant={isPreferred ? 'primary' : 'secondary'}
                 size={compact ? 'sm' : 'default'}
                 onClick={provider === 'plaid' ? handlePlaidSetup : handleMonoSetup}
-                disabled={isBusy}
+                disabled={isBusy || isPending}
                 className={compact ? "h-8" : "w-full mt-4"}
             >
-                {isBusy
+                {isBusy || isPending
                     ? `Opening ${provider}...`
                     : accountId ? `Reconnect ${provider}` : `Setup ${provider}`}
             </Button>
