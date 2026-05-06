@@ -114,7 +114,7 @@ export const ConnectProviderButtons = ({
                 token = payload.linkToken;
                 setPlaidToken(token);
             }
-            const handler = window.Plaid.create({
+            const handler = window.Plaid!.create({
                 token: token!,
                 onSuccess: async (publicToken, metadata) => {
                     setIsPending(true);
@@ -130,6 +130,7 @@ export const ConnectProviderButtons = ({
                             return;
                         }
                         router.push('/dashboard/connect?connected=plaid');
+                        setIsBusy(false);
                         router.refresh();
                     } catch {
                         setError('Exchange error');
@@ -161,7 +162,7 @@ export const ConnectProviderButtons = ({
             return;
         }
         try {
-            const mono = new window.Connect({
+            const mono = new window.Connect!({
                 key: monoPublicKey,
                 onSuccess: async ({ code }) => {
                     setIsPending(true);
@@ -177,6 +178,7 @@ export const ConnectProviderButtons = ({
                             return;
                         }
                         router.push('/dashboard/connect?connected=mono');
+                        setIsBusy(false);
                         router.refresh();
                     } catch {
                         setError('Exchange error');

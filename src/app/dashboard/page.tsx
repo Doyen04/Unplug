@@ -87,7 +87,7 @@ export default function DashboardPage() {
         return Array.from({ length: 12 }, (_, i) => {
             const d = new Date(now.getFullYear(), now.getMonth() - (11 - i), 1);
             const key = getMonthKey(d);
-            return { name: d.toLocaleDateString('en-US', { month: 'short' }), spend: spendByMonth.get(key) || 0 };
+            return { name: d.toLocaleDateString('en-US', { month: 'short' }).toUpperCase(), spend: spendByMonth.get(key) || 0 };
         });
     }, [txData]);
 

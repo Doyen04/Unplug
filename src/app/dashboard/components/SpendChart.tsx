@@ -78,7 +78,7 @@ export function SpendChart({
             </div>
           ) : (
             <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={160}>
-              <AreaChart data={chartData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+              <AreaChart data={chartData} margin={{ top: 8, right: 8, left: 0, bottom: 24 }}>
                 <defs>
                   <linearGradient id="spendGradient" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="#FF5C35" stopOpacity={0.35} />
@@ -91,9 +91,9 @@ export function SpendChart({
                   dataKey="name"
                   axisLine={false}
                   tickLine={false}
-                  style={{ textTransform: 'uppercase' }}
                   tick={{ fill: '#A9A79E', fontSize: 10, fontWeight: 500 }}
-                  dy={22}
+                  dy={8}
+                  interval={0}
                 />
                 <Tooltip
                   cursor={{ stroke: '#FFE0D6', strokeWidth: 2 }}
