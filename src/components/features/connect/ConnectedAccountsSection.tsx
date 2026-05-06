@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Trash2, AlertCircle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -78,8 +79,17 @@ export const ConnectedAccountsSection = ({
                     </div>
                 ) : (
                     <ul className="space-y-4">
-                        {initialAccounts.map((account) => (
-                            <li key={account.id} className="flex flex-col gap-4 rounded-xl border border-border bg-bg-base/50 p-4 sm:flex-row sm:items-center sm:justify-between transition-colors hover:bg-bg-base">
+                        <AnimatePresence mode="popLayout">
+                            {initialAccounts.map((account) => (
+                                <motion.li 
+                                    layout
+                                    initial={{ opacity: 0, scale: 0.95, y: 15 }}
+                                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                                    exit={{ opacity: 0, scale: 0.95, y: -15 }}
+                                    transition={{ duration: 0.25, ease: 'easeOut' }}
+                                    key={account.id} 
+                                    className="flex flex-col gap-4 rounded-xl border border-border bg-bg-base/50 p-4 sm:flex-row sm:items-center sm:justify-between transition-colors hover:bg-bg-base"
+                                >
                                 <div>
                                     <p className="text-sm font-bold text-text-primary">{account.displayName}</p>
                                     <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted">
@@ -108,8 +118,9 @@ export const ConnectedAccountsSection = ({
                                         <Trash2 size={14} />
                                     </Button>
                                 </div>
-                            </li>
+                            </motion.li>
                         ))}
+                        </AnimatePresence>
                     </ul>
                 )}
             </div>

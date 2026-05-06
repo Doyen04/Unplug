@@ -12,15 +12,37 @@ import { Badge } from '@/components/ui/Badge';
 
 const MONO_COUNTRIES = new Set(['NG', 'GH', 'KE', 'ZA', 'UG', 'TZ']);
 
-const resolveCountry = (countryHeader: string | null, languageHeader: string | null): string => {
+const resolveCountry = (
+    countryHeader: string | null,
+    languageHeader: string | null,
+    forceRegion?: string
+): string => {
+    if (forceRegion && forceRegion.length === 2) return forceRegion.toUpperCase();
     if (countryHeader && countryHeader.length === 2) return countryHeader.toUpperCase();
+    
+    // Fallback using server environment time zone (helps heavily in local development)
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    if (tz) {
+        if (tz.includes('Lagos')) return 'NG';
+        if (tz.includes('Accra')) return 'GH';
+        if (tz.includes('Nairobi')) return 'KE';
+        if (tz.includes('Johannesburg')) return 'ZA';
+        if (tz.includes('Kampala')) return 'UG';
+        if (tz.includes('Dar_es_Salaam')) return 'TZ';
+        if (tz.includes('London')) return 'GB';
+    }
+
     const languageSuffix = languageHeader?.split(',')[0]?.split('-')[1];
-    if (languageSuffix && languageSuffix.length === 2) return languageSuffix.toUpperCase();
+    if (languageSuffix && languageSuffix.length === 2 && languageSuffix.toUpperCase() !== 'US') {
+        // Ignore US language suffix because en-US is the default language for most browser installations globally
+        return languageSuffix.toUpperCase();
+    }
+    
     return 'US';
 };
 
 interface ConnectAccountsPageProps {
-    searchParams?: Promise<{ error?: string; disconnected?: string; connected?: string }>;
+    searchParams?: Promise<{ error?: string; disconnected?: string; connected?: string; region?: string }>;
 }
 
 const ConnectAccountsPage = async ({ searchParams }: ConnectAccountsPageProps) => {
@@ -50,7 +72,11 @@ const ConnectAccountsPage = async ({ searchParams }: ConnectAccountsPageProps) =
     const hasDisconnectError = params.error === 'disconnect_failed';
 
     const requestHeaders = await headers();
-    const countryCode = resolveCountry(requestHeaders.get('x-vercel-ip-country'), requestHeaders.get('accept-language'));
+    const countryCode = resolveCountry(
+        requestHeaders.get('x-vercel-ip-country') || requestHeaders.get('cf-ipcountry'), 
+        requestHeaders.get('accept-language'),
+        params.region
+    );
     const preferredProvider = MONO_COUNTRIES.has(countryCode) ? 'mono' : 'plaid';
     const monoPublicKey = process.env.MONO_PUBLIC_KEY ?? process.env.NEXT_PUBLIC_MONO_PUBLIC_KEY ?? '';
 
