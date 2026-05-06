@@ -160,7 +160,9 @@ export default function DashboardPage() {
                             </div>
 
                             <div className="relative w-full sm:w-64 h-10 group">
-                                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted transition-colors group-focus-within:text-brand z-10" />
+                                <div className="absolute left-3 inset-y-0 flex items-center pointer-events-none z-10">
+                                    <Search size={16} className="text-text-muted transition-colors group-focus-within:text-brand" />
+                                </div>
                                 <Input
                                     className="pl-10 h-full w-full"
                                     placeholder="Search..." 
