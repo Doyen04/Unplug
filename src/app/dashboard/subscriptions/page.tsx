@@ -14,6 +14,7 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Input } from '@/components/ui/Input';
+import { DataTable } from '@/components/ui/DataTable';
 
 const providerLabel = (provider: DashboardProvider): string =>
     provider === 'plaid' ? 'Plaid' : 'Mono';
@@ -143,66 +144,44 @@ export default function SubscriptionsPage() {
                 </div>
             )}
 
-            <Card className="p-0 overflow-hidden">
-                <div className="border-b border-border bg-bg-muted/30 px-6 h-14 flex items-center">
-                    <div className="flex items-center gap-2 overflow-x-auto no-scrollbar w-full">
-                        {DASHBOARD_FILTER_OPTIONS.map((item) => (
-                            <button
-                                key={item.key}
-                                onClick={() => { setFilter(item.key); setPage(1); }}
-                                className={`h-8 rounded-pill px-4 flex items-center justify-center text-[10px] font-bold uppercase tracking-widest transition-all ${item.key === filter
-                                    ? 'bg-brand text-white shadow-md'
-                                    : 'bg-bg-muted text-text-secondary hover:bg-bg-subtle border border-border bg-white'
-                                    }`}
-                            >
-                                {item.label}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-
-                <div className="px-6 py-4">
-                    {isError && (
-                        <Badge variant="warning" className="w-full justify-center py-2 mb-4 h-auto">
-                            Live refresh failed. Showing cached data.
-                            <Button variant="ghost" size="sm" onClick={() => refetch()} className="ml-4 h-8 bg-white/20 hover:bg-white/40">
-                                <RefreshCcw size={12} className={isFetching ? 'animate-spin' : ''} />
-                            </Button>
-                        </Badge>
-                    )}
-
-                    {filteredBySearch.length === 0 ? (
-                        <div className="rounded-xl border border-dashed border-border p-12 text-center text-text-secondary">
-                            <AlertTriangle size={32} className="mx-auto mb-4 opacity-20" />
-                            <p className="font-semibold">No subscriptions found</p>
-                            <p className="text-sm mt-1 mb-6">Try broadening your search or adjusting filters.</p>
-                            <Button variant="secondary" onClick={() => { setSearch(''); setFilter('all'); }}>Clear all filters</Button>
-                        </div>
-                    ) : (
-                        <div className="space-y-4">
-                            {filteredBySearch.map((s: Subscription, i: number) => (
-                                <SubscriptionRow key={s.id} subscription={s} index={i} currency={currency} onCancel={cancelSubscription} />
-                            ))}
-                        </div>
-                    )}
-                </div>
-
-                {totalSubscriptions > 0 && pageCount > 1 && (
-                    <div className="flex items-center justify-between px-6 py-4 border-t border-border bg-bg-muted/30">
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted">
-                            Page {page} / {pageCount} · {totalSubscriptions} total
-                        </span>
-                        <div className="flex gap-2">
-                            <Button variant="secondary" size="icon" onClick={() => setPage(page - 1)} disabled={page <= 1} className="h-9 w-9 rounded-full">
-                                <ChevronLeft size={18} className="text-text-primary" />
-                            </Button>
-                            <Button variant="secondary" size="icon" onClick={() => setPage(page + 1)} disabled={page >= pageCount} className="h-9 w-9 rounded-full">
-                                <ChevronRight size={18} className="text-text-primary" />
-                            </Button>
-                        </div>
+            <DataTable
+                data={filteredBySearch}
+                renderItem={(s: Subscription, i: number) => (
+                    <div key={s.id} className="p-6">
+                        <SubscriptionRow subscription={s} index={i} currency={currency} onCancel={cancelSubscription} />
                     </div>
                 )}
-            </Card>
+                isLoading={isLoading}
+                isError={isError}
+                onRetry={refetch}
+                emptyTitle="No subscriptions found"
+                emptyMessage="Try broadening your search or adjusting filters."
+                emptyAction={<Button variant="secondary" onClick={() => { setSearch(''); setFilter('all'); }}>Clear all filters</Button>}
+                header={
+                    <div className="border-b border-border bg-bg-muted/30 px-6 h-14 flex items-center">
+                        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar w-full">
+                            {DASHBOARD_FILTER_OPTIONS.map((item) => (
+                                <button
+                                    key={item.key}
+                                    onClick={() => { setFilter(item.key); setPage(1); }}
+                                    className={`h-8 rounded-pill px-4 flex items-center justify-center text-[10px] font-bold uppercase tracking-widest transition-all ${item.key === filter
+                                        ? 'bg-brand text-white shadow-md'
+                                        : 'bg-bg-muted text-text-secondary hover:bg-bg-subtle border border-border bg-white'
+                                        }`}
+                                >
+                                    {item.label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                }
+                pagination={{
+                    page,
+                    pageCount,
+                    total: totalSubscriptions,
+                    onPageChange: (p) => setPage(p)
+                } }
+            />
 
             {pendingUndoId && (
                 <Card className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-text-primary text-white border-none shadow-2xl p-4 flex items-center gap-6 z-50">

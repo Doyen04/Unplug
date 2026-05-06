@@ -14,6 +14,8 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Input } from '@/components/ui/Input';
+import { DataTable } from '@/components/ui/DataTable';
+import { TransactionRow } from '@/components/features/transactions/TransactionRow';
 
 const providerLabel = (provider: DashboardProvider): string =>
     provider === 'plaid' ? 'Plaid' : 'Mono';
@@ -172,76 +174,38 @@ export default function TransactionsPage() {
                 </div>
             </div>
 
-            <Card className="p-0 overflow-hidden">
-                <div className="px-5 py-3 border-b border-border bg-bg-muted/30 flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-text-muted">
-                    <span>{data?.total ?? 0} transactions</span>
-                    <span>Page {data?.page ?? 1} / {data?.pageCount ?? 1}</span>
-                </div>
-
-                {isError ? (
-                    <div className="p-12 text-center">
-                        <AlertTriangle size={32} className="mx-auto mb-4 text-danger opacity-20" />
-                        <p className="font-semibold text-text-primary">Failed to load transactions</p>
-                        <p className="text-sm text-text-secondary mt-1 mb-6">There was a problem connecting to your bank feed.</p>
-                        <Button variant="secondary" onClick={() => refetch()} className="mx-auto">
-                            <RefreshCcw size={14} className={`mr-2 ${isFetching ? 'animate-spin' : ''}`} />
-                            Try again
-                        </Button>
-                    </div>
-                ) : filteredTransactions.length === 0 ? (
-                    <div className="p-12 text-center text-text-secondary">
-                        <Receipt size={32} className="mx-auto mb-4 opacity-20" />
-                        <p className="font-semibold">No transactions found</p>
-                        <p className="text-sm mt-1">Try a different search or date range.</p>
-                    </div>
-                ) : (
-                    <div className="divide-y divide-border">
-                        {filteredTransactions.map((transaction: PlaidTransaction) => (
-                            <article key={transaction.transaction_id} className="flex items-center justify-between gap-4 px-5 py-4 hover:bg-bg-base/50 transition-colors group">
-                                <div className="flex min-w-0 items-center gap-4">
-                                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-text-primary text-white">
-                                        <Receipt size={16} />
-                                    </div>
-                                    <div className="min-w-0">
-                                        <p className="truncate text-sm font-bold text-text-primary">
-                                            {transaction.merchant_name ?? transaction.name}
-                                        </p>
-                                        <p className="mt-0.5 text-[10px] font-bold uppercase tracking-widest text-text-muted">
-                                            {new Date(transaction.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                                            {transaction.category?.length ? ` · ${transaction.category[0]}` : ''}
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <div className="text-right tabular-nums">
-                                    <p className="text-sm font-bold text-text-primary">
-                                        {formatCurrency(Math.abs(transaction.amount), transaction.iso_currency_code ?? providerCurrency(selectedProvider))}
-                                    </p>
-                                    <Badge variant={transaction.amount > 0 ? 'warning' : 'success'} className="mt-1">
-                                        {transaction.amount > 0 ? 'Outflow' : 'Inflow'}
-                                    </Badge>
-                                </div>
-                            </article>
-                        ))}
-                    </div>
+            <DataTable
+                data={filteredTransactions}
+                renderItem={(tx: PlaidTransaction, i: number) => (
+                    <TransactionRow
+                        key={tx.transaction_id}
+                        transaction={tx}
+                        currency={tx.iso_currency_code ?? providerCurrency(selectedProvider)}
+                        index={i}
+                    />
                 )}
-
-                {!isLoading && !isError && (data?.pageCount ?? 1) > 1 && (
-                    <div className="flex items-center justify-between border-t border-border px-5 py-4 bg-bg-muted/30">
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted">
-                            Showing {(data!.page - 1) * data!.pageSize + 1}-{Math.min(data!.page * data!.pageSize, data!.total)} of {data!.total}
-                        </span>
-                        <div className="flex gap-2">
-                            <Button variant="secondary" size="icon" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1} className="h-9 w-9 rounded-full">
-                                <ChevronLeft size={18} className="text-text-primary" />
-                            </Button>
-                            <Button variant="secondary" size="icon" onClick={() => setPage(p => Math.min(data!.pageCount, p + 1))} disabled={page >= data!.pageCount} className="h-9 w-9 rounded-full">
-                                <ChevronRight size={18} className="text-text-primary" />
-                            </Button>
-                        </div>
+                isLoading={isLoading}
+                isError={isError}
+                onRetry={refetch}
+                errorTitle="Failed to load transactions"
+                errorMessage="There was a problem connecting to your bank feed."
+                emptyIcon={<Receipt size={32} />}
+                emptyTitle="No transactions found"
+                emptyMessage="Try a different search or date range."
+                header={
+                    <div className="px-5 py-3 border-b border-border bg-bg-muted/30 flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-text-muted">
+                        <span>{data?.total ?? 0} transactions</span>
+                        <span>Page {data?.page ?? 1} / {data?.pageCount ?? 1}</span>
                     </div>
-                )}
-            </Card>
+                }
+                pagination={{
+                    page: data?.page ?? 1,
+                    pageCount: data?.pageCount ?? 1,
+                    total: data?.total ?? 0,
+                    pageSize: data?.pageSize ?? 20,
+                    onPageChange: (p) => setPage(p)
+                }}
+            />
         </div>
     );
 }

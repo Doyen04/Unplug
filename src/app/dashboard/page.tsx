@@ -24,6 +24,8 @@ import { SavingsInsight } from './components/SavingsInsight';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
+import { DataTable } from '@/components/ui/DataTable';
+import { TransactionRow } from '@/components/features/transactions/TransactionRow';
 
 const startOfMonth = (date: Date): Date => {
     const d = new Date(date);
@@ -115,75 +117,64 @@ export default function DashboardPage() {
                 />
             </div>
 
-            <Card className="overflow-hidden p-0">
-                <div className="border-b border-border p-6 flex flex-col sm:flex-row justify-between gap-4">
-                    <div className="flex gap-1 bg-bg-muted p-1 rounded-full">
-                        {(['subscriptions', 'transactions'] as const).map(t => (
-                            <Button key={t} variant={ledgerTab === t ? 'primary' : 'ghost'} size="sm" className="rounded-full px-5 uppercase text-[10px] tracking-widest font-bold" onClick={() => setLedgerTab(t)}>
-                                {t}
-                            </Button>
-                        ))}
-                    </div>
-                    <div className="relative flex-1 max-w-sm">
-                        <Search size={16} className="absolute left-3 top-3 text-text-muted" />
-                        <input
-                            className="w-full bg-bg-base border border-border-strong rounded-btn py-2 pl-10 pr-4 text-sm"
-                            placeholder="Search..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
-                        />
-                    </div>
-                </div>
-
-
-                {ledgerTab === 'subscriptions' ? (
-                    <div className="space-y-0">
-                        <div className="h-14 flex items-center gap-2 px-6 border-b border-border bg-bg-muted/10">
-                            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar w-full">
-                                {DASHBOARD_FILTER_OPTIONS.map(f => (
-                                    <button
-                                        key={f.key} onClick={() => setFilter(f.key)}
-                                        className={`h-8 px-4 rounded-full flex items-center justify-center text-[10px] font-bold uppercase transition-all ${filter === f.key ? 'bg-brand text-white shadow-sm' : 'bg-bg-muted text-text-secondary border border-border-strong hover:bg-bg-subtle'}`}
-                                    >
-                                        {f.label} ({filterCounts[f.key]})
-                                    </button>
+            <DataTable
+                className="overflow-hidden p-0"
+                data={(ledgerTab === 'subscriptions' 
+                    ? subscriptions.filter(s => s.serviceName.toLowerCase().includes(searchQuery.toLowerCase()))
+                    : (txData?.transactions.slice(0, 8) || [])) as any[]
+                }
+                isLoading={ledgerTab === 'subscriptions' ? isLoading : lux}
+                isError={ledgerTab === 'subscriptions' ? isError : erx}
+                onRetry={ledgerTab === 'subscriptions' ? refetch : rex}
+                header={
+                    <div className="border-b border-border">
+                        <div className="p-6 flex flex-col sm:flex-row justify-between gap-4">
+                            <div className="flex gap-1 bg-bg-muted p-1 rounded-full">
+                                {(['subscriptions', 'transactions'] as const).map(t => (
+                                    <Button key={t} variant={ledgerTab === t ? 'primary' : 'ghost'} size="sm" className="rounded-full px-5 uppercase text-[10px] tracking-widest font-bold" onClick={() => setLedgerTab(t)}>
+                                        {t}
+                                    </Button>
                                 ))}
                             </div>
+                            <div className="relative flex-1 max-w-sm">
+                                <Search size={16} className="absolute left-3 top-3 text-text-muted" />
+                                <input
+                                    className="w-full bg-bg-base border border-border-strong rounded-btn py-2 pl-10 pr-4 text-sm"
+                                    placeholder="Search..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
+                                />
+                            </div>
                         </div>
-                        <div className="p-6 space-y-4">
-                            {subscriptions.filter(s => s.serviceName.toLowerCase().includes(searchQuery.toLowerCase())).map((s, i) => (
-                                <SubscriptionRow key={s.id} subscription={s} onCancel={cancelSubscription} index={i} />
-                            ))}
-                            {pageCount > 1 && (
-                                <div className="flex justify-between items-center pt-4 border-t border-border mt-4">
-                                    <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Page {page} / {pageCount}</span>
-                                    <div className="flex gap-2">
-                                        <Button variant="secondary" size="icon" className="h-9 w-9 rounded-full" disabled={page === 1} onClick={() => setPage(page - 1)}><ChevronLeft size={18} className="text-text-primary" /></Button>
-                                        <Button variant="secondary" size="icon" className="h-9 w-9 rounded-full" disabled={page === pageCount} onClick={() => setPage(page + 1)}><ChevronRight size={18} className="text-text-primary" /></Button>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                ) : (
-                    <div className="divide-y divide-border">
-                        {txData?.transactions.slice(0, 8).map(tx => (
-                            <div key={tx.transaction_id} className="flex justify-between py-4 group">
-                                <div className="flex gap-4">
-                                    <div className="h-10 w-10 flex items-center justify-center rounded-full bg-text-primary text-white"><Receipt size={16} /></div>
-                                    <div>
-                                        <p className="text-sm font-bold">{tx.merchant_name || tx.name}</p>
-                                        <p className="text-[10px] text-text-muted uppercase font-bold">{tx.date}</p>
-                                    </div>
-                                </div>
-                                <div className="text-right tabular-nums">
-                                    <p className="text-sm font-bold">{formatCurrency(tx.amount, currency)}</p>
-                                    <Badge variant={tx.amount > 0 ? 'warning' : 'success'}>{tx.amount > 0 ? 'Outflow' : 'Inflow'}</Badge>
+
+                        {ledgerTab === 'subscriptions' && (
+                            <div className="h-14 flex items-center gap-2 px-6 border-t border-border bg-bg-muted/10">
+                                <div className="flex items-center gap-2 overflow-x-auto no-scrollbar w-full">
+                                    {DASHBOARD_FILTER_OPTIONS.map(f => (
+                                        <button
+                                            key={f.key} onClick={() => setFilter(f.key)}
+                                            className={`h-8 px-4 rounded-full flex items-center justify-center text-[10px] font-bold uppercase transition-all ${filter === f.key ? 'bg-brand text-white shadow-sm' : 'bg-bg-muted text-text-secondary border border-border-strong hover:bg-bg-subtle'}`}
+                                        >
+                                            {f.label} ({filterCounts[f.key]})
+                                        </button>
+                                    ))}
                                 </div>
                             </div>
-                        ))}
+                        )}
                     </div>
-                )}
-
-            </Card>
+                }
+                renderItem={(item, i) => {
+                    if (ledgerTab === 'subscriptions') {
+                        return <div key={(item as any).id} className="p-6">
+                            <SubscriptionRow subscription={item as any} onCancel={cancelSubscription} index={i} />
+                        </div>;
+                    }
+                    return <TransactionRow key={(item as any).transaction_id} transaction={item as any} currency={currency} index={i} />;
+                }}
+                pagination={ledgerTab === 'subscriptions' ? {
+                    page,
+                    pageCount,
+                    onPageChange: (p) => setPage(p)
+                } : undefined}
+            />
 
             {pendingUndoId && (
                 <Card className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-text-primary text-white border-none shadow-2xl p-4 flex items-center gap-6 z-50">
