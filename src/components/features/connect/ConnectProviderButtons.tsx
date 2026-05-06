@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 
@@ -60,6 +61,7 @@ export const ConnectProviderButtons = ({
     compact = false,
     monoPublicKey = '',
 }: ConnectProviderButtonsProps) => {
+    const router = useRouter();
     const [plaidToken, setPlaidToken] = useState<string | null>(null);
     const [isBusy, setIsBusy] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -112,7 +114,7 @@ export const ConnectProviderButtons = ({
                         setIsBusy(false);
                         return;
                     }
-                    window.location.assign('/dashboard/connect?connected=plaid');
+                    router.push('/dashboard/connect?connected=plaid');
                 },
                 onExit: () => setIsBusy(false),
             });
@@ -148,7 +150,7 @@ export const ConnectProviderButtons = ({
                         setIsBusy(false);
                         return;
                     }
-                    window.location.assign('/dashboard/connect?connected=mono');
+                    router.push('/dashboard/connect?connected=mono');
                 },
                 onClose: () => setIsBusy(false),
             });

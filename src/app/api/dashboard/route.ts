@@ -8,7 +8,16 @@ const filterSchema = z.enum(['all', 'at-risk', 'active', 'cancelled', 'unused'])
 const providerSchema = z.enum(['plaid', 'mono']);
 
 export async function GET(request: Request) {
-    const session = await getServerSession();
+    let session;
+    try {
+        session = await getServerSession();
+    } catch (error: any) {
+        if (error.code === 'ECONNRESET' || error.errno === -4077) {
+            return NextResponse.json({ error: 'Database Connection Error', offline: true }, { status: 503 });
+        }
+        throw error;
+    }
+
     if (!session) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
