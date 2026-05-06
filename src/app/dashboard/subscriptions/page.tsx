@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { Search, AlertTriangle, RefreshCcw, ChevronLeft, ChevronRight } from 'lucide-react';
 
 import { SubscriptionRow } from '@/components/features/subscriptions/SubscriptionRow';
@@ -20,6 +20,7 @@ const providerLabel = (provider: DashboardProvider): string =>
     provider === 'plaid' ? 'Plaid' : 'Mono';
 
 export default function SubscriptionsPage() {
+    const router = useRouter();
     const searchParams = useSearchParams();
     const [search, setSearch] = useState('');
 
@@ -71,16 +72,14 @@ export default function SubscriptionsPage() {
     }, [isLoading, providers.active, providers.connected, selectedProvider]);
 
     useEffect(() => {
-        const currentProviderParam = searchParams.get('provider');
-        const currentProvider = currentProviderParam === 'plaid' || currentProviderParam === 'mono' ? currentProviderParam : undefined;
+        const currentProvider = searchParams.get('provider') || undefined;
         if (currentProvider === selectedProvider) return;
 
         const params = new URLSearchParams(searchParams.toString());
         if (selectedProvider) params.set('provider', selectedProvider);
         else params.delete('provider');
-
-        window.history.replaceState(null, '', `/dashboard/subscriptions?${params.toString()}`);
-    }, [searchParams, selectedProvider]);
+        router.replace(`/dashboard/subscriptions?${params.toString()}`, { scroll: false });
+    }, [selectedProvider, router]);
 
     useEffect(() => {
         if (!pendingUndoId) return;
@@ -96,7 +95,7 @@ export default function SubscriptionsPage() {
         );
     }, [subscriptions, search]);
 
-    if (isLoading) return (
+    if (isLoading && subscriptions.length === 0) return (
         <div className="space-y-6 animate-shimmer">
             <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div className="space-y-2">
@@ -147,10 +146,10 @@ export default function SubscriptionsPage() {
             <DataTable
                 data={filteredBySearch}
                 renderItem={(s: Subscription, i: number) => (
-                    <div key={s.id} className="p-6">
-                        <SubscriptionRow subscription={s} index={i} currency={currency} onCancel={cancelSubscription} />
-                    </div>
+                    <SubscriptionRow key={s.id} subscription={s} index={i} currency={currency} onCancel={cancelSubscription} />
                 )}
+                showDivider={false}
+                itemsClassName="p-6 space-y-4"
                 isLoading={isLoading || isFetching}
                 isError={isError}
                 onRetry={refetch}

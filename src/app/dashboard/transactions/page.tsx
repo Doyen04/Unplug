@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { Search, Receipt, AlertTriangle, RefreshCcw, ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -57,6 +57,7 @@ const fetchTransactions = async (
 };
 
 export default function TransactionsPage() {
+    const router = useRouter();
     const searchParams = useSearchParams();
     const [days, setDays] = useState(90);
     const [page, setPage] = useState(1);
@@ -82,14 +83,14 @@ export default function TransactionsPage() {
     }, [isDashboardLoading, providers.active, providers.connected, selectedProvider]);
 
     useEffect(() => {
-        const currentProviderParam = searchParams.get('provider');
-        const currentProvider = currentProviderParam === 'plaid' || currentProviderParam === 'mono' ? currentProviderParam : undefined;
+        const currentProvider = searchParams.get('provider') || undefined;
         if (currentProvider === selectedProvider) return;
+
         const params = new URLSearchParams(searchParams.toString());
         if (selectedProvider) params.set('provider', selectedProvider);
         else params.delete('provider');
-        window.history.replaceState(null, '', `/dashboard/transactions?${params.toString()}`);
-    }, [searchParams, selectedProvider]);
+        router.replace(`/dashboard/transactions?${params.toString()}`, { scroll: false });
+    }, [selectedProvider, router]);
 
     const { data, isLoading, isError, isFetching, refetch } = useQuery({
         queryKey: ['transactions-page', days, page, pageSize, selectedProvider ?? 'auto'],
@@ -109,7 +110,7 @@ export default function TransactionsPage() {
         });
     }, [data?.transactions, search]);
 
-    if (isLoading) return (
+    if (isDashboardLoading && !selectedProvider) return (
         <div className="space-y-6 animate-shimmer">
             <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div className="space-y-2"><div className="h-8 w-48 bg-bg-muted rounded-pill" /><div className="h-4 w-72 bg-bg-muted/60 rounded" /></div>

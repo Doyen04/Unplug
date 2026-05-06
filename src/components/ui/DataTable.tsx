@@ -27,6 +27,8 @@ interface DataTableProps<T> {
     footer?: React.ReactNode;
     className?: string;
     containerClassName?: string;
+    showDivider?: boolean;
+    itemsClassName?: string;
 }
 
 export function DataTable<T>({
@@ -46,6 +48,8 @@ export function DataTable<T>({
     footer,
     className = "",
     containerClassName = "p-0 overflow-hidden",
+    showDivider = true,
+    itemsClassName = "",
 }: DataTableProps<T>) {
 
     if (isError) {
@@ -69,7 +73,7 @@ export function DataTable<T>({
         <Card className={`${containerClassName} ${className}`}>
             {header}
 
-            <div className="divide-y divide-border">
+            <div className={`${showDivider ? 'divide-y divide-border' : ''} ${itemsClassName}`}>
                 {isLoading ? (
                     <div className="p-12 text-center animate-pulse space-y-4">
                         <div className="h-12 w-12 bg-bg-muted rounded-full mx-auto" />

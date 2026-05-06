@@ -163,12 +163,12 @@ export default function DashboardPage() {
                 }
                 renderItem={(item, i) => {
                     if (ledgerTab === 'subscriptions') {
-                        return <div key={(item as any).id} className="p-6">
-                            <SubscriptionRow subscription={item as any} onCancel={cancelSubscription} index={i} />
-                        </div>;
+                        return <SubscriptionRow key={(item as any).id} subscription={item as any} onCancel={cancelSubscription} index={i} />;
                     }
                     return <TransactionRow key={(item as any).transaction_id} transaction={item as any} currency={currency} index={i} />;
                 }}
+                showDivider={ledgerTab === 'transactions'}
+                itemsClassName={ledgerTab === 'subscriptions' ? "p-6 space-y-4" : ""}
                 pagination={ledgerTab === 'subscriptions' ? {
                     page,
                     pageCount,
