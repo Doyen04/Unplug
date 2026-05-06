@@ -9,7 +9,6 @@ export function DashboardSkeleton() {
         <div className="h-8 w-40 bg-bg-muted rounded-pill" />
         <div className="flex gap-4">
           <div className="h-10 w-10 bg-bg-muted rounded-full" />
-          <div className="h-10 w-10 bg-bg-muted rounded-full" />
         </div>
       </div>
 
