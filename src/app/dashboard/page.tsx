@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { Link as LinkIcon, AlertTriangle, Search, Receipt, RefreshCcw, ChevronLeft, ChevronRight, Bell, X } from 'lucide-react';
@@ -61,6 +61,13 @@ export default function DashboardPage() {
     useEffect(() => {
         fetchCurrentUser().then(u => setUserInitials(getNameInitials(u.name || ''))).catch(() => { });
     }, []);
+
+    // Auto-dismiss undo toast after 5 seconds
+    useEffect(() => {
+        if (!pendingUndoId) return;
+        const timeoutId = setTimeout(() => clearPendingUndo(), 5000);
+        return () => clearTimeout(timeoutId);
+    }, [pendingUndoId, clearPendingUndo]);
 
     const { data: txData, isLoading: lux, isError: erx, isFetching: fex, refetch: rex } = useQuery({
         queryKey: ['dashboard-transactions', providers.active],
@@ -255,12 +262,24 @@ export default function DashboardPage() {
                 } : undefined}
             />
 
-            {pendingUndoId && (
-                <Card className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-text-primary text-white border-none shadow-2xl p-4 flex items-center gap-6 z-50">
-                    <span className="text-sm">Subscription cancelled.</span>
-                    <Button variant="secondary" size="sm" className="bg-white text-text-primary border-none" onClick={undoCancel} disabled={isCancelling}>Undo</Button>
-                </Card>
-            )}
+            <AnimatePresence>
+                {pendingUndoId && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 20, x: '-50%' }}
+                        animate={{ opacity: 1, y: 0, x: '-50%' }}
+                        exit={{ opacity: 0, y: 20, x: '-50%' }}
+                        transition={{ duration: 0.25, ease: 'easeOut' }}
+                        className="fixed bottom-6 left-1/2 z-50"
+                    >
+                        <Card className="bg-text-primary text-white border-none shadow-2xl p-4 flex items-center gap-6">
+                            <span className="text-sm">Subscription cancelled.</span>
+                            <Button variant="secondary" size="sm" className="bg-white text-text-primary border-none" onClick={undoCancel} disabled={isCancelling}>
+                                {isCancelling ? <span className="animate-pulse">Undoing...</span> : 'Undo'}
+                            </Button>
+                        </Card>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

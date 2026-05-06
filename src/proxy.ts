@@ -5,7 +5,9 @@ const isProtectedPath = (pathname: string): boolean =>
     pathname.startsWith('/dashboard') ||
     pathname.startsWith('/api/dashboard') ||
     pathname.startsWith('/api/debrief') ||
-    pathname.startsWith('/api/subscriptions');
+    pathname.startsWith('/api/subscriptions') ||
+    pathname.startsWith('/api/user') ||
+    pathname.startsWith('/api/connect');
 
 export function handleAuthGuard(request: NextRequest) {
     const { pathname } = request.nextUrl;

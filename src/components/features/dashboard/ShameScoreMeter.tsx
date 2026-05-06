@@ -59,7 +59,7 @@ export const ShameScoreMeter = ({
       <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#A9A79E]">SHAME SCORE</p>
       <div className="mt-3 flex items-end gap-2 sm:gap-3">
         <p className="font-display text-5xl leading-none sm:text-6xl lg:text-7xl" style={{ color: scoreColor }}>
-          {isLoading ? '--' : displayScore}
+          {isLoading ? <span className="animate-pulse">--</span> : displayScore}
         </p>
         {delta !== null ? (
           <p className={`mb-2 text-sm ${delta <= 0 ? 'text-[#1C9E5B]' : 'text-[#E53434]'}`}>

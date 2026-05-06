@@ -6,5 +6,12 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-    matcher: ['/dashboard/:path*', '/api/dashboard/:path*', '/api/debrief/:path*', '/api/subscriptions/:path*'],
+    matcher: [
+        '/dashboard/:path*',
+        '/api/dashboard/:path*',
+        '/api/debrief/:path*',
+        '/api/subscriptions/:path*',
+        '/api/user/:path*',
+        '/api/connect/:path*',
+    ],
 };

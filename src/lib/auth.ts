@@ -4,14 +4,32 @@ import { emailOTP } from 'better-auth/plugins';
 
 import { db } from './server/db';
 
-const authBaseUrl = process.env.BETTER_AUTH_URL
-    ?? (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
+const resolveBaseUrl = (): string => {
+    // Explicit app URL (set in Vercel env vars to actual production domain)
+    if (process.env.NEXT_PUBLIC_APP_URL) return process.env.NEXT_PUBLIC_APP_URL;
+    // Better Auth dedicated config
+    if (process.env.BETTER_AUTH_URL) return process.env.BETTER_AUTH_URL;
+    // Vercel system env
+    if (process.env.VERCEL_PROJECT_PRODUCTION_URL) return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
+    if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+    return 'http://localhost:3000';
+};
+
+const authBaseUrl = resolveBaseUrl();
 
 const authSecret = process.env.BETTER_AUTH_SECRET
     ?? (process.env.NODE_ENV === 'production' ? undefined : 'local-dev-only-secret-change-me');
 
 if (!authSecret) {
     throw new Error('Missing BETTER_AUTH_SECRET. Set this environment variable in production.');
+}
+
+// Build a list of all origins that are allowed to make auth requests
+const trustedOrigins: string[] = [authBaseUrl];
+if (process.env.VERCEL_URL) trustedOrigins.push(`https://${process.env.VERCEL_URL}`);
+if (process.env.VERCEL_PROJECT_PRODUCTION_URL) trustedOrigins.push(`https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`);
+if (process.env.NEXT_PUBLIC_APP_URL && !trustedOrigins.includes(process.env.NEXT_PUBLIC_APP_URL)) {
+    trustedOrigins.push(process.env.NEXT_PUBLIC_APP_URL);
 }
 
 export const auth = betterAuth({
@@ -26,11 +44,15 @@ export const auth = betterAuth({
         expiresIn: 60 * 60 * 24 * 7,
         // seconds: refresh at most once per 24h
         updateAge: 60 * 60 * 24,
+        cookieCache: {
+            enabled: true,
+            maxAge: 60 * 5, // 5 minutes — avoids DB hit on every request
+        },
     },
     emailAndPassword: {
         enabled: true,
     },
-    trustedOrigins: [authBaseUrl],
+    trustedOrigins: [...new Set(trustedOrigins)],
     plugins: [
         nextCookies(),
         emailOTP({

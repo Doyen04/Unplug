@@ -111,12 +111,12 @@ export default function TransactionsPage() {
     }, [data?.transactions, search]);
 
     if (isDashboardLoading && !selectedProvider) return (
-        <div className="space-y-6 animate-shimmer">
+        <div className="space-y-6">
             <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-                <div className="space-y-2"><div className="h-8 w-48 bg-bg-muted rounded-pill" /><div className="h-4 w-72 bg-bg-muted/60 rounded" /></div>
-                <div className="h-8 w-48 bg-bg-muted rounded-pill" />
+                <div className="space-y-2"><div className="h-8 w-48 bg-bg-muted rounded-pill animate-pulse" /><div className="h-4 w-72 bg-bg-muted/60 rounded animate-pulse" /></div>
+                <div className="h-8 w-48 bg-bg-muted rounded-pill animate-pulse" />
             </header>
-            <Card className="h-96 border-dashed bg-bg-surface/50" />
+            <Card className="h-96 border-dashed bg-bg-surface/50 animate-pulse" />
         </div>
     );
 

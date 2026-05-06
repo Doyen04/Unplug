@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Search, AlertTriangle, RefreshCcw, ChevronLeft, ChevronRight } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
 
 import { SubscriptionRow } from '@/components/features/subscriptions/SubscriptionRow';
 import { useDashboardData } from '@/hooks/useDashboardData';
@@ -97,16 +98,16 @@ export default function SubscriptionsPage() {
     }, [subscriptions, search]);
 
     if (isLoading && subscriptions.length === 0) return (
-        <div className="space-y-6 animate-shimmer">
+        <div className="space-y-6">
             <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div className="space-y-2">
-                    <div className="h-8 w-48 bg-bg-muted rounded-pill" />
-                    <div className="h-4 w-72 bg-bg-muted/60 rounded" />
+                    <div className="h-8 w-48 bg-bg-muted rounded-pill animate-pulse" />
+                    <div className="h-4 w-72 bg-bg-muted/60 rounded animate-pulse" />
                 </div>
-                <div className="h-10 w-full sm:w-72 bg-bg-muted rounded-btn" />
+                <div className="h-10 w-full sm:w-72 bg-bg-muted rounded-btn animate-pulse" />
             </header>
-            <div className="h-8 w-48 bg-bg-muted rounded-pill" />
-            <Card className="h-96 border-dashed bg-bg-surface/50" />
+            <div className="h-8 w-48 bg-bg-muted rounded-pill animate-pulse" />
+            <Card className="h-96 border-dashed bg-bg-surface/50 animate-pulse" />
         </div>
     );
 
@@ -185,12 +186,24 @@ export default function SubscriptionsPage() {
                 } }
             />
 
-            {pendingUndoId && (
-                <Card className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-text-primary text-white border-none shadow-2xl p-4 flex items-center gap-6 z-50">
-                    <span className="text-sm">Subscription cancelled.</span>
-                    <Button variant="secondary" size="sm" className="bg-white text-text-primary border-none" onClick={undoCancel} disabled={isCancelling}>Undo</Button>
-                </Card>
-            )}
+            <AnimatePresence>
+                {pendingUndoId && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 20, x: '-50%' }}
+                        animate={{ opacity: 1, y: 0, x: '-50%' }}
+                        exit={{ opacity: 0, y: 20, x: '-50%' }}
+                        transition={{ duration: 0.25, ease: 'easeOut' }}
+                        className="fixed bottom-6 left-1/2 z-50"
+                    >
+                        <Card className="bg-text-primary text-white border-none shadow-2xl p-4 flex items-center gap-6">
+                            <span className="text-sm">Subscription cancelled.</span>
+                            <Button variant="secondary" size="sm" className="bg-white text-text-primary border-none" onClick={undoCancel} disabled={isCancelling}>
+                                {isCancelling ? <span className="animate-pulse">Undoing...</span> : 'Undo'}
+                            </Button>
+                        </Card>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

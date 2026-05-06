@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { ExternalLink, Search, X, CheckCircle } from 'lucide-react';
+import { ExternalLink, Search, X, CheckCircle, Loader2 } from 'lucide-react';
 import { toSentenceCase } from '@/lib/utils/format';
 import { useState } from 'react';
 
@@ -33,6 +33,11 @@ export const CancellationGuideModal = ({
     }
   };
 
+  const handleClose = () => {
+    if (isConfirming) return; // Prevent closing while confirming
+    onClose();
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -41,7 +46,7 @@ export const CancellationGuideModal = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={onClose}
+            onClick={handleClose}
             className="fixed inset-0 bg-[#1A1A17]/40 backdrop-blur-sm"
             aria-hidden="true"
           />
@@ -55,12 +60,30 @@ export const CancellationGuideModal = ({
             aria-modal="true"
             aria-labelledby="modal-title"
           >
+            {/* Loading overlay */}
+            <AnimatePresence>
+              {isConfirming && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute inset-0 z-10 bg-white/80 backdrop-blur-[2px] flex items-center justify-center"
+                >
+                  <div className="flex flex-col items-center gap-3 animate-pulse">
+                    <Loader2 size={28} className="animate-spin text-[#E53434]" />
+                    <p className="text-sm font-bold text-[#E53434] uppercase tracking-widest">Marking as cancelled...</p>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
             <div className="flex items-center justify-between border-b border-[#E8E7E0] px-5 py-4 bg-[#FAFAF7]">
               <h2 id="modal-title" className="text-lg font-bold text-[#1A1A17]">Cancel {toSentenceCase(serviceName)}</h2>
               <button
                 type="button"
-                onClick={onClose}
-                className="rounded-full p-1.5 text-[#A9A79E] transition-colors hover:bg-[#E8E7E0] hover:text-[#1A1A17]"
+                onClick={handleClose}
+                disabled={isConfirming}
+                className="rounded-full p-1.5 text-[#A9A79E] transition-colors hover:bg-[#E8E7E0] hover:text-[#1A1A17] disabled:opacity-30 disabled:cursor-not-allowed"
               >
                 <X size={18} />
               </button>
@@ -95,10 +118,13 @@ export const CancellationGuideModal = ({
                     type="button"
                     onClick={() => handleConfirm()}
                     disabled={isConfirming}
-                    className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[#E53434] px-4 py-2.5 text-sm font-bold uppercase tracking-[0.04em] text-white transition-colors hover:bg-[#C93A1A] disabled:opacity-50"
+                    className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[#E53434] px-4 py-2.5 text-sm font-bold uppercase tracking-[0.04em] text-white transition-colors hover:bg-[#C93A1A] disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isConfirming ? (
-                      <span className="animate-pulse">Marking...</span>
+                      <>
+                        <Loader2 size={16} className="animate-spin" />
+                        <span className="animate-pulse">Marking as cancelled...</span>
+                      </>
                     ) : (
                       <>
                         <CheckCircle size={16} /> Yes, mark as cancelled
@@ -107,8 +133,9 @@ export const CancellationGuideModal = ({
                   </button>
                   <button
                     type="button"
-                    onClick={onClose}
-                    className="w-full rounded-xl border border-[#D0CFC7] bg-white px-4 py-2.5 text-sm font-semibold text-[#6B6960] transition-colors hover:bg-[#F4F3EE] hover:text-[#1A1A17]"
+                    onClick={handleClose}
+                    disabled={isConfirming}
+                    className="w-full rounded-xl border border-[#D0CFC7] bg-white px-4 py-2.5 text-sm font-semibold text-[#6B6960] transition-colors hover:bg-[#F4F3EE] hover:text-[#1A1A17] disabled:opacity-30 disabled:cursor-not-allowed"
                   >
                     Not yet, remind me later
                   </button>

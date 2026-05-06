@@ -18,8 +18,8 @@ export const DebriefPanel = ({
 
     <div className="mt-4 text-[15px] leading-7 text-[#1A1A17]">
       {isLoading ? (
-        <p className="text-sm text-[#6B6960]">
-          Analysing your subscriptions<span className="animate-blink">_</span>
+        <p className="text-sm text-[#6B6960] animate-pulse">
+          Analysing your subscriptions<span>...</span>
         </p>
       ) : null}
 
