@@ -184,7 +184,7 @@ export default function TransactionsPage() {
                         index={i}
                     />
                 )}
-                isLoading={isLoading}
+                isLoading={isLoading || isFetching}
                 isError={isError}
                 onRetry={refetch}
                 errorTitle="Failed to load transactions"

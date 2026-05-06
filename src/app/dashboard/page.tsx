@@ -123,7 +123,7 @@ export default function DashboardPage() {
                     ? subscriptions.filter(s => s.serviceName.toLowerCase().includes(searchQuery.toLowerCase()))
                     : (txData?.transactions.slice(0, 8) || [])) as any[]
                 }
-                isLoading={ledgerTab === 'subscriptions' ? isLoading : lux}
+                isLoading={ledgerTab === 'subscriptions' ? (isLoading || isFetching) : (lux || fex)}
                 isError={ledgerTab === 'subscriptions' ? isError : erx}
                 onRetry={ledgerTab === 'subscriptions' ? refetch : rex}
                 header={

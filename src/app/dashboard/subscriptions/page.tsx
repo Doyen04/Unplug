@@ -151,7 +151,7 @@ export default function SubscriptionsPage() {
                         <SubscriptionRow subscription={s} index={i} currency={currency} onCancel={cancelSubscription} />
                     </div>
                 )}
-                isLoading={isLoading}
+                isLoading={isLoading || isFetching}
                 isError={isError}
                 onRetry={refetch}
                 emptyTitle="No subscriptions found"
