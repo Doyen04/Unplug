@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { Search, AlertTriangle, RefreshCcw, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 
 import { SubscriptionRow } from '@/components/features/subscriptions/SubscriptionRow';
