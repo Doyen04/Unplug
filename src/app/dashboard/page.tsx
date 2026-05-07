@@ -14,7 +14,7 @@ import { useDashboardData } from '@/hooks/useDashboardData';
 import { interpolateScoreColor } from '@/lib/utils/shameScore';
 import { providerCurrency } from '@/lib/utils/provider';
 import type { DashboardFilter, DashboardProvider, Subscription } from '@/types/subscription';
-import type { PlaidTransaction } from '@/lib/client/dashboard-api';
+import type { Transaction } from '@/lib/client/dashboard-api';
 import { SubscriptionRow } from '@/components/features/subscriptions/SubscriptionRow';
 import { DashboardSkeleton } from '@/components/features/dashboard/DashboardSkeleton';
 
@@ -143,7 +143,7 @@ export default function DashboardPage() {
                 />
             </div>
 
-            <DataTable<Subscription | PlaidTransaction>
+            <DataTable<Subscription | Transaction>
                 className="overflow-hidden p-0"
                 data={ledgerTab === 'subscriptions' ? subscriptions : (txData?.transactions.slice(0, 8) || [])}
                 isLoading={ledgerTab === 'subscriptions' ? (isLoading || isFetching) : (lux || fex)}
@@ -210,12 +210,12 @@ export default function DashboardPage() {
                         )}
                     </div>
                 }
-                renderItem={(item: Subscription | PlaidTransaction, i: number) => {
+                renderItem={(item: Subscription | Transaction, i: number) => {
                     if (ledgerTab === 'subscriptions') {
                         const s = item as Subscription;
                         return <SubscriptionRow key={s.id} subscription={s} onCancel={cancelSubscription} index={i} />;
                     }
-                    const t = item as PlaidTransaction;
+                    const t = item as Transaction;
                     return <TransactionRow key={t.transaction_id} transaction={t} currency={currency} index={i} />;
                 }}
                 showDivider={ledgerTab === 'transactions'}

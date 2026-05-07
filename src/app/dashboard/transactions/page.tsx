@@ -16,19 +16,10 @@ import { Badge } from '@/components/ui/Badge';
 import { Input } from '@/components/ui/Input';
 import { DataTable } from '@/components/ui/DataTable';
 import { TransactionRow } from '@/components/features/transactions/TransactionRow';
+import type { Transaction } from '@/lib/client/dashboard-api';
 
 const providerLabel = (provider: DashboardProvider): string =>
     provider === 'plaid' ? 'Plaid' : 'Mono';
-
-interface PlaidTransaction {
-    transaction_id: string;
-    name: string;
-    amount: number;
-    date: string;
-    merchant_name: string | null;
-    iso_currency_code: string | null;
-    category: string[] | null;
-}
 
 interface TransactionsResponse {
     provider: DashboardProvider;
@@ -36,7 +27,7 @@ interface TransactionsResponse {
     page: number;
     pageSize: number;
     pageCount: number;
-    transactions: PlaidTransaction[];
+    transactions: Transaction[];
 }
 
 const fetchTransactions = async (
@@ -181,7 +172,7 @@ export default function TransactionsPage() {
 
             <DataTable
                 data={data?.transactions ?? []}
-                renderItem={(tx: PlaidTransaction, i: number) => (
+                renderItem={(tx: Transaction, i: number) => (
                     <TransactionRow
                         key={tx.transaction_id}
                         transaction={tx}

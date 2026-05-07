@@ -9,7 +9,7 @@ export interface DashboardDebrief {
     content: string;
 }
 
-export interface PlaidTransaction {
+export interface Transaction {
     transaction_id: string;
     name: string;
     amount: number;
@@ -25,7 +25,7 @@ export interface TransactionsPayload {
     page?: number;
     pageSize?: number;
     pageCount?: number;
-    transactions: PlaidTransaction[];
+    transactions: Transaction[];
 }
 
 export interface UserPayload {
@@ -126,7 +126,7 @@ export const fetchRecentTransactions = async (
 ): Promise<TransactionsPayload> => {
     const pageSize = 100;
     const maxPages = 25;
-    const allTransactions: PlaidTransaction[] = [];
+    const allTransactions: Transaction[] = [];
 
     let page = 1;
     let pageCount = 1;

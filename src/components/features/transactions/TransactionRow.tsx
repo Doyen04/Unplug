@@ -3,16 +3,7 @@ import { motion } from 'framer-motion';
 import { Badge } from '@/components/ui/Badge';
 import { formatCurrency } from '@/lib/utils/format';
 import { Button } from '@/components/ui/Button';
-
-interface Transaction {
-    transaction_id: string;
-    name: string;
-    amount: number;
-    date: string;
-    merchant_name: string | null;
-    iso_currency_code?: string | null;
-    category?: string[] | null;
-}
+import type { Transaction } from '@/lib/client/dashboard-api';
 
 interface TransactionRowProps {
     transaction: Transaction;
