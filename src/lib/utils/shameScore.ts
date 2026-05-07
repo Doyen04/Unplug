@@ -14,7 +14,7 @@ const lerp = (a: number, b: number, t: number): number =>
 
 /**
  * Interpolates score color through danger → warning → success
- * per DESIGN.md: 100 → #E53434 (danger), 50 → #E8860A (warning), 0 → #1C9E5B (success)
+ *  100 → #E53434 (danger), 50 → #E8860A (warning), 0 → #1C9E5B (success)
  */
 export const interpolateScoreColor = (score: number): string => {
   const t = clamp(score, 0, 100) / 100;

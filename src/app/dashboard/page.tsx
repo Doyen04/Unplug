@@ -1,16 +1,15 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import Link from 'next/link';
+import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Link as LinkIcon, AlertTriangle, Search, Receipt, RefreshCcw, ChevronLeft, ChevronRight, Bell, X } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useSearchParams } from 'next/navigation';
 
 import { fetchCurrentUser, fetchRecentTransactions, searchTransactions } from '@/lib/client/dashboard-api';
 import { NotificationsDrawer } from '@/components/features/notifications/NotificationsDrawer';
 import { DASHBOARD_FILTER_OPTIONS } from '@/lib/constants/dashboard';
-import { formatCurrency, getNameInitials } from '@/lib/utils/format';
+import { getNameInitials } from '@/lib/utils/format';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { interpolateScoreColor } from '@/lib/utils/shameScore';
 import { providerCurrency } from '@/lib/utils/provider';
@@ -121,23 +120,6 @@ export default function DashboardPage() {
                 alerts={alerts}
                 onClose={() => setIsAlertsOpen(false)}
             />
-        </div>
-                                                </div >
-                                            ))
-}
-                                        </div >
-                                    ) : (
-    <div className="flex flex-col items-center justify-center h-40 text-center text-text-muted space-y-2">
-        <Bell size={32} className="opacity-20" />
-        <p className="text-sm">No new notifications</p>
-    </div>
-)}
-                                </div >
-                            </div >
-                        </motion.div >
-                    </>
-                )}
-            </AnimatePresence >
     { isError && <Badge variant="warning" className="w-full justify-center py-2 h-auto">Using offline snapshot data</Badge>}
 
             <DashboardHeader alertsCount={alerts.length} onOpenAlerts={() => setIsAlertsOpen(true)} userInitials={userInitials} />
@@ -162,10 +144,7 @@ export default function DashboardPage() {
 
             <DataTable
                 className="overflow-hidden p-0"
-                data={ledgerTab === 'subscriptions'
-                    ? subscriptions
-                    : (txData?.transactions.slice(0, 8) || [])
-                }
+                data={(ledgerTab === 'subscriptions' ? subscriptions : (txData?.transactions.slice(0, 8) || [])) as any}
                 isLoading={ledgerTab === 'subscriptions' ? (isLoading || isFetching) : (lux || fex)}
                 isError={ledgerTab === 'subscriptions' ? isError : erx}
                 onRetry={ledgerTab === 'subscriptions' ? refetch : rex}
