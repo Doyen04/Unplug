@@ -6,7 +6,6 @@ import { getServerSession } from '@/lib/server/auth-session';
 import { decryptToken } from '@/lib/server/token-crypto';
 import { PLAID_BASE_URLS } from '@/lib/constants/providers';
 import type { AuthSession } from '@/types/subscription';
-import type { AuthSession } from '@/types/subscription';
 
 const requestSchema = z.object({
     accountId: z.string().optional(),

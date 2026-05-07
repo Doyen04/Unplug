@@ -13,7 +13,8 @@ import { getNameInitials } from '@/lib/utils/format';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { interpolateScoreColor } from '@/lib/utils/shameScore';
 import { providerCurrency } from '@/lib/utils/provider';
-import type { DashboardFilter, DashboardProvider } from '@/types/subscription';
+import type { DashboardFilter, DashboardProvider, Subscription } from '@/types/subscription';
+import type { PlaidTransaction } from '@/lib/client/dashboard-api';
 import { SubscriptionRow } from '@/components/features/subscriptions/SubscriptionRow';
 import { DashboardSkeleton } from '@/components/features/dashboard/DashboardSkeleton';
 
@@ -120,7 +121,7 @@ export default function DashboardPage() {
                 alerts={alerts}
                 onClose={() => setIsAlertsOpen(false)}
             />
-    { isError && <Badge variant="warning" className="w-full justify-center py-2 h-auto">Using offline snapshot data</Badge>}
+            {isError && <Badge variant="warning" className="w-full justify-center py-2 h-auto">Using offline snapshot data</Badge>}
 
             <DashboardHeader alertsCount={alerts.length} onOpenAlerts={() => setIsAlertsOpen(true)} userInitials={userInitials} />
 
@@ -142,9 +143,9 @@ export default function DashboardPage() {
                 />
             </div>
 
-            <DataTable
+            <DataTable<Subscription | PlaidTransaction>
                 className="overflow-hidden p-0"
-                data={(ledgerTab === 'subscriptions' ? subscriptions : (txData?.transactions.slice(0, 8) || [])) as any}
+                data={ledgerTab === 'subscriptions' ? subscriptions : (txData?.transactions.slice(0, 8) || [])}
                 isLoading={ledgerTab === 'subscriptions' ? (isLoading || isFetching) : (lux || fex)}
                 isError={ledgerTab === 'subscriptions' ? isError : erx}
                 onRetry={ledgerTab === 'subscriptions' ? refetch : rex}
@@ -209,11 +210,13 @@ export default function DashboardPage() {
                         )}
                     </div>
                 }
-                renderItem={(item, i) => {
+                renderItem={(item: Subscription | PlaidTransaction, i: number) => {
                     if (ledgerTab === 'subscriptions') {
-                        return <SubscriptionRow key={(item as any).id} subscription={item as any} onCancel={cancelSubscription} index={i} />;
+                        const s = item as Subscription;
+                        return <SubscriptionRow key={s.id} subscription={s} onCancel={cancelSubscription} index={i} />;
                     }
-                    return <TransactionRow key={(item as any).transaction_id} transaction={item as any} currency={currency} index={i} />;
+                    const t = item as PlaidTransaction;
+                    return <TransactionRow key={t.transaction_id} transaction={t} currency={currency} index={i} />;
                 }}
                 showDivider={ledgerTab === 'transactions'}
                 itemsClassName={ledgerTab === 'subscriptions' ? "p-6 space-y-4" : ""}
