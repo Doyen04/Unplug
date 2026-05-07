@@ -7,6 +7,7 @@ import {
 } from '@/lib/server/connected-accounts-store';
 import { getServerSession } from '@/lib/server/auth-session';
 import { decryptToken } from '@/lib/server/token-crypto';
+import type { AuthSession } from '@/types/subscription';
 import { isoDateDaysAgo, toMonoDate } from '@/lib/utils/date';
 
 
@@ -131,13 +132,12 @@ const extractMonoTransactions = (payload: Record<string, unknown>): unknown[] =>
 };
 
 export async function GET(request: Request) {
-    const session = await getServerSession();
-    if (!session) {
+    const session = (await getServerSession()) as AuthSession | null;
+    if (!session?.user?.id) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const sessionAny = session as { user?: { id?: string } };
-    const userId = sessionAny.user?.id ?? 'local-user';
+    const userId = session.user.id;
 
     const url = new URL(request.url);
     const accountId = url.searchParams.get('accountId');
@@ -223,10 +223,10 @@ export async function GET(request: Request) {
         const rawTransactions = extractMonoTransactions(monoPayload);
 
         let normalized = normalizeMonoTransactions(rawTransactions).sort((a, b) => b.date.localeCompare(a.date));
-        
+
         if (normalizedSearch) {
-            normalized = normalized.filter(tx => 
-                tx.name.toLowerCase().includes(normalizedSearch) || 
+            normalized = normalized.filter(tx =>
+                tx.name.toLowerCase().includes(normalizedSearch) ||
                 tx.category?.some(c => c.toLowerCase().includes(normalizedSearch)) ||
                 tx.merchant_name?.toLowerCase().includes(normalizedSearch)
             );
@@ -259,7 +259,7 @@ export async function GET(request: Request) {
     }
 
     const accessToken = decryptToken(connectedAccount.encryptedAccessToken);
-    
+
     // If searching, we fetch a larger batch first to filter in-memory since Plaid's /transactions/get 
     // doesn't support text searching natively in a single call.
     const internalPageSize = normalizedSearch ? 500 : safePageSize;
@@ -319,8 +319,8 @@ export async function GET(request: Request) {
     let total = payload.total_transactions;
 
     if (normalizedSearch) {
-        transactions = transactions.filter(tx => 
-            tx.name.toLowerCase().includes(normalizedSearch) || 
+        transactions = transactions.filter(tx =>
+            tx.name.toLowerCase().includes(normalizedSearch) ||
             tx.category?.some(c => c.toLowerCase().includes(normalizedSearch)) ||
             tx.merchant_name?.toLowerCase().includes(normalizedSearch)
         );

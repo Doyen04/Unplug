@@ -2,14 +2,15 @@ import { NextResponse } from 'next/server';
 
 import { cancelSubscriptionById } from '@/lib/server/dashboard-data';
 import { getServerSession } from '@/lib/server/auth-session';
+import type { AuthSession } from '@/types/subscription';
 
 interface RouteContext {
     params: Promise<{ id: string }>;
 }
 
 export async function POST(_: Request, context: RouteContext) {
-    const session = await getServerSession();
-    if (!session) {
+    const session = (await getServerSession()) as AuthSession | null;
+    if (!session?.user?.id) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

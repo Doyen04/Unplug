@@ -1,15 +1,15 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from '@/lib/server/auth-session';
 import { disconnectConnectedAccount } from '@/lib/server/connected-accounts-store';
+import type { AuthSession } from '@/types/subscription';
 
 export async function POST(request: Request) {
-    const session = await getServerSession();
-    if (!session) {
+    const session = (await getServerSession()) as AuthSession | null;
+    if (!session?.user?.id) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const sessionAny = session as { user?: { id?: string } };
-    const userId = sessionAny.user?.id ?? 'local-user';
+    const userId = session.user.id;
 
     try {
         const formData = await request.formData();

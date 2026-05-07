@@ -8,6 +8,19 @@ export interface StoredSubscription extends Subscription {
 
 const isProviderScopedId = (id: string): boolean => id.startsWith('plaid-') || id.startsWith('mono-');
 
+interface SubscriptionRow {
+    id: string;
+    serviceName: string;
+    amountMonthly: number | string;
+    frequencyLabel: Subscription['frequencyLabel'];
+    status: Subscription['status'];
+    confidence: Subscription['confidence'];
+    usageScore: number | string;
+    verdict: Subscription['verdict'];
+    alert: Subscription['alert'] | string | null;
+    previousStatus: SubscriptionStatus | null;
+}
+
 export const readStoredSubscriptions = async (userId: string): Promise<StoredSubscription[]> => {
     // We use sql`` queries for dynamic Record<string, unknown> Kysely db
     const result = await sql`
@@ -26,7 +39,7 @@ export const readStoredSubscriptions = async (userId: string): Promise<StoredSub
         WHERE user_id = ${userId}
     `.execute(db);
 
-    const rows = result.rows as any[];
+    const rows = result.rows as SubscriptionRow[];
 
     return rows.map((row) => ({
         id: row.id,

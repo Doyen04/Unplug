@@ -16,11 +16,10 @@ import {
     Menu,
     Zap,
     User,
-    X,
 } from 'lucide-react';
-import { AnimatePresence, motion } from 'framer-motion';
 
 import { useDashboardData } from '@/hooks/useDashboardData';
+import { NotificationsDrawer } from '@/components/features/notifications/NotificationsDrawer';
 
 const NAV_ITEMS = [
     { href: '/dashboard', label: 'Dashboard', icon: Home },
@@ -30,59 +29,6 @@ const NAV_ITEMS = [
     { href: '/dashboard/settings', label: 'Settings', icon: Settings },
 ];
 
-const NotificationsDrawer = ({ isOpen, onClose, alerts }: { isOpen: boolean; onClose: () => void; alerts: any[] }) => (
-    <AnimatePresence>
-        {isOpen && (
-            <>
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    onClick={onClose}
-                    className="fixed inset-0 z-[60] bg-black/20 backdrop-blur-sm"
-                />
-                <motion.div
-                    initial={{ x: '100%' }}
-                    animate={{ x: 0 }}
-                    exit={{ x: '100%' }}
-                    transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                    className="fixed inset-y-0 right-0 z-[70] w-full max-w-sm border-l border-border bg-bg-surface shadow-2xl"
-                >
-                    <div className="flex flex-col h-full">
-                        <div className="flex items-center justify-between border-b border-border p-4">
-                            <h2 className="text-lg font-bold text-text-primary">Notifications</h2>
-                            <button onClick={onClose} className="rounded-full p-2 hover:bg-bg-muted transition-colors">
-                                <X size={20} />
-                            </button>
-                        </div>
-                        <div className="flex-1 overflow-y-auto p-4">
-                            {alerts.length > 0 ? (
-                                <div className="space-y-4">
-                                    {alerts.map((alert, i) => (
-                                        <div key={i} className="flex gap-3 rounded-xl border border-border bg-bg-base p-4 shadow-sm">
-                                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-warning-light/30 text-warning">
-                                                <Bell size={18} />
-                                            </div>
-                                            <div className="space-y-1">
-                                                <p className="text-sm font-bold text-text-primary uppercase tracking-tight">{alert.type?.replace(/_/g, ' ') || 'Alert'}</p>
-                                                <p className="text-xs text-text-muted leading-relaxed">{alert.label}</p>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            ) : (
-                                <div className="flex flex-col items-center justify-center h-40 text-center text-text-muted space-y-2">
-                                    <Bell size={32} className="opacity-20" />
-                                    <p className="text-sm">No new notifications</p>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </motion.div>
-            </>
-        )}
-    </AnimatePresence>
-);
 
 interface SidebarProps {
     expanded: boolean;
@@ -118,7 +64,7 @@ const Sidebar = ({ expanded, toggleExpanded, isMobileOpen, setIsMobileOpen }: Si
             {/* Mobile overlay */}
             {isMobileOpen && (
                 <div
-                    className="fixed inset-0 z-40 bg-black/20 lg:hidden"
+                    className="fixed inset-0 z-40 bg-bg-surface/60 lg:hidden"
                     onClick={() => setIsMobileOpen(false)}
                 />
             )}
@@ -149,7 +95,7 @@ const Sidebar = ({ expanded, toggleExpanded, isMobileOpen, setIsMobileOpen }: Si
                         </button>
                     )}
                 </div>
-                
+
                 {!expanded && (
                     <div className="flex justify-center py-2">
                         <button
@@ -222,7 +168,7 @@ export const DashboardLayoutShell = ({ children }: { children: React.ReactNode }
     const { alerts } = useDashboardData({ includeDebrief: false });
 
     return (
-        <div className="flex h-screen overflow-hidden bg-white text-[#1A1A17]">
+        <div className="flex h-screen overflow-hidden bg-bg-base text-text-primary">
             <Sidebar
                 expanded={expanded}
                 toggleExpanded={() => setExpanded(!expanded)}
@@ -230,28 +176,28 @@ export const DashboardLayoutShell = ({ children }: { children: React.ReactNode }
                 setIsMobileOpen={setIsMobileOpen}
             />
 
-            <NotificationsDrawer 
-                isOpen={isAlertsOpen} 
-                onClose={() => setIsAlertsOpen(false)} 
-                alerts={alerts} 
+            <NotificationsDrawer
+                isOpen={isAlertsOpen}
+                onClose={() => setIsAlertsOpen(false)}
+                alerts={alerts}
             />
 
             <main className="flex-1 overflow-y-auto">
                 {/* Mobile Header */}
-                <div className="flex h-16 items-center justify-between border-b border-[#E8E7E0] bg-[#FAFAF7] px-4 lg:hidden">
-                    <button onClick={() => setIsMobileOpen(true)} className="p-2 text-[#6B6960]">
+                <div className="flex h-16 items-center justify-between border-b border-border bg-bg-base px-4 lg:hidden">
+                    <button onClick={() => setIsMobileOpen(true)} className="p-2 text-text-secondary">
                         <Menu size={24} />
                     </button>
-                    <span className="text-sm font-bold uppercase tracking-[0.08em] text-[#1A1A17]">
+                    <span className="text-sm font-bold uppercase tracking-[0.08em] text-text-primary">
                         Unplug
                     </span>
-                    <button 
-                        onClick={() => setIsAlertsOpen(true)} 
-                        className="relative p-2 text-[#6B6960]"
+                    <button
+                        onClick={() => setIsAlertsOpen(true)}
+                        className="relative p-2 text-text-secondary"
                     >
                         <Bell size={20} />
                         {alerts.length > 0 && (
-                            <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-brand ring-2 ring-[#FAFAF7]" />
+                            <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-brand ring-2 ring-bg-base" />
                         )}
                     </button>
                 </div>

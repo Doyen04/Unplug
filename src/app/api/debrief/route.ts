@@ -3,6 +3,7 @@ import { z } from 'zod';
 
 import { getDashboardPayload } from '@/lib/server/dashboard-data';
 import { getServerSession } from '@/lib/server/auth-session';
+import type { AuthSession } from '@/types/subscription';
 
 const debriefSchema = z.object({
     month: z.string(),
@@ -10,13 +11,11 @@ const debriefSchema = z.object({
 });
 
 export async function GET() {
-    const session = await getServerSession();
-    if (!session) {
+    const session = (await getServerSession()) as AuthSession | null;
+    if (!session?.user?.id) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-
-    const sessionAny = session as { user?: { id?: string } };
-    const userId = sessionAny.user?.id ?? 'local-user';
+    const userId = session.user.id;
 
     try {
         const {

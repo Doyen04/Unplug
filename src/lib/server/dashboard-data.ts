@@ -19,6 +19,7 @@ import {
 import { isoDateDaysAgo, toMonoDate } from '@/lib/utils/date';
 import { clamp } from '@/lib/utils/math';
 import { normalizeMerchantLabel, toMerchantKey } from '@/lib/utils/format';
+import { PLAID_BASE_URLS, MONO_DEFAULT_BASE_URL } from '@/lib/constants/providers';
 
 export interface DashboardPayload {
     summary: DashboardSummary;
@@ -69,14 +70,6 @@ interface BankSnapshot {
     transactions: BankTransaction[];
     noAccount?: boolean;
 }
-
-const PLAID_BASE_URLS: Record<string, string> = {
-    sandbox: 'https://sandbox.plaid.com',
-    development: 'https://development.plaid.com',
-    production: 'https://production.plaid.com',
-};
-
-const MONO_DEFAULT_BASE_URL = 'https://api.withmono.com/v2';
 
 const RECONNECT_ERROR_CODES = new Set(['INVALID_ACCESS_TOKEN', 'ITEM_LOGIN_REQUIRED']);
 
@@ -630,7 +623,7 @@ export const getDashboardPayload = async (
     }
 
     const subscriptions: Subscription[] = effectiveStoredSubscriptions.map(({ previousStatus, ...item }) => item);
-    
+
     const normalizedSearch = options.search?.trim().toLowerCase();
     const searchedSubscriptions = normalizedSearch
         ? subscriptions.filter((sub) => sub.serviceName.toLowerCase().includes(normalizedSearch))

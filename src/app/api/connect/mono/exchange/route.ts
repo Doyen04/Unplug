@@ -3,6 +3,7 @@ import { z } from 'zod';
 
 import { getServerSession } from '@/lib/server/auth-session';
 import { upsertConnectedAccount } from '@/lib/server/connected-accounts-store';
+import type { AuthSession } from '@/types/subscription';
 
 const monoSchema = z.object({
     code: z.string(),
@@ -25,13 +26,12 @@ const readNestedString = (record: Record<string, unknown>, keys: string[]): stri
 };
 
 export async function POST(request: Request) {
-    const session = await getServerSession();
-    if (!session) {
+    const session = (await getServerSession()) as AuthSession | null;
+    if (!session?.user?.id) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const sessionAny = session as { user?: { id?: string } };
-    const userId = sessionAny.user?.id ?? 'local-user';
+    const userId = session.user.id;
 
     const body = await request.json();
     const parsed = monoSchema.safeParse(body);

@@ -4,12 +4,9 @@ import { z } from 'zod';
 import { getConnectedAccountById } from '@/lib/server/connected-accounts-store';
 import { getServerSession } from '@/lib/server/auth-session';
 import { decryptToken } from '@/lib/server/token-crypto';
-
-const PLAID_BASE_URLS: Record<string, string> = {
-    sandbox: 'https://sandbox.plaid.com',
-    development: 'https://development.plaid.com',
-    production: 'https://production.plaid.com',
-};
+import { PLAID_BASE_URLS } from '@/lib/constants/providers';
+import type { AuthSession } from '@/types/subscription';
+import type { AuthSession } from '@/types/subscription';
 
 const requestSchema = z.object({
     accountId: z.string().optional(),
@@ -33,8 +30,11 @@ export async function POST(request: Request) {
         );
     }
 
-    const sessionAny = session as { user?: { id?: string } };
-    const userId = sessionAny.user?.id ?? 'local-user';
+    const sessionTyped = session as AuthSession | null;
+    if (!sessionTyped?.user?.id) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    const userId = sessionTyped.user.id;
 
     const body = await request.json().catch(() => ({}));
     const parsed = requestSchema.safeParse(body);

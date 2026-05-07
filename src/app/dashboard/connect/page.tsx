@@ -18,7 +18,7 @@ const resolveCountry = (
 ): string => {
     if (forceRegion && forceRegion.length === 2) return forceRegion.toUpperCase();
     if (countryHeader && countryHeader.length === 2) return countryHeader.toUpperCase();
-    
+
     // Fallback using server environment time zone (helps heavily in local development)
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
     if (tz) {
@@ -36,7 +36,7 @@ const resolveCountry = (
         // Ignore US language suffix because en-US is the default language for most browser installations globally
         return languageSuffix.toUpperCase();
     }
-    
+
     return 'US';
 };
 
@@ -58,7 +58,7 @@ const ConnectAccountsPage = async ({ searchParams }: ConnectAccountsPageProps) =
 
     const requestHeaders = await headers();
     const countryCode = resolveCountry(
-        requestHeaders.get('x-vercel-ip-country') || requestHeaders.get('cf-ipcountry'), 
+        requestHeaders.get('x-vercel-ip-country') || requestHeaders.get('cf-ipcountry'),
         requestHeaders.get('accept-language'),
         params.region
     );
@@ -91,9 +91,9 @@ const ConnectAccountsPage = async ({ searchParams }: ConnectAccountsPageProps) =
             )}
 
             <div className="grid gap-6 lg:grid-cols-5">
-                <ConnectedAccountsSection 
-                    preferredProvider={preferredProvider} 
-                    monoPublicKey={monoPublicKey} 
+                <ConnectedAccountsSection
+                    preferredProvider={preferredProvider}
+                    monoPublicKey={monoPublicKey}
                 />
 
                 <div className="lg:col-span-2 space-y-4">

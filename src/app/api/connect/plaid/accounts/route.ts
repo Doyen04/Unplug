@@ -7,6 +7,7 @@ import {
 } from '@/lib/server/connected-accounts-store';
 import { getServerSession } from '@/lib/server/auth-session';
 import { decryptToken } from '@/lib/server/token-crypto';
+import type { AuthSession } from '@/types/subscription';
 
 const PLAID_BASE_URLS: Record<string, string> = {
     sandbox: 'https://sandbox.plaid.com',
@@ -17,13 +18,12 @@ const PLAID_BASE_URLS: Record<string, string> = {
 const RECONNECT_ERROR_CODES = new Set(['INVALID_ACCESS_TOKEN', 'ITEM_LOGIN_REQUIRED']);
 
 export async function GET(request: Request) {
-    const session = await getServerSession();
-    if (!session) {
+    const session = (await getServerSession()) as AuthSession | null;
+    if (!session?.user?.id) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const sessionAny = session as { user?: { id?: string } };
-    const userId = sessionAny.user?.id ?? 'local-user';
+    const userId = session.user.id;
 
     const url = new URL(request.url);
     const accountId = url.searchParams.get('accountId');

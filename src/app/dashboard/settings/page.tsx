@@ -168,8 +168,8 @@ export default async function DashboardSettingsPage({ searchParams }: SettingsPa
 
                 {/* DANGER ZONE SECTION */}
                 <section>
-                    <Card className="border-danger/10 bg-danger/[0.02] p-0 overflow-hidden">
-                        <div className="border-b border-danger/10 bg-danger/[0.04] px-6 py-5 flex items-center gap-4">
+                    <Card className="border-danger/10 bg-danger/2 p-0 overflow-hidden">
+                        <div className="border-b border-danger/10 bg-danger/4 px-6 py-5 flex items-center gap-4">
                             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-danger border border-danger/10">
                                 <AlertOctagon size={18} />
                             </div>

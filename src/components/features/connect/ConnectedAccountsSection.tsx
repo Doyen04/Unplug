@@ -54,12 +54,12 @@ export const ConnectedAccountsSection = ({
         try {
             const formData = new FormData();
             formData.append('accountId', accountId);
-            
+
             const response = await fetch('/api/connect/disconnect', {
                 method: 'POST',
                 body: formData
             });
-            
+
             if (response.ok) {
                 // Remove the account from local state
                 setAccounts(prev => prev.filter(acc => acc.id !== accountId));
@@ -89,7 +89,7 @@ export const ConnectedAccountsSection = ({
     return (
         <Card className="lg:col-span-3 p-0 overflow-hidden relative">
             {isPending && (
-                <div className="absolute inset-0 z-10 bg-bg-surface/60 backdrop-blur-[4px] flex items-center justify-center">
+                <div className="absolute inset-0 z-10 bg-bg-surface/60 backdrop-blur-xs flex items-center justify-center">
                     <div className="flex flex-col items-center gap-3 animate-pulse">
                         <div className="h-8 w-8 animate-spin rounded-full border-[3px] border-brand border-t-transparent" />
                         <p className="text-xs font-bold text-brand uppercase tracking-widest drop-shadow-sm">Updating...</p>
@@ -114,45 +114,45 @@ export const ConnectedAccountsSection = ({
                     <ul className="space-y-4">
                         <AnimatePresence mode="popLayout">
                             {accounts.map((account) => (
-                                <motion.li 
+                                <motion.li
                                     layout
                                     initial={{ opacity: 0, scale: 0.95, y: 15 }}
                                     animate={{ opacity: 1, scale: 1, y: 0 }}
                                     exit={{ opacity: 0, scale: 0.95, y: -15 }}
                                     transition={{ duration: 0.25, ease: 'easeOut' }}
-                                    key={account.id} 
+                                    key={account.id}
                                     className="flex flex-col gap-4 rounded-xl border border-border bg-bg-base/50 p-4 sm:flex-row sm:items-center sm:justify-between transition-colors hover:bg-bg-base"
                                 >
-                                <div>
-                                    <p className="text-sm font-bold text-text-primary">{account.displayName}</p>
-                                    <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted">
-                                        {account.provider} · {account.accountRef}
-                                    </p>
-                                    <Badge variant={account.authStatus === 'reconnect_required' ? 'warning' : 'success'} className="mt-2 text-[8px] px-1.5">
-                                        {account.authStatus === 'reconnect_required' ? 'Reconnect' : 'Active'}
-                                    </Badge>
-                                </div>
+                                    <div>
+                                        <p className="text-sm font-bold text-text-primary">{account.displayName}</p>
+                                        <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted">
+                                            {account.provider} · {account.accountRef}
+                                        </p>
+                                        <Badge variant={account.authStatus === 'reconnect_required' ? 'warning' : 'success'} className="mt-2 text-[8px] px-1.5">
+                                            {account.authStatus === 'reconnect_required' ? 'Reconnect' : 'Active'}
+                                        </Badge>
+                                    </div>
 
-                                <div className="flex items-center gap-3">
-                                    {account.authStatus === 'reconnect_required' && (
-                                        <ConnectProviderButtons
-                                            provider={account.provider} preferredProvider={preferredProvider}
-                                            accountId={account.id} compact monoPublicKey={monoPublicKey}
-                                        />
-                                    )}
-                                    <Button 
-                                        variant="dangerOutline" 
-                                        size="icon" 
-                                        className="h-8 w-8" 
-                                        title="Disconnect account"
-                                        disabled={isPending}
-                                        onClick={() => handleDelete(account.id)}
-                                    >
-                                        <Trash2 size={14} />
-                                    </Button>
-                                </div>
-                            </motion.li>
-                        ))}
+                                    <div className="flex items-center gap-3">
+                                        {account.authStatus === 'reconnect_required' && (
+                                            <ConnectProviderButtons
+                                                provider={account.provider} preferredProvider={preferredProvider}
+                                                accountId={account.id} compact monoPublicKey={monoPublicKey}
+                                            />
+                                        )}
+                                        <Button
+                                            variant="dangerOutline"
+                                            size="icon"
+                                            className="h-8 w-8"
+                                            title="Disconnect account"
+                                            disabled={isPending}
+                                            onClick={() => handleDelete(account.id)}
+                                        >
+                                            <Trash2 size={14} />
+                                        </Button>
+                                    </div>
+                                </motion.li>
+                            ))}
                         </AnimatePresence>
                     </ul>
                 )}

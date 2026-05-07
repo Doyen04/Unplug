@@ -1,9 +1,25 @@
+/**
+ * Represents an authenticated user session
+ */
+export interface SessionUser {
+    id: string;
+    name?: string;
+    email?: string;
+}
+
+/**
+ * Represents the session object returned from getServerSession
+ */
+export interface AuthSession {
+    user: SessionUser;
+}
+
 export type SubscriptionStatus =
-  | 'unused'
-  | 'trial-ending'
-  | 'price-hike'
-  | 'healthy'
-  | 'cancelled';
+    | 'unused'
+    | 'trial-ending'
+    | 'price-hike'
+    | 'healthy'
+    | 'cancelled';
 
 export type UsageConfidence = 'high' | 'medium' | 'low';
 
@@ -16,58 +32,58 @@ export type DashboardFilter = 'all' | 'at-risk' | 'active' | 'cancelled' | 'unus
 export type DashboardProvider = 'plaid' | 'mono';
 
 export interface Subscription {
-  id: string;
-  serviceName: string;
-  amountMonthly: number;
-  frequencyLabel: 'monthly' | 'weekly' | 'yearly';
-  status: SubscriptionStatus;
-  confidence: UsageConfidence;
-  usageScore: number;
-  verdict: UsageVerdict;
-  alert?: {
-    type: AlertType;
-    message: string;
-  };
+    id: string;
+    serviceName: string;
+    amountMonthly: number;
+    frequencyLabel: 'monthly' | 'weekly' | 'yearly';
+    status: SubscriptionStatus;
+    confidence: UsageConfidence;
+    usageScore: number;
+    verdict: UsageVerdict;
+    alert?: {
+        type: AlertType;
+        message: string;
+    };
 }
 
 export interface DashboardSummary {
-  monthlySpend: number;
-  unusedCount: number;
-  saveablePerYear: number;
-  shameScore: number;
-  previousShameScore: number;
-  linkedAccounts: number;
-  recentTransactionCount: number;
-  dataSource: DashboardProvider | 'none';
+    monthlySpend: number;
+    unusedCount: number;
+    saveablePerYear: number;
+    shameScore: number;
+    previousShameScore: number;
+    linkedAccounts: number;
+    recentTransactionCount: number;
+    dataSource: DashboardProvider | 'none';
 }
 
 export interface DashboardAlert {
-  id: string;
-  label: string;
-  type: AlertType;
+    id: string;
+    label: string;
+    type: AlertType;
 }
 
 export interface DashboardPayload {
-  summary: DashboardSummary;
-  providers: {
-    connected: DashboardProvider[];
-    active: DashboardProvider | null;
-    hasBoth: boolean;
-  };
-  subscriptions: Subscription[];
-  alerts: DashboardAlert[];
-  pagination: {
-    filter: DashboardFilter;
-    page: number;
-    pageSize: number;
-    pageCount: number;
-    total: number;
-    counts: {
-      all: number;
-      active: number;
-      unused: number;
-      'at-risk': number;
-      cancelled: number;
+    summary: DashboardSummary;
+    providers: {
+        connected: DashboardProvider[];
+        active: DashboardProvider | null;
+        hasBoth: boolean;
     };
-  };
+    subscriptions: Subscription[];
+    alerts: DashboardAlert[];
+    pagination: {
+        filter: DashboardFilter;
+        page: number;
+        pageSize: number;
+        pageCount: number;
+        total: number;
+        counts: {
+            all: number;
+            active: number;
+            unused: number;
+            'at-risk': number;
+            cancelled: number;
+        };
+    };
 }

@@ -3,6 +3,7 @@ import { z } from 'zod';
 
 import { getDashboardPayload } from '@/lib/server/dashboard-data';
 import { getServerSession } from '@/lib/server/auth-session';
+import type { AuthSession } from '@/types/subscription';
 
 const filterSchema = z.enum(['all', 'at-risk', 'active', 'cancelled', 'unused']);
 const providerSchema = z.enum(['plaid', 'mono']);
@@ -22,8 +23,11 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const sessionAny = session as { user?: { id?: string } };
-    const userId = sessionAny.user?.id ?? 'local-user';
+    const sessionTyped = session as AuthSession | null;
+    if (!sessionTyped?.user?.id) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    const userId = sessionTyped.user.id;
 
     const url = new URL(request.url);
     const filterParam = url.searchParams.get('filter');
