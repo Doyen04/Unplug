@@ -6,8 +6,6 @@ import { Shield, CreditCard, Bell, AlertOctagon, LogOut, Key, ArrowRight, User, 
 import { FormSubmitButton } from '@/components/features/auth/FormSubmitButton';
 import { auth } from '@/lib/auth';
 import { getServerSession } from '@/lib/server/auth-session';
-import { sql } from 'kysely';
-import { db } from '@/lib/server/db';
 import { NotificationSwitches } from '@/components/features/settings/NotificationSwitches';
 import { DeleteAccountButton } from '@/components/features/settings/DeleteAccountButton';
 
@@ -47,20 +45,6 @@ export default async function DashboardSettingsPage({ searchParams }: SettingsPa
     if (!session) redirect('/login');
 
     const params = (await searchParams) ?? {};
-    const userId = session.user.id;
-    let userSettings = { new_subscriptions_alerts: true, monthly_summary: true, price_increase_alert: false };
-
-    try {
-        const result = await sql`SELECT new_subscriptions_alerts, monthly_summary, price_increase_alert FROM user_settings WHERE user_id = ${userId}`.execute(db);
-        if (result.rows.length > 0) {
-            const row = result.rows[0] as any;
-            userSettings = {
-                new_subscriptions_alerts: Boolean(row.new_subscriptions_alerts),
-                monthly_summary: Boolean(row.monthly_summary),
-                price_increase_alert: Boolean(row.price_increase_alert),
-            };
-        }
-    } catch { /* use defaults */ }
 
     const hasInvalidInputError = params.error === 'invalid_input';
     const hasChangeFailedError = params.error === 'change_failed';
@@ -177,7 +161,7 @@ export default async function DashboardSettingsPage({ searchParams }: SettingsPa
                             </div>
                         </div>
                         <div className="px-6 py-2 divide-y divide-border/30">
-                            <NotificationSwitches initialSettings={userSettings} />
+                            <NotificationSwitches />
                         </div>
                     </Card>
                 </section>

@@ -7,7 +7,7 @@ import { Link as LinkIcon, AlertTriangle, Search, Receipt, RefreshCcw, ChevronLe
 import { AnimatePresence, motion } from 'framer-motion';
 import { useSearchParams } from 'next/navigation';
 
-import { fetchCurrentUser, fetchRecentTransactions } from '@/lib/client/dashboard-api';
+import { fetchCurrentUser, fetchRecentTransactions, searchTransactions } from '@/lib/client/dashboard-api';
 import { DASHBOARD_FILTER_OPTIONS } from '@/lib/constants/dashboard';
 import { formatCurrency, getNameInitials } from '@/lib/utils/format';
 import { useDashboardData } from '@/hooks/useDashboardData';
@@ -79,8 +79,10 @@ export default function DashboardPage() {
     }, [pendingUndoId, clearPendingUndo]);
 
     const { data: txData, isLoading: lux, isError: erx, isFetching: fex, refetch: rex } = useQuery({
-        queryKey: ['dashboard-transactions', providers.active],
-        queryFn: () => fetchRecentTransactions(365, providers.active || undefined),
+        queryKey: ['dashboard-transactions', providers.active, search],
+        queryFn: () => search
+            ? searchTransactions(search, 365, providers.active || undefined)
+            : fetchRecentTransactions(365, providers.active || undefined),
         enabled: !!providers.active,
     });
 

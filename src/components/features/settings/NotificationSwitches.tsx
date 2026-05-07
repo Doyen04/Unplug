@@ -1,7 +1,7 @@
 'use client';
 
-import { useTransition, useState } from 'react';
-import { toggleNotificationAction } from '@/app/dashboard/settings/actions';
+import { useEffect, useState } from 'react';
+import { fetchUserSettings, updateUserSetting } from '@/lib/client/dashboard-api';
 
 interface SettingState {
   new_subscriptions_alerts: boolean;
@@ -9,20 +9,46 @@ interface SettingState {
   price_increase_alert: boolean;
 }
 
-export const NotificationSwitches = ({ initialSettings }: { initialSettings: SettingState }) => {
-  const [isPending, startTransition] = useTransition();
-  const [settings, setSettings] = useState<SettingState>(initialSettings);
+export const NotificationSwitches = () => {
+  const [isLoading, setIsLoading] = useState(true);
+  const [isPending, setIsPending] = useState(false);
+  const [settings, setSettings] = useState<SettingState>({
+    new_subscriptions_alerts: true,
+    monthly_summary: true,
+    price_increase_alert: false,
+  });
 
-  const handleToggle = (key: keyof SettingState) => {
+  // Fetch settings on mount
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const data = await fetchUserSettings();
+        setSettings(data);
+      } catch (error) {
+        console.error('Failed to load settings:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadSettings();
+  }, []);
+
+  const handleToggle = async (key: keyof SettingState) => {
     const newValue = !settings[key];
     setSettings(prev => ({ ...prev, [key]: newValue }));
+    setIsPending(true);
 
-    startTransition(async () => {
-      const res = await toggleNotificationAction(key, newValue);
-      if (!res.success) {
-        setSettings(prev => ({ ...prev, [key]: !newValue }));
-      }
-    });
+    try {
+      const updated = await updateUserSetting(key, newValue);
+      setSettings(updated);
+    } catch (error) {
+      console.error('Failed to update setting:', error);
+      // Revert on error
+      setSettings(prev => ({ ...prev, [key]: !newValue }));
+    } finally {
+      setIsPending(false);
+    }
   };
 
   const switches = [
@@ -42,6 +68,22 @@ export const NotificationSwitches = ({ initialSettings }: { initialSettings: Set
       description: 'Notify me when a subscription increases its price.',
     }
   ] as const;
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        {switches.map((sw) => (
+          <div key={sw.id} className={`flex items-center justify-between gap-4 cursor-pointer p-4 transition-colors border border-transparent animate-pulse`}>
+            <div className="space-y-2">
+              <div className="h-4 w-40 bg-bg-muted rounded"></div>
+              <div className="h-3 w-64 bg-bg-muted rounded"></div>
+            </div>
+            <div className="h-6 w-11 bg-bg-muted rounded-full"></div>
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <>
@@ -64,6 +106,7 @@ export const NotificationSwitches = ({ initialSettings }: { initialSettings: Set
               onClick={() => handleToggle(sw.id)}
               className={`relative inline-flex h-6 w-11 items-center rounded-full shrink-0 border transition-colors duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand ${isOn ? 'bg-success border-success' : 'bg-bg-muted border-border'
                 }`}
+              disabled={isPending}
             >
               <span className="sr-only">Enable {sw.title}</span>
               <span

@@ -171,3 +171,79 @@ export const fetchCurrentUser = async (): Promise<UserPayload> => {
 
     return (await response.json()) as UserPayload;
 };
+
+export interface UserSettings {
+    new_subscriptions_alerts: boolean;
+    monthly_summary: boolean;
+    price_increase_alert: boolean;
+}
+
+export const fetchUserSettings = async (): Promise<UserSettings> => {
+    const response = await fetch('/api/user/settings', { cache: 'no-store' });
+
+    if (!response.ok) {
+        throw new Error('Failed to load user settings');
+    }
+
+    return (await response.json()) as UserSettings;
+};
+
+export const updateUserSetting = async (
+    key: keyof UserSettings,
+    value: boolean
+): Promise<UserSettings> => {
+    const response = await fetch('/api/user/settings', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ [key]: value }),
+    });
+
+    if (!response.ok) {
+        throw new Error('Failed to update settings');
+    }
+
+    return (await response.json()) as UserSettings;
+};
+
+export interface ConnectedAccount {
+    id: string;
+    displayName: string;
+    provider: 'plaid' | 'mono';
+    accountRef: string;
+    authStatus: 'active' | 'reconnect_required' | 'disconnected';
+}
+
+export const fetchConnectedAccounts = async (): Promise<ConnectedAccount[]> => {
+    const response = await fetch('/api/connect/accounts', { cache: 'no-store' });
+
+    if (!response.ok) {
+        throw new Error('Failed to load connected accounts');
+    }
+
+    return (await response.json()) as ConnectedAccount[];
+};
+
+export const searchTransactions = async (
+    query: string,
+    days = 365,
+    provider?: DashboardProvider
+): Promise<TransactionsPayload> => {
+    const params = new URLSearchParams({
+        q: query,
+        days: String(days),
+    });
+
+    if (provider) {
+        params.set('provider', provider);
+    }
+
+    const response = await fetch(`/api/connect/plaid/transactions?${params.toString()}`, {
+        cache: 'no-store',
+    });
+
+    if (!response.ok) {
+        throw new Error('Failed to search transactions');
+    }
+
+    return (await response.json()) as TransactionsPayload;
+};

@@ -4,7 +4,6 @@ import { Globe } from 'lucide-react';
 
 import { ConnectProviderButtons } from '@/components/features/connect/ConnectProviderButtons';
 import { ConnectedAccountsSection } from '@/components/features/connect/ConnectedAccountsSection';
-import { listConnectedAccountsByUser } from '@/lib/server/connected-accounts-store';
 import { getServerSession } from '@/lib/server/auth-session';
 
 import { Card } from '@/components/ui/Card';
@@ -56,20 +55,6 @@ const ConnectAccountsPage = async ({ searchParams }: ConnectAccountsPageProps) =
     }
 
     if (!session && !isOffline) redirect('/login');
-    
-    const sessionAny = session as { user?: { id?: string } } | null;
-    const userId = sessionAny?.user?.id ?? 'local-user';
-    
-    let accounts: any[] = [];
-    try {
-        accounts = await listConnectedAccountsByUser(userId);
-    } catch (e) {
-        isOffline = true;
-    }
-
-    const hasDisconnected = params.disconnected === '1';
-    const hasConnectSuccess = params.connected === 'plaid' || params.connected === 'mono';
-    const hasDisconnectError = params.error === 'disconnect_failed';
 
     const requestHeaders = await headers();
     const countryCode = resolveCountry(
@@ -79,6 +64,10 @@ const ConnectAccountsPage = async ({ searchParams }: ConnectAccountsPageProps) =
     );
     const preferredProvider = MONO_COUNTRIES.has(countryCode) ? 'mono' : 'plaid';
     const monoPublicKey = process.env.MONO_PUBLIC_KEY ?? process.env.NEXT_PUBLIC_MONO_PUBLIC_KEY ?? '';
+
+    const hasConnectSuccess = params.connected === 'plaid' || params.connected === 'mono';
+    const hasDisconnected = params.disconnected === '1';
+    const hasDisconnectError = params.error === 'disconnect_failed';
 
     return (
         <div className="space-y-6">
@@ -103,7 +92,6 @@ const ConnectAccountsPage = async ({ searchParams }: ConnectAccountsPageProps) =
 
             <div className="grid gap-6 lg:grid-cols-5">
                 <ConnectedAccountsSection 
-                    initialAccounts={accounts as any} 
                     preferredProvider={preferredProvider} 
                     monoPublicKey={monoPublicKey} 
                 />

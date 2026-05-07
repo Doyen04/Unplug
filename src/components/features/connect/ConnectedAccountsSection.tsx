@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Trash2, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { ConnectProviderButtons } from './ConnectProviderButtons';
+import { fetchConnectedAccounts } from '@/lib/client/dashboard-api';
 
 interface ConnectedAccount {
     id: string;
@@ -18,20 +19,35 @@ interface ConnectedAccount {
 }
 
 interface ConnectedAccountsSectionProps {
-    initialAccounts: ConnectedAccount[];
     preferredProvider: 'plaid' | 'mono';
     monoPublicKey: string;
 }
 
 export const ConnectedAccountsSection = ({
-    initialAccounts,
     preferredProvider,
     monoPublicKey,
 }: ConnectedAccountsSectionProps) => {
     const router = useRouter();
+    const [isLoading, setIsLoading] = useState(true);
     const [isPending, setIsPending] = useState(false);
+    const [accounts, setAccounts] = useState<ConnectedAccount[]>([]);
 
-    // This is a simple server action wrapper to show loading
+    // Fetch accounts on mount
+    useEffect(() => {
+        const loadAccounts = async () => {
+            try {
+                const data = await fetchConnectedAccounts();
+                setAccounts(data);
+            } catch (error) {
+                console.error('Failed to load accounts:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        loadAccounts();
+    }, []);
+
     const handleDelete = async (accountId: string) => {
         if (isPending) return;
         setIsPending(true);
@@ -39,19 +55,36 @@ export const ConnectedAccountsSection = ({
             const formData = new FormData();
             formData.append('accountId', accountId);
             
-            // We use a trick to call the server action from client and then refresh
             const response = await fetch('/api/connect/disconnect', {
                 method: 'POST',
                 body: formData
             });
             
             if (response.ok) {
+                // Remove the account from local state
+                setAccounts(prev => prev.filter(acc => acc.id !== accountId));
                 router.refresh();
             }
         } finally {
             setIsPending(false);
         }
     };
+
+    if (isLoading) {
+        return (
+            <Card className="lg:col-span-3 p-0 overflow-hidden">
+                <div className="p-6 border-b border-border bg-bg-muted/30 flex items-center justify-between">
+                    <div className="h-4 w-40 bg-bg-muted rounded animate-pulse"></div>
+                    <div className="h-6 w-12 bg-bg-muted rounded animate-pulse"></div>
+                </div>
+                <div className="p-6 space-y-4">
+                    {[1, 2, 3].map(i => (
+                        <div key={i} className="h-20 bg-bg-muted rounded-xl animate-pulse"></div>
+                    ))}
+                </div>
+            </Card>
+        );
+    }
 
     return (
         <Card className="lg:col-span-3 p-0 overflow-hidden relative">
@@ -67,12 +100,12 @@ export const ConnectedAccountsSection = ({
             <div className="p-6 border-b border-border bg-bg-muted/30 flex items-center justify-between">
                 <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted">Connected accounts</p>
                 <div className="flex items-center gap-2">
-                    <Badge variant="secondary">{initialAccounts.length}</Badge>
+                    <Badge variant="secondary">{accounts.length}</Badge>
                 </div>
             </div>
 
             <div className="p-6">
-                {initialAccounts.length === 0 ? (
+                {accounts.length === 0 ? (
                     <div className="rounded-xl border border-dashed border-border p-12 text-center text-text-secondary">
                         <p className="font-semibold">No linked accounts yet</p>
                         <p className="text-sm mt-1">Choose a provider to get started.</p>
@@ -80,7 +113,7 @@ export const ConnectedAccountsSection = ({
                 ) : (
                     <ul className="space-y-4">
                         <AnimatePresence mode="popLayout">
-                            {initialAccounts.map((account) => (
+                            {accounts.map((account) => (
                                 <motion.li 
                                     layout
                                     initial={{ opacity: 0, scale: 0.95, y: 15 }}
