@@ -3,7 +3,7 @@ import { db } from './db';
 import type { Subscription, SubscriptionStatus } from '@/types/subscription';
 
 export interface StoredSubscription extends Subscription {
-    previousStatus?: Exclude<SubscriptionStatus, 'cancelled'>;
+    previousStatus?: SubscriptionStatus;
 }
 
 const isProviderScopedId = (id: string): boolean => id.startsWith('plaid-') || id.startsWith('mono-');
