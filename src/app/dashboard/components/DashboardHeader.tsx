@@ -27,7 +27,7 @@ export function DashboardHeader({
                     >
                         <Bell size={18} />
                         {alertsCount > 0 && (
-                            <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full border-2 border-bg-surface bg-danger text-[10px] font-bold text-white">
+                            <span className="absolute -right-2 -top-2 inline-flex h-4 items-center justify-center rounded-full border-2 border-bg-surface bg-danger text-[10px] font-bold text-white px-1 min-w-4">
                                 {alertsCount}
                             </span>
                         )}

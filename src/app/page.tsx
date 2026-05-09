@@ -252,7 +252,7 @@ function PricingSection() {
         <section id="pricing" className="py-32 bg-bg-muted/50 border-b border-border">
             <div className="mx-auto max-w-6xl px-6">
                 <div className="text-center max-w-2xl mx-auto mb-20">
-            <h2 className={`${displayFont.className} text-4xl md:text-5xl mb-6`}>A fraction of what you'll save.</h2>
+                    <h2 className={`${displayFont.className} text-4xl md:text-5xl mb-6`}>A fraction of what you'll save.</h2>
                 </div>
 
                 <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto items-stretch">

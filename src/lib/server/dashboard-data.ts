@@ -365,15 +365,10 @@ const extractMonoTransactions = (payload: Record<string, unknown>): unknown[] =>
 const fetchPlaidSnapshot = async (userId: string): Promise<BankSnapshot | null> => {
     const userAccounts = await listConnectedAccountsByUser(userId);
     const plaidAccounts = userAccounts.filter((item) => item.provider === 'plaid');
-    const plaidAccount = plaidAccounts.find((item) => item.encryptedAccessToken) ?? plaidAccounts[0];
 
-    // If the user has not connected any Plaid account, return a marker object
-    if (plaidAccounts.length === 0 || !plaidAccount) {
+    // No Plaid accounts connected
+    if (plaidAccounts.length === 0) {
         return { provider: 'plaid', linkedAccounts: 0, transactions: [], noAccount: true };
-    }
-
-    if (!plaidAccount.encryptedAccessToken) {
-        return null;
     }
 
     const clientId = process.env.PLAID_CLIENT_ID;
@@ -385,82 +380,85 @@ const fetchPlaidSnapshot = async (userId: string): Promise<BankSnapshot | null> 
         return null;
     }
 
-    let accessToken = '';
-    try {
-        accessToken = decryptToken(plaidAccount.encryptedAccessToken);
-    } catch {
-        return null;
-    }
+    const aggregated: BankTransaction[] = [];
 
-    try {
-        const accountsResponse = await fetch(`${baseUrl}/accounts/get`, {
-            method: 'POST',
-            headers: { 'content-type': 'application/json' },
-            body: JSON.stringify({
-                client_id: clientId,
-                secret,
-                access_token: accessToken,
-            }),
-            cache: 'no-store',
-        });
-
-        if (!accountsResponse.ok) {
-            const payload = (await accountsResponse.json().catch(() => null)) as { error_code?: string } | null;
-            const errorCode = payload?.error_code;
-            if (errorCode && RECONNECT_ERROR_CODES.has(errorCode)) {
-                await markConnectedAccountAuthStatus(userId, 'plaid', plaidAccount.accountRef, 'reconnect_required');
-            }
-            return null;
+    for (const acct of plaidAccounts) {
+        if (!acct.encryptedAccessToken) {
+            await markConnectedAccountAuthStatus(userId, 'plaid', acct.accountRef, 'reconnect_required');
+            continue;
         }
 
-        const transactionsResponse = await fetch(`${baseUrl}/transactions/get`, {
-            method: 'POST',
-            headers: { 'content-type': 'application/json' },
-            body: JSON.stringify({
-                client_id: clientId,
-                secret,
-                access_token: accessToken,
-                start_date: isoDateDaysAgo(365),
-                end_date: new Date().toISOString().slice(0, 10),
-                options: {
-                    count: 500,
-                    offset: 0,
-                },
-            }),
-            cache: 'no-store',
-        });
-
-        if (!transactionsResponse.ok) {
-            const payload = (await transactionsResponse.json().catch(() => null)) as { error_code?: string } | null;
-            const errorCode = payload?.error_code;
-            if (errorCode && RECONNECT_ERROR_CODES.has(errorCode)) {
-                await markConnectedAccountAuthStatus(userId, 'plaid', plaidAccount.accountRef, 'reconnect_required');
-            }
-            return null;
+        let accessToken = '';
+        try {
+            accessToken = decryptToken(acct.encryptedAccessToken);
+        } catch {
+            await markConnectedAccountAuthStatus(userId, 'plaid', acct.accountRef, 'reconnect_required');
+            continue;
         }
 
-        await markConnectedAccountAuthStatus(userId, 'plaid', plaidAccount.accountRef, 'active');
+        try {
+            const accountsResponse = await fetch(`${baseUrl}/accounts/get`, {
+                method: 'POST',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify({ client_id: clientId, secret, access_token: accessToken }),
+                cache: 'no-store',
+            });
 
-        const transactionsPayload = (await transactionsResponse.json()) as {
-            transactions: BankTransaction[];
-        };
+            if (!accountsResponse.ok) {
+                const payload = (await accountsResponse.json().catch(() => null)) as { error_code?: string } | null;
+                const errorCode = payload?.error_code;
+                if (errorCode && RECONNECT_ERROR_CODES.has(errorCode)) {
+                    await markConnectedAccountAuthStatus(userId, 'plaid', acct.accountRef, 'reconnect_required');
+                }
+                continue;
+            }
 
-        return {
-            provider: 'plaid',
-            linkedAccounts: plaidAccounts.length,
-            transactions: transactionsPayload.transactions,
-        };
-    } catch {
-        return null;
+            const transactionsResponse = await fetch(`${baseUrl}/transactions/get`, {
+                method: 'POST',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify({
+                    client_id: clientId,
+                    secret,
+                    access_token: accessToken,
+                    start_date: isoDateDaysAgo(365),
+                    end_date: new Date().toISOString().slice(0, 10),
+                    options: { count: 500, offset: 0 },
+                }),
+                cache: 'no-store',
+            });
+
+            if (!transactionsResponse.ok) {
+                const payload = (await transactionsResponse.json().catch(() => null)) as { error_code?: string } | null;
+                const errorCode = payload?.error_code;
+                if (errorCode && RECONNECT_ERROR_CODES.has(errorCode)) {
+                    await markConnectedAccountAuthStatus(userId, 'plaid', acct.accountRef, 'reconnect_required');
+                }
+                continue;
+            }
+
+            await markConnectedAccountAuthStatus(userId, 'plaid', acct.accountRef, 'active');
+
+            const transactionsPayload = (await transactionsResponse.json()) as { transactions: BankTransaction[] };
+            aggregated.push(...(transactionsPayload.transactions ?? []));
+        } catch (err) {
+            // Continue to next account on error
+            console.error('[Plaid] Error fetching for account', acct.accountRef, err);
+            continue;
+        }
     }
+
+    return {
+        provider: 'plaid',
+        linkedAccounts: plaidAccounts.length,
+        transactions: aggregated,
+    };
 };
 
 const fetchMonoSnapshot = async (userId: string): Promise<BankSnapshot | null> => {
     const userAccounts = await listConnectedAccountsByUser(userId);
     const monoAccounts = userAccounts.filter((item) => item.provider === 'mono');
-    const monoAccount = monoAccounts[0];
 
-    if (monoAccounts.length === 0 || !monoAccount) {
+    if (monoAccounts.length === 0) {
         return { provider: 'mono', linkedAccounts: 0, transactions: [], noAccount: true };
     }
 
@@ -471,58 +469,59 @@ const fetchMonoSnapshot = async (userId: string): Promise<BankSnapshot | null> =
         return null;
     }
 
-    try {
-        const response = await fetch(
-            `${monoBaseUrl}/accounts/${monoAccount.accountRef}/transactions?start=${toMonoDate(isoDateDaysAgo(365))}&end=${toMonoDate(new Date().toISOString().slice(0, 10))}`,
-            {
-                method: 'GET',
-                headers: {
-                    accept: 'application/json',
-                    'mono-sec-key': monoSecretKey,
-                    authorization: `Bearer ${monoSecretKey}`,
-                },
-                cache: 'no-store',
-            }
-        );
+    const aggregated: BankTransaction[] = [];
 
-        if (!response.ok) {
-            const errorText = await response.text().catch(() => '');
-            console.error(
-                `[Mono] Transactions fetch failed for account ${monoAccount.accountRef} — ${response.status} ${response.statusText}:`,
-                errorText,
+    for (const acct of monoAccounts) {
+        try {
+            const response = await fetch(
+                `${monoBaseUrl}/accounts/${acct.accountRef}/transactions?start=${toMonoDate(isoDateDaysAgo(365))}&end=${toMonoDate(new Date().toISOString().slice(0, 10))}`,
+                {
+                    method: 'GET',
+                    headers: {
+                        accept: 'application/json',
+                        'mono-sec-key': monoSecretKey,
+                        authorization: `Bearer ${monoSecretKey}`,
+                    },
+                    cache: 'no-store',
+                }
             );
 
-            const shouldReconnect =
-                response.status === 401
-                || response.status === 403
-                || response.status === 404
-                || response.status === 422;
+            if (!response.ok) {
+                const errorText = await response.text().catch(() => '');
+                console.error(
+                    `[Mono] Transactions fetch failed for account ${acct.accountRef} — ${response.status} ${response.statusText}:`,
+                    errorText,
+                );
 
-            if (shouldReconnect) {
-                await markConnectedAccountAuthStatus(userId, 'mono', monoAccount.accountRef, 'reconnect_required');
+                const shouldReconnect = [401, 403, 404, 422].includes(response.status);
+                if (shouldReconnect) {
+                    await markConnectedAccountAuthStatus(userId, 'mono', acct.accountRef, 'reconnect_required');
+                }
+                continue;
             }
-            return null;
+
+            await markConnectedAccountAuthStatus(userId, 'mono', acct.accountRef, 'active');
+
+            const payload = (await response.json()) as Record<string, unknown>;
+            const rawTransactions = extractMonoTransactions(payload);
+            const normalized = normalizeMonoTransactions(rawTransactions);
+
+            console.log(
+                `[Mono] Account ${acct.accountRef}: payload keys=[${Object.keys(payload)}], raw=${rawTransactions.length}, normalized=${normalized.length}`,
+            );
+
+            aggregated.push(...normalized);
+        } catch (err) {
+            console.error('[Mono] Exception in fetchMonoSnapshot for account', acct.accountRef, err);
+            continue;
         }
-
-        await markConnectedAccountAuthStatus(userId, 'mono', monoAccount.accountRef, 'active');
-
-        const payload = (await response.json()) as Record<string, unknown>;
-        const rawTransactions = extractMonoTransactions(payload);
-        const normalized = normalizeMonoTransactions(rawTransactions);
-
-        console.log(
-            `[Mono] Account ${monoAccount.accountRef}: payload keys=[${Object.keys(payload)}], raw=${rawTransactions.length}, normalized=${normalized.length}`,
-        );
-
-        return {
-            provider: 'mono',
-            linkedAccounts: monoAccounts.length,
-            transactions: normalized,
-        };
-    } catch (err) {
-        console.error('[Mono] Exception in fetchMonoSnapshot:', err);
-        return null;
     }
+
+    return {
+        provider: 'mono',
+        linkedAccounts: monoAccounts.length,
+        transactions: aggregated,
+    };
 };
 
 const applyFilter = (subscriptions: Subscription[], filter: DashboardFilter): Subscription[] => {
