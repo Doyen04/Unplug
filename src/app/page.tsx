@@ -380,14 +380,16 @@ function Footer() {
 
 export default function HomePage() {
     return (
-        <main className={`${uiFont.className} bg-bg-base text-text-primary min-h-screen selection:bg-brand selection:text-white`}>
+        <main className={`${uiFont.className} bg-bg-base text-text-primary min-h-screen selection:bg-brand selection:text-white flex flex-col`}>
             <Header />
-            <HeroSection />
-            <ImpactSection />
-            <FeaturesSection />
-            <CustomersSection />
-            <PricingSection />
-            <FAQSection />
+            <div className="flex-1">
+                <HeroSection />
+                <ImpactSection />
+                <FeaturesSection />
+                <CustomersSection />
+                <PricingSection />
+                <FAQSection />
+            </div>
             <Footer />
         </main>
     );
