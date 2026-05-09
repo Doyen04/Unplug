@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { Trash2, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { ConnectProviderButtons } from './ConnectProviderButtons';
 import { fetchConnectedAccounts } from '@/lib/client/dashboard-api';
+import { dashboardKeys } from '@/lib/query-keys';
 
 interface ConnectedAccount {
     id: string;
@@ -28,49 +29,41 @@ export const ConnectedAccountsSection = ({
     monoPublicKey,
 }: ConnectedAccountsSectionProps) => {
     const router = useRouter();
-    const [isLoading, setIsLoading] = useState(true);
-    const [isPending, setIsPending] = useState(false);
-    const [accounts, setAccounts] = useState<ConnectedAccount[]>([]);
+    const queryClient = useQueryClient();
 
-    // Fetch accounts on mount
-    useEffect(() => {
-        const loadAccounts = async () => {
-            try {
-                const data = await fetchConnectedAccounts();
-                setAccounts(data);
-            } catch (error) {
-                console.error('Failed to load accounts:', error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
+    const accountsQuery = useQuery({
+        queryKey: dashboardKeys.connectedAccounts(),
+        queryFn: fetchConnectedAccounts,
+    });
 
-        loadAccounts();
-    }, []);
-
-    const handleDelete = async (accountId: string) => {
-        if (isPending) return;
-        setIsPending(true);
-        try {
+    const disconnectMutation = useMutation({
+        mutationFn: async (accountId: string) => {
             const formData = new FormData();
             formData.append('accountId', accountId);
 
             const response = await fetch('/api/connect/disconnect', {
                 method: 'POST',
-                body: formData
+                body: formData,
             });
 
-            if (response.ok) {
-                // Remove the account from local state
-                setAccounts(prev => prev.filter(acc => acc.id !== accountId));
-                router.refresh();
+            if (!response.ok) {
+                throw new Error('Failed to disconnect account');
             }
-        } finally {
-            setIsPending(false);
-        }
+        },
+        onSuccess: async () => {
+            await queryClient.invalidateQueries({ queryKey: dashboardKeys.connectedAccounts() });
+            router.refresh();
+        },
+    });
+
+    const handleDelete = async (accountId: string) => {
+        if (disconnectMutation.isPending) return;
+        await disconnectMutation.mutateAsync(accountId);
     };
 
-    if (isLoading) {
+    const accounts = accountsQuery.data ?? [];
+
+    if (accountsQuery.isLoading) {
         return (
             <Card className="lg:col-span-3 p-0 overflow-hidden">
                 <div className="p-6 border-b border-border bg-bg-muted/30 flex items-center justify-between">
@@ -88,7 +81,7 @@ export const ConnectedAccountsSection = ({
 
     return (
         <Card className="lg:col-span-3 p-0 overflow-hidden relative">
-            {isPending && (
+            {disconnectMutation.isPending && (
                 <div className="absolute inset-0 z-10 bg-bg-surface/60 backdrop-blur-xs flex items-center justify-center">
                     <div className="flex flex-col items-center gap-3 animate-pulse">
                         <div className="h-8 w-8 animate-spin rounded-full border-[3px] border-brand border-t-transparent" />
@@ -105,10 +98,27 @@ export const ConnectedAccountsSection = ({
             </div>
 
             <div className="p-6">
+                {accountsQuery.isError && (
+                    <div className="mb-4 flex items-start gap-3 rounded-xl border border-warning/30 bg-warning-light/20 p-4 text-sm text-text-secondary">
+                        <AlertCircle size={16} className="mt-0.5 text-warning" />
+                        <div className="space-y-2">
+                            <p className="font-semibold text-text-primary">Could not load connected accounts.</p>
+                            <p className="text-xs leading-relaxed">You may be offline or the connection service is unavailable. Existing accounts will appear once the request succeeds.</p>
+                            <Button size="sm" variant="outline" onClick={() => accountsQuery.refetch()}>
+                                Retry
+                            </Button>
+                        </div>
+                    </div>
+                )}
+
                 {accounts.length === 0 ? (
                     <div className="rounded-xl border border-dashed border-border p-12 text-center text-text-secondary">
                         <p className="font-semibold">No linked accounts yet</p>
-                        <p className="text-sm mt-1">Choose a provider to get started.</p>
+                        <p className="text-sm mt-1">
+                            {accountsQuery.isError
+                                ? 'Unable to confirm your accounts right now. Try again when the connection is restored.'
+                                : 'Choose a provider to get started.'}
+                        </p>
                     </div>
                 ) : (
                     <ul className="space-y-4">
@@ -145,7 +155,7 @@ export const ConnectedAccountsSection = ({
                                             size="icon"
                                             className="h-8 w-8"
                                             title="Disconnect account"
-                                            disabled={isPending}
+                                            disabled={disconnectMutation.isPending}
                                             onClick={() => handleDelete(account.id)}
                                         >
                                             <Trash2 size={14} />

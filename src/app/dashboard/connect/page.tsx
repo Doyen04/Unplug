@@ -1,4 +1,4 @@
-import { headers } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { Globe } from 'lucide-react';
 
@@ -10,6 +10,12 @@ import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 
 const MONO_COUNTRIES = new Set(['NG', 'GH', 'KE', 'ZA', 'UG', 'TZ']);
+
+const hasAuthSessionCookie = async (): Promise<boolean> => {
+    const cookieStore = await cookies();
+    return Boolean(cookieStore.get('better-auth.session_token')?.value)
+        || Boolean(cookieStore.get('__Secure-better-auth.session_token')?.value);
+};
 
 const resolveCountry = (
     countryHeader: string | null,
@@ -48,13 +54,21 @@ const ConnectAccountsPage = async ({ searchParams }: ConnectAccountsPageProps) =
     const params = (await searchParams) ?? {};
     let session;
     let isOffline = false;
+    const hasSessionCookie = await hasAuthSessionCookie();
+
     try {
         session = await getServerSession();
     } catch (e) {
         isOffline = true;
     }
 
-    if (!session && !isOffline) redirect('/login');
+    if (!session) {
+        if (hasSessionCookie || isOffline) {
+            isOffline = true;
+        } else {
+            redirect('/login');
+        }
+    }
 
     const requestHeaders = await headers();
     const countryCode = resolveCountry(

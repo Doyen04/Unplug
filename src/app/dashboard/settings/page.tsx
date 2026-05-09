@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { headers } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { Shield, CreditCard, Bell, AlertOctagon, LogOut, Key, ArrowRight, User, Mail } from 'lucide-react';
 
@@ -13,6 +13,12 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Input } from '@/components/ui/Input';
+
+const hasAuthSessionCookie = async (): Promise<boolean> => {
+    const cookieStore = await cookies();
+    return Boolean(cookieStore.get('better-auth.session_token')?.value)
+        || Boolean(cookieStore.get('__Secure-better-auth.session_token')?.value);
+};
 
 const getSessionUserField = (session: unknown, key: 'email' | 'name'): string | undefined => {
     if (!session || typeof session !== 'object') return undefined;
@@ -41,8 +47,23 @@ interface SettingsPageProps {
 }
 
 export default async function DashboardSettingsPage({ searchParams }: SettingsPageProps) {
-    const session = await getServerSession();
-    if (!session) redirect('/login');
+    const hasSessionCookie = await hasAuthSessionCookie();
+    let session = null;
+    let isOffline = false;
+
+    try {
+        session = await getServerSession();
+    } catch {
+        isOffline = true;
+    }
+
+    if (!session) {
+        if (hasSessionCookie || isOffline) {
+            isOffline = true;
+        } else {
+            redirect('/login');
+        }
+    }
 
     const params = (await searchParams) ?? {};
 
@@ -59,6 +80,12 @@ export default async function DashboardSettingsPage({ searchParams }: SettingsPa
                 <h1 className="text-3xl font-bold tracking-tight text-text-primary">Settings</h1>
                 <p className="text-sm text-text-secondary">Manage your personal information and preferences.</p>
             </header>
+
+            {isOffline && (
+                <Badge variant="warning" className="w-full justify-center py-3 h-auto">
+                    Offline Mode: Some settings may be unavailable.
+                </Badge>
+            )}
 
             <div className="space-y-6">
                 {/* PROFILE SECTION */}
