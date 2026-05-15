@@ -599,7 +599,9 @@ export const getDashboardPayload = async (
         };
     }
 
-    const storedSubscriptions = await readStoredSubscriptions(options.userId);
+    const userId = options.userId;
+
+    const storedSubscriptions = await readStoredSubscriptions(userId);
     const snapshotProviders = options.provider && connectedProviders.includes(options.provider)
         ? [options.provider]
         : connectedProviders;
@@ -607,8 +609,8 @@ export const getDashboardPayload = async (
     const snapshots = await Promise.all(
         snapshotProviders.map(async (provider) => {
             const snapshot = provider === 'plaid'
-                ? await fetchPlaidSnapshot(options.userId)
-                : await fetchMonoSnapshot(options.userId);
+                ? await fetchPlaidSnapshot(userId)
+                : await fetchMonoSnapshot(userId);
 
             return snapshot && !snapshot.noAccount
                 ? { provider, snapshot }
@@ -628,7 +630,7 @@ export const getDashboardPayload = async (
             : storedSubscriptions);
 
     if (detectedSubscriptions.length > 0) {
-        await writeStoredSubscriptions(options.userId, effectiveStoredSubscriptions);
+        await writeStoredSubscriptions(userId, effectiveStoredSubscriptions);
     }
 
     const subscriptions: Subscription[] = effectiveStoredSubscriptions.map(({ previousStatus, ...item }) => item);

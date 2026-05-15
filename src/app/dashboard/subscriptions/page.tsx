@@ -185,7 +185,7 @@ export default function SubscriptionsPage() {
                     pageCount,
                     total: totalSubscriptions,
                     onPageChange: (p) => setPage(p)
-                } }
+                }}
             />
 
             <AnimatePresence>
