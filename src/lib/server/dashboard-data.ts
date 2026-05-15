@@ -600,25 +600,35 @@ export const getDashboardPayload = async (
     }
 
     const storedSubscriptions = await readStoredSubscriptions(options.userId);
-    const storedForActiveProvider = filterStoredSubscriptionsByProvider(storedSubscriptions, activeProvider);
+    const snapshotProviders = options.provider && connectedProviders.includes(options.provider)
+        ? [options.provider]
+        : connectedProviders;
 
-    const activeSnapshot = activeProvider === 'plaid'
-        ? await fetchPlaidSnapshot(options.userId)
-        : await fetchMonoSnapshot(options.userId);
+    const snapshots = await Promise.all(
+        snapshotProviders.map(async (provider) => {
+            const snapshot = provider === 'plaid'
+                ? await fetchPlaidSnapshot(options.userId)
+                : await fetchMonoSnapshot(options.userId);
 
-    const detectedSubscriptions = activeSnapshot && !activeSnapshot.noAccount
-        ? detectSubscriptionsFromTransactions(activeProvider, activeSnapshot.transactions)
-        : [];
+            return snapshot && !snapshot.noAccount
+                ? { provider, snapshot }
+                : null;
+        })
+    );
+
+    const detectedSubscriptions = snapshots
+        .flatMap((entry) => entry ? detectSubscriptionsFromTransactions(entry.provider, entry.snapshot.transactions) : []);
 
     const effectiveStoredSubscriptions = detectedSubscriptions.length > 0
-        ? mergeDetectedWithStored(detectedSubscriptions, storedForActiveProvider)
-        : storedForActiveProvider;
+        ? mergeDetectedWithStored(detectedSubscriptions, options.provider && connectedProviders.includes(options.provider)
+            ? filterStoredSubscriptionsByProvider(storedSubscriptions, options.provider)
+            : storedSubscriptions)
+        : (options.provider && connectedProviders.includes(options.provider)
+            ? filterStoredSubscriptionsByProvider(storedSubscriptions, options.provider)
+            : storedSubscriptions);
 
     if (detectedSubscriptions.length > 0) {
-        const otherProviders = storedSubscriptions.filter(
-            (item) => !item.id.startsWith(`${activeProvider}-`)
-        );
-        await writeStoredSubscriptions(options.userId, [...otherProviders, ...effectiveStoredSubscriptions]);
+        await writeStoredSubscriptions(options.userId, effectiveStoredSubscriptions);
     }
 
     const subscriptions: Subscription[] = effectiveStoredSubscriptions.map(({ previousStatus, ...item }) => item);
@@ -656,7 +666,7 @@ export const getDashboardPayload = async (
         shameScore,
         previousShameScore: Math.min(100, shameScore + 8),
         linkedAccounts: userAccounts.length,
-        recentTransactionCount: activeSnapshot?.transactions.length ?? 0,
+        recentTransactionCount: snapshots.reduce((count, entry) => count + (entry?.snapshot.transactions.length ?? 0), 0),
         dataSource: activeProvider,
     };
 

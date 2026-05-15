@@ -31,6 +31,11 @@ type NormalizedTransaction = {
     category: string[] | null;
 };
 
+type AggregatedTransaction = NormalizedTransaction & {
+    sourceProvider: 'plaid' | 'mono';
+    sourceAccountRef: string;
+};
+
 const normalizeMonoTransactions = (input: unknown[]): NormalizedTransaction[] => {
     const today = new Date().toISOString().slice(0, 10);
 
@@ -131,6 +136,41 @@ const extractMonoTransactions = (payload: Record<string, unknown>): unknown[] =>
     return [];
 };
 
+const normalizePlaidTransactions = (input: Array<{
+    transaction_id: string;
+    name: string;
+    amount: number;
+    date: string;
+    merchant_name: string | null;
+    iso_currency_code: string | null;
+    category: string[] | null;
+}>, accountRef: string): AggregatedTransaction[] => input.map((transaction) => ({
+    ...transaction,
+    transaction_id: `plaid-${accountRef}-${transaction.transaction_id}`,
+    sourceProvider: 'plaid',
+    sourceAccountRef: accountRef,
+}));
+
+const normalizeMonoTransactionsForAccount = (
+    input: unknown[],
+    accountRef: string
+): AggregatedTransaction[] => normalizeMonoTransactions(input).map((transaction) => ({
+    ...transaction,
+    transaction_id: `mono-${accountRef}-${transaction.transaction_id}`,
+    sourceProvider: 'mono',
+    sourceAccountRef: accountRef,
+}));
+
+const aggregateTransactions = (transactions: AggregatedTransaction[]): AggregatedTransaction[] => {
+    const seen = new Map<string, AggregatedTransaction>();
+
+    for (const transaction of transactions) {
+        seen.set(transaction.transaction_id, transaction);
+    }
+
+    return Array.from(seen.values()).sort((a, b) => b.date.localeCompare(a.date));
+};
+
 export async function GET(request: Request) {
     const session = (await getServerSession()) as AuthSession | null;
     if (!session?.user?.id) {
@@ -158,95 +198,18 @@ export async function GET(request: Request) {
 
     const allUserAccounts = await listConnectedAccountsByUser(userId);
 
-    const connectedAccount = accountId
+    const targetAccounts = accountId
         ? await getConnectedAccountById(userId, accountId)
+        : null;
+
+    const accounts = targetAccounts
+        ? [targetAccounts]
         : requestedProvider
-            ? allUserAccounts.find((item) => item.provider === requestedProvider)
-            : allUserAccounts[0] ?? null;
+            ? allUserAccounts.filter((item) => item.provider === requestedProvider)
+            : allUserAccounts;
 
-    if (!connectedAccount) {
+    if (accounts.length === 0) {
         return NextResponse.json({ error: 'No connected account found' }, { status: 404 });
-    }
-
-    if (connectedAccount.provider === 'mono') {
-        const monoSecretKey = process.env.MONO_SECRET_KEY;
-        const monoBaseUrl = process.env.MONO_API_BASE_URL ?? MONO_DEFAULT_BASE_URL;
-
-        if (!monoSecretKey) {
-            return NextResponse.json({ error: 'Missing MONO_SECRET_KEY' }, { status: 500 });
-        }
-
-        const monoUrl = new URL(`${monoBaseUrl}/accounts/${connectedAccount.accountRef}/transactions`);
-        monoUrl.searchParams.set('start', toMonoDate(isoDateDaysAgo(lookbackDays)));
-        monoUrl.searchParams.set('end', toMonoDate(new Date().toISOString().slice(0, 10)));
-
-        const monoResponse = await fetch(monoUrl.toString(), {
-            method: 'GET',
-            headers: {
-                accept: 'application/json',
-                'mono-sec-key': monoSecretKey,
-                authorization: `Bearer ${monoSecretKey}`,
-            },
-            cache: 'no-store',
-        });
-
-        if (!monoResponse.ok) {
-            const errorBody = await monoResponse.text();
-            console.error(
-                `[Mono] Transactions API error (${monoResponse.status}):`,
-                errorBody,
-            );
-
-            const shouldReconnect =
-                monoResponse.status === 401
-                || monoResponse.status === 403
-                || monoResponse.status === 404
-                || monoResponse.status === 422;
-
-            if (shouldReconnect) {
-                await markConnectedAccountAuthStatus(userId, 'mono', connectedAccount.accountRef, 'reconnect_required');
-                return NextResponse.json(
-                    { error: 'Mono connection requires relink', code: 'RECONNECT_REQUIRED' },
-                    { status: 401 }
-                );
-            }
-
-            return NextResponse.json(
-                { error: errorBody || 'Failed to fetch Mono transactions' },
-                { status: 502 }
-            );
-        }
-
-        await markConnectedAccountAuthStatus(userId, 'mono', connectedAccount.accountRef, 'active');
-
-        const monoPayload = (await monoResponse.json()) as Record<string, unknown>;
-        const rawTransactions = extractMonoTransactions(monoPayload);
-
-        let normalized = normalizeMonoTransactions(rawTransactions).sort((a, b) => b.date.localeCompare(a.date));
-
-        if (normalizedSearch) {
-            normalized = normalized.filter(tx =>
-                tx.name.toLowerCase().includes(normalizedSearch) ||
-                tx.category?.some(c => c.toLowerCase().includes(normalizedSearch)) ||
-                tx.merchant_name?.toLowerCase().includes(normalizedSearch)
-            );
-        }
-
-        const offset = (currentPage - 1) * safePageSize;
-        const paged = normalized.slice(offset, offset + safePageSize);
-
-        return NextResponse.json({
-            provider: 'mono',
-            total: normalized.length,
-            page: currentPage,
-            pageSize: safePageSize,
-            pageCount: Math.max(1, Math.ceil(normalized.length / safePageSize)),
-            transactions: paged,
-        });
-    }
-
-    if (!connectedAccount.encryptedAccessToken) {
-        return NextResponse.json({ error: 'Missing Plaid access token' }, { status: 409 });
     }
 
     const clientId = process.env.PLAID_CLIENT_ID;
@@ -258,84 +221,138 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: 'Missing PLAID_CLIENT_ID or PLAID_SECRET' }, { status: 500 });
     }
 
-    const accessToken = decryptToken(connectedAccount.encryptedAccessToken);
+    const plaidAccounts = accounts.filter((account) => account.provider === 'plaid');
+    const monoAccounts = accounts.filter((account) => account.provider === 'mono');
+    const aggregatedTransactions: AggregatedTransaction[] = [];
 
-    // If searching, we fetch a larger batch first to filter in-memory since Plaid's /transactions/get 
-    // doesn't support text searching natively in a single call.
-    const internalPageSize = normalizedSearch ? 500 : safePageSize;
-    const internalOffset = normalizedSearch ? 0 : (currentPage - 1) * safePageSize;
+    const monoSecretKey = process.env.MONO_SECRET_KEY;
+    const monoBaseUrl = process.env.MONO_API_BASE_URL ?? MONO_DEFAULT_BASE_URL;
 
-    const response = await fetch(`${baseUrl}/transactions/get`, {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({
-            client_id: clientId,
-            secret,
-            access_token: accessToken,
-            start_date: isoDateDaysAgo(lookbackDays),
-            end_date: new Date().toISOString().slice(0, 10),
-            options: {
-                count: internalPageSize,
-                offset: internalOffset,
-            },
-        }),
-        cache: 'no-store',
-    });
-
-    if (!response.ok) {
-        const payload = (await response.json().catch(() => null)) as { error_code?: string; error_message?: string } | null;
-        const errorCode = payload?.error_code;
-
-        if (errorCode && RECONNECT_ERROR_CODES.has(errorCode)) {
-            await markConnectedAccountAuthStatus(userId, 'plaid', connectedAccount.accountRef, 'reconnect_required');
-            return NextResponse.json(
-                { error: 'Plaid connection requires relink', code: 'RECONNECT_REQUIRED' },
-                { status: 401 }
-            );
-        }
-
-        return NextResponse.json(
-            { error: payload?.error_message ?? 'Failed to fetch Plaid transactions' },
-            { status: 502 }
-        );
+    if (monoAccounts.length > 0 && !monoSecretKey) {
+        return NextResponse.json({ error: 'Missing MONO_SECRET_KEY' }, { status: 500 });
     }
 
-    await markConnectedAccountAuthStatus(userId, 'plaid', connectedAccount.accountRef, 'active');
+    for (const account of plaidAccounts) {
+        if (!account.encryptedAccessToken) {
+            await markConnectedAccountAuthStatus(userId, 'plaid', account.accountRef, 'reconnect_required');
+            continue;
+        }
 
-    const payload = (await response.json()) as {
-        transactions: Array<{
-            transaction_id: string;
-            name: string;
-            amount: number;
-            date: string;
-            merchant_name: string | null;
-            iso_currency_code: string | null;
-            category: string[] | null;
-        }>;
-        total_transactions: number;
-    };
+        let accessToken = '';
+        try {
+            accessToken = decryptToken(account.encryptedAccessToken);
+        } catch {
+            await markConnectedAccountAuthStatus(userId, 'plaid', account.accountRef, 'reconnect_required');
+            continue;
+        }
 
-    let transactions = payload.transactions;
-    let total = payload.total_transactions;
+        const response = await fetch(`${baseUrl}/transactions/get`, {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({
+                client_id: clientId,
+                secret,
+                access_token: accessToken,
+                start_date: isoDateDaysAgo(lookbackDays),
+                end_date: new Date().toISOString().slice(0, 10),
+                options: {
+                    count: 500,
+                    offset: 0,
+                },
+            }),
+            cache: 'no-store',
+        });
+
+        if (!response.ok) {
+            const payload = (await response.json().catch(() => null)) as { error_code?: string; error_message?: string } | null;
+            const errorCode = payload?.error_code;
+
+            if (errorCode && RECONNECT_ERROR_CODES.has(errorCode)) {
+                await markConnectedAccountAuthStatus(userId, 'plaid', account.accountRef, 'reconnect_required');
+            }
+
+            continue;
+        }
+
+        await markConnectedAccountAuthStatus(userId, 'plaid', account.accountRef, 'active');
+
+        const payload = (await response.json()) as {
+            transactions: Array<{
+                transaction_id: string;
+                name: string;
+                amount: number;
+                date: string;
+                merchant_name: string | null;
+                iso_currency_code: string | null;
+                category: string[] | null;
+            }>;
+            total_transactions: number;
+        };
+
+        aggregatedTransactions.push(...normalizePlaidTransactions(payload.transactions, account.accountRef));
+    }
+
+    for (const account of monoAccounts) {
+        const monoUrl = new URL(`${monoBaseUrl}/accounts/${account.accountRef}/transactions`);
+        monoUrl.searchParams.set('start', toMonoDate(isoDateDaysAgo(lookbackDays)));
+        monoUrl.searchParams.set('end', toMonoDate(new Date().toISOString().slice(0, 10)));
+
+        const monoResponse = await fetch(monoUrl.toString(), {
+            method: 'GET',
+            headers: {
+                accept: 'application/json',
+                'mono-sec-key': monoSecretKey!,
+                authorization: `Bearer ${monoSecretKey!}`,
+            },
+            cache: 'no-store',
+        });
+
+        if (!monoResponse.ok) {
+            const errorBody = await monoResponse.text();
+            console.error(
+                `[Mono] Transactions API error (${monoResponse.status}) for account ${account.accountRef}:`,
+                errorBody,
+            );
+
+            const shouldReconnect =
+                monoResponse.status === 401
+                || monoResponse.status === 403
+                || monoResponse.status === 404
+                || monoResponse.status === 422;
+
+            if (shouldReconnect) {
+                await markConnectedAccountAuthStatus(userId, 'mono', account.accountRef, 'reconnect_required');
+            }
+
+            continue;
+        }
+
+        await markConnectedAccountAuthStatus(userId, 'mono', account.accountRef, 'active');
+
+        const monoPayload = (await monoResponse.json()) as Record<string, unknown>;
+        const rawTransactions = extractMonoTransactions(monoPayload);
+        aggregatedTransactions.push(...normalizeMonoTransactionsForAccount(rawTransactions, account.accountRef));
+    }
+
+    let normalized = aggregateTransactions(aggregatedTransactions);
 
     if (normalizedSearch) {
-        transactions = transactions.filter(tx =>
+        normalized = normalized.filter(tx =>
             tx.name.toLowerCase().includes(normalizedSearch) ||
             tx.category?.some(c => c.toLowerCase().includes(normalizedSearch)) ||
             tx.merchant_name?.toLowerCase().includes(normalizedSearch)
         );
-        total = transactions.length;
-        // Paginate the filtered results
-        const offset = (currentPage - 1) * safePageSize;
-        transactions = transactions.slice(offset, offset + safePageSize);
     }
 
+    const offset = (currentPage - 1) * safePageSize;
+    const paged = normalized.slice(offset, offset + safePageSize);
+
     return NextResponse.json({
-        provider: 'plaid',
-        total,
+        provider: requestedProvider ?? (accounts.length === 1 ? accounts[0].provider : 'all'),
+        total: normalized.length,
         page: currentPage,
         pageSize: safePageSize,
-        pageCount: Math.max(1, Math.ceil(total / safePageSize)),
-        transactions,
+        pageCount: Math.max(1, Math.ceil(normalized.length / safePageSize)),
+        transactions: paged,
     });
 }

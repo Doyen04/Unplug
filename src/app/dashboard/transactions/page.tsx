@@ -7,7 +7,6 @@ import { Search, Receipt, AlertTriangle, RefreshCcw, ChevronLeft, ChevronRight }
 
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { formatCurrency } from '@/lib/utils/format';
-import { providerCurrency } from '@/lib/utils/provider';
 import type { DashboardProvider } from '@/types/subscription';
 
 import { Card } from '@/components/ui/Card';
@@ -21,8 +20,11 @@ import type { Transaction } from '@/lib/client/dashboard-api';
 const providerLabel = (provider: DashboardProvider): string =>
     provider === 'plaid' ? 'Plaid' : 'Mono';
 
+const currencyForTransaction = (transaction: Transaction): string =>
+    transaction.iso_currency_code ?? (transaction.transaction_id.startsWith('mono-') ? 'NGN' : 'USD');
+
 interface TransactionsResponse {
-    provider: DashboardProvider;
+    provider: DashboardProvider | 'all';
     total: number;
     page: number;
     pageSize: number;
@@ -67,14 +69,10 @@ export default function TransactionsPage() {
     });
 
     useEffect(() => {
-        if (providers.connected.length === 0) {
-            if (!isDashboardLoading && selectedProvider) setSelectedProvider(undefined);
-            return;
+        if (selectedProvider && !providers.connected.includes(selectedProvider)) {
+            setSelectedProvider(undefined);
         }
-        if (!selectedProvider || !providers.connected.includes(selectedProvider)) {
-            setSelectedProvider(providers.active ?? providers.connected[0]);
-        }
-    }, [isDashboardLoading, providers.active, providers.connected, selectedProvider]);
+    }, [providers.connected, selectedProvider]);
 
     useEffect(() => {
         const timeout = setTimeout(() => {
@@ -95,10 +93,10 @@ export default function TransactionsPage() {
     }, [selectedProvider, router]);
 
     const { data, isLoading, isError, isFetching, refetch } = useQuery({
-        queryKey: ['transactions-page', days, page, pageSize, selectedProvider ?? 'auto', debouncedSearch],
+        queryKey: ['transactions-page', days, page, pageSize, selectedProvider ?? 'all', debouncedSearch],
         queryFn: () => fetchTransactions(days, page, pageSize, selectedProvider, debouncedSearch),
         retry: false,
-        enabled: Boolean(selectedProvider),
+        enabled: providers.connected.length > 0,
     });
 
 
@@ -139,12 +137,20 @@ export default function TransactionsPage() {
                 <div className="flex items-center gap-4">
                     {providers.hasBoth && (
                         <div className="flex items-center gap-1 rounded-pill bg-bg-muted p-1">
+                            <Button
+                                variant={!selectedProvider ? 'primary' : 'ghost'}
+                                size="sm"
+                                onClick={() => { setSelectedProvider(undefined); setPage(1); }}
+                                className="rounded-pill"
+                            >
+                                All
+                            </Button>
                             {providers.connected.map((p: DashboardProvider) => (
                                 <Button
                                     key={p}
                                     variant={selectedProvider === p ? 'primary' : 'ghost'}
                                     size="sm"
-                                    onClick={() => { setSelectedProvider(p); setPage(1); }}
+                                    onClick={() => { setSelectedProvider(selectedProvider === p ? undefined : p); setPage(1); }}
                                     className="rounded-pill"
                                 >
                                     {providerLabel(p)}
@@ -176,7 +182,7 @@ export default function TransactionsPage() {
                     <TransactionRow
                         key={tx.transaction_id}
                         transaction={tx}
-                        currency={tx.iso_currency_code ?? providerCurrency(selectedProvider)}
+                        currency={currencyForTransaction(tx)}
                         index={i}
                     />
                 )}

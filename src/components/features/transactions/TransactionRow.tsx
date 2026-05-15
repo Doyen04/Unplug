@@ -46,7 +46,7 @@ export const TransactionRow = ({ transaction, currency, index, onDelete }: Trans
                         {transaction.amount > 0 ? 'Outflow' : 'Inflow'}
                     </Badge>
                 </div>
-                
+
                 <Button
                     variant="ghost"
                     size="icon"

@@ -8,7 +8,6 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { SubscriptionRow } from '@/components/features/subscriptions/SubscriptionRow';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { DASHBOARD_FILTER_OPTIONS } from '@/lib/constants/dashboard';
-import { providerCurrency } from '@/lib/utils/provider';
 import type { DashboardProvider, Subscription } from '@/types/subscription';
 
 import { Card } from '@/components/ui/Card';
@@ -19,6 +18,9 @@ import { DataTable } from '@/components/ui/DataTable';
 
 const providerLabel = (provider: DashboardProvider): string =>
     provider === 'plaid' ? 'Plaid' : 'Mono';
+
+const currencyForSubscription = (subscriptionId: string): string =>
+    subscriptionId.startsWith('mono-') ? 'NGN' : 'USD';
 
 export default function SubscriptionsPage() {
     const router = useRouter();
@@ -65,19 +67,11 @@ export default function SubscriptionsPage() {
         return () => clearTimeout(timeout);
     }, [search, setHookSearch]);
 
-    const currency = providerCurrency(providers.active);
-
     useEffect(() => {
-        if (providers.connected.length === 0) {
-            if (!isLoading && selectedProvider) {
-                setSelectedProvider(undefined);
-            }
-            return;
+        if (selectedProvider && !providers.connected.includes(selectedProvider)) {
+            setSelectedProvider(undefined);
         }
-        if (!selectedProvider || !providers.connected.includes(selectedProvider)) {
-            setSelectedProvider(providers.active ?? providers.connected[0]);
-        }
-    }, [isLoading, providers.active, providers.connected, selectedProvider]);
+    }, [providers.connected, selectedProvider]);
 
     useEffect(() => {
         const currentProvider = searchParams.get('provider') || undefined;
@@ -133,12 +127,20 @@ export default function SubscriptionsPage() {
 
             {providers.hasBoth && (
                 <div className="flex items-center gap-1 rounded-pill bg-bg-muted p-1 w-max">
+                    <Button
+                        variant={!selectedProvider ? 'primary' : 'ghost'}
+                        size="sm"
+                        onClick={() => { setSelectedProvider(undefined); setPage(1); }}
+                        className="rounded-pill"
+                    >
+                        All
+                    </Button>
                     {providers.connected.map((p: DashboardProvider) => (
                         <Button
                             key={p}
                             variant={selectedProvider === p ? 'primary' : 'ghost'}
                             size="sm"
-                            onClick={() => { setSelectedProvider(p); setPage(1); }}
+                            onClick={() => { setSelectedProvider(selectedProvider === p ? undefined : p); setPage(1); }}
                             className="rounded-pill"
                         >
                             {providerLabel(p)}
@@ -150,7 +152,7 @@ export default function SubscriptionsPage() {
             <DataTable
                 data={subscriptions}
                 renderItem={(s: Subscription, i: number) => (
-                    <SubscriptionRow key={s.id} subscription={s} index={i} currency={currency} onCancel={cancelSubscription} />
+                    <SubscriptionRow key={s.id} subscription={s} index={i} currency={currencyForSubscription(s.id)} onCancel={cancelSubscription} />
                 )}
                 showDivider={false}
                 itemsClassName="p-6 space-y-4"

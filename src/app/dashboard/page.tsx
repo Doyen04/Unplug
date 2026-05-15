@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Search } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 import { fetchCurrentUser, fetchRecentTransactions, searchTransactions } from '@/lib/client/dashboard-api';
 import { NotificationsDrawer } from '@/components/features/notifications/NotificationsDrawer';
@@ -40,14 +40,25 @@ const startOfMonth = (date: Date): Date => {
 const getMonthKey = (date: Date): string =>
     `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
 
+const currencyForSubscription = (subscriptionId: string): string =>
+    subscriptionId.startsWith('mono-') ? 'NGN' : 'USD';
+
+const currencyForTransaction = (transaction: Transaction): string =>
+    transaction.iso_currency_code ?? (transaction.transaction_id.startsWith('mono-') ? 'NGN' : 'USD');
+
 export default function DashboardPage() {
+    const router = useRouter();
     const searchParams = useSearchParams();
     const [searchQuery, setSearchQuery] = useState('');
     const [isAlertsOpen, setIsAlertsOpen] = useState(false);
     const [ledgerTab, setLedgerTab] = useState<'subscriptions' | 'transactions'>('subscriptions');
     const [userInitials, setUserInitials] = useState('?');
 
-    const initialProvider = (searchParams.get('provider') as DashboardProvider) || undefined;
+    const initialProviderParam = searchParams.get('provider');
+    const initialProvider = initialProviderParam === 'plaid' || initialProviderParam === 'mono'
+        ? initialProviderParam
+        : undefined;
+    const [selectedProvider, setSelectedProvider] = useState<DashboardProvider | undefined>(initialProvider);
     const {
         summary, providers, subscriptions, totalSubscriptions, filterCounts, alerts,
         hasData, isInitialLoading, isLoading, isError, isFetching,
@@ -57,8 +68,24 @@ export default function DashboardPage() {
     } = useDashboardData({
         initialFilter: (searchParams.get('filter') as DashboardFilter) || 'all',
         initialPage: Number(searchParams.get('page')) || 1,
-        provider: initialProvider,
+        provider: selectedProvider,
     });
+
+    useEffect(() => {
+        if (selectedProvider && !providers.connected.includes(selectedProvider)) {
+            setSelectedProvider(undefined);
+        }
+    }, [providers.connected, selectedProvider]);
+
+    useEffect(() => {
+        const currentProvider = searchParams.get('provider') || undefined;
+        if (currentProvider === selectedProvider) return;
+
+        const params = new URLSearchParams(searchParams.toString());
+        if (selectedProvider) params.set('provider', selectedProvider);
+        else params.delete('provider');
+        router.replace(`/dashboard?${params.toString()}`, { scroll: false });
+    }, [selectedProvider, router, searchParams]);
 
     // Debounce local search state to hook's search state
     useEffect(() => {
@@ -80,11 +107,11 @@ export default function DashboardPage() {
     }, [pendingUndoId, clearPendingUndo]);
 
     const { data: txData, isLoading: lux, isError: erx, isFetching: fex, refetch: rex } = useQuery({
-        queryKey: ['dashboard-transactions', providers.active, search],
+        queryKey: ['dashboard-transactions', selectedProvider ?? 'all', search],
         queryFn: () => search
-            ? searchTransactions(search, 365, providers.active || undefined)
-            : fetchRecentTransactions(365, providers.active || undefined),
-        enabled: !!providers.active,
+            ? searchTransactions(search, 365, selectedProvider)
+            : fetchRecentTransactions(365, selectedProvider),
+        enabled: providers.connected.length > 0,
     });
 
     const chartData = useMemo(() => {
@@ -103,7 +130,7 @@ export default function DashboardPage() {
         });
     }, [txData]);
 
-    const currency = providerCurrency(providers.active || initialProvider);
+    const currency = providerCurrency(selectedProvider ?? providers.active);
     const strokeDashoffset = 125.6 * (1 - summary.shameScore / 100);
     const scoreAngle = (summary.shameScore / 100) * Math.PI * 2 - Math.PI / 2;
 
@@ -163,16 +190,20 @@ export default function DashboardPage() {
 
                                 {providers.hasBoth && (
                                     <div className="flex gap-1 bg-bg-muted p-1 rounded-full">
+                                        <Button
+                                            key="all"
+                                            size="sm"
+                                            variant={!selectedProvider ? 'primary' : 'ghost'}
+                                            className="rounded-full px-4 uppercase text-[10px] tracking-widest font-bold"
+                                            onClick={() => setSelectedProvider(undefined)}
+                                        >
+                                            all
+                                        </Button>
                                         {providers.connected.map((p: DashboardProvider) => (
                                             <Button
-                                                key={p} size="sm" variant={providers.active === p ? 'primary' : 'ghost'}
+                                                key={p} size="sm" variant={selectedProvider === p ? 'primary' : 'ghost'}
                                                 className="rounded-full px-4 uppercase text-[10px] tracking-widest font-bold"
-                                                onClick={() => {
-                                                    const params = new URLSearchParams(searchParams.toString());
-                                                    params.set('provider', p);
-                                                    window.history.replaceState(null, '', `?${params.toString()}`);
-                                                    window.location.reload(); // Quickest way to sync providers for now
-                                                }}
+                                                onClick={() => setSelectedProvider(p)}
                                             >
                                                 {p}
                                             </Button>
@@ -213,10 +244,10 @@ export default function DashboardPage() {
                 renderItem={(item: Subscription | Transaction, i: number) => {
                     if (ledgerTab === 'subscriptions') {
                         const s = item as Subscription;
-                        return <SubscriptionRow key={s.id} subscription={s} onCancel={cancelSubscription} index={i} />;
+                        return <SubscriptionRow key={s.id} subscription={s} onCancel={cancelSubscription} index={i} currency={currencyForSubscription(s.id)} />;
                     }
                     const t = item as Transaction;
-                    return <TransactionRow key={t.transaction_id} transaction={t} currency={currency} index={i} />;
+                    return <TransactionRow key={t.transaction_id} transaction={t} currency={currencyForTransaction(t)} index={i} />;
                 }}
                 showDivider={ledgerTab === 'transactions'}
                 itemsClassName={ledgerTab === 'subscriptions' ? "p-6 space-y-4" : ""}
