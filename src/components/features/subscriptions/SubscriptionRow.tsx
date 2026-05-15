@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { AppWindow, AlertTriangle, Shield, Calendar, Ban } from 'lucide-react';
+import { AlertTriangle, Shield, Calendar, Ban } from 'lucide-react';
 
 import { CancelButton } from './CancelButton';
 import { CancellationGuideModal } from './CancellationGuideModal';
 import { formatCurrencyPrecise, toSentenceCase } from '@/lib/utils/format';
 import { getAvatarClass } from '@/lib/utils/avatar';
+import { getServiceIcon } from '@/lib/utils/service-icons';
 import type { Subscription } from '@/types/subscription';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -47,7 +48,7 @@ export const SubscriptionRow = ({
           } ${hasAlert && !isCancelled ? 'border-l-4 border-l-warning' : ''} ${subscription.status === 'unused' ? 'alert-pulse-border' : ''
           }`}>
           <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-btn shadow-sm ${getAvatarClass(subscription.serviceName)} ${isCancelled ? 'grayscale' : ''}`}>
-            <AppWindow size={20} aria-hidden="true" />
+            {getServiceIcon(subscription.serviceName)}
           </div>
 
           <div className="min-w-0 flex-1">

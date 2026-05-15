@@ -15,21 +15,21 @@ export function DashboardSkeleton() {
       {/* Stats Skeleton */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         {[1, 2, 3, 4].map((i) => (
-          <Card key={i} className="h-32 bg-bg-surface/50 border-dashed animate-pulse" />
+          <Card key={i} className="h-32 bg-bg-muted animate-pulse" />
         ))}
       </div>
 
       {/* Charts Skeleton */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <Card className="col-span-2 h-80 bg-bg-surface/50 border-dashed animate-pulse" />
+        <Card className="col-span-2 h-80 bg-bg-muted animate-pulse" />
         <div className="space-y-4">
-           <Card className="h-38 bg-bg-surface/50 border-dashed animate-pulse" />
-           <Card className="h-38 bg-bg-surface/50 border-dashed animate-pulse" />
+           <Card className="h-38 bg-bg-muted animate-pulse" />
+           <Card className="h-38 bg-bg-muted animate-pulse" />
         </div>
       </div>
 
       {/* Ledger Skeleton */}
-      <Card className="h-96 bg-bg-surface/50 border-dashed animate-pulse" />
+      <Card className="h-96 bg-bg-muted animate-pulse" />
     </div>
   );
 }

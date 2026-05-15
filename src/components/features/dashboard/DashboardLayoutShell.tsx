@@ -41,6 +41,7 @@ const Sidebar = ({ expanded, toggleExpanded, isMobileOpen, setIsMobileOpen }: Si
     const pathname = usePathname();
     const [userName, setUserName] = useState('Account user');
     const [userEmail, setUserEmail] = useState('user@unplug.app');
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const fetchUser = async () => {
@@ -53,6 +54,8 @@ const Sidebar = ({ expanded, toggleExpanded, isMobileOpen, setIsMobileOpen }: Si
                 if (payload.email?.trim()) setUserEmail(payload.email.trim());
             } catch {
                 // no-op: keep fallback values
+            } finally {
+                setIsLoading(false);
             }
         };
 
@@ -135,17 +138,29 @@ const Sidebar = ({ expanded, toggleExpanded, isMobileOpen, setIsMobileOpen }: Si
                 </nav>
 
                 <div className="border-t border-border p-4 space-y-4">
-                    <div className={`flex items-center gap-3 py-2 ${!expanded ? 'justify-center' : ''}`}>
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-bg-muted text-text-secondary ring-1 ring-border shadow-sm transition-colors group-hover:bg-text-primary group-hover:text-white">
-                            <User size={18} />
+                    {isLoading ? (
+                        <div className={`flex items-center gap-3 py-2 ${!expanded ? 'justify-center' : ''}`}>
+                            <div className="h-9 w-9 shrink-0 rounded-full bg-bg-muted animate-pulse" />
+                            {expanded && (
+                                <div className="min-w-0 flex-1 space-y-2">
+                                    <div className="h-4 w-24 bg-bg-muted rounded animate-pulse" />
+                                    <div className="h-3 w-32 bg-bg-muted rounded animate-pulse" />
+                                </div>
+                            )}
                         </div>
-                        {expanded ? (
-                            <div className="min-w-0">
-                                <p className="truncate text-sm font-bold capitalize text-text-primary leading-tight">{userName}</p>
-                                <p className="truncate text-[11px] font-medium text-text-muted mt-0.5">{userEmail}</p>
+                    ) : (
+                        <div className={`flex items-center gap-3 py-2 ${!expanded ? 'justify-center' : ''}`}>
+                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-bg-muted text-text-secondary ring-1 ring-border shadow-sm transition-colors group-hover:bg-text-primary group-hover:text-white">
+                                <User size={18} />
                             </div>
-                        ) : null}
-                    </div>
+                            {expanded ? (
+                                <div className="min-w-0">
+                                    <p className="truncate text-sm font-bold capitalize text-text-primary leading-tight">{userName}</p>
+                                    <p className="truncate text-[11px] font-medium text-text-muted mt-0.5">{userEmail}</p>
+                                </div>
+                            ) : null}
+                        </div>
+                    )}
 
                     <Link
                         href="/logout"
