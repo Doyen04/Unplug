@@ -1,8 +1,10 @@
-import { Receipt, Trash2 } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Badge } from '@/components/ui/Badge';
 import { formatCurrency } from '@/lib/utils/format';
 import { Button } from '@/components/ui/Button';
+import { getAvatarClass } from '@/lib/utils/avatar';
+import { getServiceIcon } from '@/lib/utils/service-icons';
 import type { Transaction } from '@/lib/client/dashboard-api';
 
 interface TransactionRowProps {
@@ -13,6 +15,8 @@ interface TransactionRowProps {
 }
 
 export const TransactionRow = ({ transaction, currency, index, onDelete }: TransactionRowProps) => {
+    const merchantLabel = transaction.merchant_name ?? transaction.name;
+
     return (
         <motion.article
             initial={{ opacity: 0, y: 10 }}
@@ -21,13 +25,11 @@ export const TransactionRow = ({ transaction, currency, index, onDelete }: Trans
             className="flex items-center justify-between gap-4 px-5 py-4 hover:bg-bg-base/50 transition-colors group relative"
         >
             <div className="flex min-w-0 items-center gap-4">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-text-primary text-white shadow-sm font-bold">
-                    <Receipt size={16} />
+                <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full shadow-sm ${getAvatarClass(merchantLabel)}`}>
+                    {getServiceIcon(merchantLabel)}
                 </div>
                 <div className="min-w-0">
-                    <p className="truncate text-sm font-bold text-text-primary">
-                        {transaction.merchant_name ?? transaction.name}
-                    </p>
+                    <p className="truncate text-sm font-bold text-text-primary">{merchantLabel}</p>
                     <p className="mt-0.5 text-[10px] font-bold uppercase tracking-widest text-text-muted">
                         {new Date(transaction.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                         {transaction.category?.length ? ` · ${transaction.category[0]}` : ''}

@@ -2,8 +2,10 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
+import { dashboardKeys } from '@/lib/query-keys';
 
 interface ConnectProviderButtonsProps {
     provider: 'plaid' | 'mono';
@@ -62,6 +64,7 @@ export const ConnectProviderButtons = ({
     monoPublicKey = '',
 }: ConnectProviderButtonsProps) => {
     const router = useRouter();
+    const queryClient = useQueryClient();
     const [plaidToken, setPlaidToken] = useState<string | null>(null);
     const [isBusy, setIsBusy] = useState(false);
     const [isPending, setIsPending] = useState(false);
@@ -129,6 +132,9 @@ export const ConnectProviderButtons = ({
                             setIsBusy(false);
                             return;
                         }
+                        await queryClient.invalidateQueries({ queryKey: dashboardKeys.connectedAccounts() });
+                        await queryClient.invalidateQueries({ queryKey: dashboardKeys.payloads() });
+                        await queryClient.refetchQueries({ queryKey: dashboardKeys.connectedAccounts(), type: 'active' });
                         router.push('/dashboard/connect?connected=plaid');
                         setIsBusy(false);
                         router.refresh();
@@ -177,6 +183,9 @@ export const ConnectProviderButtons = ({
                             setIsBusy(false);
                             return;
                         }
+                        await queryClient.invalidateQueries({ queryKey: dashboardKeys.connectedAccounts() });
+                        await queryClient.invalidateQueries({ queryKey: dashboardKeys.payloads() });
+                        await queryClient.refetchQueries({ queryKey: dashboardKeys.connectedAccounts(), type: 'active' });
                         router.push('/dashboard/connect?connected=mono');
                         setIsBusy(false);
                         router.refresh();

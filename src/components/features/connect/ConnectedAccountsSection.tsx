@@ -34,6 +34,7 @@ export const ConnectedAccountsSection = ({
     const accountsQuery = useQuery({
         queryKey: dashboardKeys.connectedAccounts(),
         queryFn: fetchConnectedAccounts,
+        refetchOnMount: 'always',
     });
 
     const disconnectMutation = useMutation({
