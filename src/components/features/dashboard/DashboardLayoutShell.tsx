@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import {
     Home,
     List,
@@ -176,11 +177,22 @@ const Sidebar = ({ expanded, toggleExpanded, isMobileOpen, setIsMobileOpen }: Si
     );
 };
 
-export const DashboardLayoutShell = ({ children }: { children: React.ReactNode }) => {
+export const DashboardLayoutShell = ({ children, requiresOnboarding }: { children: React.ReactNode; requiresOnboarding?: boolean }) => {
     const [expanded, setExpanded] = useState(true);
     const [isMobileOpen, setIsMobileOpen] = useState(false);
     const [isAlertsOpen, setIsAlertsOpen] = useState(false);
     const { alerts } = useDashboardData({ includeDebrief: false });
+    const router = useRouter();
+    const pathname = usePathname();
+
+    useEffect(() => {
+        if (!requiresOnboarding) return;
+        if (!pathname) return;
+        if (pathname.startsWith('/dashboard/onboarding')) return;
+        if (pathname.startsWith('/dashboard/connect')) return;
+        // client-side redirect to onboarding
+        router.push('/dashboard/onboarding');
+    }, [requiresOnboarding, pathname, router]);
 
     return (
         <div className="flex h-screen overflow-hidden bg-bg-base text-text-primary">

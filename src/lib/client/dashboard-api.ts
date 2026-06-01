@@ -176,6 +176,7 @@ export interface UserSettings {
     new_subscriptions_alerts: boolean;
     monthly_summary: boolean;
     price_increase_alert: boolean;
+    onboarding_completed?: boolean;
 }
 
 export const fetchUserSettings = async (): Promise<UserSettings> => {

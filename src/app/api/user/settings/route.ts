@@ -6,6 +6,7 @@ interface UserSettings {
     new_subscriptions_alerts: boolean;
     monthly_summary: boolean;
     price_increase_alert: boolean;
+    onboarding_completed?: boolean;
 }
 
 export async function GET() {
@@ -22,7 +23,7 @@ export async function GET() {
 
     try {
         const result = await sql<UserSettings>`
-            SELECT new_subscriptions_alerts, monthly_summary, price_increase_alert 
+            SELECT new_subscriptions_alerts, monthly_summary, price_increase_alert, onboarding_completed
             FROM user_settings 
             WHERE user_id = ${userId}
         `.execute(db);
@@ -36,6 +37,7 @@ export async function GET() {
             new_subscriptions_alerts: true,
             monthly_summary: true,
             price_increase_alert: false,
+            onboarding_completed: false,
         };
 
         return Response.json(defaults);
@@ -85,9 +87,17 @@ export async function PATCH(req: Request) {
             `.execute(db);
         }
 
+        if (body.onboarding_completed !== undefined) {
+            await sql`
+                UPDATE user_settings
+                SET onboarding_completed = ${body.onboarding_completed}
+                WHERE user_id = ${userId}
+            `.execute(db);
+        }
+
         // Fetch and return updated settings
         const result = await sql<UserSettings>`
-            SELECT new_subscriptions_alerts, monthly_summary, price_increase_alert 
+            SELECT new_subscriptions_alerts, monthly_summary, price_increase_alert, onboarding_completed
             FROM user_settings 
             WHERE user_id = ${userId}
         `.execute(db);

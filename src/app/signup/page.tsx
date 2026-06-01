@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 
 import { FormSubmitButton } from '@/components/features/auth/FormSubmitButton';
 import { auth } from '@/lib/auth';
+import { sendWelcomeEmail } from '@/lib/server/mailer';
 import { getServerSession } from '@/lib/server/auth-session';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
@@ -20,13 +21,19 @@ const signupAction = async (formData: FormData) => {
 
     try {
         await auth.api.signUpEmail({
-            body: { name, email, password, callbackURL: '/dashboard' },
+            body: { name, email, password, callbackURL: '/dashboard/connect?welcome=1' },
             headers: await headers(),
         });
+
+        // fire-and-forget welcome email
+        try {
+            // don't await to avoid slowing signup response
+            void sendWelcomeEmail(email, name);
+        } catch {}
     } catch {
         redirect('/signup?error=signup_failed');
     }
-    redirect('/dashboard');
+    redirect('/dashboard/connect?welcome=1');
 };
 
 export default async function SignupPage({ searchParams }: { searchParams?: Promise<{ error?: string }> }) {

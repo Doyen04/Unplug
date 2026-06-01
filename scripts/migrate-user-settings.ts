@@ -49,10 +49,14 @@ const migrate = async () => {
                 new_subscriptions_alerts BOOLEAN NOT NULL DEFAULT true,
                 monthly_summary BOOLEAN NOT NULL DEFAULT true,
                 price_increase_alert BOOLEAN NOT NULL DEFAULT false,
+                onboarding_completed BOOLEAN NOT NULL DEFAULT false,
                 created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
                 updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
             );
         `);
+
+        // Ensure onboarding flag exists for older installs
+        await client.query(`ALTER TABLE user_settings ADD COLUMN IF NOT EXISTS onboarding_completed BOOLEAN NOT NULL DEFAULT false;`);
 
         console.log('✓ user_settings table created (or already exists).');
         console.log('Migration complete.');

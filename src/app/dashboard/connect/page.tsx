@@ -47,7 +47,7 @@ const resolveCountry = (
 };
 
 interface ConnectAccountsPageProps {
-    searchParams?: Promise<{ error?: string; disconnected?: string; connected?: string; region?: string }>;
+    searchParams?: Promise<{ error?: string; disconnected?: string; connected?: string; region?: string; welcome?: string }>;
 }
 
 const ConnectAccountsPage = async ({ searchParams }: ConnectAccountsPageProps) => {
@@ -82,6 +82,7 @@ const ConnectAccountsPage = async ({ searchParams }: ConnectAccountsPageProps) =
     const hasConnectSuccess = params.connected === 'plaid' || params.connected === 'mono';
     const hasDisconnected = params.disconnected === '1';
     const hasDisconnectError = params.error === 'disconnect_failed';
+    const hasWelcome = params.welcome === '1';
 
     return (
         <div className="space-y-6">
@@ -95,9 +96,10 @@ const ConnectAccountsPage = async ({ searchParams }: ConnectAccountsPageProps) =
                 </div>
             </header>
 
-            {(isOffline || hasConnectSuccess || hasDisconnected || hasDisconnectError) && (
+            {(isOffline || hasWelcome || hasConnectSuccess || hasDisconnected || hasDisconnectError) && (
                 <div className="space-y-3">
                     {isOffline && <Badge variant="warning" className="w-full justify-center py-3 h-auto">Offline Mode: Some data may be unavailable.</Badge>}
+                    {hasWelcome && <Badge variant="success" className="w-full justify-center py-3 h-auto">Welcome! Connect an account to get started.</Badge>}
                     {hasConnectSuccess && <Badge variant="success" className="w-full justify-center py-3 h-auto">Account connected successfully.</Badge>}
                     {hasDisconnected && <Badge variant="secondary" className="w-full justify-center py-3 h-auto">Account disconnected.</Badge>}
                     {hasDisconnectError && <Badge variant="danger" className="w-full justify-center py-3 h-auto">Could not disconnect account.</Badge>}
