@@ -29,6 +29,17 @@ export default async function OnboardingPage() {
     const session = await getServerSession();
     if (!session) redirect('/login');
 
+    const userId = (session as any)?.user?.id;
+    if (!userId) redirect('/login');
+
+    const result = await sql<{ onboarding_completed?: boolean }>`
+        SELECT onboarding_completed FROM user_settings WHERE user_id = ${userId}
+    `.execute(db);
+
+    if (result.rows.length > 0 && result.rows[0].onboarding_completed) {
+        redirect('/dashboard');
+    }
+
     return (
         <main className="space-y-6">
             <h1 className="text-3xl font-bold">Welcome to Unplug</h1>

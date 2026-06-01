@@ -189,7 +189,6 @@ export const DashboardLayoutShell = ({ children, requiresOnboarding }: { childre
         if (!requiresOnboarding) return;
         if (!pathname) return;
         if (pathname.startsWith('/dashboard/onboarding')) return;
-        if (pathname.startsWith('/dashboard/connect')) return;
         // client-side redirect to onboarding
         router.push('/dashboard/onboarding');
     }, [requiresOnboarding, pathname, router]);

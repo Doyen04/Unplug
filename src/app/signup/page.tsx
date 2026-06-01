@@ -21,7 +21,7 @@ const signupAction = async (formData: FormData) => {
 
     try {
         await auth.api.signUpEmail({
-            body: { name, email, password, callbackURL: '/dashboard/connect?welcome=1' },
+            body: { name, email, password, callbackURL: '/dashboard/onboarding' },
             headers: await headers(),
         });
 
@@ -29,11 +29,11 @@ const signupAction = async (formData: FormData) => {
         try {
             // don't await to avoid slowing signup response
             void sendWelcomeEmail(email, name);
-        } catch {}
+        } catch { }
     } catch {
         redirect('/signup?error=signup_failed');
     }
-    redirect('/dashboard/connect?welcome=1');
+    redirect('/dashboard/onboarding');
 };
 
 export default async function SignupPage({ searchParams }: { searchParams?: Promise<{ error?: string }> }) {
