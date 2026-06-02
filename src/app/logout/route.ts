@@ -1,15 +1,16 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 
-export async function GET(request: NextRequest) {
+export async function GET(request: NextRequest): Promise<Response> {
+    // Revoke the server-side session (best-effort).
     try {
-        return await auth.api.signOut({
-            headers: request.headers as any,
-        });
+        await auth.api.signOut({ headers: request.headers as any });
     } catch (err) {
         console.error("Sign out failed:", err);
-
-        // fallback redirect if something breaks
-        return Response.redirect(new URL("/login", request.url));
     }
+
+    // Delete every cookie present in the request, then redirect.
+    const response = NextResponse.redirect(new URL("/login", request.url));
+
+    return response;
 }
