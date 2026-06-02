@@ -50,11 +50,13 @@ export const auth = betterAuth({
             maxAge: 60 * 5, // 5 minutes — avoids DB hit on every request
         },
     },
-    emailAndPassword: {
-        enabled: true,
+    user: {
         deleteUser: {
             enabled: true,
         },
+    },
+    emailAndPassword: {
+        enabled: true,
     },
     trustedOrigins: [...new Set(trustedOrigins)],
     plugins: [

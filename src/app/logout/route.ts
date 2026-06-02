@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { auth } from '@/lib/auth';
 
 const COOKIE_NAMES = [
     'better-auth.session_token',
@@ -13,6 +14,13 @@ const COOKIE_NAMES = [
 ];
 
 export async function GET(request: Request) {
+    // Revoke the session server-side so cookieCache doesn't keep it alive
+    try {
+        await auth.api.signOut({ headers: request.headers as any });
+    } catch {
+        // best-effort: continue to clear cookies even if sign-out call fails
+    }
+
     const response = NextResponse.redirect(new URL('/login', request.url));
 
     COOKIE_NAMES.forEach((cookieName) => {
