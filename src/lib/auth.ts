@@ -52,6 +52,9 @@ export const auth = betterAuth({
     },
     emailAndPassword: {
         enabled: true,
+        deleteUser: {
+            enabled: true,
+        },
     },
     trustedOrigins: [...new Set(trustedOrigins)],
     plugins: [

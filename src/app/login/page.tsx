@@ -55,6 +55,9 @@ export default async function LoginPage({ searchParams }: { searchParams?: Promi
                     {params.error === 'invalid_credentials' && (
                         <Badge variant="danger" className="w-full justify-center py-3 mb-6">Invalid email or password</Badge>
                     )}
+                    {params.error === 'delete_failed' && (
+                        <Badge variant="danger" className="w-full justify-center py-3 mb-6">Account deletion failed. Please contact support.</Badge>
+                    )}
                     {params.reset === 'success' && (
                         <Badge variant="success" className="w-full justify-center py-3 mb-6">Password reset successful</Badge>
                     )}

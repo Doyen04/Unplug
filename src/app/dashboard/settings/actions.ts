@@ -17,23 +17,24 @@ export async function deleteAccountAction() {
   const userId = session.user.id;
 
   try {
-    // 1. Wipe custom state tables
-    await sql`DELETE FROM connected_accounts WHERE user_id = ${userId}`.execute(db);
-    await sql`DELETE FROM user_subscriptions WHERE user_id = ${userId}`.execute(db);
-    await sql`DELETE FROM user_settings WHERE user_id = ${userId}`.execute(db);
-
-    // 2. Wipe identity & sessions through Better-Auth
-    // Better-Auth does not export a direct internal db delete method for user, we use the API client
+    // 1. Delete the Better-Auth user record first (this also invalidates all sessions)
     await auth.api.deleteUser({
       body: {},
       headers: await headers() as any
     });
 
+    // 2. Wipe custom state tables after auth identity is gone
+    await sql`DELETE FROM connected_accounts WHERE user_id = ${userId}`.execute(db);
+    await sql`DELETE FROM user_subscriptions WHERE user_id = ${userId}`.execute(db);
+    await sql`DELETE FROM user_settings WHERE user_id = ${userId}`.execute(db);
+
   } catch (error) {
     console.error('Failed to wipe user data:', error);
-    // Even if something fails, the user requested deletion, but we should probably redirect with an error status.
-    redirect('/dashboard/settings?error=delete_failed');
+    // Redirect to /login with error — avoids the dashboard layout's onboarding guard
+    // which would redirect to /onboarding if user_settings was already partially wiped.
+    redirect('/login?error=delete_failed');
   }
 
   redirect('/signup');
 }
+
