@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation';
 import { getServerSession } from '@/lib/server/auth-session';
 import { sql } from 'kysely';
 import { db } from '@/lib/server/db';
-import OnboardingContent from './onboarding-content';
+import OnboardingClient from './OnboardingClient';
 
 export default async function OnboardingPage() {
     const session = await getServerSession();
@@ -23,5 +23,5 @@ export default async function OnboardingPage() {
         // continue to onboarding
     }
 
-    return <OnboardingContent />;
+    return <OnboardingClient />;
 }

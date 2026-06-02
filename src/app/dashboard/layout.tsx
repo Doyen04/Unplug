@@ -40,7 +40,11 @@ const DashboardLayout = async ({ children }: DashboardLayoutProps) => {
         // ignore and continue
     }
 
-    return <DashboardLayoutShell requiresOnboarding={requiresOnboarding}>{children}</DashboardLayoutShell>;
+    if (requiresOnboarding) {
+        redirect('/onboarding');
+    }
+
+    return <DashboardLayoutShell>{children}</DashboardLayoutShell>;
 };
 
 export default DashboardLayout;
