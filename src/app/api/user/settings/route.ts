@@ -62,38 +62,44 @@ export async function PATCH(req: Request) {
     try {
         const body = await req.json() as Partial<UserSettings>;
 
-        // Validate and update each setting if provided
+        // Validate and coerce boolean fields
+        if (body.new_subscriptions_alerts !== undefined && typeof body.new_subscriptions_alerts !== 'boolean') {
+            return Response.json({ error: 'Invalid new_subscriptions_alerts value' }, { status: 400 });
+        }
+        
+        if (body.monthly_summary !== undefined && typeof body.monthly_summary !== 'boolean') {
+            return Response.json({ error: 'Invalid monthly_summary value' }, { status: 400 });
+        }
+        
+        if (body.price_increase_alert !== undefined && typeof body.price_increase_alert !== 'boolean') {
+            return Response.json({ error: 'Invalid price_increase_alert value' }, { status: 400 });
+        }
+        
+        if (body.onboarding_completed !== undefined && typeof body.onboarding_completed !== 'boolean') {
+            return Response.json({ error: 'Invalid onboarding_completed value' }, { status: 400 });
+        }
+
+        // Single parameterized upsert query via raw SQL with proper parameterization
+        const setClauses: any[] = [sql`updated_at = now()`];
+        
         if (body.new_subscriptions_alerts !== undefined) {
-            await sql`
-                UPDATE user_settings 
-                SET new_subscriptions_alerts = ${body.new_subscriptions_alerts}
-                WHERE user_id = ${userId}
-            `.execute(db);
+            setClauses.push(sql`new_subscriptions_alerts = ${body.new_subscriptions_alerts}`);
         }
-
         if (body.monthly_summary !== undefined) {
-            await sql`
-                UPDATE user_settings 
-                SET monthly_summary = ${body.monthly_summary}
-                WHERE user_id = ${userId}
-            `.execute(db);
+            setClauses.push(sql`monthly_summary = ${body.monthly_summary}`);
         }
-
         if (body.price_increase_alert !== undefined) {
-            await sql`
-                UPDATE user_settings 
-                SET price_increase_alert = ${body.price_increase_alert}
-                WHERE user_id = ${userId}
-            `.execute(db);
+            setClauses.push(sql`price_increase_alert = ${body.price_increase_alert}`);
+        }
+        if (body.onboarding_completed !== undefined) {
+            setClauses.push(sql`onboarding_completed = ${body.onboarding_completed}`);
         }
 
-        if (body.onboarding_completed !== undefined) {
-            await sql`
-                UPDATE user_settings
-                SET onboarding_completed = ${body.onboarding_completed}
-                WHERE user_id = ${userId}
-            `.execute(db);
-        }
+        await sql`
+            INSERT INTO user_settings (user_id, created_at, updated_at)
+            VALUES (${userId}, now(), now())
+            ON CONFLICT (user_id) DO UPDATE SET ${sql.join(setClauses, sql`, `)}
+        `.execute(db);
 
         // Fetch and return updated settings
         const result = await sql<UserSettings>`

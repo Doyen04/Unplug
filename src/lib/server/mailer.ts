@@ -43,8 +43,13 @@ export const sendMail = async (opts: MailOptions): Promise<boolean> => {
         return false;
     }
 
-    await t.sendMail({ from: resolveFrom(), to: opts.to, subject: opts.subject, html: opts.html, text: opts.text });
-    return true;
+    try {
+        await t.sendMail({ from: resolveFrom(), to: opts.to, subject: opts.subject, html: opts.html, text: opts.text });
+        return true;
+    } catch (err) {
+        console.error('sendMail failed:', err);
+        return false;
+    }
 };
 
 export const sendPasswordResetOtpEmail = async (email: string, otp: string) => {
