@@ -1,36 +1,41 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 
-const COOKIE_NAMES = [
-    'better-auth.session_token',
-    'better-auth.session_data',
-    'better-auth.dont_remember',
-    'better-auth.account_data',
-    '__Secure-better-auth.session_token',
-    '__Secure-better-auth.session_data',
-    '__Secure-better-auth.dont_remember',
-    '__Secure-better-auth.account_data',
-    'unplug_session',
+// Pairs of [cookieName, isSecurePrefixed].
+// __Secure- cookies MUST be cleared with Secure:true or the browser ignores it.
+const COOKIES: Array<[string, boolean]> = [
+    ['better-auth.session_token',                   false],
+    ['better-auth.session_data',                    false],
+    ['better-auth.dont_remember',                   false],
+    ['better-auth.account_data',                    false],
+    ['__Secure-better-auth.session_token',          true],
+    ['__Secure-better-auth.session_data',           true],
+    ['__Secure-better-auth.dont_remember',          true],
+    ['__Secure-better-auth.account_data',           true],
+    ['unplug_session',                              false],
 ];
 
 export async function GET(request: Request) {
-    // Revoke the session server-side so cookieCache doesn't keep it alive
+    // Revoke the session server-side first
     try {
         await auth.api.signOut({ headers: request.headers as any });
     } catch {
-        // best-effort: continue to clear cookies even if sign-out call fails
+        // best-effort — still clear cookies below
     }
 
     const response = NextResponse.redirect(new URL('/login', request.url));
 
-    COOKIE_NAMES.forEach((cookieName) => {
+    for (const [name, isSecure] of COOKIES) {
         response.cookies.set({
-            name: cookieName,
+            name,
             value: '',
             path: '/',
             maxAge: 0,
+            httpOnly: true,
+            sameSite: 'lax',
+            secure: isSecure,
         });
-    });
+    }
 
     return response;
 }

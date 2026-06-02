@@ -19,7 +19,6 @@ const resolveBaseUrl = (): string => {
 const authBaseUrl = resolveBaseUrl();
 
 const authSecret = process.env.BETTER_AUTH_SECRET
-    ?? (process.env.NODE_ENV === 'production' ? undefined : 'local-dev-only-secret-change-me');
 
 if (!authSecret) {
     throw new Error('Missing BETTER_AUTH_SECRET. Set this environment variable in production.');

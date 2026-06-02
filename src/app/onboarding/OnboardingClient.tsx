@@ -1,13 +1,11 @@
 'use client';
 
 import { useTransition } from 'react';
-import { useRouter } from 'next/navigation';
 import { Sparkles, ArrowRight, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 
 export default function OnboardingClient() {
-    const router = useRouter();
     const [isPending, startTransition] = useTransition();
 
     const handleContinue = () => {
@@ -20,9 +18,11 @@ export default function OnboardingClient() {
                 });
 
                 if (res.ok) {
-                    router.push('/dashboard/connect');
+                    // Hard-navigate so the server-side dashboard layout re-runs its
+                    // DB check fresh and doesn't redirect back to /onboarding.
+                    window.location.href = '/dashboard/connect';
                 } else if (res.status === 401) {
-                    router.push('/login');
+                    window.location.href = '/login';
                 }
             } catch (error) {
                 console.error('Failed to complete onboarding:', error);
