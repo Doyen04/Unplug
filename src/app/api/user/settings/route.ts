@@ -66,22 +66,22 @@ export async function PATCH(req: Request) {
         if (body.new_subscriptions_alerts !== undefined && typeof body.new_subscriptions_alerts !== 'boolean') {
             return Response.json({ error: 'Invalid new_subscriptions_alerts value' }, { status: 400 });
         }
-        
+
         if (body.monthly_summary !== undefined && typeof body.monthly_summary !== 'boolean') {
             return Response.json({ error: 'Invalid monthly_summary value' }, { status: 400 });
         }
-        
+
         if (body.price_increase_alert !== undefined && typeof body.price_increase_alert !== 'boolean') {
             return Response.json({ error: 'Invalid price_increase_alert value' }, { status: 400 });
         }
-        
+
         if (body.onboarding_completed !== undefined && typeof body.onboarding_completed !== 'boolean') {
             return Response.json({ error: 'Invalid onboarding_completed value' }, { status: 400 });
         }
 
         // Single parameterized upsert query via raw SQL with proper parameterization
         const setClauses: any[] = [sql`updated_at = now()`];
-        
+
         if (body.new_subscriptions_alerts !== undefined) {
             setClauses.push(sql`new_subscriptions_alerts = ${body.new_subscriptions_alerts}`);
         }
@@ -118,3 +118,4 @@ export async function PATCH(req: Request) {
         return Response.json({ error: 'Failed to update settings' }, { status: 500 });
     }
 }
+
