@@ -7,12 +7,8 @@ import { sendPasswordResetOtpEmail } from './server/mailer';
 
 const resolveBaseUrl = (): string => {
     // Explicit app URL (set in Vercel env vars to actual production domain)
-    if (process.env.NEXT_PUBLIC_APP_URL) return process.env.NEXT_PUBLIC_APP_URL;
-    // Better Auth dedicated config
     if (process.env.BETTER_AUTH_URL) return process.env.BETTER_AUTH_URL;
-    // Vercel system env
-    if (process.env.VERCEL_PROJECT_PRODUCTION_URL) return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
-    if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+
     return 'http://localhost:3000';
 };
 
