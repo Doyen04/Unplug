@@ -177,21 +177,6 @@ export const getConnectedAccountById = async (
     return row ? rowToConnectedAccount(row) : null;
 };
 
-export const getConnectedAccountByRef = async (
-    userId: string,
-    provider: ConnectedProvider,
-    accountRef: string
-): Promise<ConnectedAccount | null> => {
-    const row = await typedDb
-        .selectFrom('connected_accounts')
-        .selectAll()
-        .where('user_id', '=', userId)
-        .where('provider', '=', provider)
-        .where('account_ref', '=', accountRef)
-        .executeTakeFirst();
-
-    return row ? rowToConnectedAccount(row) : null;
-};
 
 export const markConnectedAccountAuthStatus = async (
     userId: string,

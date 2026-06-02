@@ -34,8 +34,3 @@ export const interpolateScoreColor = (score: number): string => {
   return `rgb(${lerp(success.r, warning.r, localT)}, ${lerp(success.g, warning.g, localT)}, ${lerp(success.b, warning.b, localT)})`;
 };
 
-export const getScoreColor = (score: number): string => {
-  if (score >= 70) return '#E53434'; // danger
-  if (score >= 40) return '#E8860A'; // warning
-  return '#1C9E5B';                  // success
-};
