@@ -1,4 +1,4 @@
-import { cookies, headers } from 'next/headers';
+import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { Globe } from 'lucide-react';
 
@@ -11,11 +11,11 @@ import { Badge } from '@/components/ui/Badge';
 
 const MONO_COUNTRIES = new Set(['NG', 'GH', 'KE', 'ZA', 'UG', 'TZ']);
 
-const hasAuthSessionCookie = async (): Promise<boolean> => {
-    const cookieStore = await cookies();
-    return Boolean(cookieStore.get('better-auth.session_token')?.value)
-        || Boolean(cookieStore.get('__Secure-better-auth.session_token')?.value);
-};
+// const hasAuthSessionCookie = async (): Promise<boolean> => {
+//     const cookieStore = await cookies();
+//     return Boolean(cookieStore.get('better-auth.session_token')?.value)
+//         || Boolean(cookieStore.get('__Secure-better-auth.session_token')?.value);
+// };
 
 const resolveCountry = (
     countryHeader: string | null,
@@ -52,18 +52,15 @@ interface ConnectAccountsPageProps {
 
 const ConnectAccountsPage = async ({ searchParams }: ConnectAccountsPageProps) => {
     const params = (await searchParams) ?? {};
-    let session;
     let isOffline = false;
-    const hasSessionCookie = await hasAuthSessionCookie();
+    const session = await getServerSession();
 
-    try {
-        session = await getServerSession();
-    } catch (e) {
+    if(!session) {
         isOffline = true;
     }
 
     if (!session) {
-        if (hasSessionCookie || isOffline) {
+        if (session || isOffline) {
             isOffline = true;
         } else {
             redirect('/login');

@@ -4,7 +4,6 @@ import { DashboardLayoutShell } from '@/components/features/dashboard/DashboardL
 import { getServerSession } from '@/lib/server/auth-session';
 import { sql } from 'kysely';
 import { db } from '@/lib/server/db';
-import { authClient } from "@/lib/auth-client" // import the auth client
 
 
 interface DashboardLayoutProps {
@@ -26,7 +25,9 @@ const DashboardLayout = async ({ children }: DashboardLayoutProps) => {
             const result = await sql<{ onboarding_completed?: boolean }>`
                 SELECT onboarding_completed FROM user_settings WHERE user_id = ${userId}
             `.execute(db);
-
+            
+            console.log(result,userId,session, 'result,userid,session');
+    
             if (result.rows.length > 0) {
                 requiresOnboarding = !result.rows[0].onboarding_completed;
             } else {
