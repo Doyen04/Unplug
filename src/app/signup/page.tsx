@@ -6,7 +6,6 @@ import { FormSubmitButton } from '@/components/features/auth/FormSubmitButton';
 import { auth } from '@/lib/auth';
 import { sendWelcomeEmail } from '@/lib/server/mailer';
 import { getServerSession } from '@/lib/server/auth-session';
-import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { Badge } from '@/components/ui/Badge';
@@ -21,7 +20,7 @@ const signupAction = async (formData: FormData) => {
 
     try {
         await auth.api.signUpEmail({
-            body: { name, email, password, callbackURL: '/onboarding' },
+            body: { name, email, password, callbackURL: '/dashboard' },
             headers: await headers(),
         });
 
@@ -33,7 +32,7 @@ const signupAction = async (formData: FormData) => {
     } catch {
         redirect('/signup?error=signup_failed');
     }
-    redirect('/onboarding');
+    // redirect('/onboarding');
 };
 
 export default async function SignupPage({ searchParams }: { searchParams?: Promise<{ error?: string }> }) {
