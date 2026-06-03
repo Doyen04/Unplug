@@ -1,28 +1,26 @@
-import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { DashboardLayoutShell } from '@/components/features/dashboard/DashboardLayoutShell';
 import { getServerSession } from '@/lib/server/auth-session';
 import { sql } from 'kysely';
 import { db } from '@/lib/server/db';
+import { authClient } from "@/lib/auth-client" // import the auth client
+
 
 interface DashboardLayoutProps {
     children: ReactNode;
 }
 
 const DashboardLayout = async ({ children }: DashboardLayoutProps) => {
-    const cookieStore = await cookies();
-    const hasSessionCookie =
-        Boolean(cookieStore.get('better-auth.session_token')?.value)
-        || Boolean(cookieStore.get('__Secure-better-auth.session_token')?.value);
+    const session = await getServerSession();
 
-    if (!hasSessionCookie) {
+    if (!session) {
         redirect('/login');
     }
 
     let requiresOnboarding = false;
     try {
-        const session = await getServerSession();
+    
         const userId = (session as any)?.user?.id;
         if (userId) {
             const result = await sql<{ onboarding_completed?: boolean }>`

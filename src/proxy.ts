@@ -17,6 +17,9 @@ export function handleAuthGuard(request: NextRequest) {
     }
 
     const sessionCookie = getSessionCookie(request);
+
+    console.log(sessionCookie, 'cookie', request.headers.get('cookie'), request.headers);
+    
     if (sessionCookie) {
         return NextResponse.next();
     }

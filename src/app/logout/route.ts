@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { headers } from 'next/headers';
 
 export async function GET(request: NextRequest): Promise<Response> {
     // Revoke the server-side session (best-effort).
+    console.log('touched logout button');
+    
     try {
-        await auth.api.signOut({ headers: request.headers as any });
+        const response = await auth.api.signOut({ headers: await headers(), });
     } catch (err) {
         console.error("Sign out failed:", err);
     }
