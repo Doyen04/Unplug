@@ -108,7 +108,7 @@ export async function PATCH(req: Request) {
             WHERE user_id = ${userId}
         `.execute(db);
 
-        console.log(result, 'result in settings page');
+        console.log(result, 'result in settings page', body,setClauses);
         
         if (result.rows.length > 0) {
             return Response.json(result.rows[0]);
