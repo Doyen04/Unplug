@@ -93,6 +93,7 @@ export async function PATCH(req: Request) {
         }
         if (body.onboarding_completed !== undefined) {
             setClauses.push(sql`onboarding_completed = ${body.onboarding_completed}`);
+            console.log('Updating onboarding_completed:', setClauses);
         }
 
         await sql`
