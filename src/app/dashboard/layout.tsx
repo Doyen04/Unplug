@@ -28,8 +28,8 @@ const DashboardLayout = async ({ children }: DashboardLayoutProps) => {
             
             console.log(result,userId,session, 'result,userid,session');
     
-            if (result.rows.length > 0) {
-                requiresOnboarding = !result.rows[0].onboarding_completed;
+            if (result.rows.length > 0 && result.rows[0].onboarding_completed) {
+                requiresOnboarding = false;
             } else {
                 // no settings row implies not completed
                 requiresOnboarding = true;

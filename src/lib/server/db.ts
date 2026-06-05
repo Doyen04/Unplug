@@ -1,7 +1,20 @@
-import { Kysely, PostgresDialect } from 'kysely';
+import { Kysely, PostgresDialect, ColumnType, Generated  } from 'kysely';
 import { Pool } from 'pg';
 
-type DbShape = Record<string, unknown>;
+
+interface UserSettingsTable {
+    user_id: string;
+    new_subscriptions_alerts: Generated<boolean>;
+    monthly_summary: Generated<boolean>;
+    price_increase_alert: Generated<boolean>;
+    onboarding_completed: Generated<boolean>;
+    created_at: Generated<Date>;  // ← was ColumnType<Date, never, never>
+    updated_at: Generated<Date>;
+}
+
+interface DbShape {
+    user_settings: UserSettingsTable;
+}
 
 const resolveConnectionString = (): string => {
     const fromDatabaseUrl = process.env.DATABASE_URL;
