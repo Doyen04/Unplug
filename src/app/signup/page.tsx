@@ -32,7 +32,7 @@ const signupAction = async (formData: FormData) => {
     } catch {
         redirect('/signup?error=signup_failed');
     }
-    // redirect('/onboarding');
+    redirect('/dashboard')
 };
 
 export default async function SignupPage({ searchParams }: { searchParams?: Promise<{ error?: string }> }) {

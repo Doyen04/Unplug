@@ -1,37 +1,34 @@
 'use server';
-
+import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { db } from '@/lib/server/db';
 import { getServerSession } from '@/lib/server/auth-session';
-import { sql } from 'kysely';
-
+import { auth } from '@/lib/auth';
 
 export async function deleteAccountAction() {
-  const session = await getServerSession();
-  if (!session || !session.user) {
-    redirect('/login');
-  }
+    const session = await getServerSession();
+    if (!session || !session.user) {
+        redirect('/login');
+    }
 
-  const userId = session.user.id;
+    const userId = session.user.id;
 
-  try {
-    // Delete app-level data first (FK children), then Better Auth's own tables.
-    // We delete directly from the DB — auth.api.deleteUser() requires forwarded
-    // HTTP request headers that Next.js server actions cannot provide reliably.
-    await sql`DELETE FROM connected_accounts  WHERE user_id = ${userId}`.execute(db);
-    await sql`DELETE FROM user_subscriptions  WHERE user_id = ${userId}`.execute(db);
-    await sql`DELETE FROM user_settings       WHERE user_id = ${userId}`.execute(db);
+    try {
+        // Delete app-level data first (FK children), then Better Auth's own tables.
+        await db.deleteFrom('connected_accounts').where('user_id', '=', userId).execute();
+        await db.deleteFrom('user_subscriptions').where('user_id', '=', userId).execute();
+        await db.deleteFrom('user_settings').where('user_id', '=', userId).execute();
 
-    // Better Auth tables (session → account → verification → user)
-    await sql`DELETE FROM session      WHERE "userId" = ${userId}`.execute(db);
-    await sql`DELETE FROM account      WHERE "userId" = ${userId}`.execute(db);
-    await sql`DELETE FROM verification WHERE identifier = ${userId}`.execute(db);
-    await sql`DELETE FROM "user"       WHERE id        = ${userId}`.execute(db);
+        // Better Auth tables (session → account → verification → user)
+        await db.deleteFrom('session').where('userId', '=', userId).execute();
+        await db.deleteFrom('account').where('userId', '=', userId).execute();
+        await db.deleteFrom('verification').where('identifier', '=', userId).execute();
+        await db.deleteFrom('user').where('id', '=', userId).execute();
 
-  } catch (error) {
-    console.error('Failed to delete account:', error);
-    redirect('/login?error=delete_failed');
-  }
-
-  redirect('/signup');
+    } catch (error) {
+        console.error('Failed to delete account:', error);
+        redirect('/login?error=delete_failed');
+    }
+    await auth.api.signOut({ headers: await headers() });
+    redirect('/signup');
 }
