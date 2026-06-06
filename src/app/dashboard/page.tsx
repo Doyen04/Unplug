@@ -19,16 +19,21 @@ import { SubscriptionRow } from '@/components/features/subscriptions/Subscriptio
 import { DashboardSkeleton } from '@/components/features/dashboard/DashboardSkeleton';
 
 // Modular Components
-import { DashboardHeader } from './components/DashboardHeader';
-import { DashboardStats } from './components/DashboardStats';
-import { SpendChart } from './components/SpendChart';
-import { SavingsInsight } from './components/SavingsInsight';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Input } from '@/components/ui/Input';
 import { DataTable } from '@/components/ui/DataTable';
 import { TransactionRow } from '@/components/features/transactions/TransactionRow';
+import { DashboardHeader } from '@/components/features/dashboard/DashboardHeader';
+import { DashboardStats } from '@/components/features/dashboard/DashboardStats';
+import { SavingsInsight } from '@/components/features/dashboard/SavingsInsight';
+import { SpendChart } from '@/components/features/dashboard/SpendChart';
+
+
+
+
+
 
 const startOfMonth = (date: Date): Date => {
     const d = new Date(date);
