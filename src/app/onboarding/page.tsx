@@ -1,6 +1,5 @@
 import { redirect } from 'next/navigation';
 import { getServerSession } from '@/lib/server/auth-session';
-import { sql } from 'kysely';
 import { db } from '@/lib/server/db';
 import OnboardingClient from './OnboardingClient';
 
@@ -12,11 +11,13 @@ export default async function OnboardingPage() {
     if (!userId) redirect('/login');
 
     try {
-        const result = await sql<{ onboarding_completed?: boolean }>`
-            SELECT onboarding_completed FROM user_settings WHERE user_id = ${userId}
-        `.execute(db);
+        const result = await db
+            .selectFrom('user_settings')
+            .select('onboarding_completed')
+            .where('user_id', '=', userId)
+            .executeTakeFirst();
 
-        if (result.rows.length > 0 && result.rows[0].onboarding_completed) {
+        if (result?.onboarding_completed) {
             redirect('/dashboard');
         }
     } catch (e) {

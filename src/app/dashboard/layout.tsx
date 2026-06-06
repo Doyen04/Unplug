@@ -2,7 +2,6 @@ import { redirect } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { DashboardLayoutShell } from '@/components/features/dashboard/DashboardLayoutShell';
 import { getServerSession } from '@/lib/server/auth-session';
-import { sql } from 'kysely';
 import { db } from '@/lib/server/db';
 
 
@@ -22,11 +21,13 @@ const DashboardLayout = async ({ children }: DashboardLayoutProps) => {
 
         const userId = (session as any)?.user?.id;
         if (userId) {
-            const result = await sql<{ onboarding_completed?: boolean }>`
-                SELECT onboarding_completed FROM user_settings WHERE user_id = ${userId}
-            `.execute(db);
+            const result = await db
+                .selectFrom('user_settings')
+                .select('onboarding_completed')
+                .where('user_id', '=', userId)
+                .executeTakeFirst();
 
-            if (result.rows.length > 0 && result.rows[0].onboarding_completed) {
+            if (result?.onboarding_completed) {
                 requiresOnboarding = false;
             } else {
                 // no settings row implies not completed

@@ -35,7 +35,7 @@ interface UserSubscriptionsTable {
     amount_monthly: number;
     frequency_label: string | null;
     status: string;
-    confidence: number;
+    confidence: string;
     usage_score: number;
     verdict: string | null;
     alert: unknown | null;            // jsonb

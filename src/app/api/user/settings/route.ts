@@ -1,5 +1,4 @@
 import { getServerSession } from '@/lib/server/auth-session';
-import { sql } from 'kysely';
 import { db } from '@/lib/server/db';
 
 type UserSettingsUpdate = {
@@ -53,17 +52,18 @@ async function upsertUserSettings(userId: string, data: UserSettingsUpdate) {
     if (data.price_increase_alert !== undefined)
         updates.price_increase_alert = data.price_increase_alert;
 
+    const now = new Date();
     await db
         .insertInto('user_settings')
         .values({
             user_id: userId,
             ...updates,
-            created_at: sql`now()`,
-            updated_at: sql`now()`,
+            created_at: now,
+            updated_at: now,
         })
         .onConflict((oc) =>
             oc.column('user_id').doUpdateSet({
-                updated_at: sql`now()`,
+                updated_at: now,
                 ...updates,
             } as any)
         )

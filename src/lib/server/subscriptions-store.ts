@@ -1,4 +1,3 @@
-import { sql } from 'kysely';
 import { db } from './db';
 import type { Subscription, SubscriptionStatus } from '@/types/subscription';
 
@@ -8,50 +7,35 @@ export interface StoredSubscription extends Subscription {
 
 const isProviderScopedId = (id: string): boolean => id.startsWith('plaid-') || id.startsWith('mono-');
 
-interface SubscriptionRow {
-    id: string;
-    serviceName: string;
-    amountMonthly: number | string;
-    frequencyLabel: Subscription['frequencyLabel'];
-    status: Subscription['status'];
-    confidence: Subscription['confidence'];
-    usageScore: number | string;
-    verdict: Subscription['verdict'];
-    alert: Subscription['alert'] | string | null;
-    previousStatus: SubscriptionStatus | null;
-}
-
 export const readStoredSubscriptions = async (userId: string): Promise<StoredSubscription[]> => {
-    // We use sql`` queries for dynamic Record<string, unknown> Kysely db
-    const result = await sql`
-        SELECT 
-            subscription_id as id,
-            service_name as "serviceName",
-            amount_monthly as "amountMonthly",
-            frequency_label as "frequencyLabel",
-            status,
-            confidence,
-            usage_score as "usageScore",
-            verdict,
-            alert,
-            previous_status as "previousStatus"
-        FROM user_subscriptions
-        WHERE user_id = ${userId}
-    `.execute(db);
-
-    const rows = result.rows as SubscriptionRow[];
+    const rows = await db
+        .selectFrom('user_subscriptions')
+        .select([
+            'subscription_id as id',
+            'service_name as serviceName',
+            'amount_monthly as amountMonthly',
+            'frequency_label as frequencyLabel',
+            'status',
+            'confidence',
+            'usage_score as usageScore',
+            'verdict',
+            'alert',
+            'previous_status as previousStatus',
+        ])
+        .where('user_id', '=', userId)
+        .execute();
 
     return rows.map((row) => ({
-        id: row.id,
+        id: row.id as string,
         serviceName: row.serviceName,
         amountMonthly: Number(row.amountMonthly),
-        frequencyLabel: row.frequencyLabel,
-        status: row.status,
-        confidence: row.confidence,
+        frequencyLabel: row.frequencyLabel as StoredSubscription['frequencyLabel'],
+        status: row.status as StoredSubscription['status'],
+        confidence: row.confidence as StoredSubscription['confidence'],
         usageScore: Number(row.usageScore),
-        verdict: row.verdict,
+        verdict: row.verdict as StoredSubscription['verdict'],
         alert: row.alert ? (typeof row.alert === 'string' ? JSON.parse(row.alert) : row.alert) : undefined,
-        previousStatus: row.previousStatus || undefined,
+        previousStatus: (row.previousStatus as SubscriptionStatus | null) || undefined,
     }));
 };
 
@@ -66,26 +50,36 @@ export const writeStoredSubscriptions = async (
 
         const provider = sub.id.split('-')[0];
 
-        await sql`
-            INSERT INTO user_subscriptions (
-                user_id, provider, subscription_id, service_name, amount_monthly,
-                frequency_label, status, confidence, usage_score, verdict, alert, previous_status
-            ) VALUES (
-                ${userId}, ${provider}, ${sub.id}, ${sub.serviceName}, ${sub.amountMonthly},
-                ${sub.frequencyLabel}, ${sub.status}, ${sub.confidence}, ${sub.usageScore},
-                ${sub.verdict}, ${sub.alert ? JSON.stringify(sub.alert) : null}, ${sub.previousStatus ?? null}
+        await db
+            .insertInto('user_subscriptions')
+            .values({
+                user_id: userId,
+                provider,
+                subscription_id: sub.id,
+                service_name: sub.serviceName,
+                amount_monthly: sub.amountMonthly,
+                frequency_label: sub.frequencyLabel,
+                status: sub.status,
+                confidence: sub.confidence,
+                usage_score: sub.usageScore,
+                verdict: sub.verdict,
+                alert: sub.alert ? JSON.stringify(sub.alert) : null,
+                previous_status: sub.previousStatus ?? null,
+            })
+            .onConflict((oc) =>
+                oc.columns(['user_id', 'subscription_id']).doUpdateSet((eb) => ({
+                    service_name: eb.ref('excluded.service_name'),
+                    amount_monthly: eb.ref('excluded.amount_monthly'),
+                    frequency_label: eb.ref('excluded.frequency_label'),
+                    status: eb.ref('excluded.status'),
+                    confidence: eb.ref('excluded.confidence'),
+                    usage_score: eb.ref('excluded.usage_score'),
+                    verdict: eb.ref('excluded.verdict'),
+                    alert: eb.ref('excluded.alert'),
+                    previous_status: eb.ref('excluded.previous_status'),
+                    updated_at: new Date(),
+                }))
             )
-            ON CONFLICT (user_id, subscription_id) DO UPDATE SET
-                service_name = EXCLUDED.service_name,
-                amount_monthly = EXCLUDED.amount_monthly,
-                frequency_label = EXCLUDED.frequency_label,
-                status = EXCLUDED.status,
-                confidence = EXCLUDED.confidence,
-                usage_score = EXCLUDED.usage_score,
-                verdict = EXCLUDED.verdict,
-                alert = EXCLUDED.alert,
-                previous_status = EXCLUDED.previous_status,
-                updated_at = now()
-        `.execute(db);
+            .execute();
     }
 };
