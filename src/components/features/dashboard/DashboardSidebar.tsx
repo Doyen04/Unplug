@@ -1,5 +1,6 @@
 import { authClient } from "@/lib/auth-client";
-import { ChevronLeft, ChevronRight, Home, Link, LinkIcon, List, LogOut, Receipt, Settings, User, Zap } from "lucide-react";
+import { ChevronLeft, ChevronRight, Home, LinkIcon, List, LogOut, Receipt, Settings, User, Zap } from "lucide-react";
+import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -66,7 +67,7 @@ export const Sidebar = ({ expanded, toggleExpanded, isMobileOpen, setIsMobileOpe
             )}
 
             <aside
-                className={`fixed inset-y-0 left-0 z-50 flex flex-col border-r border-border bg-bg-base transition-all duration-300 lg:static ${isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+                className={`text-text-primary fixed inset-y-0 left-0 z-50 flex flex-col border-r border-border bg-bg-base transition-all duration-300 lg:static ${isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
                     } ${expanded ? 'w-60' : 'w-16'}`}
             >
                 <div className={`flex h-20 items-center justify-between pb-3 pt-7 transition-all ${expanded ? 'px-4' : 'px-2'}`}>

@@ -19,15 +19,13 @@ const DashboardLayout = async ({ children }: DashboardLayoutProps) => {
 
     let requiresOnboarding = false;
     try {
-    
+
         const userId = (session as any)?.user?.id;
         if (userId) {
             const result = await sql<{ onboarding_completed?: boolean }>`
                 SELECT onboarding_completed FROM user_settings WHERE user_id = ${userId}
             `.execute(db);
-            
-            console.log(result,userId,session, 'result,userid,session');
-    
+
             if (result.rows.length > 0 && result.rows[0].onboarding_completed) {
                 requiresOnboarding = false;
             } else {

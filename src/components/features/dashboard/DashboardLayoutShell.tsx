@@ -1,11 +1,10 @@
 'use client';
 
-import { useState } from 'react';
-import { Bell, Menu} from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Bell, Menu } from 'lucide-react';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { NotificationsDrawer } from '@/components/features/notifications/NotificationsDrawer';
 import { Sidebar } from './DashboardSidebar';
-
 
 
 

@@ -16,7 +16,7 @@ const loginAction = async (formData: FormData) => {
     const password = String(formData.get('password') ?? '').trim();
 
     if (!email || !password) redirect('/login?error=invalid_credentials');
-    
+
     //work on this /dasboard redirect after login, it is currently hardcoded in the callbackURL above
     try {
         await auth.api.signInEmail({
@@ -32,7 +32,6 @@ const loginAction = async (formData: FormData) => {
 export default async function LoginPage({ searchParams }: { searchParams?: Promise<{ error?: string; reset?: string }> }) {
     const params = (await searchParams) ?? {};
     const session = await getServerSession();
-    console.log('session on login page', session);
     if (session) redirect('/dashboard');
 
     return (
