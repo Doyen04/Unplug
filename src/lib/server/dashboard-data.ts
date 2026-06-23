@@ -659,7 +659,7 @@ export const getDashboardPayload = async (
         .filter((item) => item.status === 'unused')
         .reduce((sum, item) => sum + item.amountMonthly * 12, 0);
 
-    const shameScore = Math.min(100, Math.max(0, 100 - Math.round(monthlySpend * 0.75)));
+    const shameScore = Math.min(100, Math.max(0, Math.round(monthlySpend * 0.75)));
 
     const summary: DashboardSummary = {
         monthlySpend,
