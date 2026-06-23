@@ -1,15 +1,23 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { ExternalLink, Search, X, CheckCircle, Loader2 } from 'lucide-react';
+import { ExternalLink, Search, X, CheckCircle, Loader2, Sparkles, AlertCircle } from 'lucide-react';
 import { toSentenceCase } from '@/lib/utils/format';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface CancellationGuideModalProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirmCancel: () => void | Promise<void>;
   serviceName: string;
+}
+
+interface AIInstructions {
+  normalizedServiceName: string;
+  difficulty: 'easy' | 'medium' | 'hard';
+  estimatedTimeMinutes: number;
+  steps: string[];
+  directLink: string;
 }
 
 export const CancellationGuideModal = ({
@@ -19,9 +27,40 @@ export const CancellationGuideModal = ({
   serviceName,
 }: CancellationGuideModalProps) => {
   const [isConfirming, setIsConfirming] = useState(false);
+  const [isLoadingInstructions, setIsLoadingInstructions] = useState(true);
+  const [instructions, setInstructions] = useState<AIInstructions | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  // Helper to generate a Google search URL for how to cancel
+  // Helper to generate a Google search URL for how to cancel (as fallback)
   const searchUrl = `https://www.google.com/search?q=how+to+cancel+${encodeURIComponent(serviceName)}+subscription`;
+
+  useEffect(() => {
+    if (!isOpen) {
+      setInstructions(null);
+      setError(null);
+      return;
+    }
+
+    const loadInstructions = async () => {
+      setIsLoadingInstructions(true);
+      setError(null);
+      try {
+        const response = await fetch(`/api/subscriptions/cancel-instructions?serviceName=${encodeURIComponent(serviceName)}`);
+        if (!response.ok) {
+          throw new Error('Failed to load cancellation steps');
+        }
+        const data = await response.json();
+        setInstructions(data);
+      } catch (err: any) {
+        console.error(err);
+        setError(err.message || 'Something went wrong');
+      } finally {
+        setIsLoadingInstructions(false);
+      }
+    };
+
+    loadInstructions();
+  }, [isOpen, serviceName]);
 
   const handleConfirm = async () => {
     setIsConfirming(true);
@@ -37,6 +76,21 @@ export const CancellationGuideModal = ({
     if (isConfirming) return; // Prevent closing while confirming
     onClose();
   };
+
+  const getDifficultyColor = (diff: AIInstructions['difficulty']) => {
+    switch (diff) {
+      case 'easy':
+        return 'bg-success-light text-success ring-success/20';
+      case 'medium':
+        return 'bg-warning-light text-warning ring-warning/20';
+      case 'hard':
+        return 'bg-danger-light text-danger ring-danger/20';
+      default:
+        return 'bg-bg-muted text-text-secondary ring-border';
+    }
+  };
+
+  const displayServiceName = instructions?.normalizedServiceName || toSentenceCase(serviceName);
 
   return (
     <AnimatePresence>
@@ -67,7 +121,7 @@ export const CancellationGuideModal = ({
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="absolute inset-0 z-10 bg-white/80 backdrop-blur-[2px] flex items-center justify-center"
+                  className="absolute inset-0 z-25 bg-white/80 backdrop-blur-[2px] flex items-center justify-center"
                 >
                   <div className="flex flex-col items-center gap-3 animate-pulse">
                     <Loader2 size={28} className="animate-spin text-[#E53434]" />
@@ -78,7 +132,9 @@ export const CancellationGuideModal = ({
             </AnimatePresence>
 
             <div className="flex items-center justify-between border-b border-[#E8E7E0] px-5 py-4 bg-[#FAFAF7]">
-              <h2 id="modal-title" className="text-lg font-bold text-[#1A1A17]">Cancel {toSentenceCase(serviceName)}</h2>
+              <h2 id="modal-title" className="text-lg font-bold text-[#1A1A17] flex items-center gap-2">
+                <span>Cancel {displayServiceName}</span>
+              </h2>
               <button
                 type="button"
                 onClick={handleClose}
@@ -89,27 +145,94 @@ export const CancellationGuideModal = ({
               </button>
             </div>
 
-            <div className="p-5">
+            <div className="p-5 max-h-[75vh] overflow-y-auto">
               <p className="text-sm text-[#6B6960] mb-5 leading-relaxed">
                 Because bank connections are read-only to protect your security, Unplug cannot automatically stop payments on your behalf.
-                You must cancel the subscription directly with <strong className="text-[#1A1A17]">{serviceName}</strong>.
+                You must cancel the subscription directly with <strong className="text-[#1A1A17]">{displayServiceName}</strong>.
               </p>
 
-              <div className="mb-6 rounded-xl border border-[#D0CFC7] bg-[#FAFAF7] p-4 text-sm flex gap-3">
-                <Search size={18} className="text-[#A9A79E] shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-semibold text-[#1A1A17] mb-1">Find Cancellation Instructions</p>
-                  <p className="text-[#6B6960] mb-2 text-xs">Search for the exact steps to cancel your account.</p>
+              {/* dynamic AI instructions layout */}
+              {isLoadingInstructions ? (
+                <div className="mb-6 rounded-xl border border-[#E8E7E0] bg-[#FAFAF7] p-5 space-y-3">
+                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#FF5C35]">
+                    <Loader2 size={16} className="animate-spin" />
+                    <span>AI Tailoring Instructions...</span>
+                  </div>
+                  <div className="h-4 bg-[#E8E7E0] rounded animate-pulse w-3/4"></div>
+                  <div className="h-3 bg-[#E8E7E0] rounded animate-pulse w-full"></div>
+                  <div className="h-3 bg-[#E8E7E0] rounded animate-pulse w-5/6"></div>
+                </div>
+              ) : error ? (
+                /* Fallback to simple Google Search on error */
+                <div className="mb-6 rounded-xl border border-[#D0CFC7] bg-[#FAFAF7] p-4 text-sm">
+                  <div className="flex gap-3 mb-3 text-danger">
+                    <AlertCircle size={18} className="shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-semibold">Unable to fetch AI guide</p>
+                      <p className="text-xs text-[#6B6960]">Proceed with manual cancellation search.</p>
+                    </div>
+                  </div>
                   <a
                     href={searchUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.05em] text-[#FF5C35] hover:text-[#C93A1A]"
+                    className="w-full inline-flex items-center justify-center gap-2 rounded-xl border border-[#D0CFC7] bg-white px-4 py-2.5 text-xs font-bold uppercase tracking-[0.05em] text-[#FF5C35] hover:bg-[#F4F3EE]"
                   >
                     Search Google <ExternalLink size={12} />
                   </a>
                 </div>
-              </div>
+              ) : instructions ? (
+                /* AI Instructions Loaded successfully */
+                <div className="mb-6 space-y-4">
+                  {/* Badges */}
+                  <div className="flex flex-wrap gap-2">
+                    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wider ring-1 ring-inset ${getDifficultyColor(instructions.difficulty)}`}>
+                      {instructions.difficulty} difficulty
+                    </span>
+                    <span className="inline-flex items-center rounded-full bg-bg-muted px-2.5 py-0.5 text-xs font-semibold text-text-secondary ring-1 ring-inset ring-border">
+                      ~{instructions.estimatedTimeMinutes} min{instructions.estimatedTimeMinutes > 1 ? 's' : ''}
+                    </span>
+                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#FF5C35] ml-auto">
+                      <Sparkles size={12} /> AI Tailored
+                    </span>
+                  </div>
+
+                  {/* Steps */}
+                  <div className="rounded-xl border border-[#E8E7E0] bg-[#FAFAF7] p-4">
+                    <p className="font-semibold text-xs uppercase tracking-wider text-text-primary mb-3">Cancellation Steps</p>
+                    <ol className="list-decimal pl-5 space-y-2.5 text-sm text-[#6B6960]">
+                      {instructions.steps.map((step, idx) => (
+                        <li key={idx} className="leading-relaxed pl-1">
+                          {step}
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+
+                  {/* Direct Link / Google Link */}
+                  <div className="flex flex-col gap-2">
+                    {instructions.directLink ? (
+                      <a
+                        href={instructions.directLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[#FF5C35] px-4 py-2.5 text-xs font-bold uppercase tracking-[0.05em] text-white hover:bg-[#C93A1A] transition-colors"
+                      >
+                        Go to Cancellation Page <ExternalLink size={12} />
+                      </a>
+                    ) : null}
+                    
+                    <a
+                      href={searchUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full inline-flex items-center justify-center gap-2 rounded-xl border border-[#D0CFC7] bg-white px-4 py-2 text-xs font-semibold text-[#6B6960] hover:bg-[#F4F3EE] hover:text-[#1A1A17]"
+                    >
+                      <Search size={12} /> Search Google instead
+                    </a>
+                  </div>
+                </div>
+              ) : null}
 
               <div className="border-t border-[#E8E7E0] pt-4">
                 <p className="text-sm font-semibold text-[#1A1A17] mb-3">Did you successfully cancel?</p>

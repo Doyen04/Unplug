@@ -52,7 +52,37 @@ export const toSentenceCase = (value: string): string => {
 };
 
 export const normalizeMerchantLabel = (rawName: string): string => {
-  return rawName.trim().replace(/\s+/g, ' ');
+  let name = rawName.trim();
+  
+  // Remove URLs or domains (e.g. netflix.com, spotify.co.uk)
+  name = name.replace(/(https?:\/\/)?(www\.)?([a-zA-Z0-9-]+\.[a-zA-Z]{2,})(\/[a-zA-Z0-9-_]+)*/gi, '$3');
+  name = name.replace(/\.[a-zA-Z]{2,4}$/i, ''); // Strip top level domain
+
+  // Strip phone numbers
+  name = name.replace(/[\d+-]{7,}/g, '');
+
+  // Strip common corporate suffixes & locations & billing jargon
+  const patternsToRemove = [
+    /\b(inc|ltd|llc|co|corp|gmbh|sa|pvt|pty|plc|sarl)\b/gi,
+    /\b(us|uk|ca|fr|de|nl|eu|bill|billing|sub|subscription|recurring|pmt|payment|chg|charge)\b/gi,
+    /\*+/g, // asterisks
+    /[-_/\\#@:]/g, // special chars
+  ];
+
+  for (const pattern of patternsToRemove) {
+    name = name.replace(pattern, ' ');
+  }
+
+  // Remove multiple spaces, numbers, and trim
+  name = name.replace(/\s+/g, ' ').replace(/\d+/g, '').trim();
+
+  // Convert to Title Case
+  if (!name) return 'Unknown Service';
+  
+  return name
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
 };
 
 export const toMerchantKey = (label: string): string =>
