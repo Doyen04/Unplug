@@ -154,13 +154,26 @@ export const upsertConnectedAccount = async (
 };
 
 export const disconnectConnectedAccount = async (userId: string, id: string): Promise<boolean> => {
+    const account = await getConnectedAccountById(userId, id);
+    if (!account) return false;
+
     const result = await typedDb
         .deleteFrom('connected_accounts')
         .where('user_id', '=', userId)
         .where('id', '=', id)
         .executeTakeFirst();
 
-    return (result?.numDeletedRows ?? BigInt(0)) > BigInt(0);
+    const deleted = (result?.numDeletedRows ?? BigInt(0)) > BigInt(0);
+
+    if (deleted) {
+        await db
+            .deleteFrom('user_subscriptions')
+            .where('user_id', '=', userId)
+            .where('provider', '=', account.provider)
+            .execute();
+    }
+
+    return deleted;
 };
 
 export const getConnectedAccountById = async (
