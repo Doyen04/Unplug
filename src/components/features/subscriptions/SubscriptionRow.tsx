@@ -47,7 +47,7 @@ export const SubscriptionRow = ({
                 <Card className={`group flex flex-col gap-3 p-4 sm:flex-row sm:items-center ${isCancelled ? 'opacity-60' : ''
                     } ${hasAlert && !isCancelled ? 'border-l-4 border-l-warning' : ''} ${subscription.status === 'unused' ? 'alert-pulse-border' : ''
                     }`}>
-                    <div className="flex items-center gap-3 w-full sm:w-auto min-w-0">
+                    <div className="flex items-center gap-3 w-full sm:flex-1 min-w-0">
                         <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-btn shadow-sm ${getAvatarClass(subscription.serviceName)} ${isCancelled ? 'grayscale' : ''}`}>
                             {getServiceIcon(subscription.serviceName)}
                         </div>
