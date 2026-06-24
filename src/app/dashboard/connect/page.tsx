@@ -86,10 +86,12 @@ const ConnectAccountsPage = async ({ searchParams }: ConnectAccountsPageProps) =
             <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight text-text-primary">Connect Accounts</h1>
-                    <p className="flex items-center gap-1.5 text-sm text-text-secondary">
-                        <Globe size={14} className="text-text-muted" />
-                        Region detected: <span className="text-text-primary font-bold">{countryCode}</span>. Choose your bank linking provider.
-                    </p>
+                    <div className="flex items-start gap-1.5 text-sm text-text-secondary">
+                        <Globe size={14} className="text-text-muted mt-0.5 shrink-0" />
+                        <p>
+                            Region detected: <span className="text-text-primary font-bold">{countryCode}</span>. Choose your bank linking provider.
+                        </p>
+                    </div>
                 </div>
             </header>
 
