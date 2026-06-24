@@ -169,7 +169,7 @@ export default function SubscriptionsPage() {
                                 <button
                                     key={item.key}
                                     onClick={() => { setFilter(item.key); setPage(1); }}
-                                    className={`h-8 rounded-pill px-4 flex items-center justify-center text-[10px] font-bold uppercase tracking-widest transition-all ${item.key === filter
+                                    className={`h-8 rounded-pill px-4 flex shrink-0 items-center justify-center text-[10px] font-bold uppercase tracking-widest transition-all ${item.key === filter
                                         ? 'bg-brand text-white shadow-md'
                                         : 'bg-bg-muted text-text-secondary hover:bg-bg-subtle border border-border'
                                         }`}

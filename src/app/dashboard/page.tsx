@@ -236,7 +236,7 @@ export default function DashboardPage() {
                                     {DASHBOARD_FILTER_OPTIONS.map(f => (
                                         <button
                                             key={f.key} onClick={() => setFilter(f.key)}
-                                            className={`h-8 px-4 rounded-full flex items-center justify-center text-[10px] font-bold uppercase transition-all ${filter === f.key ? 'bg-brand text-white shadow-sm' : 'bg-bg-muted text-text-secondary border border-border-strong hover:bg-bg-subtle'}`}
+                                            className={`h-8 px-4 rounded-full flex shrink-0 items-center justify-center text-[10px] font-bold uppercase transition-all ${filter === f.key ? 'bg-brand text-white shadow-sm' : 'bg-bg-muted text-text-secondary border border-border-strong hover:bg-bg-subtle'}`}
                                         >
                                             {f.label} ({filterCounts[f.key]})
                                         </button>
