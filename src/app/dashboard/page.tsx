@@ -232,7 +232,7 @@ export default function DashboardPage() {
 
                         {ledgerTab === 'subscriptions' && (
                             <div className="h-14 flex items-center gap-2 px-6 border-t border-border bg-bg-muted/10">
-                                <div className="flex items-center gap-2 overflow-x-auto no-scrollbar w-full">
+                                <div className="flex items-center gap-2 overflow-x-auto scrollbar-hidden w-full">
                                     {DASHBOARD_FILTER_OPTIONS.map(f => (
                                         <button
                                             key={f.key} onClick={() => setFilter(f.key)}

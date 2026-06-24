@@ -164,7 +164,7 @@ export default function SubscriptionsPage() {
                 emptyAction={<Button variant="secondary" onClick={() => { setSearch(''); setFilter('all'); }}>Clear all filters</Button>}
                 header={
                     <div className="border-b border-border bg-bg-muted/30 px-6 h-14 flex items-center">
-                        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar w-full">
+                        <div className="flex items-center gap-2 overflow-x-auto scrollbar-hidden w-full">
                             {DASHBOARD_FILTER_OPTIONS.map((item) => (
                                 <button
                                     key={item.key}

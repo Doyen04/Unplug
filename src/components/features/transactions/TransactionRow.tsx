@@ -50,7 +50,7 @@ export const TransactionRow = ({ transaction, currency, index, onDelete }: Trans
                 <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 rounded-full text-text-muted hover:text-danger hover:bg-danger/10 opacity-0 group-hover:opacity-100 transition-all duration-200"
+                    className="h-8 w-8 rounded-full text-text-muted hover:text-danger hover:bg-danger/10 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-200"
                     onClick={(e: React.MouseEvent) => {
                         e.stopPropagation();
                         onDelete?.(transaction.transaction_id);
