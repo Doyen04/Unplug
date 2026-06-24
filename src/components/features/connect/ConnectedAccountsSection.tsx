@@ -134,9 +134,9 @@ export const ConnectedAccountsSection = ({
                                     key={account.id}
                                     className="flex flex-col gap-4 rounded-xl border border-border bg-bg-base/50 p-4 sm:flex-row sm:items-center sm:justify-between transition-colors hover:bg-bg-base"
                                 >
-                                    <div>
+                                    <div className="min-w-0">
                                         <p className="text-sm font-bold text-text-primary">{account.displayName}</p>
-                                        <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted">
+                                        <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted break-all">
                                             {account.provider} · {account.accountRef}
                                         </p>
                                         <Badge variant={account.authStatus === 'reconnect_required' ? 'warning' : 'success'} className="mt-2 text-[8px] px-1.5">
