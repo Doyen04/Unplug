@@ -35,14 +35,8 @@ import { db } from '@/lib/server/db';
  */
 function verifyPaystackSignature(rawBody: string, signature: string): boolean {
     const secret = process.env.PAYSTACK_SECRET_KEY!;
+    console.log('[paystack webhook] verifying signature', rawBody);
     const expected = crypto.createHmac('sha512', secret).update(rawBody).digest('hex');
-    console.log('[paystack-webhook] secret defined:', !!secret);
-    console.log('[paystack-webhook] signature received:', !!signature);
-    console.log('[paystack-webhook] signature expected:', !!expected);
-    console.log('[paystack-webhook] raw body:', rawBody);
-    console.log('[paystack-webhook] signature:', signature);
-    console.log('[paystack-webhook] expected signature:', expected);
-    console.log('[paystack-webhook] signature match:', expected === signature);
     return expected === signature;
 }
 
