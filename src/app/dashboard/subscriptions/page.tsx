@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Input } from '@/components/ui/Input';
 import { DataTable } from '@/components/ui/DataTable';
+import { ManualSubscriptionForm } from '@/components/features/subscriptions/ManualSubscriptionForm';
 
 const providerLabel = (provider: DashboardProvider): string =>
     provider === 'plaid' ? 'Plaid' : 'Mono';
@@ -124,6 +125,8 @@ export default function SubscriptionsPage() {
                     />
                 </div>
             </header>
+
+            <ManualSubscriptionForm onSuccess={() => { void refetch(); }} />
 
             {providers.hasBoth && (
                 <div className="flex items-center gap-1 rounded-pill bg-bg-muted p-1 w-max">

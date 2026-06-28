@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { Search } from 'lucide-react';
+import { ArrowRight, Search } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useRouter, useSearchParams } from 'next/navigation';
 
@@ -58,6 +59,7 @@ export default function DashboardPage() {
     const [isAlertsOpen, setIsAlertsOpen] = useState(false);
     const [ledgerTab, setLedgerTab] = useState<'subscriptions' | 'transactions'>('subscriptions');
     const [userInitials, setUserInitials] = useState('?');
+    const [userName, setUserName] = useState('');
 
     const initialProviderParam = searchParams.get('provider');
     const initialProvider = initialProviderParam === 'plaid' || initialProviderParam === 'mono'
@@ -101,7 +103,12 @@ export default function DashboardPage() {
     }, [searchQuery, setSearch]);
 
     useEffect(() => {
-        fetchCurrentUser().then(u => setUserInitials(getNameInitials(u.name || ''))).catch(() => { });
+        fetchCurrentUser()
+            .then((u) => {
+                setUserName(u.name || '');
+                setUserInitials(getNameInitials(u.name || ''));
+            })
+            .catch(() => { });
     }, []);
 
     // Auto-dismiss undo toast after 5 seconds
@@ -161,6 +168,7 @@ export default function DashboardPage() {
                 summary={summary} totalSubscriptions={totalSubscriptions} activeFilterCount={filterCounts.active}
                 providers={providers} currency={currency} scoreColor={interpolateScoreColor(summary.shameScore)}
                 strokeDashoffset={strokeDashoffset} dialX={22 + 20 * Math.cos(scoreAngle)} dialY={22 + 20 * Math.sin(scoreAngle)}
+                userName={userName}
             />
 
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
@@ -174,6 +182,21 @@ export default function DashboardPage() {
                     currency={currency} onFilterUnused={() => setFilter('unused')}
                 />
             </div>
+
+            <Card className="border border-brand/20 bg-linear-to-br from-brand/10 via-bg-surface to-bg-surface p-6">
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                    <div className="space-y-2">
+                        <div className="text-[10px] font-bold uppercase tracking-[0.24em] text-text-muted">Billing & cards</div>
+                        <h2 className="text-xl font-semibold text-text-primary">Protect renewals with dedicated virtual cards</h2>
+                        <p className="max-w-2xl text-sm text-text-secondary">
+                            Head to billing to upgrade to Pro, manage your cards, and keep every recurring subscription covered.
+                        </p>
+                    </div>
+                    <Button asChild variant="primary" size="sm">
+                        <Link href="/dashboard/billing">Open billing <ArrowRight size={14} className="ml-2" /></Link>
+                    </Button>
+                </div>
+            </Card>
 
             <DataTable<Subscription | Transaction>
                 className="overflow-hidden p-0"

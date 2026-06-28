@@ -1,6 +1,9 @@
-import { Flame, Layers, Link as LinkIcon, Check, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { useState } from 'react';
+import { Flame, Layers, Link as LinkIcon, Check, ArrowUpRight, Share2 } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
 import { formatCurrency } from '@/lib/utils/format';
+import { ShareCard } from '@/components/shame-score/ShareCard';
 
 interface DashboardStatsProps {
   summary: {
@@ -8,6 +11,7 @@ interface DashboardStatsProps {
     recentTransactionCount: number;
     shameScore: number;
     linkedAccounts: number;
+    unusedCount: number;
   };
   totalSubscriptions: number;
   activeFilterCount: number;
@@ -21,6 +25,7 @@ interface DashboardStatsProps {
   strokeDashoffset: number;
   dialX: number;
   dialY: number;
+  userName?: string;
 }
 
 const providerLabel = (provider: string): string =>
@@ -36,7 +41,10 @@ export function DashboardStats({
   strokeDashoffset,
   dialX,
   dialY,
+  userName,
 }: DashboardStatsProps) {
+  const [isSharing, setIsSharing] = useState(false);
+
   return (
     <section className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
       {/* Monthly Burn */}
@@ -100,11 +108,17 @@ export function DashboardStats({
 
       {/* Shame Score */}
       <Card className="group relative flex flex-col gap-3 overflow-hidden p-3.5">
-        <div className="z-10 flex items-center gap-3">
-          <div className="flex h-9.5 w-9.5 items-center justify-center rounded-full bg-bg-base text-text-primary ring-1 ring-border transition-colors group-hover:bg-text-primary group-hover:text-white">
-            <Check size={20} />
+        <div className="z-10 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="flex h-9.5 w-9.5 items-center justify-center rounded-full bg-bg-base text-text-primary ring-1 ring-border transition-colors group-hover:bg-text-primary group-hover:text-white">
+              <Check size={20} />
+            </div>
+            <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-text-secondary">Shame Score</p>
           </div>
-          <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-text-secondary">Shame Score</p>
+          <Button type="button" variant="ghost" size="sm" className="h-8 px-3 text-[11px]" onClick={() => setIsSharing((value) => !value)}>
+            <Share2 size={12} className="mr-1.5" />
+            {isSharing ? 'Hide' : 'Share'}
+          </Button>
         </div>
         <div className="z-10 flex min-h-14 items-center justify-between">
           <p className="font-ui text-3xl font-bold tabular-nums leading-none text-text-primary">{summary.shameScore}</p>
@@ -139,8 +153,19 @@ export function DashboardStats({
           </div>
         </div>
         <div className="inline-flex items-center gap-1.5 text-[11px] text-[#5E9273]">
-          <span>Trend analysis coming soon</span>
+          <span>{summary.unusedCount} subscriptions need attention</span>
         </div>
+        {isSharing && (
+          <div className="z-10 rounded-2xl border border-border bg-bg-surface/80 p-3">
+            <ShareCard
+              score={summary.shameScore}
+              wasteAmountNaira={summary.monthlySpend}
+              totalSubscriptions={totalSubscriptions}
+              wastedCount={summary.unusedCount}
+              userName={userName}
+            />
+          </div>
+        )}
       </Card>
     </section>
   );

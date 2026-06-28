@@ -1,5 +1,5 @@
 import { authClient } from "@/lib/auth-client";
-import { ChevronLeft, ChevronRight, Home, LinkIcon, List, LogOut, Receipt, Settings, User, Zap } from "lucide-react";
+import { ChevronLeft, ChevronRight, CreditCard, Home, LinkIcon, List, LogOut, Receipt, Settings, User, Zap } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 const NAV_ITEMS = [
     { href: '/dashboard', label: 'Dashboard', icon: Home },
     { href: '/dashboard/subscriptions', label: 'Subscriptions', icon: List },
+    { href: '/dashboard/billing', label: 'Billing', icon: CreditCard },
     { href: '/dashboard/transactions', label: 'Transactions', icon: Receipt },
     { href: '/dashboard/connect', label: 'Linked Accounts', icon: LinkIcon },
     { href: '/dashboard/settings', label: 'Settings', icon: Settings },

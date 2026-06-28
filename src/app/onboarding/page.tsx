@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { getServerSession } from '@/lib/server/auth-session';
 import { db } from '@/lib/server/db';
+import { ensureUserBootstrap } from '@/lib/server/user-bootstrap';
 import OnboardingClient from './OnboardingClient';
 
 export default async function OnboardingPage() {
@@ -11,6 +12,7 @@ export default async function OnboardingPage() {
     if (!userId) redirect('/login');
 
     try {
+        await ensureUserBootstrap(userId);
         const result = await db
             .selectFrom('user_settings')
             .select('onboarding_completed')
