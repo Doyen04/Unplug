@@ -34,7 +34,7 @@ import { db } from '@/lib/server/db';
  * is not secret — only the secret key is.
  */
 function verifyPaystackSignature(rawBody: string, signature: string): boolean {
-    const secret = process.env.PAYSTACK_WEBHOOK_SECRET!;
+    const secret = process.env.PAYSTACK_SECRET_KEY!;
     const expected = crypto.createHmac('sha512', secret).update(rawBody).digest('hex');
     console.log('[paystack-webhook] secret defined:', !!secret);
     console.log('[paystack-webhook] signature received:', !!signature);
