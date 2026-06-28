@@ -19,13 +19,13 @@
  * Processed by POST /api/jobs/issue-card (QStash worker).
  */
 export interface IssueVirtualCardJobPayload {
-  type:           'ISSUE_VIRTUAL_CARD';
-  subscriptionId: string;
-  userId:         string;
-  serviceName:    string;
-  billingAmount:  number;   // decimal, e.g. 4500 or 9.99
-  currency:       'NGN' | 'USD';
-  billingDay:     number;   // day of month (1-31) used to anchor monthly limits and billing scans
+    type: 'ISSUE_VIRTUAL_CARD';
+    subscriptionId: string;
+    userId: string;
+    serviceName: string;
+    billingAmount: number;   // decimal, e.g. 4500 or 9.99
+    currency: 'NGN' | 'USD';
+    billingDay: number;   // day of month (1-31) used to anchor monthly limits and billing scans
 }
 
 /**
@@ -37,11 +37,11 @@ export interface IssueVirtualCardJobPayload {
  * billing on the same day — they're collected in a single Paystack charge.
  */
 export interface CollectUserFundingJobPayload {
-  type:            'COLLECT_USER_FUNDING';
-  userId:          string;
-  billingDate:     string;      // ISO date string (YYYY-MM-DD)
-  subscriptionIds: string[];    // all subscriptions in this billing-date group
-  totalKobo:       number;      // sum of all subscription amounts in kobo
+    type: 'COLLECT_USER_FUNDING';
+    userId: string;
+    billingDate: string;      // ISO date string (YYYY-MM-DD)
+    subscriptionIds: string[];    // all subscriptions in this billing-date group
+    totalKobo: number;      // sum of all subscription amounts in kobo
 }
 
 /**
@@ -49,7 +49,7 @@ export interface CollectUserFundingJobPayload {
  * Compares what was collected vs what was actually charged and credits the difference.
  */
 export interface ReconcileSurplusJobPayload {
-  type:     'RECONCILE_SURPLUS';
-  userId:   string;
-  cycleRef: string;   // paystack_ref of the original collection — used as idempotency key
+    type: 'RECONCILE_SURPLUS';
+    userId: string;
+    cycleRef: string;   // paystack_ref of the original collection — used as idempotency key
 }

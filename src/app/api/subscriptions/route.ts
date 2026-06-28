@@ -4,7 +4,6 @@ import { auth } from '@/lib/auth';
 import { db } from '@/lib/server/db';
 import { enqueueCardIssuance } from '@/lib/jobs/enqueue-card-issuance';
 import { resolveCardCurrency } from '@/lib/sudo/currency';
-import { ensureUserBootstrap } from '@/lib/server/user-bootstrap';
 
 interface CreateSubscriptionBody {
     serviceName?: string;
@@ -29,8 +28,6 @@ export async function POST(req: NextRequest) {
     } catch {
         return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
     }
-
-    await ensureUserBootstrap(session.user.id);
 
     const serviceName = body.serviceName ?? body.service_name;
     const amountMonthly = Number(body.amountMonthly ?? body.amount_monthly ?? body.amount ?? 0);
