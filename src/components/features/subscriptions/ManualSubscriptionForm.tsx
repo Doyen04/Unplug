@@ -71,7 +71,7 @@ export function ManualSubscriptionForm({ onSuccess }: ManualSubscriptionFormProp
     }
 
     return (
-        <Card className="border border-border bg-bg-surface/80 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.04)]">
+        <Card className="border border-border bg-bg-surface/80 p-5">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                 <div className="space-y-2">
                     <div className="inline-flex items-center gap-2 rounded-full bg-bg-muted px-3 py-1 text-[10px] font-bold uppercase tracking-[0.24em] text-text-secondary">

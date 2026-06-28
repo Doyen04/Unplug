@@ -79,13 +79,6 @@ export function SpendChart({
           ) : (
             <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={160}>
               <AreaChart data={chartData} margin={{ top: 8, right: 8, left: 0, bottom: 24 }}>
-                <defs>
-                  <linearGradient id="spendGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#FF5C35" stopOpacity={0.35} />
-                    <stop offset="75%" stopColor="#FF5C35" stopOpacity={0.08} />
-                    <stop offset="100%" stopColor="#FF5C35" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
                 <ReferenceLine y={0} stroke="#E8E7E0" strokeWidth={1} />
                 <XAxis
                   dataKey="name"
@@ -114,7 +107,7 @@ export function SpendChart({
                   dataKey="spend"
                   stroke="#FF5C35"
                   strokeWidth={3}
-                  fill="url(#spendGradient)"
+                  fill="#FF5C35"
                   fillOpacity={1}
                   dot={{ r: 3, fill: '#FF5C35', stroke: '#FFFFFF', strokeWidth: 1.5 }}
                   activeDot={{ r: 5, fill: '#FF5C35', stroke: '#FFFFFF', strokeWidth: 2 }}

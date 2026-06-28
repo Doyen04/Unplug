@@ -27,7 +27,7 @@ export function NotificationsDrawer({ isOpen, alerts, onClose }: NotificationsDr
                         animate={{ x: 0 }}
                         exit={{ x: '100%' }}
                         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                        className="fixed inset-y-0 right-0 z-70 w-full max-w-sm border-l border-border bg-bg-surface shadow-2xl"
+                        className="fixed inset-y-0 right-0 z-70 w-full max-w-sm border-l border-border bg-bg-surface"
                     >
                         <div className="flex flex-col h-full">
                             <div className="flex items-center justify-between border-b border-border p-4">
@@ -40,7 +40,7 @@ export function NotificationsDrawer({ isOpen, alerts, onClose }: NotificationsDr
                                 {alerts.length > 0 ? (
                                     <div className="space-y-4">
                                         {alerts.map((alert, i) => (
-                                            <div key={i} className="flex gap-3 rounded-xl border border-border bg-bg-base p-4 shadow-sm">
+                                            <div key={i} className="flex gap-3 rounded-xl border border-border bg-bg-base p-4">
                                                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-warning-light/30 text-warning">
                                                     <Bell size={18} />
                                                 </div>

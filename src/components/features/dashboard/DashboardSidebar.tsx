@@ -78,7 +78,7 @@ export const Sidebar = ({ expanded, toggleExpanded, isMobileOpen, setIsMobileOpe
                             Unplug
                         </Link>
                     ) : (
-                        <Link href="/" className="mx-auto flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-text-primary shadow-lg shadow-brand/10 transition-transform hover:scale-105">
+                        <Link href="/" className="mx-auto flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-text-primary transition-colors hover:bg-text-primary/90">
                             <Zap size={22} className="text-brand fill-brand" />
                         </Link>
                     )}
@@ -145,7 +145,7 @@ export const Sidebar = ({ expanded, toggleExpanded, isMobileOpen, setIsMobileOpe
                         </div>
                     ) : (
                         <div className={`flex items-center gap-3 py-2 ${!expanded ? 'justify-center' : ''}`}>
-                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-bg-muted text-text-secondary ring-1 ring-border shadow-sm transition-colors group-hover:bg-text-primary group-hover:text-white">
+                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-bg-muted text-text-secondary ring-1 ring-border transition-colors group-hover:bg-text-primary group-hover:text-white">
                                 <User size={18} />
                             </div>
                             {expanded ? (

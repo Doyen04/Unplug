@@ -25,7 +25,7 @@ export const TransactionRow = ({ transaction, currency, index, onDelete }: Trans
             className="flex items-center justify-between gap-4 px-5 py-4 hover:bg-bg-base/50 transition-colors group relative"
         >
             <div className="flex min-w-0 items-center gap-4">
-                <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full shadow-sm ${getAvatarClass(merchantLabel)}`}>
+                <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${getAvatarClass(merchantLabel)}`}>
                     {getServiceIcon(merchantLabel)}
                 </div>
                 <div className="min-w-0">

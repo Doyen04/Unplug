@@ -115,9 +115,9 @@ export function DashboardStats({
                         </div>
                         <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-text-secondary">Shame Score</p>
                     </div>
-                    <Button type="button" variant="ghost" size="sm" className="h-8 px-3 text-[11px]" onClick={() => setIsSharing((value) => !value)}>
+                    <Button type="button" variant="ghost" size="sm" className="h-8 px-3 text-[11px]" onClick={() => setIsSharing(true)}>
                         <Share2 size={12} className="mr-1.5" />
-                        {isSharing ? 'Hide' : 'Share'}
+                        Share
                     </Button>
                 </div>
                 <div className="z-10 flex min-h-14 items-center justify-between">
@@ -156,14 +156,24 @@ export function DashboardStats({
                     <span>{summary.unusedCount} subscriptions need attention</span>
                 </div>
                 {isSharing && (
-                    <div className="z-10 rounded-2xl border border-border bg-bg-surface/80 p-3">
-                        <ShareCard
-                            score={summary.shameScore}
-                            wasteAmountNaira={summary.monthlySpend}
-                            totalSubscriptions={totalSubscriptions}
-                            wastedCount={summary.unusedCount}
-                            userName={userName}
-                        />
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 px-4 py-8 backdrop-blur-sm sm:px-6">
+                        <div className="relative w-full max-w-2xl rounded-[28px] border border-border/70 bg-bg-surface p-5 sm:p-6 lg:p-8">
+                            <button
+                                type="button"
+                                onClick={() => setIsSharing(false)}
+                                className="absolute right-4 top-4 inline-flex h-9 w-9 items-center justify-center rounded-full border border-border bg-bg-base text-lg text-text-secondary transition-colors hover:bg-bg-base/80 hover:text-text-primary"
+                                aria-label="Close share dialog"
+                            >
+                                ×
+                            </button>
+                            <ShareCard
+                                score={summary.shameScore}
+                                wasteAmountNaira={summary.monthlySpend}
+                                totalSubscriptions={totalSubscriptions}
+                                wastedCount={summary.unusedCount}
+                                userName={userName}
+                            />
+                        </div>
                     </div>
                 )}
             </Card>

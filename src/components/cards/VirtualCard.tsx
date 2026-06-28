@@ -105,8 +105,8 @@ export function VirtualCard({
         ${isFrozen
                     ? 'bg-neutral-800 grayscale opacity-70'
                     : card.currency === 'USD'
-                        ? 'bg-gradient-to-br from-neutral-900 to-neutral-800'
-                        : 'bg-gradient-to-br from-[#E8482C] to-[#c4341a]'}
+                        ? 'bg-neutral-900'
+                        : 'bg-[#E8482C]'}
       `}>
                 {isFrozen && (
                     <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-10">

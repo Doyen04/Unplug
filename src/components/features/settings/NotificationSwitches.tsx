@@ -114,7 +114,7 @@ export const NotificationSwitches = () => {
                         >
                             <span className="sr-only">Enable {sw.title}</span>
                             <span
-                                className={`inline-block h-4 w-4 transform rounded-full bg-white transition duration-300 ease-in-out shadow-sm ${isOn ? 'translate-x-6' : 'translate-x-1'
+                                className={`inline-block h-4 w-4 transform rounded-full bg-white transition duration-300 ease-in-out ${isOn ? 'translate-x-6' : 'translate-x-1'
                                     }`}
                             />
                         </button>

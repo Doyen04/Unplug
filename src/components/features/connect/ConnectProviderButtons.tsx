@@ -214,7 +214,7 @@ export const ConnectProviderButtons = ({
                 <div className="absolute inset-0 z-10 bg-bg-surface/60 backdrop-blur-xs flex items-center justify-center">
                     <div className="flex flex-col items-center gap-3 animate-pulse">
                         <div className="h-8 w-8 animate-spin rounded-full border-[3px] border-brand border-t-transparent" />
-                        <p className="text-xs font-bold text-brand uppercase tracking-widest drop-shadow-sm">Connecting...</p>
+                        <p className="text-xs font-bold uppercase tracking-widest text-brand">Connecting...</p>
                     </div>
                 </div>
             )}

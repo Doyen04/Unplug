@@ -152,15 +152,15 @@ export function ShareCard({
                 className="w-full max-w-105 mx-auto rounded-2xl block border border-neutral-800"
                 style={{ aspectRatio: '1 / 1' }}
             />
-            <div className="flex gap-2 max-w-105 mx-auto">
+            <div className="mx-auto flex max-w-105 flex-col gap-2 sm:flex-row">
                 <button onClick={handleDownload}
-                    className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-neutral-700 text-neutral-300 hover:text-white text-sm transition-colors cursor-pointer">
-                    <Download className="w-3.5 h-3.5" />
+                    className="flex flex-1 items-center justify-center gap-1.5 rounded-2xl border border-border bg-bg-base px-4 py-3 text-sm font-medium text-text-primary transition-colors hover:bg-bg-base/80">
+                    <Download className="h-3.5 w-3.5" />
                     Save image
                 </button>
                 <button onClick={handleShare}
-                    className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-[#E8482C] text-white text-sm font-medium hover:bg-[#d13f26] transition-colors cursor-pointer">
-                    <Share2 className="w-3.5 h-3.5" />
+                    className="flex flex-1 items-center justify-center gap-1.5 rounded-2xl bg-[#E8482C] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#d13f26]">
+                    <Share2 className="h-3.5 w-3.5" />
                     Share score
                 </button>
             </div>
