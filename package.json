@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
+    "migrate": "node scripts/run-migrations.cjs",
     "test": "echo \"No tests configured yet\""
   },
   "keywords": [],
