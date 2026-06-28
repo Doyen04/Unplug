@@ -21,7 +21,7 @@ interface ConnectedAccountsTable {
     display_name: string | null;
     connected_at: Date;
     auth_status: string;
-    encrypted_access_token: string | null;
+    billing_day: number;
     created_at: Generated<Date>;
     updated_at: Generated<Date>;
 }
@@ -34,12 +34,16 @@ interface UserSubscriptionsTable {
     service_name: string;
     amount_monthly: number;
     frequency_label: string | null;
+    billing_day: number;
     status: string;
     confidence: string;
     usage_score: number;
     verdict: string | null;
     alert: unknown | null;            // jsonb
     previous_status: string | null;
+    currency: string;
+    source: string;                    // 'mono_detected' | 'manual'
+    card_id: string | null;            // references subscription_cards.id
     created_at: Generated<Date>;
     updated_at: Generated<Date>;
 }
@@ -54,6 +58,10 @@ interface UserTable {
     image: string | null;
     createdAt: Generated<Date>;
     updatedAt: Generated<Date>;
+    wallet_credit_kobo: number;
+    plan: string;
+    plan_expires_at: Date | null;
+    paystack_customer_code: string | null;
 }
 
 interface SessionTable {
@@ -92,6 +100,80 @@ interface VerificationTable {
     updatedAt: Generated<Date>;
 }
 
+// ─── Virtual Cards tables ───────────────────────────────────────────────────
+
+interface SudoCustomersTable {
+    id: Generated<string>;
+    user_id: string;
+    sudo_customer_id: string;
+    status: string;
+    created_at: Generated<Date>;
+    updated_at: Date;
+}
+
+interface SubscriptionCardsTable {
+    id: Generated<string>;
+    subscription_id: string;
+    sudo_card_id: string;
+    sudo_customer_id: string;
+    currency: string;
+    last_four: string;
+    expiry_month: string;
+    expiry_year: string;
+    status: string;
+    spend_limit_kobo: number | null;
+    migration_status: string;
+    migration_confirmed_at: Date | null;
+    next_billing_date: Date | null;
+    created_at: Generated<Date>;
+    updated_at: Date;
+}
+
+interface CardTransactionsTable {
+    id: Generated<string>;
+    sudo_card_id: string;
+    subscription_id: string | null;
+    sudo_transaction_id: string;
+    type: string;
+    status: string;
+    amount_kobo: number;
+    currency: string;
+    merchant_name: string | null;
+    merchant_category: string | null;
+    channel: string | null;
+    created_at: Generated<Date>;
+}
+
+interface UserFundingSourcesTable {
+    id: Generated<string>;
+    user_id: string;
+    paystack_authorization_code: string;
+    paystack_email: string;
+    card_type: string | null;
+    last_four: string | null;
+    bank: string | null;
+    status: string;
+    created_at: Generated<Date>;
+    updated_at: Date;
+}
+
+interface CardFundingTransactionsTable {
+    id: Generated<string>;
+    user_id: string;
+    subscription_id: string | null;
+    sudo_card_id: string | null;
+    amount_kobo: number;
+    subscription_kobo: number;
+    currency: string;
+    billing_date: Date;
+    paystack_ref: string;
+    status: string;
+    transferred_at: Date | null;
+    treasury_ref: string | null;
+    created_at: Generated<Date>;
+    updated_at: Date;
+}
+
 // ─── Database shape ───────────────────────────────────────────────────────────
 
 export interface DbShape {
@@ -99,6 +181,11 @@ export interface DbShape {
     user_settings: UserSettingsTable;
     connected_accounts: ConnectedAccountsTable;
     user_subscriptions: UserSubscriptionsTable;
+    sudo_customers: SudoCustomersTable;
+    subscription_cards: SubscriptionCardsTable;
+    card_transactions: CardTransactionsTable;
+    user_funding_sources: UserFundingSourcesTable;
+    card_funding_transactions: CardFundingTransactionsTable;
     // Better Auth tables
     user: UserTable;
     session: SessionTable;

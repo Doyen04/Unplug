@@ -65,6 +65,7 @@ export const writeStoredSubscriptions = async (
                 verdict: sub.verdict,
                 alert: sub.alert ? JSON.stringify(sub.alert) : null,
                 previous_status: sub.previousStatus ?? null,
+                currency: 'NGN',   // default; detected subscriptions are NGN
             })
             .onConflict((oc) =>
                 oc.columns(['user_id', 'subscription_id']).doUpdateSet((eb) => ({

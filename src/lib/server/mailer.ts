@@ -281,3 +281,63 @@ export const sendSubscriptionCancelledEmail = async (
     });
 };
 
+/**
+ * Sent when QStash exhausts all 3 retries trying to fund a user's virtual card wallet.
+ * The user needs to update their payment card so the next billing scan can retry.
+ *
+ * Triggered by: POST /api/jobs/funding-failed (QStash failureCallback)
+ */
+export const sendFundingFailedEmail = async (
+    email: string,
+    name: string,
+    billingDate: string,     // human-readable date, e.g. "July 15, 2025"
+    serviceNames: string[]   // which subscriptions were affected
+) => {
+    const subject = `Action required: We couldn't fund your card before ${billingDate}`;
+
+    // Build a meta-table row for each affected subscription — consistent with cancellation email style
+    const serviceRows = serviceNames
+        .map((s, i) => `
+            <tr>
+                <td class="label">${i === 0 ? 'Subscriptions' : ''}</td>
+                <td class="value">${s}</td>
+            </tr>`)
+        .join('');
+
+    const updateCardUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://unplug.app'}/dashboard/billing`;
+
+    const innerHtml = `
+        <h1>Action required ⚠️</h1>
+        <p>Hi ${name || 'there'},</p>
+        <p>
+            We tried to fund your virtual card wallet before your subscription billing date on
+            <strong>${billingDate}</strong>, but your saved payment card declined all 3 attempts.
+            Your subscriptions may lapse if this isn't resolved soon.
+        </p>
+
+        <table class="meta-table">
+            ${serviceRows}
+            <tr>
+                <td class="label">Billing date</td>
+                <td class="value">${billingDate}</td>
+            </tr>
+            <tr>
+                <td class="label">Status</td>
+                <td class="value" style="color: #E53434;">Payment failed</td>
+            </tr>
+        </table>
+
+        <p>To keep your virtual cards funded, please update your payment card in Unplug. We'll retry automatically once a valid card is on file.</p>
+        <a class="btn" href="${updateCardUrl}">Update payment card →</a>
+        <p style="font-size:13px;color:#A9A79E;">If your card is already up to date, please check with your bank to ensure international or merchant-initiated charges are enabled.</p>
+    `;
+
+    const html = getEmailLayout(subject, innerHtml);
+
+    return sendMail({
+        to: email,
+        subject,
+        html,
+        text: `Hi ${name || 'there'}, we couldn't fund your Unplug virtual card wallet before ${billingDate} for: ${serviceNames.join(', ')}. Please update your payment card at ${updateCardUrl}`,
+    });
+};
