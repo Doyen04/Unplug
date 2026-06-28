@@ -39,6 +39,10 @@ function verifyPaystackSignature(rawBody: string, signature: string): boolean {
     console.log('[paystack-webhook] secret defined:', !!secret);
     console.log('[paystack-webhook] signature received:', !!signature);
     console.log('[paystack-webhook] signature expected:', !!expected);
+    console.log('[paystack-webhook] raw body:', rawBody);
+    console.log('[paystack-webhook] signature:', signature);
+    console.log('[paystack-webhook] expected signature:', expected);
+    console.log('[paystack-webhook] signature match:', expected === signature);
     return expected === signature;
 }
 

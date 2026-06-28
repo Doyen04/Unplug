@@ -183,7 +183,7 @@ export default function DashboardPage() {
                 />
             </div>
 
-            <Card className="border border-brand/20 bg-linear-to-br from-brand/10 via-bg-surface to-bg-surface p-6">
+            <Card className="border border-brand/20 p-6">
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                     <div className="space-y-2">
                         <div className="text-[10px] font-bold uppercase tracking-[0.24em] text-text-muted">Billing & cards</div>
