@@ -1,5 +1,6 @@
 import { getServerSession } from '@/lib/server/auth-session';
 import { db } from '@/lib/server/db';
+import { ensureUserBootstrap } from '@/lib/server/user-bootstrap';
 
 type UserSettingsUpdate = {
     onboarding_completed?: boolean;
@@ -24,6 +25,7 @@ export async function GET() {
     }
 
     try {
+        await ensureUserBootstrap(userId);
         const settings = await getUserSettings(userId);
 
         return Response.json(
@@ -92,6 +94,7 @@ export async function PATCH(req: Request) {
     }
 
     try {
+        await ensureUserBootstrap(userId);
         const body = (await req.json()) as Partial<UserSettingsUpdate>;
 
         for (const field of BOOLEAN_FIELDS) {
