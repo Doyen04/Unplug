@@ -66,6 +66,8 @@ export const writeStoredSubscriptions = async (
                 alert: sub.alert ? JSON.stringify(sub.alert) : null,
                 previous_status: sub.previousStatus ?? null,
                 currency: 'NGN',   // default; detected subscriptions are NGN
+                billing_day: 1,
+                source: 'mono_detected',
             })
             .onConflict((oc) =>
                 oc.columns(['user_id', 'subscription_id']).doUpdateSet((eb) => ({
