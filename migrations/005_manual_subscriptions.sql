@@ -3,8 +3,10 @@
 -- card_id: references the virtual card issued for this subscription (once card_issuance succeeds)
 
 ALTER TABLE user_subscriptions
-  ADD COLUMN source TEXT DEFAULT 'mono_detected',
-  ADD COLUMN card_id UUID REFERENCES subscription_cards(id) ON DELETE SET NULL;
+  ADD COLUMN IF NOT EXISTS source TEXT DEFAULT 'mono_detected';
+
+ALTER TABLE user_subscriptions
+  ADD COLUMN IF NOT EXISTS card_id UUID REFERENCES subscription_cards(id) ON DELETE SET NULL;
 
 -- Manual subscriptions bypass the migration state machine entirely
 -- They skip straight to 'active' once the card is issued
