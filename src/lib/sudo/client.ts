@@ -57,7 +57,7 @@ export interface SudoCustomer {
 export interface SpendingControls {
     spendingLimits?: {
         amount: number;                                                  // in smallest unit (kobo/cents)
-        interval: 'daily' | 'weekly' | 'monthly' | 'annually' | 'all_time';
+        interval: 'daily' | 'weekly' | 'monthly' | 'yearly';
         billing_day?: number;                                             // optional anchor day for monthly limits
     }[];
     allowedCategories?: string[];                                       // MCC whitelist
@@ -143,7 +143,7 @@ export async function createSudoCard(payload: CreateCardPayload): Promise<SudoCa
         throw new Error(`Sudo createCard [${res.status}]: ${JSON.stringify(err)}`);
     }
     const data = await res.json();
-    console.log('[issue-card] sudo response from createSudoCard:', JSON.stringify(data));
+    console.log('[issue-card] sudo response from createSudoCard:', JSON.stringify(data), res);
     return data.data;
 }
 

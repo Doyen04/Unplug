@@ -67,7 +67,7 @@ export async function issueCardForSubscription(
         customerId: sudoCustomerId,
         type: 'virtual',
         currency,
-        brand: "MasterCard",
+        brand: "Verve",
         status: 'active',
         debitAccountId: process.env.SUDO_POOL_ACCOUNT_ID!,
         amount: spendLimitWithBuffer, //what if there is no money at the time of creation
