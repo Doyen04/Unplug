@@ -56,7 +56,7 @@ export function IssueCardPrompt({
                 <p className="text-sm font-medium text-neutral-200">
                     No virtual card for {serviceName}
                 </p>
-                <p className="text-xs text-neutral-500 mt-1 max-w-xs mx-auto">
+                <p className="text-xs text-neutral-200 mt-1 max-w-xs mx-auto">
                     {isPro
                         ? 'Get a dedicated card. Freeze it anytime to stop the next billing cycle.'
                         : 'Upgrade to Pro to get a virtual card for each subscription.'}

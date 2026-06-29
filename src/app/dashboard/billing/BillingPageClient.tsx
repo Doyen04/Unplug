@@ -67,7 +67,7 @@ export default function BillingPageClient({ subscriptions, isPro }: BillingPageC
                 </Button>
             </header>
 
-            <Card className="border border-brand/20 bg-linear-to-br from-brand/10 via-bg-surface to-bg-surface p-6">
+            <Card className="border border-brand/20 ">
                 <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
                     <div className="space-y-3">
                         <div className="flex items-center gap-2">

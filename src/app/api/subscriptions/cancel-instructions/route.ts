@@ -15,7 +15,7 @@ export async function GET(request: Request) {
     } catch (error: any) {
         console.error('Error fetching cancel instructions:', error);
         
-        if (error.message && error.message.includes('API_KEY')) {
+        if (error.message && error.message.includes('GEMINI_API_KEY')) {
             return NextResponse.json({ error: `Gemini API key is not configured /n Error: ${error.message}` }, { status: 500 });
         }
         

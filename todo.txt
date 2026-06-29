@@ -1,3 +1,5 @@
 when deleting users their account and eerything related to them should go
 toast for error from api request or post request in ui
 create card should be a button that opens a modal and the billing date should be set by backend when the card get automatically charge cause some card can be created and not used
+what happen if there is no cash in card connected to user account and we try to pay for their sub and it fails
+can window.location.href be chane to redirect or router

@@ -24,43 +24,43 @@ import { auth } from '@/lib/auth';
 import { db } from '@/lib/server/db';
 
 export async function GET(
-  req: NextRequest,
-  { params }: { params: Promise<{ subscriptionId: string }> | { subscriptionId: string } }
+    req: NextRequest,
+    { params }: { params: Promise<{ subscriptionId: string }> | { subscriptionId: string } }
 ) {
-  const session = await auth.api.getSession({ headers: req.headers });
-  if (!session?.user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+    const session = await auth.api.getSession({ headers: req.headers });
+    if (!session?.user) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
-  // Next.js 15: route params are async — must be awaited before destructuring
-  const resolvedParams = await params;
-  const { subscriptionId } = resolvedParams;
+    // Next.js 15: route params are async — must be awaited before destructuring
+    const resolvedParams = await params;
+    const { subscriptionId } = resolvedParams;
 
-  // JOIN with user_subscriptions is the ownership check.
-  // If the subscription belongs to a different user, the WHERE clause returns no rows.
-  const card = await db
-    .selectFrom('subscription_cards as sc')
-    .innerJoin('user_subscriptions as s', 's.id', 'sc.subscription_id')
-    .select([
-      'sc.id',
-      'sc.sudo_card_id',
-      'sc.currency',
-      'sc.last_four',
-      'sc.expiry_month',
-      'sc.expiry_year',
-      'sc.status',
-      'sc.spend_limit_kobo',
-      'sc.migration_status',   // pending | user_done | confirmed | failed
-      'sc.created_at',
-    ])
-    .where('sc.subscription_id', '=', subscriptionId)
-    .where('s.user_id', '=', session.user.id)  // ownership enforcement
-    .executeTakeFirst();
+    // JOIN with user_subscriptions is the ownership check.
+    // If the subscription belongs to a different user, the WHERE clause returns no rows.
+    const card = await db
+        .selectFrom('subscription_cards as sc')
+        .innerJoin('user_subscriptions as s', 's.id', 'sc.subscription_id')
+        .select([
+            'sc.id',
+            'sc.sudo_card_id',
+            'sc.currency',
+            'sc.last_four',
+            'sc.expiry_month',
+            'sc.expiry_year',
+            'sc.status',
+            'sc.spend_limit_kobo',
+            'sc.migration_status',   // pending | user_done | confirmed | failed
+            'sc.created_at',
+        ])
+        .where('sc.subscription_id', '=', subscriptionId)
+        .where('s.user_id', '=', session.user.id)  // ownership enforcement
+        .executeTakeFirst();
 
-  if (!card) {
-    // 404 can mean: card doesn't exist yet (issuance pending) OR wrong subscriptionId
-    return NextResponse.json({ error: 'Card not found' }, { status: 404 });
-  }
+    if (!card) {
+        // 404 can mean: card doesn't exist yet (issuance pending) OR wrong subscriptionId
+        return NextResponse.json({ error: 'Card not found' }, { status: 404 });
+    }
 
-  return NextResponse.json({ card });
+    return NextResponse.json({ card });
 }

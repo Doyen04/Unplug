@@ -60,7 +60,8 @@ export interface SpendingControls {
         interval: 'daily' | 'weekly' | 'monthly' | 'annually' | 'all_time';
         billing_day?: number;                                             // optional anchor day for monthly limits
     }[];
-    merchantCategories?: string[];                                       // MCC whitelist
+    allowedCategories?: string[];                                       // MCC whitelist
+    blockedCategories?: string[];                                               // MCC blacklist 
     channels?: {
         atm: boolean;   // always false — subscriptions don't use ATMs
         pos: boolean;   // always false — subscriptions don't use physical POS
@@ -74,6 +75,8 @@ export interface CreateCardPayload {
     customerId: string;
     type: 'virtual' | 'physical';
     currency: SudoCardCurrency;
+    brand: 'Verve' | 'MasterCard' | 'Visa' | 'AfriGo';
+    debitAccountId: string;
     status: 'active';
     spendingControls?: SpendingControls;
 }

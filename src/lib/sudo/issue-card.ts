@@ -67,10 +67,13 @@ export async function issueCardForSubscription(
         customerId: sudoCustomerId,
         type: 'virtual',
         currency,
+        brand: "MasterCard",
         status: 'active',
+        debitAccountId: process.env.SUDO_POOL_ACCOUNT_ID!,
         spendingControls: {
             spendingLimits: [{ amount: spendLimitWithBuffer, interval: 'monthly', billing_day: billingDay }],
-            merchantCategories: mccs,   // whitelist: only these MCCs can charge this card
+            allowedCategories: mccs,   // whitelist: only these MCCs can charge this card
+            blockedCategories: [],   // blacklist: these MCCs cannot charge this card
             channels: {
                 atm: false,   // subscriptions never use ATMs
                 pos: false,   // subscriptions never use physical POS terminals

@@ -31,7 +31,7 @@ const getTransport = () => {
 };
 
 const resolveFrom = (): string => {
-    const fromEmail = process.env.SMTP_FROM_EMAIL ?? process.env.RESEND_FROM_EMAIL ?? 'no-reply@unplug.app';
+    const fromEmail = process.env.SMTP_FROM_EMAIL  ?? 'no-reply@unplug.app';
     const fromName = process.env.SMTP_FROM_NAME ?? 'Unplug';
     return `${fromName} <${fromEmail}>`;
 };

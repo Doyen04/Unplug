@@ -11,9 +11,9 @@ export interface CancellationInstructions {
  * from the Gemini API using structured JSON output.
  */
 export async function getCancellationInstructions(serviceName: string): Promise<CancellationInstructions> {
-    const apiKey = process.env.API_KEY;
+    const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-        throw new Error('API_KEY environment variable is not configured');
+        throw new Error('GEMINI_API_KEY environment variable is not configured');
     }
 
     const response = await fetch(
