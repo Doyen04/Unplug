@@ -122,7 +122,6 @@ export async function createSudoCustomer(
         body: JSON.stringify(payload),
     });
     const data = await res.json();
-    console.log('sudocreatecustomer: ', res, data);
 
     // Check both HTTP status AND response body for errors
     // Sudo sometimes returns 2xx status with error message in body
@@ -146,7 +145,6 @@ export async function createSudoCard(payload: CreateCardPayload): Promise<SudoCa
         body: JSON.stringify(payload),
     });
     const data = await res.json();
-    console.log('sudocreatecard: ', res, data);
 
     // Check both HTTP status AND response body for errors
     // Sudo sometimes returns 2xx status with error message in body
@@ -155,7 +153,6 @@ export async function createSudoCard(payload: CreateCardPayload): Promise<SudoCa
         throw new Error(`Sudo createCard [${res.status}]: ${JSON.stringify(data)}`);
     }
 
-    console.log('[issue-card] sudo response from createSudoCard:', JSON.stringify(data));
     return data.data;
 }
 
