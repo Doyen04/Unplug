@@ -70,6 +70,7 @@ export async function issueCardForSubscription(
         brand: "MasterCard",
         status: 'active',
         debitAccountId: process.env.SUDO_POOL_ACCOUNT_ID!,
+        amount: spendLimitWithBuffer, //what if there is no money at the time of creation
         spendingControls: {
             spendingLimits: [{ amount: spendLimitWithBuffer, interval: 'monthly', billing_day: billingDay }],
             allowedCategories: mccs,   // whitelist: only these MCCs can charge this card

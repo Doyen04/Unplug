@@ -77,6 +77,7 @@ export interface CreateCardPayload {
     currency: SudoCardCurrency;
     brand: 'Verve' | 'MasterCard' | 'Visa' | 'AfriGo';
     debitAccountId: string;
+    amount: number;
     status: 'active';
     spendingControls?: SpendingControls;
 }
