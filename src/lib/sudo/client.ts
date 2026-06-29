@@ -123,7 +123,7 @@ export async function createSudoCustomer(
     });
     const data = await res.json();
     console.log('sudocreatecustomer: ', res, data);
-    
+
     // Check both HTTP status AND response body for errors
     // Sudo sometimes returns 2xx status with error message in body
     // Only throw if statusCode indicates an error (>= 400) or there's an explicit error field
