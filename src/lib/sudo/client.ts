@@ -122,7 +122,8 @@ export async function createSudoCustomer(
         body: JSON.stringify(payload),
     });
     const data = await res.json();
-
+    console.log('sudocreatecustomer: ', res, data);
+    
     // Check both HTTP status AND response body for errors
     // Sudo sometimes returns 2xx status with error message in body
     if (!res.ok || data.statusCode || data.error || data.message?.includes('required')) {
@@ -144,6 +145,7 @@ export async function createSudoCard(payload: CreateCardPayload): Promise<SudoCa
         body: JSON.stringify(payload),
     });
     const data = await res.json();
+    console.log('sudocreatecard: ', res, data);
 
     // Check both HTTP status AND response body for errors
     // Sudo sometimes returns 2xx status with error message in body
