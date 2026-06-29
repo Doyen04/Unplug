@@ -4,3 +4,61 @@ create card should be a button that opens a modal and the billing date should be
 what happen if there is no cash in card connected to user account and we try to pay for their sub and it fails
 can window.location.href be chane to redirect or router
 when creating user phonenumber is needed and should be erify
+
+---
+
+> I am building a subscription management platform called Unplug. We have discovered a critical inconsistency in how different APIs handle monetary amounts, and I need you to audit and fix the entire codebase.
+> 
+> 
+> **The problem:**
+> Our codebase stores all amounts in **kobo** (smallest unit) in the database, which is correct for Paystack. However we have just discovered that the Sudo Africa sandbox simulator `POST /accounts/simulator/fund` treats `amount` as **naira**, not kobo. We need to verify and fix how amounts are passed to every Sudo Africa API endpoint.
+> 
+> 
+> **Known facts:**
+> 
+> 
+> 
+> - Database: all `amount` columns store values in **kobo** (e.g. ₦6,000 = `600000`)
+> - Paystack: all amounts in **kobo** — already correct, do not touch
+> - Sudo simulator `POST /accounts/simulator/fund`: confirmed to use **naira**
+> - Sudo `POST /cards` — `amount` field: **unconfirmed, needs investigation**
+> - Sudo `spendingControls.spendingLimits[].amount`: **unconfirmed, needs investigation**
+> - Sudo `POST /accounts/transfers` — `amount` field: **unconfirmed, needs investigation**
+> 
+> **What I need you to do:**
+> 
+> 
+> 
+> 1. **Audit** every place in the codebase where an amount is passed to a Sudo Africa API endpoint. List each one with the file path, line number, current value being passed, and whether it is in kobo or naira.
+> 2. **Check the Sudo Africa documentation** for each endpoint to determine the expected unit. If the docs are ambiguous, flag it explicitly.
+> 3. **Fix** every Sudo API call that is passing kobo where naira is expected by dividing by 100 before sending. Wrap the conversion in a named helper so it is clear what is happening:
+> 
+> 
+> ```
+> /** Convert kobo (DB unit) to naira (Sudo API unit) */
+> const toNaira = (kobo: number) => kobo / 100;
+> ```
+> 
+> 
+> 1. **Do not change** anything related to Paystack — those amounts are correctly in kobo.
+> 2. **Do not change** any database writes or reads — the DB always stores kobo.
+> 3. **Add a comment** above every amount passed to a Sudo API call clearly stating the unit, for example:
+> 
+> 
+> ```
+> amount: toNaira(billingAmount), // Sudo expects naira; billingAmount is kobo from DB
+> ```
+> 
+> 
+> 1. After fixing, show me a summary table of every Sudo endpoint we call, the amount field, its unit, and whether a conversion is applied.
+> 
+> **Files most likely affected:**
+> 
+> 
+> 
+> - `lib/server/sudo.ts` — the Sudo API client
+> - Any QStash job that calls `createSudoCard`
+> - Any script in `scripts/` that calls Sudo endpoints
+> - The treasury sweep job if it calls any Sudo transfer endpoint
+> 
+> Do not guess — if you are unsure about a unit, say so explicitly and flag it for manual verification rather than making an assumption.

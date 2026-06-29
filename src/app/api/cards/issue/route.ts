@@ -3,14 +3,9 @@
  *
  * User-facing endpoint to request a virtual card for a subscription.
  *
- * This endpoint is intentionally lightweight — it does NOT create the card itself.
- * Instead it validates all preconditions and fires an async background job via QStash.
- * The actual Sudo Africa API call happens in the /api/jobs/issue-card worker.
- *
- * WHY ASYNC:
- * Card creation in Sudo takes 1–3 seconds. Returning 202 immediately gives a
- * responsive UX. The frontend should poll GET /api/cards/[subscriptionId] to detect
- * when the card appears.
+ * This endpoint validates preconditions and issues the card directly in the
+ * request lifecycle. If issuance succeeds, the card exists immediately and the
+ * frontend can refresh state right away.
  *
  * PRECONDITION CHECKS (in order):
  *  1. Authenticated session
@@ -23,8 +18,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/lib/server/db';
-import { enqueueCardIssuance } from '@/lib/jobs/enqueue-card-issuance';
 import { resolveCardCurrency } from '@/lib/sudo/currency';
+import { getOrCreateSudoCustomer } from '@/lib/sudo/get-or-create-customer';
+import { issueCardForSubscription } from '@/lib/sudo/issue-card';
 
 export async function POST(req: NextRequest) {
     const session = await auth.api.getSession({ headers: req.headers });
@@ -63,34 +59,52 @@ export async function POST(req: NextRequest) {
     }
 
     // Virtual cards are a Pro-only feature — free users see an upgrade prompt instead
-    const user = await db
+    const currentUser = await db
         .selectFrom('user')
         .select(['plan'])
         .where('id', '=', session.user.id)
         .executeTakeFirstOrThrow();
 
-    if (user.plan !== 'pro') {
+    if (currentUser.plan !== 'pro') {
         return NextResponse.json(
             { error: 'Virtual cards require a Pro plan' },
             { status: 403 }
         );
     }
 
-    // All checks passed — enqueue the actual card creation as a background job.
-    // resolveCardCurrency determines if this subscription needs a USD or NGN card.
-    await enqueueCardIssuance({
-        subscriptionId: subscription.id,
-        userId: session.user.id,
-        serviceName: subscription.service_name,
-        billingAmount: Number(subscription.amount_monthly),
-        currency: resolveCardCurrency(subscription.currency),
-        billingDay: Number(subscription.billing_day),
-    });
+    // All checks passed — create the card directly in the request lifecycle.
+    const userForSudo = await db
+        .selectFrom('user')
+        .select(['id', 'name', 'email as emailAddress', 'phoneNumber'])
+        .where('id', '=', session.user.id)
+        .executeTakeFirstOrThrow();
 
-    // 202 Accepted: job is queued but not yet complete.
-    // Frontend should poll GET /api/cards/[subscriptionId] until the card appears.
-    return NextResponse.json(
-        { message: 'Card issuance queued. Ready in a few seconds.' },
-        { status: 202 }
-    );
+    const sudoCustomerId = await getOrCreateSudoCustomer(userForSudo);
+
+    try {
+        await issueCardForSubscription({
+            subscriptionId: subscription.id,
+            sudoCustomerId,
+            serviceName: subscription.service_name,
+            billingAmount: Number(subscription.amount_monthly),
+            currency: resolveCardCurrency(subscription.currency),
+            billingDay: Number(subscription.billing_day),
+        });
+    } catch (err) {
+        console.error('[cards/issue] failed to issue card for subscription', subscription.id, err);
+
+        try {
+            await db
+                .updateTable('user_subscriptions')
+                .set({ status: 'card_failed', updated_at: new Date() })
+                .where('id', '=', subscription.id)
+                .execute();
+        } catch (updateErr) {
+            console.error('[cards/issue] failed to mark subscription card_failed', subscription.id, updateErr);
+        }
+
+        return NextResponse.json({ error: 'Failed to issue card' }, { status: 500 });
+    }
+
+    return NextResponse.json({ message: 'Card issued successfully.' }, { status: 200 });
 }

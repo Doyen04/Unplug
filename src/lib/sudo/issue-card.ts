@@ -30,8 +30,8 @@ interface IssueCardParams {
 /**
  * Issues a new virtual card for a subscription and saves safe metadata to the DB.
  *
- * This function is called asynchronously by the QStash worker (not directly by the API).
- * It will silently skip if a card already exists for the subscription.
+ * This function may be called directly by API routes. It will silently skip if a
+ * card already exists for the subscription.
  *
  * @param params Card issuance parameters including subscription ID, user's Sudo customer ID,
  *               service name (for MCC lookup), billing amount, and currency.

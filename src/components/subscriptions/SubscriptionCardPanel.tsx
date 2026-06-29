@@ -11,10 +11,9 @@
  *  3. Has card: Renders the VirtualCard component with freeze/reveal controls.
  *
  * POLLING AFTER ISSUANCE:
- * When a user requests a card, the API returns 202 (queued) and QStash processes
- * the issuance asynchronously. IssueCardPrompt calls onIssued() after a 3.5s delay,
- * which triggers fetchCard() to re-poll and pick up the newly created card.
- * This avoids a complex WebSocket/SSE setup for a one-time event.
+ * When a user requests a card, the API issues it directly and returns once the
+ * card is created. IssueCardPrompt calls onIssued() immediately to refresh the
+ * card state without waiting for a background worker.
  *
  * STATE MACHINE:
  *   loading → no-card → [user requests card] → loading → has-card

@@ -37,8 +37,8 @@ export function IssueCardPrompt({
                 const err = await res.json().catch(() => ({}));
                 throw new Error(err.error ?? 'Failed to request card');
             }
-            toast.success(`${serviceName} card is being created. Ready in a few seconds.`);
-            setTimeout(onIssued, 3500);
+            toast.success(`${serviceName} card issued successfully.`);
+            onIssued();
         } catch (err: any) {
             toast.error(err.message ?? 'Could not issue card. Try again.');
         } finally {

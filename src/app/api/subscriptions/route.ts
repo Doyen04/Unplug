@@ -2,7 +2,8 @@ import { randomUUID } from 'node:crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/lib/server/db';
-import { enqueueCardIssuance } from '@/lib/jobs/enqueue-card-issuance';
+import { getOrCreateSudoCustomer } from '@/lib/sudo/get-or-create-customer';
+import { issueCardForSubscription } from '@/lib/sudo/issue-card';
 import { resolveCardCurrency } from '@/lib/sudo/currency';
 
 interface CreateSubscriptionBody {
@@ -87,20 +88,39 @@ export async function POST(req: NextRequest) {
         })
         .execute();
 
-    await enqueueCardIssuance({
-        subscriptionId,
-        userId: session.user.id,
-        serviceName,
-        billingAmount: amountMonthly,
-        currency: resolveCardCurrency(currency),
-        billingDay,
-    });
+    const userForSudo = await db
+        .selectFrom('user')
+        .select(['id', 'name', 'email as emailAddress', 'phoneNumber'])
+        .where('id', '=', session.user.id)
+        .executeTakeFirstOrThrow();
+
+    const sudoCustomerId = await getOrCreateSudoCustomer(userForSudo);
+
+    try {
+        await issueCardForSubscription({
+            subscriptionId,
+            sudoCustomerId,
+            serviceName,
+            billingAmount: amountMonthly,
+            currency: resolveCardCurrency(currency),
+            billingDay,
+        });
+    } catch (err) {
+        console.error('[subscriptions] failed to issue card for subscription', subscriptionId, err);
+        await db
+            .updateTable('user_subscriptions')
+            .set({ status: 'card_failed', updated_at: new Date() })
+            .where('id', '=', subscriptionId)
+            .execute();
+
+        return NextResponse.json({ error: 'Failed to issue card' }, { status: 500 });
+    }
 
     return NextResponse.json(
         {
             subscriptionId,
-            message: 'Subscription created. Card issuance queued.',
+            message: 'Subscription created and card issued successfully.',
         },
-        { status: 202 }
+        { status: 200 }
     );
 }

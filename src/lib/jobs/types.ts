@@ -14,21 +14,6 @@
  */
 
 /**
- * Triggers asynchronous issuance of a virtual card for a subscription.
- * Fired by POST /api/cards/issue immediately after a user requests a card.
- * Processed by POST /api/jobs/issue-card (QStash worker).
- */
-export interface IssueVirtualCardJobPayload {
-    type: 'ISSUE_VIRTUAL_CARD';
-    subscriptionId: string;
-    userId: string;
-    serviceName: string;
-    billingAmount: number;   // decimal, e.g. 4500 or 9.99
-    currency: 'NGN' | 'USD';
-    billingDay: number;   // day of month (1-31) used to anchor monthly limits and billing scans
-}
-
-/**
  * Triggers Paystack wallet funding for a group of subscriptions billing on the same date.
  * Fired by the midnight billing scan cron for each user+billingDate group.
  * Processed by POST /api/jobs/collect-user-funding (QStash worker).

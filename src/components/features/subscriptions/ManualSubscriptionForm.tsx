@@ -57,7 +57,7 @@ export function ManualSubscriptionForm({ onSuccess }: ManualSubscriptionFormProp
                 throw new Error(data.error ?? 'Unable to create subscription.');
             }
 
-            toast.success(`${serviceName.trim()} added. A card request is now queued.`);
+            toast.success(`${serviceName.trim()} added. A card request is being processed immediately.`);
             setServiceName('');
             setAmount('');
             setCurrency('NGN');
@@ -145,7 +145,7 @@ export function ManualSubscriptionForm({ onSuccess }: ManualSubscriptionFormProp
 
                 <div className="md:col-span-2 xl:col-span-4 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-3">
                     <p className="text-sm text-text-secondary">
-                        We’ll create the subscription record and queue card issuance immediately.
+                        We’ll create the subscription record and issue a dedicated virtual card immediately.
                     </p>
                     <Button type="submit" disabled={isSubmitting}>
                         {isSubmitting ? 'Creating…' : 'Create subscription'}
