@@ -32,6 +32,8 @@ export interface CreateCustomerPayload {
     name: string;
     status: 'active';
     individual: { firstName: string; lastName: string };
+    phoneNumber: string;  // e.g. "+2348012345678"
+    emailAddress: string;
     billingAddress: {
         line1: string;
         city: string;

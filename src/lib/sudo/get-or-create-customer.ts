@@ -19,6 +19,8 @@ import { createSudoCustomer } from './client';
 interface UserForCard {
     id: string;
     name: string;       // full display name — split into first/last if needed
+    emailAddress: string;      // user's email address
+    phoneNumber: string;      // user's phone number (e.g. "+2348012345678")
     firstName?: string;      // optional explicit first name
     lastName?: string;      // optional explicit last name
 }
@@ -59,6 +61,8 @@ export async function getOrCreateSudoCustomer(
         name: user.name,
         status: 'active',
         individual: { firstName, lastName },
+        phoneNumber: user.phoneNumber,
+        emailAddress: user.emailAddress,
         billingAddress: {
             // Placeholder address — required by Sudo but not used for virtual card authorizations
             line1: '1 Main Street',

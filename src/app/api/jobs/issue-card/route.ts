@@ -37,7 +37,7 @@ async function handler(req: NextRequest): Promise<NextResponse> {
     // Fetch minimal user data needed for the Sudo customer creation
     const user = await db
         .selectFrom('user')
-        .select(['id', 'name'])
+        .select(['id', 'name', 'email as emailAddress', 'phone_number as phoneNumber'])
         .where('id', '=', userId)
         .executeTakeFirstOrThrow();
 

@@ -14,13 +14,14 @@ const signupAction = async (formData: FormData) => {
     'use server';
     const name = String(formData.get('name') ?? '').trim();
     const email = String(formData.get('email') ?? '').trim();
+    const phoneNumber = String(formData.get('phoneNumber') ?? '').trim();
     const password = String(formData.get('password') ?? '').trim();
 
-    if (!name || !email || !password) redirect('/signup?error=invalid_input');
+    if (!name || !email || !phoneNumber || !password) redirect('/signup?error=invalid_input');
 
     try {
         await auth.api.signUpEmail({
-            body: { name, email, password, callbackURL: '/dashboard' },
+            body: { name, email, password, phoneNumber, callbackURL: '/dashboard' },
             headers: await headers(),
         });
 
@@ -74,6 +75,10 @@ export default async function SignupPage({ searchParams }: { searchParams?: Prom
                         <div className="space-y-2">
                             <label className="text-[10px] font-bold uppercase tracking-widest text-text-muted ml-1">Email</label>
                             <Input name="email" type="email" placeholder="you@example.com" required />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-bold uppercase tracking-widest text-text-muted ml-1">Phone Number</label>
+                            <Input name="phoneNumber" type="tel" placeholder="+234 801 234 5678" required />
                         </div>
                         <div className="space-y-2">
                             <label className="text-[10px] font-bold uppercase tracking-widest text-text-muted ml-1">Password</label>
