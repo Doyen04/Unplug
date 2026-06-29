@@ -121,11 +121,14 @@ export async function createSudoCustomer(
         headers: SUDO_HEADERS,
         body: JSON.stringify(payload),
     });
-    if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(`Sudo createCustomer [${res.status}]: ${JSON.stringify(err)}`);
-    }
     const data = await res.json();
+    
+    // Check both HTTP status AND response body for errors
+    // Sudo sometimes returns 2xx status with error message in body
+    if (!res.ok || data.statusCode || data.error || data.message?.includes('required')) {
+        throw new Error(`Sudo createCustomer [${res.status}]: ${JSON.stringify(data)}`);
+    }
+    
     return data.data;
 }
 
@@ -140,12 +143,15 @@ export async function createSudoCard(payload: CreateCardPayload): Promise<SudoCa
         headers: SUDO_HEADERS,
         body: JSON.stringify(payload),
     });
-    if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(`Sudo createCard [${res.status}]: ${JSON.stringify(err)}`);
-    }
     const data = await res.json();
-    console.log('[issue-card] sudo response from createSudoCard:', JSON.stringify(data), res);
+    
+    // Check both HTTP status AND response body for errors
+    // Sudo sometimes returns 2xx status with error message in body
+    if (!res.ok || data.statusCode || data.error || data.message?.includes('required')) {
+        throw new Error(`Sudo createCard [${res.status}]: ${JSON.stringify(data)}`);
+    }
+    
+    console.log('[issue-card] sudo response from createSudoCard:', JSON.stringify(data));
     return data.data;
 }
 

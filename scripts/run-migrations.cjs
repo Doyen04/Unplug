@@ -49,6 +49,10 @@ async function runMigrationFile(client, fileName) {
 }
 
 async function main() {
+    console.log('Running Better Auth migrations...');
+    execSync('npx auth@latest migrate --yes', { stdio: 'inherit' });
+    console.log('✓ Better Auth tables ready');
+    
     const client = await pool.connect();
 
     try {
@@ -57,9 +61,6 @@ async function main() {
             .filter((fileName) => fileName.endsWith('.sql'))
             .sort();
 
-        console.log('Running Better Auth migrations...');
-        execSync('npx auth@latest migrate --yes', { stdio: 'inherit' });
-        console.log('✓ Better Auth tables ready');
 
         if (migrationFiles.length === 0) {
             console.log('No SQL migration files found.');

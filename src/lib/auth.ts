@@ -47,10 +47,9 @@ export const auth = betterAuth({
     },
     user: {
         additionalFields: {
-            phoneNumber: {
+            phone_number: {
                 type: 'string',
                 required: true,
-                defaultValue: null,
                 input: true, // allows it to be passed during signUp
             },
         },
