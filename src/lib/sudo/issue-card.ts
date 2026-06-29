@@ -84,6 +84,7 @@ export async function issueCardForSubscription(
         },
     });
 
+    console.log('[issue-card] sudo response:', JSON.stringify(card));
     // Persist ONLY safe metadata — PAN and CVV from the Sudo response are intentionally discarded.
     // The `card` object returned by createSudoCard does not include the PAN anyway.
     const insertResult = await db
