@@ -4,6 +4,8 @@ create card should be a button that opens a modal and the billing date should be
 what happen if there is no cash in card connected to user account and we try to pay for their sub and it fails
 can window.location.href be chane to redirect or router
 when creating user phonenumber is needed and should be erify
+all stored subcription is ngn
+what haapen when user uses newly created card for a sub for another sun entirely that it is not created for
 
 ---
 

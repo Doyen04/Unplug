@@ -60,14 +60,22 @@ export async function GET(
         );
     }
 
-    // Fetch PAN from Sudo Africa server-to-server — never stored, never logged
-    const pan = await getSudoCardPAN(card.sudo_card_id);
+    try {
+        // Fetch PAN from Sudo Africa server-to-server — never stored, never logged
+        const pan = await getSudoCardPAN(card.sudo_card_id);
 
-    // Return in-full: this data lives only in the browser's memory until the component unmounts
-    return NextResponse.json({
-        pan: pan.pan,
-        cvv: pan.cvv2,
-        expiryMonth: pan.expiryMonth,
-        expiryYear: pan.expiryYear,
-    });
+        // Return in-full: this data lives only in the browser's memory until the component unmounts
+        return NextResponse.json({
+            pan: pan.pan,
+            cvv: pan.cvv2,
+            expiryMonth: pan.expiryMonth,
+            expiryYear: pan.expiryYear,
+        });
+    } catch (err) {
+        console.error('[cards/pan] failed to retrieve PAN for', card.sudo_card_id, err);
+        return NextResponse.json(
+            { error: 'Unable to retrieve card details. Please try again later.' },
+            { status: 500 }
+        );
+    }
 }
