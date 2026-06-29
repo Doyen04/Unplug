@@ -55,6 +55,7 @@ interface UserTable {
     name: string;
     email: string;
     emailVerified: boolean;
+    phoneNumber: string;
     image: string | null;
     createdAt: Generated<Date>;
     updatedAt: Generated<Date>;
@@ -62,7 +63,6 @@ interface UserTable {
     plan: string;
     plan_expires_at: Date | null;
     paystack_customer_code: string | null;
-    phone_number: string;
 }
 
 interface SessionTable {

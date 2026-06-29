@@ -14,14 +14,14 @@ const signupAction = async (formData: FormData) => {
     'use server';
     const name = String(formData.get('name') ?? '').trim();
     const email = String(formData.get('email') ?? '').trim();
-    const phone_number = String(formData.get('phoneNumber') ?? '').trim();
+    const phoneNumber = String(formData.get('phoneNumber') ?? '').trim();
     const password = String(formData.get('password') ?? '').trim();
 
-    if (!name || !email || !phone_number || !password) redirect('/signup?error=invalid_input');
+    if (!name || !email || !phoneNumber || !password) redirect('/signup?error=invalid_input');
 
     try {
         await auth.api.signUpEmail({
-            body: { name, email, password, phone_number, callbackURL: '/dashboard' },
+            body: { name, email, password, phoneNumber, callbackURL: '/dashboard' },
             headers: await headers(),
         });
 
