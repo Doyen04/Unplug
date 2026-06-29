@@ -143,6 +143,7 @@ export async function createSudoCard(payload: CreateCardPayload): Promise<SudoCa
         throw new Error(`Sudo createCard [${res.status}]: ${JSON.stringify(err)}`);
     }
     const data = await res.json();
+    console.log('[issue-card] sudo response from createSudoCard:', JSON.stringify(data));
     return data.data;
 }
 
