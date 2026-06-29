@@ -126,7 +126,8 @@ export async function createSudoCustomer(
     
     // Check both HTTP status AND response body for errors
     // Sudo sometimes returns 2xx status with error message in body
-    if (!res.ok || data.statusCode || data.error || data.message?.includes('required')) {
+    // Only throw if statusCode indicates an error (>= 400) or there's an explicit error field
+    if (!res.ok || data.error || (data.statusCode && data.statusCode >= 400) || data.message?.includes('required')) {
         throw new Error(`Sudo createCustomer [${res.status}]: ${JSON.stringify(data)}`);
     }
 
@@ -149,7 +150,8 @@ export async function createSudoCard(payload: CreateCardPayload): Promise<SudoCa
 
     // Check both HTTP status AND response body for errors
     // Sudo sometimes returns 2xx status with error message in body
-    if (!res.ok || data.statusCode || data.error || data.message?.includes('required')) {
+    // Only throw if statusCode indicates an error (>= 400) or there's an explicit error field
+    if (!res.ok || data.error || (data.statusCode && data.statusCode >= 400) || data.message?.includes('required')) {
         throw new Error(`Sudo createCard [${res.status}]: ${JSON.stringify(data)}`);
     }
 
