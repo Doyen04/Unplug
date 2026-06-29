@@ -84,7 +84,7 @@ export async function issueCardForSubscription(
         },
     });
 
-    console.log('[issue-card] sudo response:', JSON.stringify(card));
+    // console.log('[issue-card] sudo response:', JSON.stringify(card));
     // Persist ONLY safe metadata — PAN and CVV from the Sudo response are intentionally discarded.
     // The `card` object returned by createSudoCard does not include the PAN anyway.
     const insertResult = await db
@@ -94,7 +94,7 @@ export async function issueCardForSubscription(
             sudo_card_id: card._id,
             sudo_customer_id: sudoCustomerId,
             currency: card.currency,
-            last_four: card.last4,         // safe to store — not a secret
+            last_four: card.last4 ?? card.maskedPan.slice(-4),         // safe to store — not a secret
             expiry_month: card.expiryMonth,   // safe to store
             expiry_year: card.expiryYear,    // safe to store
             status: 'active',

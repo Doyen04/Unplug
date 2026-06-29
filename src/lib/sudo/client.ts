@@ -91,6 +91,7 @@ export interface SudoCard {
     currency: SudoCardCurrency;
     status: SudoCardStatus;
     last4: string;          // last 4 digits — safe to store
+    maskedPan: string;      // masked card number — safe to store
     expiryMonth: string;
     expiryYear: string;
     customerId: string;
