@@ -25,7 +25,6 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import crypto from 'crypto';
 import { db } from '@/lib/server/db';
 
 /**
@@ -42,6 +41,9 @@ export async function POST(req: NextRequest) {
     // Sudo sends the token you configured as: Authorization: Bearer <token>
     const authHeader = req.headers.get('authorization');
     const expectedToken = process.env.SUDO_AFRICA_WEBHOOK_SECRET!;
+
+    console.log('head',req.headers, 'token', expectedToken);
+    
 
     if (!authHeader || authHeader !== `Bearer ${expectedToken}`) {
         console.warn('[sudo-webhook] Unauthorized - invalid or missing Authorization header');
