@@ -1,3 +1,4 @@
+//fix the comment below 
 /**
  * Sudo Africa Webhook Handler
  * POST /api/webhooks/sudo
@@ -34,33 +35,21 @@ import { db } from '@/lib/server/db';
  * @param rawBody The raw request body string (must be read before any parsing).
  * @param signature The value of the x-sudo-signature header.
  */
-function verifySudoSignature(rawBody: string, signature: string): boolean {
-    const secret = process.env.SUDO_AFRICA_WEBHOOK_SECRET!;
-    const expected = crypto.createHmac('sha512', secret).update(rawBody).digest('hex');
-
-    console.log('verifySudoSignature',secret,signature, expected,rawBody)
-    try {
-        // timingSafeEqual prevents attackers from guessing the signature byte-by-byte
-        return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected));
-    } catch {
-        // If buffers are different lengths, timingSafeEqual throws — treat as mismatch
-        return false;
-    }
-}
 
 export async function POST(req: NextRequest) {
     // IMPORTANT: Read rawBody first as a string before any JSON.parse().
     // Once we parse, we can't reconstruct the exact bytes for HMAC verification.
-    const rawBody = await req.text();
-    const signature = req.headers.get('x-sudo-signature') ?? '';
+    // Sudo sends the token you configured as: Authorization: Bearer <token>
+    const authHeader = req.headers.get('authorization');
+    const expectedToken = process.env.SUDO_AFRICA_WEBHOOK_SECRET!;
 
-    if (!verifySudoSignature(rawBody, signature)) {
-        console.warn('[sudo-webhook] Signature verification failed');
-        return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
+    if (!authHeader || authHeader !== `Bearer ${expectedToken}`) {
+        console.warn('[sudo-webhook] Unauthorized - invalid or missing Authorization header');
+        return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const event = JSON.parse(rawBody) as { type: string; data: Record<string, any> };
-    const { type, data } = event;
+    const body = await req.json();
+    const { type, data } = body;
 
     // Sudo sends card ID in different fields depending on event type — try all three
     const sudoCardId = data.card?._id ?? data.cardId ?? data._id;
