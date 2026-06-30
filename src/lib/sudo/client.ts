@@ -9,7 +9,6 @@
  *
  * ⚠️  SECURITY RULES (never break these):
  *  - PAN and CVV must never be written to a database or log.
- *  - getSudoCardPAN() is server-side only. Its return value must not be persisted.
  *  - The Authorization header carries the API key — never expose this client to the browser.
  */
 
@@ -99,18 +98,6 @@ export interface SudoCard {
 }
 
 /**
- * SENSITIVE — Full card details including PAN and CVV.
- * This type must never be written to a database, logger, or external service.
- * It flows: Sudo Africa → our server → browser (HTTPS only, in-memory only).
- */
-export interface SudoCardPAN {
-    pan: string;   // full 16-digit card number
-    cvv2: string;   // 3-digit security code
-    expiryMonth: string;
-    expiryYear: string;
-}
-
-/**
  * Creates a new cardholder (customer) in Sudo Africa.
  * Called once per Unplug user — all their virtual cards are grouped under one customer.
  */
@@ -170,6 +157,24 @@ export async function getSudoCard(cardId: string): Promise<SudoCard> {
     return data.data;
 }
 
+export interface SudoCardToken {
+    token: string;
+}
+
+export async function generateSudoCardToken(cardId: string): Promise<SudoCardToken> {
+    const res = await fetch(`${SUDO_BASE_URL}/cards/${cardId}/token`, {
+        method: 'GET',
+        headers: SUDO_HEADERS,
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data?.data?.token) {
+        throw new Error(`Sudo generateCardToken [${res.status}]: ${JSON.stringify(data)}`);
+    }
+
+    return data.data;
+}
+
 /**
  * Freezes or unfreezes a card by changing its status.
  * - 'inactive' = frozen: all authorizations are declined
@@ -190,22 +195,6 @@ export async function updateSudoCardStatus(
         const err = await res.json().catch(() => ({}));
         throw new Error(`Sudo updateCardStatus [${res.status}]: ${JSON.stringify(err)}`);
     }
-    const data = await res.json();
-    return data.data;
-}
-
-/**
- * ⚠️ SENSITIVE — Retrieves full card details including PAN and CVV.
- *
- * Server-side ONLY. Never log the result. Never store the result.
- * This is called when a user explicitly requests to view their card number.
- * The data flows: Sudo → our server → browser (HTTPS, in-memory only).
- */
-export async function getSudoCardPAN(cardId: string): Promise<SudoCardPAN> {
-    const res = await fetch(`${SUDO_BASE_URL}/cards/${cardId}/pan`, {
-        headers: SUDO_HEADERS,
-    });
-    if (!res.ok) throw new Error(`Sudo getCardPAN [${res.status}]: ${cardId}`);
     const data = await res.json();
     return data.data;
 }

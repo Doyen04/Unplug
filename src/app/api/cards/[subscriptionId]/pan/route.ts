@@ -1,81 +1,65 @@
 /**
  * GET /api/cards/[subscriptionId]/pan
  *
- * ⚠️  SENSITIVE ENDPOINT — Reveals full card number (PAN) and CVV.
+ * ⚠️  SENSITIVE ENDPOINT — returns a one-time Sudo card token for SecureProxy.
  *
- * This is intentionally a separate endpoint from GET /api/cards/[subscriptionId]
- * to enforce a deliberate, auditable action before exposing card secrets.
- * The frontend should only call this when the user explicitly taps "Show Card Number".
+ * This endpoint intentionally separates token generation from regular card metadata
+ * and only allows it when the requesting user owns the subscription.
  *
- * DATA FLOW (server-side only):
- *   Sudo Africa API → this server handler → HTTPS → browser (in-memory only)
- * The PAN NEVER touches our database. If logging is enabled, ensure this response
- * body is excluded from logs.
+ * DATA FLOW:
+ *   Sudo Africa API → this server handler → HTTPS → browser
+ * The token is then used by SecureProxy to reveal PAN/CVV without storing them.
  *
  * SECURITY GUARDS:
  *  1. Session authentication — must be logged in
  *  2. Ownership check via JOIN — card must belong to the requesting user
- *  3. Active card check — frozen cards cannot reveal their PAN
- *     (prevents attackers from unfreezing-reading-refreezing without user noticing)
- *
- * The browser should show the PAN for a limited time (e.g. 30 seconds) and then blur it again.
+ *  3. Frozen cards cannot generate a reveal token
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/lib/server/db';
-import { getSudoCardPAN } from '@/lib/sudo/client';
+import { generateSudoCardToken } from '@/lib/sudo/client';
 
 export async function GET(
-    req: NextRequest,
-    { params }: { params: Promise<{ subscriptionId: string }> | { subscriptionId: string } }
+    request: NextRequest,
+    { params }: { params: { subscriptionId: string } }
 ) {
-    const session = await auth.api.getSession({ headers: req.headers });
+    const session = await auth.api.getSession({ headers: request.headers });
     if (!session?.user) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Next.js 15: params can be a Promise
-    const resolvedParams = await params;
-    const { subscriptionId } = resolvedParams;
+    const { subscriptionId } = params;
 
-    // Ownership check: JOIN ensures this subscription belongs to the logged-in user
-    const card = await db
+    const subscription = await db
         .selectFrom('subscription_cards as sc')
-        .innerJoin('user_subscriptions as s', 's.id', 'sc.subscription_id')
+        .innerJoin('user_subscriptions as us', 'us.id', 'sc.subscription_id')
         .select(['sc.sudo_card_id', 'sc.status'])
         .where('sc.subscription_id', '=', subscriptionId)
-        .where('s.user_id', '=', session.user.id)
+        .where('us.user_id', '=', session.user.id)
         .executeTakeFirst();
 
-    if (!card) {
+    if (!subscription?.sudo_card_id) {
         return NextResponse.json({ error: 'Card not found' }, { status: 404 });
     }
 
-    // Block PAN reveal for frozen cards — an extra friction layer in case of account compromise
-    if (card.status !== 'active') {
+    if (subscription.status !== 'active') {
         return NextResponse.json(
-            { error: 'Unfreeze the card first to view details.' },
+            { error: 'Unfreeze the card first to reveal the number' },
             { status: 403 }
         );
     }
 
     try {
-        // Fetch PAN from Sudo Africa server-to-server — never stored, never logged
-        const pan = await getSudoCardPAN(card.sudo_card_id);
+        const { token } = await generateSudoCardToken(subscription.sudo_card_id);
 
-        // Return in-full: this data lives only in the browser's memory until the component unmounts
         return NextResponse.json({
-            pan: pan.pan,
-            cvv: pan.cvv2,
-            expiryMonth: pan.expiryMonth,
-            expiryYear: pan.expiryYear,
+            token,
+            sudoCardId: subscription.sudo_card_id,
         });
-    } catch (err) {
-        console.error('[cards/pan] failed to retrieve PAN for', card.sudo_card_id, err);
-        return NextResponse.json(
-            { error: 'Unable to retrieve card details. Please try again later.' },
-            { status: 500 }
-        );
+    } catch (error) {
+        console.error('[cards/pan] Sudo token error:', error);
+        return NextResponse.json({ error: 'Failed to generate card token' }, { status: 502 });
     }
 }

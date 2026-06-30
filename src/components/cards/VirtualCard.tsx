@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { Eye, EyeOff, Lock, Unlock, Copy } from 'lucide-react';
+import { Lock, Unlock } from 'lucide-react';
 import { toast } from 'sonner';
+import { CardSensitiveData } from '@/components/cards/CardSensitiveData';
 
 interface CardData {
     sudo_card_id: string;
@@ -12,13 +13,6 @@ interface CardData {
     expiry_year: string;
     status: 'active' | 'inactive' | 'closed';
     migration_status: string;
-}
-
-interface PANData {
-    pan: string;
-    cvv: string;
-    expiryMonth: string;
-    expiryYear: string;
 }
 
 interface VirtualCardProps {
@@ -34,30 +28,9 @@ export function VirtualCard({
     card,
     onStatusChange,
 }: VirtualCardProps) {
-    const [panData, setPanData] = useState<PANData | null>(null);
-    const [showDetails, setShowDetails] = useState(false);
-    const [isLoadingPAN, setIsLoadingPAN] = useState(false);
     const [isTogglingFreeze, setIsTogglingFreeze] = useState(false);
 
     const isFrozen = card.status === 'inactive';
-
-    async function handleRevealToggle() {
-        if (isFrozen) { toast.error('Unfreeze the card first to view details'); return; }
-        if (panData) { setShowDetails((v) => !v); return; }
-
-        setIsLoadingPAN(true);
-        try {
-            const res = await fetch(`/api/cards/${subscriptionId}/pan`);
-            if (!res.ok) throw new Error('Failed to load card details');
-            const data: PANData = await res.json();
-            setPanData(data);
-            setShowDetails(true);
-        } catch {
-            toast.error('Could not load card details. Try again.');
-        } finally {
-            setIsLoadingPAN(false);
-        }
-    }
 
     async function handleFreezeToggle() {
         setIsTogglingFreeze(true);
@@ -71,32 +44,13 @@ export function VirtualCard({
             if (!res.ok) throw new Error();
             const data = await res.json();
             onStatusChange?.(data.status);
-            if (action === 'freeze') {
-                setPanData(null);
-                setShowDetails(false);
-                toast.success('Card frozen — no charges will go through');
-            } else {
-                toast.success('Card unfrozen');
-            }
+            toast.success(action === 'freeze' ? 'Card frozen — no charges will go through' : 'Card unfrozen');
         } catch {
             toast.error('Could not update card. Try again.');
         } finally {
             setIsTogglingFreeze(false);
         }
     }
-
-    function copyToClipboard(value: string, label: string) {
-        navigator.clipboard.writeText(value);
-        toast.success(`${label} copied`);
-    }
-
-    const displayPAN = showDetails && panData
-        ? panData.pan.match(/.{1,4}/g)?.join(' ') ?? panData.pan
-        : `•••• •••• •••• ${card.last_four}`;
-    const displayExpiry = showDetails && panData
-        ? `${panData.expiryMonth}/${panData.expiryYear}`
-        : `${card.expiry_month}/${card.expiry_year}`;
-    const displayCVV = showDetails && panData ? panData.cvv : '•••';
 
     return (
         <div className="space-y-3">
@@ -126,35 +80,12 @@ export function VirtualCard({
                     </span>
                 </div>
 
-                <div className="relative flex items-center gap-2 mb-4">
-                    <span className="font-mono text-white text-lg tracking-[0.18em] flex-1">
-                        {displayPAN}
-                    </span>
-                    {showDetails && panData && (
-                        <button onClick={() => copyToClipboard(panData.pan, 'Card number')}
-                            className="text-white/45 hover:text-white transition-colors">
-                            <Copy className="w-3.5 h-3.5" />
-                        </button>
-                    )}
-                </div>
-
-                <div className="relative flex gap-6 items-center">
-                    <div>
-                        <p className="text-white/40 text-[10px] uppercase tracking-widest mb-0.5">Expires</p>
-                        <p className="text-white font-mono text-sm">{displayExpiry}</p>
-                    </div>
-                    <div>
-                        <p className="text-white/40 text-[10px] uppercase tracking-widest mb-0.5">CVV</p>
-                        <div className="flex items-center gap-1.5">
-                            <p className="text-white font-mono text-sm">{displayCVV}</p>
-                            {showDetails && panData && (
-                                <button onClick={() => copyToClipboard(panData.cvv, 'CVV')}
-                                    className="text-white/45 hover:text-white transition-colors">
-                                    <Copy className="w-3 h-3" />
-                                </button>
-                            )}
-                        </div>
-                    </div>
+                <div className="space-y-4">
+                    <CardSensitiveData
+                        subscriptionId={subscriptionId}
+                        lastFour={card.last_four}
+                        disabled={isFrozen}
+                    />
                 </div>
 
                 <div className="absolute bottom-4 right-5 flex -space-x-2.5 pointer-events-none">
@@ -164,16 +95,6 @@ export function VirtualCard({
             </div>
 
             <div className="flex gap-2">
-                <button onClick={handleRevealToggle}
-                    disabled={isLoadingPAN || isFrozen}
-                    className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl border border-neutral-700 text-neutral-300 hover:text-white hover:border-neutral-500 text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer">
-                    {isLoadingPAN
-                        ? <span className="text-xs animate-spin">↻</span>
-                        : showDetails
-                            ? <><EyeOff className="w-3.5 h-3.5" /> Hide</>
-                            : <><Eye className="w-3.5 h-3.5" /> Show details</>}
-                </button>
-
                 <button onClick={handleFreezeToggle}
                     disabled={isTogglingFreeze}
                     className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-sm transition-all disabled:opacity-40 cursor-pointer
