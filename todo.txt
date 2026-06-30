@@ -6,6 +6,43 @@ can window.location.href be chane to redirect or router
 when creating user phonenumber is needed and should be erify
 all stored subcription is ngn
 what haapen when user uses newly created card for a sub for another sun entirely that it is not created for
+how do we preent a card from being charge twice and also how do we preent users from using a card for another sub that 
+it was not created for and also how do we test the cards in sandbox mode
+
+how to set funding source for card through api cause default funding source did not work 
+and how come we are getting this {"statusCode":200,"message":"Simulated successfully."} een thought it failed
+
+
+
+
+
+
+curl -X POST https://api.sandbox.sudo.cards/cards/simulator/authorization   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2YTNlZGUzNzgxNDQ0ZDAxOGVkYjI2MjYiLCJlbWFpbEFkZHJlc3MiOiJvbHV3YXNvbGFvcGV5ZW1pOTNAZ21haWwuY29tIiwianRpIjoiNmE0MmFjODUxMzRjMzkxOThmZTEyMjEwIiwibWVtYmVyc2hpcCI6eyJfaWQiOiI2YTNlZGUzNzgxNDQ0ZDAxOGVkYjI2MjgiLCJidXNpbmVzcyI6eyJfaWQiOiI2YTNlZGUzNzgxNDQ0ZDAxOGVkYjI2MjQiLCJuYW1lIjoiVW5wbHVnIiwiaXNBcHByb3ZlZCI6ZmFsc2V9LCJ1c2VyIjoiNmEzZWRlMzc4MTQ0NGQwMThlZGIyNjI2Iiwicm9sZSI6IkFQSUtleSJ9LCJpYXQiOjE3ODI3NTQ0MzcsImV4cCI6MTgxNDMxMjAzN30.wD-EStjXJzYAO6DwkOO9oIzKgFQdpsbXfytyEKw-a74"   -H "Content-Type: application/json"   -d '{
+    "cardId": "6a42b4b8134c39198fe12b24",
+    "channel": "web",
+    "type": "purchase",
+    "amount": 1000,
+    "currency": "NGN",
+    "merchant": {
+      "category": "7372",
+      "merchantId": "TEST001",
+      "name": "TEST MERCHANT",
+      "city": "Lagos",
+      "state": "LA",
+      "country": "NG"
+    }
+  }'
+
+
+
+
+
+
+
+
+
+
+
 
 ---
 

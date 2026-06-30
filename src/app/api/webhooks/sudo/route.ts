@@ -37,6 +37,8 @@ import { db } from '@/lib/server/db';
 function verifySudoSignature(rawBody: string, signature: string): boolean {
     const secret = process.env.SUDO_AFRICA_WEBHOOK_SECRET!;
     const expected = crypto.createHmac('sha512', secret).update(rawBody).digest('hex');
+
+    console.log('erifysudosignature',secret,signature, expected,rawbody)
     try {
         // timingSafeEqual prevents attackers from guessing the signature byte-by-byte
         return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected));
