@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
     const authHeader = req.headers.get('authorization');
     const expectedToken = process.env.SUDO_AFRICA_WEBHOOK_SECRET!;
 
-    console.log('head',req.headers, 'token', expectedToken);
+    console.log('head', authHeader, 'token', expectedToken);
     
 
     if (!authHeader || authHeader !== `Bearer ${expectedToken}`) {
