@@ -42,10 +42,11 @@ export async function POST(req: NextRequest) {
     const authHeader = req.headers.get('authorization');
     const expectedToken = process.env.SUDO_AFRICA_WEBHOOK_SECRET!;
 
-    console.log('head', authHeader, 'token', expectedToken);
-    
+    const token = authHeader?.startsWith('Bearer ')
+    ? authHeader?.slice(7)
+    : authHeader;
 
-    if (!authHeader || authHeader !== `Bearer ${expectedToken}`) {
+    if (!token || token !== expectedToken) {
         console.warn('[sudo-webhook] Unauthorized - invalid or missing Authorization header');
         return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
