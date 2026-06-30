@@ -48,8 +48,8 @@ export async function POST(req: NextRequest) {
     const expectedToken = process.env.SUDO_AFRICA_WEBHOOK_SECRET!;
 
     const token = authHeader?.startsWith('Bearer ')
-    ? authHeader?.slice(7)
-    : authHeader;
+        ? authHeader?.slice(7)
+        : authHeader;
 
     if (!token || token !== expectedToken) {
         console.warn('[sudo-webhook] Unauthorized - invalid or missing Authorization header');
@@ -71,6 +71,10 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ received: true }); // ack so Sudo doesn't retry forever
     }
 
+    // Sudo amounts are decimal naira, signed (debits negative, credits positive).
+    // Our DB stores absolute values in kobo as bigint.
+    const toKobo = (amount: number) => Math.round(Math.abs(amount) * 100);
+    //TODO: create a sign db column to keep track if it is a debit or refund
 
     // Look up which subscription this card belongs to (for linking transactions to subscriptions)
     const cardRecord = await db
@@ -93,7 +97,7 @@ export async function POST(req: NextRequest) {
                 sudo_transaction_id: obj._id,
                 type: 'authorization',
                 status: obj.status,
-                amount_kobo: obj.amount,
+                amount_kobo: toKobo(obj.amount),
                 currency: obj.currency,
                 merchant_name: obj.merchant?.name ?? null,
                 merchant_category: obj.merchant?.category ?? null,
@@ -135,7 +139,7 @@ export async function POST(req: NextRequest) {
                 sudo_transaction_id: obj._id,
                 type: obj.type === 'refund' ? 'refund' : 'transaction',
                 status: 'closed',         // settled transactions are always 'closed'
-                amount_kobo: obj.amount,
+                amount_kobo: toKobo(obj.amount),
                 currency: obj.currency,
                 merchant_name: obj.merchant?.name ?? null,
                 merchant_category: obj.merchant?.category ?? null,
