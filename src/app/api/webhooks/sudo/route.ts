@@ -1,4 +1,3 @@
-//fix the comment below 
 /**
  * Sudo Africa Webhook Handler
  * POST /api/webhooks/sudo
@@ -8,20 +7,26 @@
  *
  * EVENTS HANDLED:
  *  - authorization.request   → A merchant is attempting to charge the card.
- *                               We record it immediately (status may still be 'pending').
+ *                               We record it with status 'pending'.
  *  - authorization.updated   → Sudo finalized the authorization (approved/declined).
  *                               We upsert the row with the new status.
  *  - transaction.created     → A settled transaction (debit or refund) was recorded.
  *                               We insert it for ledger completeness.
+ *
+ * PAYLOAD SHAPE:
+ * All events nest the actual object under body.data.object — not body.data directly.
+ * On transaction.created, body.data.object.card is a plain string card ID.
+ * On authorization events, body.data.object.card is a nested card object with ._id.
  *
  * MIGRATION CONFIRMATION:
  * When an authorization is APPROVED, it means the user has successfully updated their
  * subscription payment method to the Unplug virtual card. We mark migration_status = 'confirmed'
  * so the user sees a ✓ confirmation in the UI.
  *
- * SIGNATURE VERIFICATION:
- * Sudo signs all webhook payloads with HMAC-SHA512 using SUDO_AFRICA_WEBHOOK_SECRET.
- * We verify this before processing. Unverified requests get a 401.
+ * AUTHENTICATION:
+ * Sudo sends the Authorization Token you configured on the webhook (plain Bearer token,
+ * no HMAC signing). We compare it directly against SUDO_AFRICA_WEBHOOK_SECRET.
+ * Unverified requests get a 401.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -54,8 +59,18 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { type, data } = body;
 
-    // Sudo sends card ID in different fields depending on event type — try all three
-    const sudoCardId = data.card?._id ?? data.cardId ?? data._id;
+    const obj = data.object;
+
+    // card is a string ID on transaction.created, an object on authorization events
+    const sudoCardId =
+        typeof obj.card === 'string'
+            ? obj.card
+            : obj.card?._id ?? obj.cardId ?? null;
+    if (!sudoCardId) {
+        console.warn('[sudo-webhook] Could not extract sudoCardId from event:', type, obj._id);
+        return NextResponse.json({ received: true }); // ack so Sudo doesn't retry forever
+    }
+
 
     // Look up which subscription this card belongs to (for linking transactions to subscriptions)
     const cardRecord = await db
@@ -75,26 +90,26 @@ export async function POST(req: NextRequest) {
             .values({
                 sudo_card_id: sudoCardId,
                 subscription_id: subscriptionId,
-                sudo_transaction_id: data._id,
+                sudo_transaction_id: obj._id,
                 type: 'authorization',
-                status: data.status,
-                amount_kobo: data.amount,
-                currency: data.currency,
-                merchant_name: data.merchant?.name ?? null,
-                merchant_category: data.merchant?.category ?? null,
-                channel: data.channel ?? null,
+                status: obj.status,
+                amount_kobo: obj.amount,
+                currency: obj.currency,
+                merchant_name: obj.merchant?.name ?? null,
+                merchant_category: obj.merchant?.category ?? null,
+                channel: obj.transactionMetadata?.channel ?? null,
             })
             // If we've already seen this transaction ID (duplicate delivery), just update the status.
             // Sudo can deliver the same event more than once — this is normal webhook behavior.
             .onConflict((oc) =>
-                oc.column('sudo_transaction_id').doUpdateSet({ status: data.status })
+                oc.column('sudo_transaction_id').doUpdateSet({ status: obj.status })
             )
             .execute();
 
         // MIGRATION CONFIRMATION: First approved charge on this card = user successfully
         // switched their payment method. Mark the card as 'confirmed' in migration_status.
         // We only update if NOT already confirmed to avoid redundant writes.
-        if (data.status === 'approved' && subscriptionId) {
+        if (obj.status === 'approved' && subscriptionId) {
             await db
                 .updateTable('subscription_cards')
                 .set({
@@ -117,14 +132,14 @@ export async function POST(req: NextRequest) {
             .values({
                 sudo_card_id: sudoCardId,
                 subscription_id: subscriptionId,
-                sudo_transaction_id: data._id,
-                type: data.type === 'refund' ? 'refund' : 'transaction',
+                sudo_transaction_id: obj._id,
+                type: obj.type === 'refund' ? 'refund' : 'transaction',
                 status: 'closed',         // settled transactions are always 'closed'
-                amount_kobo: data.amount,
-                currency: data.currency,
-                merchant_name: data.merchant?.name ?? null,
-                merchant_category: data.merchant?.category ?? null,
-                channel: data.channel ?? null,
+                amount_kobo: obj.amount,
+                currency: obj.currency,
+                merchant_name: obj.merchant?.name ?? null,
+                merchant_category: obj.merchant?.category ?? null,
+                channel: obj.channel ?? null,
             })
             // If already inserted (duplicate delivery), silently skip
             .onConflict((oc) => oc.column('sudo_transaction_id').doNothing())
