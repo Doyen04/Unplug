@@ -23,14 +23,14 @@ import { generateSudoCardToken } from '@/lib/sudo/client';
 
 export async function GET(
     request: NextRequest,
-    { params }: { params: { subscriptionId: string } }
+    { params }: { params: Promise<{ subscriptionId: string }> }
 ) {
     const session = await auth.api.getSession({ headers: request.headers });
     if (!session?.user) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { subscriptionId } = params;
+    const { subscriptionId } = await params;
 
     const subscription = await db
         .selectFrom('subscription_cards as sc')
