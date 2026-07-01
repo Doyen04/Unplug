@@ -19,20 +19,31 @@ export default async function BillingPage() {
 
     const subscriptions = await db
         .selectFrom('user_subscriptions')
-        .select(['id', 'service_name', 'amount_monthly', 'currency'])
-        .where('user_id', '=', (session as any).user.id)
-        .orderBy('service_name', 'asc')
+        .leftJoin('subscription_cards', 'subscription_cards.subscription_id', 'user_subscriptions.id')
+        .select([
+            'user_subscriptions.id as id',
+            'user_subscriptions.service_name as service_name',
+            'user_subscriptions.amount_monthly as amount_monthly',
+            'user_subscriptions.currency as currency',
+            'subscription_cards.status as card_status',
+            'subscription_cards.sudo_card_id as sudo_card_id',
+        ])
+        .where('user_subscriptions.user_id', '=', (session as any).user.id)
+        .orderBy('user_subscriptions.service_name', 'asc')
         .execute();
 
-    const mappedSubscriptions: Subscription[] = subscriptions.map((subscription) => ({
+    const mappedSubscriptions = subscriptions.map((subscription) => ({
         id: subscription.id,
         serviceName: subscription.service_name,
         amountMonthly: Number(subscription.amount_monthly),
-        frequencyLabel: 'monthly',
-        status: 'healthy',
-        confidence: 'high',
+        frequencyLabel: 'monthly' as const,
+        status: 'healthy' as const,
+        confidence: 'high' as const,
         usageScore: 100,
-        verdict: 'active',
+        verdict: 'active' as const,
+        cardStatus: subscription.card_status,
+        cardId: subscription.sudo_card_id,
+        currency: subscription.currency,
     }));
 
     return <BillingPageClient subscriptions={mappedSubscriptions} isPro={user?.plan === 'pro'} />;

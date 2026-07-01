@@ -1,18 +1,18 @@
 import Link from 'next/link';
-import { cookies, headers } from 'next/headers';
+import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { Shield, CreditCard, Bell, AlertOctagon, LogOut, Key, ArrowRight, User, Mail } from 'lucide-react';
 
-import { FormSubmitButton } from '@/components/features/auth/FormSubmitButton';
-import { auth } from '@/lib/auth';
 import { getServerSession } from '@/lib/server/auth-session';
 import { NotificationSwitches } from '@/components/features/settings/NotificationSwitches';
 import { DeleteAccountButton } from '@/components/features/settings/DeleteAccountButton';
+import { UnsubscribeButton } from '@/components/features/settings/UnsubscribeButton';
 
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Input } from '@/components/ui/Input';
+import { db } from '@/lib/server/db';
+import { updateProfileAction } from './actions';
 
 const hasAuthSessionCookie = async (): Promise<boolean> => {
     const cookieStore = await cookies();
@@ -26,20 +26,6 @@ const getSessionUserField = (session: unknown, key: 'email' | 'name'): string | 
     if (!user || typeof user !== 'object') return undefined;
     const value = (user as Record<string, unknown>)[key];
     return typeof value === 'string' ? value : undefined;
-};
-
-const changePasswordAction = async (formData: FormData) => {
-    'use server';
-    const currentPassword = String(formData.get('currentPassword') ?? '').trim();
-    const newPassword = String(formData.get('newPassword') ?? '').trim();
-    if (!currentPassword || newPassword.length < 8) redirect('/dashboard/settings?error=invalid_input');
-    try {
-        await auth.api.changePassword({
-            body: { currentPassword, newPassword, revokeOtherSessions: true },
-            headers: await headers(),
-        });
-    } catch { redirect('/dashboard/settings?error=change_failed'); }
-    redirect('/dashboard/settings?success=password_changed');
 };
 
 interface SettingsPageProps {
@@ -67,18 +53,31 @@ export default async function DashboardSettingsPage({ searchParams }: SettingsPa
 
     const params = (await searchParams) ?? {};
 
-    const hasInvalidInputError = params.error === 'invalid_input';
-    const hasChangeFailedError = params.error === 'change_failed';
-    const hasPasswordChanged = params.success === 'password_changed';
+    const hasInvalidProfileInput = params.error === 'invalid_profile_input';
+    const hasProfileUpdateFailed = params.error === 'profile_update_failed';
+    const hasProfileUpdated = params.success === 'profile_updated';
+    const hasUnsubscribeFailed = params.error === 'unsubscribe_failed';
+    const hasUnsubscribed = params.success === 'unsubscribed';
 
     const email = getSessionUserField(session, 'email') ?? 'unknown';
     const name = getSessionUserField(session, 'name') ?? 'Account user';
 
+    // Fetch user plan status from DB
+    let isPro = false;
+    if (session?.user?.id) {
+        const user = await db
+            .selectFrom('user')
+            .select(['plan'])
+            .where('id', '=', session.user.id)
+            .executeTakeFirst();
+        isPro = user?.plan === 'pro';
+    }
+
     return (
-        <div className="space-y-6">
-            <header>
-                <h1 className="text-3xl font-bold tracking-tight text-text-primary">Settings</h1>
-                <p className="text-sm text-text-secondary">Manage your personal information and preferences.</p>
+        <div className="max-w-[880px] mx-auto pt-6 px-6 max-sm:px-4 space-y-4">
+            <header className="mb-5">
+                <h1 className="text-[28px] font-semibold leading-tight text-[var(--color-text-primary)] font-display">Settings</h1>
+                <p className="text-sm text-[var(--color-text-secondary)] mt-1 font-ui">Manage your personal information and preferences.</p>
             </header>
 
             {isOffline && (
@@ -87,139 +86,119 @@ export default async function DashboardSettingsPage({ searchParams }: SettingsPa
                 </Badge>
             )}
 
-            <div className="space-y-6">
-                {/* PROFILE SECTION */}
-                <section>
-                    <Card className="p-0 overflow-hidden">
-                        <div className="border-b border-border bg-bg-muted/30 px-6 py-5 flex items-center gap-4 sm:px-8">
-                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-text-primary border border-border shadow-sm">
-                                <Shield size={20} />
-                            </div>
-                            <div>
-                                <h2 className="text-base font-bold text-text-primary">Profile & Security</h2>
-                                <p className="text-xs text-text-secondary mt-0.5">Edit your account details and security settings.</p>
-                            </div>
-                        </div>
+            {hasInvalidProfileInput && <Badge variant="danger" className="w-full justify-center py-2">Input error: Check name and email requirements.</Badge>}
+            {hasProfileUpdateFailed && <Badge variant="danger" className="w-full justify-center py-2">Error: Could not update profile.</Badge>}
+            {hasProfileUpdated && <Badge variant="success" className="w-full justify-center py-2">Success: Profile has been updated.</Badge>}
+            {hasUnsubscribeFailed && <Badge variant="danger" className="w-full justify-center py-2">Error: Could not cancel Pro plan.</Badge>}
+            {hasUnsubscribed && <Badge variant="success" className="w-full justify-center py-2">Success: Pro plan cancelled.</Badge>}
 
-                        <div className="p-6 sm:p-8 grid gap-8 md:grid-cols-5">
-                            <div className="md:col-span-2 space-y-6">
-                                <div>
-                                    <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-text-muted"><User size={12} /> Display Name</p>
-                                    <p className="mt-1.5 text-base font-bold text-text-primary">{name}</p>
-                                </div>
-                                <div>
-                                    <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-text-muted"><Mail size={12} /> Email Address</p>
-                                    <p className="mt-1.5 text-base font-bold text-text-primary">{email}</p>
-                                </div>
-                            </div>
+            {/* Profile & Security Card */}
+            <Card className="p-5 font-ui">
+                <div className="flex flex-col gap-1 mb-3.5">
+                    <h2 className="text-base font-semibold text-[var(--color-text-primary)]">Profile & Security</h2>
+                    <p className="text-xs text-[var(--color-text-secondary)]">Edit your account details and security settings.</p>
+                </div>
 
-                            <div className="md:col-span-3 rounded-2xl border border-dashed border-border p-6 bg-bg-muted/10">
-                                <div className="flex items-center gap-2 mb-5">
-                                    <Key className="text-text-muted" size={16} />
-                                    <p className="text-sm font-bold text-text-primary">Change Password</p>
-                                </div>
+                <form action={updateProfileAction} className="space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="flex flex-col gap-1.5">
+                            <label className="text-xs font-medium text-[var(--color-text-primary)]">Display Name</label>
+                            <Input name="name" defaultValue={name} required placeholder="Display Name" />
+                        </div>
+                        <div className="flex flex-col gap-1.5">
+                            <label className="text-xs font-medium text-[var(--color-text-primary)]">Email Address</label>
+                            <Input name="email" type="email" defaultValue={email} required placeholder="Email Address" />
+                        </div>
+                    </div>
 
-                                {hasInvalidInputError && <Badge variant="danger" className="mb-5 w-full justify-center">Input error: Check password requirements.</Badge>}
-                                {hasChangeFailedError && <Badge variant="danger" className="mb-5 w-full justify-center">Verification failed: Current password is incorrect.</Badge>}
-                                {hasPasswordChanged && <Badge variant="success" className="mb-5 w-full justify-center">Success: Password has been updated.</Badge>}
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-6">
+                        <Link href="/forgot-password" className="text-sm font-medium text-[var(--color-brand)] hover:underline">
+                            Change Password &rarr;
+                        </Link>
+                        <Button type="submit" variant="primary">
+                            Update Security
+                        </Button>
+                    </div>
+                </form>
+            </Card>
 
-                                <form className="space-y-4" action={changePasswordAction}>
-                                    <div className="space-y-4">
-                                        <Input name="currentPassword" type="password" required placeholder="Current password" />
-                                        <Input name="newPassword" type="password" minLength={8} required placeholder="New password" />
-                                    </div>
-                                    <div className="flex items-center justify-between pt-2">
-                                        <Link href="/forgot-password" className="text-xs font-bold text-text-secondary hover:text-brand transition-colors">
-                                            Forgot password?
-                                        </Link>
-                                        <FormSubmitButton
-                                            idleLabel="Update Security"
-                                            pendingLabel="Applying..."
-                                            variant="primary"
-                                            className="px-8"
-                                        />
-                                    </div>
-                                </form>
-                            </div>
+            {/* Connected Accounts & Preferences side-by-side */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 font-ui">
+                {/* Connected Accounts Card */}
+                <Card className="p-5 flex flex-col justify-between">
+                    <div>
+                        <div className="flex flex-col gap-1 mb-3.5">
+                            <h2 className="text-base font-semibold text-[var(--color-text-primary)]">Connected Accounts</h2>
+                            <p className="text-xs text-[var(--color-text-secondary)]">Manage linked providers.</p>
                         </div>
-                    </Card>
-                </section>
+                        <div className="flex flex-col gap-1 py-3.5 border-b border-[var(--color-border)] last:border-b-0">
+                            <p className="text-sm font-semibold text-[var(--color-text-primary)]">Sync Your Financial Data</p>
+                            <p className="text-xs text-[var(--color-text-secondary)] leading-relaxed">Securely connect new accounts or update credentials via Plaid and Mono.</p>
+                        </div>
+                    </div>
+                    <div className="mt-4">
+                        <Button variant="secondary" asChild className="w-full">
+                            <Link href="/dashboard/connect">Manage Connections</Link>
+                        </Button>
+                    </div>
+                </Card>
 
-                {/* CONNECTED ACCOUNTS SECTION */}
-                <section>
-                    <Card className="p-0 overflow-hidden group">
-                        <div className="p-6 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                            <div className="flex items-center gap-4">
-                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-bg-muted text-text-muted group-hover:bg-text-primary group-hover:text-white transition-colors">
-                                    <CreditCard size={18} />
-                                </div>
-                                <div>
-                                    <h2 className="text-base font-bold text-text-primary">Connected Accounts</h2>
-                                    <p className="text-xs text-text-secondary mt-0.5">Manage your linked banking and financial providers.</p>
-                                </div>
-                            </div>
-                            <Button variant="ghost" size="sm" asChild className="group-hover:translate-x-1 transition-transform">
-                                <Link href="/dashboard/connect">Go to Connections <ArrowRight size={14} className="ml-2" /></Link>
-                            </Button>
-                        </div>
-                        <div className="p-8 flex flex-col items-center justify-center text-center bg-bg-muted/5">
-                            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white border border-border mb-4 shadow-sm group-hover:scale-105 transition-transform">
-                                <CreditCard size={24} className="text-text-muted" />
-                            </div>
-                            <p className="text-sm font-bold text-text-primary">Sync Your Financial Data</p>
-                            <p className="text-xs text-text-secondary mt-1.5 max-w-sm leading-relaxed">Securely connect new accounts or update credentials via Plaid and Mono.</p>
-                            <Button variant="outline" asChild className="mt-6 px-8 border-border-strong hover:bg-bg-muted">
-                                <Link href="/dashboard/connect">Manage Connections</Link>
-                            </Button>
-                        </div>
-                    </Card>
-                </section>
-
-                {/* NOTIFICATIONS SECTION */}
-                <section>
-                    <Card className="p-0 overflow-hidden">
-                        <div className="border-b border-border px-6 py-5 flex items-center gap-4 h-auto">
-                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-bg-muted text-text-primary border border-border">
-                                <Bell size={18} />
-                            </div>
-                            <div>
-                                <h2 className="text-base font-bold text-text-primary">Preferences</h2>
-                                <p className="text-xs text-text-secondary mt-0.5">Choose how Unplug communicates with you.</p>
-                            </div>
-                        </div>
-                        <div className="px-6 py-2 divide-y divide-border/30">
-                            <NotificationSwitches />
-                        </div>
-                    </Card>
-                </section>
-
-                {/* DANGER ZONE SECTION */}
-                <section>
-                    <Card className="border-danger/10 bg-danger/2 p-0 overflow-hidden">
-                        <div className="border-b border-danger/10 bg-danger/4 px-6 py-5 flex items-center gap-4">
-                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-danger border border-danger/10">
-                                <AlertOctagon size={18} />
-                            </div>
-                            <div>
-                                <h2 className="text-base font-bold text-danger">Safety & Account</h2>
-                                <p className="text-xs text-danger/60 mt-0.5">Destructive actions and account removal.</p>
-                            </div>
-                        </div>
-                        <div className="p-6 sm:p-8 flex flex-col gap-6 sm:flex-row sm:items-center justify-between">
-                            <div className="space-y-1">
-                                <p className="text-sm font-bold text-text-primary underline decoration-danger/20">Critical Actions</p>
-                                <p className="text-xs text-text-secondary max-w-sm leading-relaxed italic">Log out of your current session or delete all your personal and financial data permanently.</p>
-                            </div>
-                            <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0">
-                                <Button variant="secondary" asChild className="w-full sm:w-auto bg-white">
-                                    <Link href="/logout"><LogOut size={14} className="mr-2" /> Log Out</Link>
-                                </Button>
-                                <DeleteAccountButton />
-                            </div>
-                        </div>
-                    </Card>
-                </section>
+                {/* Preferences Card */}
+                <Card className="p-5">
+                    <div className="flex flex-col gap-1 mb-3.5">
+                        <h2 className="text-base font-semibold text-[var(--color-text-primary)]">Preferences</h2>
+                        <p className="text-xs text-[var(--color-text-secondary)]">Choose how Unplug reaches you.</p>
+                    </div>
+                    <div className="divide-y divide-[var(--color-border)]/30">
+                        <NotificationSwitches />
+                    </div>
+                </Card>
             </div>
+
+            {/* Safety & Account Card (Danger Zone) */}
+            <Card className="p-5 border-[var(--color-border-strong)] font-ui">
+                <div className="flex flex-col gap-1 mb-3.5">
+                    <h2 className="text-base font-semibold text-[var(--color-danger)]">Critical Actions</h2>
+                    <p className="text-xs text-[var(--color-text-secondary)]">Destructive actions and account removal.</p>
+                </div>
+
+                <div className="divide-y divide-[var(--color-border)]">
+                    {/* Log Out Row */}
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 py-3.5">
+                        <div>
+                            <p className="text-sm font-semibold text-[var(--color-text-primary)]">Log Out</p>
+                            <p className="text-xs text-[var(--color-text-secondary)] mt-1">End your current session.</p>
+                        </div>
+                        <Button variant="secondary" asChild className="w-full sm:w-auto">
+                            <Link href="/logout">Log Out</Link>
+                        </Button>
+                    </div>
+
+                    {/* Unsubscribe Row (Only if Pro) */}
+                    {isPro && (
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 py-3.5">
+                            <div>
+                                <p className="text-sm font-semibold text-[var(--color-text-primary)]">Unsubscribe from Pro</p>
+                                <p className="text-xs text-[var(--color-text-secondary)] mt-1 max-w-md leading-relaxed">
+                                    Cancel your Pro plan. You&apos;ll keep virtual card access until the end of your current billing period.
+                                </p>
+                            </div>
+                            <UnsubscribeButton />
+                        </div>
+                    )}
+
+                    {/* Delete Account Row */}
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 py-3.5">
+                        <div>
+                            <p className="text-sm font-semibold text-[var(--color-text-primary)]">Delete Account</p>
+                            <p className="text-xs text-[var(--color-text-secondary)] mt-1 max-w-md leading-relaxed">
+                                Permanently remove all your personal and financial data. This can&apos;t be undone.
+                            </p>
+                        </div>
+                        <DeleteAccountButton />
+                    </div>
+                </div>
+            </Card>
         </div>
     );
 }

@@ -91,16 +91,16 @@ export const NotificationSwitches = () => {
                 </div>
             )}
 
-            {switches.map((sw) => {
+            {switches.map((sw, idx) => {
                 const isOn = settings[sw.id];
                 return (
-                    <label
+                    <div
                         key={sw.id}
-                        className={`flex items-center justify-between gap-4 cursor-pointer p-4 transition-colors border border-transparent ${toggleMutation.isPending ? 'opacity-80 pointer-events-none' : ''}`}
+                        className={`flex items-center justify-between gap-4 py-3.5 border-b border-[var(--color-border)] last:border-b-0 ${toggleMutation.isPending ? 'opacity-80 pointer-events-none' : ''}`}
                     >
                         <div>
-                            <p className="text-sm font-bold text-text-primary">{sw.title}</p>
-                            <p className="text-xs text-text-secondary mt-1 leading-relaxed">{sw.description}</p>
+                            <p className="text-sm font-semibold text-[var(--color-text-primary)]">{sw.title}</p>
+                            <p className="text-xs text-[var(--color-text-secondary)] mt-1 leading-relaxed">{sw.description}</p>
                         </div>
 
                         <button
@@ -108,17 +108,17 @@ export const NotificationSwitches = () => {
                             role="switch"
                             aria-checked={isOn}
                             onClick={() => handleToggle(sw.id)}
-                            className={`relative inline-flex h-6 w-11 items-center rounded-full shrink-0 border transition-colors duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand ${isOn ? 'bg-success border-success' : 'bg-bg-muted border-border'
+                            className={`relative inline-flex h-[22px] w-10 shrink-0 items-center rounded-[var(--radius-pill)] transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brand)] ${isOn ? 'bg-[var(--color-brand)]' : 'bg-[var(--color-border-strong)]'
                                 }`}
                             disabled={toggleMutation.isPending}
                         >
                             <span className="sr-only">Enable {sw.title}</span>
                             <span
-                                className={`inline-block h-4 w-4 transform rounded-full bg-white transition duration-300 ease-in-out ${isOn ? 'translate-x-6' : 'translate-x-1'
+                                className={`inline-block h-[18px] w-[18px] transform rounded-full bg-white transition duration-200 ease-in-out ${isOn ? 'translate-x-[20px]' : 'translate-x-[2px]'
                                     }`}
                             />
                         </button>
-                    </label>
+                    </div>
                 );
             })}
         </>

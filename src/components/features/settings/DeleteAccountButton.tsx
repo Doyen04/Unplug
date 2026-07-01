@@ -23,10 +23,9 @@ export const DeleteAccountButton = () => {
     return (
         <Button
             type="button"
-            variant="danger"
             onClick={handleDelete}
             disabled={isPending}
-            className="w-full sm:w-auto"
+            className="w-full sm:w-auto border border-[var(--color-border)] text-[var(--color-danger)] bg-transparent hover:bg-[var(--color-danger-light)] focus:ring-[var(--color-danger)]"
         >
             {isPending ? 'Deleting...' : 'Delete Account'}
         </Button>

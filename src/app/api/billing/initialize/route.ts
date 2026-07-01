@@ -30,33 +30,18 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
+import { initializePaystackCheckout } from '@/lib/paystack';
 
 export async function POST(req: NextRequest) {
     const session = await auth.api.getSession({ headers: req.headers });
-    if (!session?.user) {
+    if (!session?.user || !session.user.email) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const res = await fetch('https://api.paystack.co/transaction/initialize', {
-        method: 'POST',
-        headers: {
-            Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            email: session.user.email,
-            amount: 400000,                              // ₦4,000 in kobo — Pro plan price
-            plan: process.env.PAYSTACK_PRO_PLAN_CODE,  // ties to recurring subscription plan
-            callback_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?upgraded=true`,
-            metadata: { userId: session.user.id },
-        }),
-    });
-
-    const data = await res.json();
-    if (!data.status) {
-        return NextResponse.json({ error: data.message || 'Paystack initialization failed' }, { status: 400 });
+    try {
+        const authorizationUrl = await initializePaystackCheckout(session.user.email, session.user.id);
+        return NextResponse.json({ url: authorizationUrl });
+    } catch (err: any) {
+        return NextResponse.json({ error: err.message || 'Paystack initialization failed' }, { status: 400 });
     }
-
-    // Return the checkout URL — frontend redirects user to it
-    return NextResponse.json({ url: data.data.authorization_url });
 }
