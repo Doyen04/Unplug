@@ -65,23 +65,26 @@ interface CardSensitiveDataProps {
     disabled?: boolean;
 }
 
-// Regex patterns that pull out one 4-digit block from a 16-digit PAN string
-const GROUP_PATTERNS = [
-    { pattern: "^(\\d{4})\\d{4}\\d{4}\\d{4}$", replacement: "$1" },
-    { pattern: "^\\d{4}(\\d{4})\\d{4}\\d{4}$", replacement: "$1" },
-    { pattern: "^\\d{4}\\d{4}(\\d{4})\\d{4}$", replacement: "$1" },
-    { pattern: "^\\d{4}\\d{4}\\d{4}(\\d{4})$", replacement: "$1" },
-];
-
 /**
- * Renders the front-of-card sensitive fields (number, expiry, CVV) in white
- * text, since this is only ever rendered on top of the branded, colored
- * virtual card face in <VirtualCard />.
+ * Renders the front-of-card sensitive fields (number, expiry, CVV) on top
+ * of the branded, colored virtual card face in <VirtualCard />.
  *
- * The PAN is rendered as 4 independently-positioned group elements (rather
- * than one injected string) so the masked state ("•••• •••• •••• 1234") and
- * revealed state line up exactly — same widths, same gaps, no letter-spacing
- * tricks needed, no layout shift on toggle.
+ * IMPORTANT — Secure Proxy Show renders revealed values inside a real
+ * cross-origin <iframe> (docs.sudo.africa/docs/displaying-sensitive-card-data).
+ * That means:
+ *   - We CAN size/position the <iframe> element itself via CSS — it's a
+ *     normal DOM node in our own document.
+ *   - We CANNOT change the text color/font *inside* it. No CSS reaches
+ *     across that boundary. Revealed digits render in Secure Proxy's own
+ *     default color, not ours.
+ * Only the masked dot placeholder below is our own markup and fully
+ * stylable — that's why it can be pure white while the revealed value
+ * may not be.
+ *
+ * This must stay ONE request per field (matches Sudo's documented
+ * example exactly). Splitting the PAN into multiple per-group requests
+ * is not a supported pattern — every iframe ends up rendering the full
+ * unfiltered value and they overlap.
  */
 export function CardSensitiveData({
     subscriptionId,
@@ -95,7 +98,7 @@ export function CardSensitiveData({
     const [error, setError] = useState<string | null>(null);
     const didRender = useRef(false);
 
-    const panGroupIds = [0, 1, 2, 3].map((i) => `sudo-pan-${uid}-g${i}`);
+    const panId = `sudo-pan-${uid}`;
     const cvvId = `sudo-cvv-${uid}`;
 
     async function handleReveal() {
@@ -119,26 +122,25 @@ export function CardSensitiveData({
 
             const { token, sudoCardId } = body;
 
-            // One request per 4-digit group, each rendered into its own span
-            panGroupIds.forEach((groupId, i) => {
-                const proxy = window.SecureProxy.create(VAULT_ID);
-                proxy
-                    .request({
-                        name: `pan-${uid}-g${i}`,
-                        method: "GET",
-                        path: `/cards/${sudoCardId}/secure-data/number`,
-                        headers: { Authorization: `Bearer ${token}` },
-                        htmlWrapper: "text",
-                        jsonPathSelector: "data.number",
-                        serializers: [
-                            proxy.SERIALIZERS.replace(
-                                GROUP_PATTERNS[i].pattern,
-                                GROUP_PATTERNS[i].replacement,
-                            ),
-                        ],
-                    })
-                    .render(`#${groupId}`);
-            });
+            // Single request, single target — the replace serializer
+            // inserts the group spaces itself in one pass.
+            const panProxy = window.SecureProxy.create(VAULT_ID);
+            panProxy
+                .request({
+                    name: `pan-${uid}`,
+                    method: "GET",
+                    path: `/cards/${sudoCardId}/secure-data/number`,
+                    headers: { Authorization: `Bearer ${token}` },
+                    htmlWrapper: "text",
+                    jsonPathSelector: "data.number",
+                    serializers: [
+                        panProxy.SERIALIZERS.replace(
+                            "(\\d{4})(\\d{4})(\\d{4})(\\d{4})",
+                            "$1 $2 $3 $4 ",
+                        ),
+                    ],
+                })
+                .render(`#${panId}`);
 
             const cvvProxy = window.SecureProxy.create(VAULT_ID);
             cvvProxy
@@ -168,17 +170,28 @@ export function CardSensitiveData({
     return (
         <div className="space-y-3">
             <style>{`
-                /* Force SecureProxy-injected content to match the card styles */
-                ${panGroupIds.map((id) => `#${id}, #${id} *`).join(", ")},
-                #${cvvId}, #${cvvId} * {
-                    color: white !important;
-                    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', 'Segoe UI Mono', monospace !important;
-                    font-variant-numeric: tabular-nums !important;
-                    white-space: pre !important;
-                    line-height: 1.1 !important;
-                    font-size: inherit !important;
-                    background: transparent !important;
-                    -webkit-text-fill-color: white !important;
+                /*
+                 * Controls the OUTER <iframe> box only — width, height,
+                 * border, background. Never its internal text/font/color;
+                 * that's owned by Secure Proxy and not reachable from here.
+                 * Sudo's own basic example needed an explicit iframe height
+                 * override too, so this isn't optional — an unconstrained
+                 * iframe is what blew the layout out in your screenshot.
+                 */
+                #${panId} iframe {
+                    display: block;
+                    width: 100%;
+                    max-width: 210px;
+                    height: 22px;
+                    border: none;
+                    background: transparent;
+                }
+                #${cvvId} iframe {
+                    display: block;
+                    width: 44px;
+                    height: 18px;
+                    border: none;
+                    background: transparent;
                 }
             `}</style>
             <div className="flex items-end justify-between gap-3">
@@ -186,32 +199,16 @@ export function CardSensitiveData({
                     <p className="text-[9px] font-semibold uppercase tracking-wider text-white/50">
                         Card number
                     </p>
-                    <div className="flex gap-2 font-mono text-base text-white sm:text-lg">
-                        {panGroupIds.map((groupId, i) => {
-                            const isLastGroup = i === 3;
-                            const maskedGroup =
-                                isLastGroup && lastFour ? lastFour : "••••";
-                            return (
-                                <span
-                                    key={groupId}
-                                    className="inline-block w-[4ch] text-center tabular-nums"
-                                >
-                                    {!revealed && (
-                                        <span>{maskedGroup}</span>
-                                    )}
-                                    <span
-                                        id={groupId}
-                                        style={{
-                                            display: revealed
-                                                ? "inline"
-                                                : "none",
-                                            color: "white",
-                                        }}
-                                    />
-                                </span>
-                            );
-                        })}
-                    </div>
+                    {!revealed && (
+                        <p className="truncate font-mono text-base tracking-[0.15em] text-white sm:text-lg">
+                            •••• •••• •••• {lastFour ?? "••••"}
+                        </p>
+                    )}
+                    <div
+                        id={panId}
+                        className="font-mono text-base sm:text-lg"
+                        style={{ display: revealed ? "block" : "none" }}
+                    />
                 </div>
 
                 <button
@@ -256,8 +253,8 @@ export function CardSensitiveData({
                     )}
                     <div
                         id={cvvId}
-                        className="font-mono text-xs text-white sm:text-sm"
-                        style={{ display: revealed ? "block" : "none", color: 'white' }}
+                        className="font-mono text-xs sm:text-sm"
+                        style={{ display: revealed ? "block" : "none" }}
                     />
                 </div>
             </div>
