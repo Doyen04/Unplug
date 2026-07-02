@@ -17,11 +17,17 @@
  * OWNERSHIP CHECK:
  * The JOIN with user_subscriptions ensures the card belongs to the authenticated user.
  * A user cannot read another user's card details.
+ *
+ * PRO GATE:
+ * Virtual cards are a Pro-only feature. If the user has since cancelled their
+ * Pro subscription, they should no longer be able to view a previously-issued
+ * card's details, even though the card record still exists in our DB.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/lib/server/db';
+import { isProUser } from '@/lib/server/plan';
 
 export async function GET(
     req: NextRequest,
@@ -35,6 +41,15 @@ export async function GET(
     // Next.js 15: route params are async — must be awaited before destructuring
     const resolvedParams = await params;
     const { subscriptionId } = resolvedParams;
+
+    // Pro gate: a cancelled Pro user must not be able to view card details anymore,
+    // even though the underlying card record still exists from when they were Pro.
+    if (!(await isProUser(session.user.id))) {
+        return NextResponse.json(
+            { error: 'Virtual cards require a Pro plan' },
+            { status: 403 }
+        );
+    }
 
     // JOIN with user_subscriptions is the ownership check.
     // If the subscription belongs to a different user, the WHERE clause returns no rows.

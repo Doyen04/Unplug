@@ -8,6 +8,7 @@ all stored subcription is ngn
 what haapen when user uses newly created card for a sub for another sun entirely that it is not created for
 how do we preent a card from being charge twice and also how do we preent users from using a card for another sub that 
 it was not created for and also how do we test the cards in sandbox mode
+when a user cancels their subscription to unplug pro we should preent then from seeing or creating cards
 also when we create or initalise anythin whether sudo or paystack and a error preent full completion allong the path we should reert all our preius changes back
 
 how to set funding source for card through api cause default funding source did not work 

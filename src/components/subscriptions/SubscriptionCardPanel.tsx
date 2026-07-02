@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * SubscriptionCardPanel
@@ -23,12 +23,15 @@
  * PROPS:
  *  - subscriptionId: The user_subscriptions.id — used to query the right card.
  *  - serviceName:    Display name (e.g. "Netflix") — shown on the card face.
- *  - isPro:          Whether user is on Pro plan — gates the card issuance button.
+ *  - isPro:          Whether user is on Pro plan — gates both viewing an existing
+ *                    card and issuing a new one. If a user cancels Pro, this flips
+ *                    to false and they fall back to the upgrade prompt instead of
+ *                    ever seeing their (still-existing) card details.
  */
 
-import { useState, useEffect, useCallback } from 'react';
-import { VirtualCard } from '@/components/cards/VirtualCard';
-import { IssueCardPrompt } from '@/components/cards/IssueCardPrompt';
+import { useState, useEffect, useCallback } from "react";
+import { VirtualCard } from "@/components/cards/VirtualCard";
+import { IssueCardPrompt } from "@/components/cards/IssueCardPrompt";
 
 interface SubscriptionCardPanelProps {
     subscriptionId: string;
@@ -37,16 +40,16 @@ interface SubscriptionCardPanelProps {
 }
 
 type CardState =
-    | { state: 'loading' }
-    | { state: 'no-card' }
-    | { state: 'has-card'; card: any };  // card shape matches GET /api/cards/[subscriptionId] response
+    | { state: "loading" }
+    | { state: "no-card" }
+    | { state: "has-card"; card: any }; // card shape matches GET /api/cards/[subscriptionId] response
 
 export function SubscriptionCardPanel({
     subscriptionId,
     serviceName,
     isPro,
 }: SubscriptionCardPanelProps) {
-    const [cardState, setCardState] = useState<CardState>({ state: 'loading' });
+    const [cardState, setCardState] = useState<CardState>({ state: "loading" });
 
     /**
      * Fetches the current card state from the API.
@@ -58,34 +61,46 @@ export function SubscriptionCardPanel({
      * without causing infinite re-renders in the useEffect dependency array.
      */
     const fetchCard = useCallback(async () => {
-        setCardState({ state: 'loading' });
+        // Non-Pro users (including those who have since cancelled) must never see or
+        // create a card, so skip the fetch entirely and fall back to the upgrade prompt.
+        if (!isPro) {
+            setCardState({ state: "no-card" });
+            return;
+        }
+
+        setCardState({ state: "loading" });
         try {
             const res = await fetch(`/api/cards/${subscriptionId}`);
-            if (res.status === 404) setCardState({ state: 'no-card' });
+            if (res.status === 404 || res.status === 403)
+                setCardState({ state: "no-card" });
             else if (res.ok) {
                 const data = await res.json();
-                setCardState({ state: 'has-card', card: data.card });
+                setCardState({ state: "has-card", card: data.card });
             }
         } catch {
             // Treat network failures as "no card" to avoid infinite loading
-            setCardState({ state: 'no-card' });
+            setCardState({ state: "no-card" });
         }
-    }, [subscriptionId]);
+    }, [subscriptionId, isPro]);
 
     // Fetch on mount and whenever subscriptionId changes (user navigated to a different subscription)
-    useEffect(() => { fetchCard(); }, [fetchCard]);
+    useEffect(() => {
+        fetchCard();
+    }, [fetchCard]);
 
     // Skeleton placeholder — matches the approximate height of the VirtualCard component
-    if (cardState.state === 'loading') {
-        return <div className="rounded-2xl bg-neutral-800/40 animate-pulse h-55" />;
+    if (cardState.state === "loading") {
+        return (
+            <div className="rounded-2xl bg-neutral-800/40 animate-pulse h-55" />
+        );
     }
 
-    if (cardState.state === 'no-card') {
+    if (cardState.state === "no-card") {
         return (
             <IssueCardPrompt
                 subscriptionId={subscriptionId}
                 serviceName={serviceName}
-                onIssued={fetchCard}   // re-fetch after issuance delay to pick up the new card
+                onIssued={fetchCard} // re-fetch after issuance delay to pick up the new card
                 isPro={isPro}
             />
         );
@@ -99,9 +114,9 @@ export function SubscriptionCardPanel({
             onStatusChange={(newStatus) =>
                 // Optimistically update local state without a full re-fetch
                 setCardState((prev) =>
-                    prev.state === 'has-card'
+                    prev.state === "has-card"
                         ? { ...prev, card: { ...prev.card, status: newStatus } }
-                        : prev
+                        : prev,
                 )
             }
         />
