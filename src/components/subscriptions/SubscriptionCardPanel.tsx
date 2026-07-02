@@ -30,6 +30,7 @@
  */
 
 import { useState, useEffect, useCallback } from "react";
+import { toast } from "sonner";
 import { VirtualCard } from "@/components/cards/VirtualCard";
 import { IssueCardPrompt } from "@/components/cards/IssueCardPrompt";
 
@@ -71,14 +72,17 @@ export function SubscriptionCardPanel({
         setCardState({ state: "loading" });
         try {
             const res = await fetch(`/api/cards/${subscriptionId}`);
-            if (res.status === 404 || res.status === 403)
+            if (res.status === 404 || res.status === 403) {
                 setCardState({ state: "no-card" });
-            else if (res.ok) {
+            } else if (res.ok) {
                 const data = await res.json();
                 setCardState({ state: "has-card", card: data.card });
+            } else {
+                toast.error("Could not load your virtual card. Try again.");
+                setCardState({ state: "no-card" });
             }
         } catch {
-            // Treat network failures as "no card" to avoid infinite loading
+            toast.error("Could not load your virtual card. Try again.");
             setCardState({ state: "no-card" });
         }
     }, [subscriptionId, isPro]);
@@ -88,10 +92,13 @@ export function SubscriptionCardPanel({
         fetchCard();
     }, [fetchCard]);
 
-    // Skeleton placeholder — matches the approximate height of the VirtualCard component
+    // Skeleton placeholder — matches the approximate aspect ratio of the VirtualCard face
     if (cardState.state === "loading") {
         return (
-            <div className="rounded-2xl bg-neutral-800/40 animate-pulse h-55" />
+            <div className="mx-auto w-full max-w-sm animate-pulse space-y-3">
+                <div className="aspect-[1.586/1] w-full rounded-2xl bg-bg-muted" />
+                <div className="h-10 w-full rounded-btn bg-bg-muted" />
+            </div>
         );
     }
 

@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useState, useRef, useId } from 'react';
-import { Eye, EyeOff, Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { useState, useRef, useId } from "react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 declare global {
     interface Window {
@@ -28,30 +28,32 @@ interface SecureProxyInstance {
 }
 
 const SECURE_PROXY_SCRIPT =
-    'https://js.securepro.xyz/sudo-show/1.1/ACiWvWF9tYAez4M498DHs.min.js';
-const VAULT_ID = process.env.NEXT_PUBLIC_SUDO_VAULT_ID ?? 'we0dsa28s';
+    "https://js.securepro.xyz/sudo-show/1.1/ACiWvWF9tYAez4M498DHs.min.js";
+const VAULT_ID = process.env.NEXT_PUBLIC_SUDO_VAULT_ID ?? "we0dsa28s";
 
 function loadSecureProxyScript(): Promise<void> {
     return new Promise((resolve, reject) => {
-        if (typeof window.SecureProxy !== 'undefined') {
+        if (typeof window.SecureProxy !== "undefined") {
             resolve();
             return;
         }
 
         const existing = document.querySelector<HTMLScriptElement>(
-            `script[src="${SECURE_PROXY_SCRIPT}"]`
+            `script[src="${SECURE_PROXY_SCRIPT}"]`,
         );
         if (existing) {
-            existing.addEventListener('load', () => resolve());
-            existing.addEventListener('error', () => reject(new Error('SecureProxy load failed')));
+            existing.addEventListener("load", () => resolve());
+            existing.addEventListener("error", () =>
+                reject(new Error("SecureProxy load failed")),
+            );
             return;
         }
 
-        const script = document.createElement('script');
+        const script = document.createElement("script");
         script.src = SECURE_PROXY_SCRIPT;
         script.async = true;
         script.onload = () => resolve();
-        script.onerror = () => reject(new Error('SecureProxy load failed'));
+        script.onerror = () => reject(new Error("SecureProxy load failed"));
         document.head.appendChild(script);
     });
 }
@@ -59,11 +61,28 @@ function loadSecureProxyScript(): Promise<void> {
 interface CardSensitiveDataProps {
     subscriptionId: string;
     lastFour?: string;
+    expiry?: string;
     disabled?: boolean;
 }
 
-export function CardSensitiveData({ subscriptionId, lastFour, disabled }: CardSensitiveDataProps) {
-    const uid = useId().replace(/:/g, '-');
+/**
+ * Renders the front-of-card sensitive fields (number, expiry, CVV) in white
+ * text, since this is only ever rendered on top of the branded, colored
+ * virtual card face in <VirtualCard />.
+ *
+ * NOTE: this previously used shadcn-style utility classes (`text-foreground`,
+ * `text-muted-foreground`, `text-destructive`) that have no matching CSS
+ * variables in this app's Tailwind v4 theme (see `globals.css`), so the text
+ * rendered with the browser's default color — effectively invisible against
+ * the colored card. All colors here are explicit for that reason.
+ */
+export function CardSensitiveData({
+    subscriptionId,
+    lastFour,
+    expiry,
+    disabled,
+}: CardSensitiveDataProps) {
+    const uid = useId().replace(/:/g, "-");
     const [revealed, setRevealed] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -88,7 +107,7 @@ export function CardSensitiveData({ subscriptionId, lastFour, disabled }: CardSe
             const res = await fetch(`/api/cards/${subscriptionId}/pan`);
             const body = await res.json().catch(() => ({}));
             if (!res.ok) {
-                throw new Error(body.error ?? 'Failed to fetch card token');
+                throw new Error(body.error ?? "Failed to fetch card token");
             }
 
             const { token, sudoCardId } = body;
@@ -96,15 +115,15 @@ export function CardSensitiveData({ subscriptionId, lastFour, disabled }: CardSe
             panProxy
                 .request({
                     name: `pan-${uid}`,
-                    method: 'GET',
+                    method: "GET",
                     path: `/cards/${sudoCardId}/secure-data/number`,
                     headers: { Authorization: `Bearer ${token}` },
-                    htmlWrapper: 'text',
-                    jsonPathSelector: 'data.number',
+                    htmlWrapper: "text",
+                    jsonPathSelector: "data.number",
                     serializers: [
                         panProxy.SERIALIZERS.replace(
-                            '(\\d{4})(\\d{4})(\\d{4})(\\d{4})',
-                            '$1 $2 $3 $4'
+                            "(\\d{4})(\\d{4})(\\d{4})(\\d{4})",
+                            "$1 $2 $3 $4",
                         ),
                     ],
                 })
@@ -114,11 +133,11 @@ export function CardSensitiveData({ subscriptionId, lastFour, disabled }: CardSe
             cvvProxy
                 .request({
                     name: `cvv-${uid}`,
-                    method: 'GET',
+                    method: "GET",
                     path: `/cards/${sudoCardId}/secure-data/cvv2`,
                     headers: { Authorization: `Bearer ${token}` },
-                    htmlWrapper: 'text',
-                    jsonPathSelector: 'data.cvv2',
+                    htmlWrapper: "text",
+                    jsonPathSelector: "data.cvv2",
                     serializers: [],
                 })
                 .render(`#${cvvId}`);
@@ -126,8 +145,10 @@ export function CardSensitiveData({ subscriptionId, lastFour, disabled }: CardSe
             didRender.current = true;
             setRevealed(true);
         } catch (err) {
-            console.error('[CardSensitiveData]', err);
-            setError('Could not load card details. Please try again.');
+            console.error("[CardSensitiveData]", err);
+            const message = "Could not load card details. Try again.";
+            setError(message);
+            toast.error(message);
         } finally {
             setLoading(false);
         }
@@ -135,44 +156,76 @@ export function CardSensitiveData({ subscriptionId, lastFour, disabled }: CardSe
 
     return (
         <div className="space-y-3">
-            <div className="space-y-1">
-                <p className="text-xs text-muted-foreground">Card Number</p>
-                {!revealed && (
-                    <p className="font-mono text-sm tracking-widest text-foreground">
-                        •••• •••• •••• {lastFour ?? '••••'}
+            <div className="flex items-end justify-between gap-3">
+                <div className="min-w-0">
+                    <p className="text-[9px] font-semibold uppercase tracking-wider text-white/50">
+                        Card number
                     </p>
-                )}
-                <div
-                    id={panId}
-                    className="font-mono text-sm"
-                    style={{ display: revealed ? 'block' : 'none' }}
-                />
+                    {!revealed && (
+                        <p className="truncate font-mono text-base tracking-[0.15em] text-white sm:text-lg">
+                            •••• •••• •••• {lastFour ?? "••••"}
+                        </p>
+                    )}
+                    <div
+                        id={panId}
+                        className="font-mono text-base tracking-widest text-white sm:text-lg"
+                        style={{ display: revealed ? "block" : "none" }}
+                    />
+                </div>
+
+                <button
+                    type="button"
+                    onClick={handleReveal}
+                    disabled={loading || disabled}
+                    aria-label={
+                        revealed ? "Hide card details" : "Reveal card details"
+                    }
+                    className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/15 text-white transition-colors hover:bg-white/25 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                    {loading ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : revealed ? (
+                        <EyeOff className="h-3.5 w-3.5" />
+                    ) : (
+                        <Eye className="h-3.5 w-3.5" />
+                    )}
+                </button>
             </div>
 
-            <div className="space-y-1">
-                <p className="text-xs text-muted-foreground">CVV</p>
-                {!revealed && (
-                    <p className="font-mono text-sm tracking-widest text-foreground">•••</p>
+            <div className="flex items-end justify-between gap-3">
+                {expiry && (
+                    <div>
+                        <p className="text-[9px] font-semibold uppercase tracking-wider text-white/50">
+                            Expires
+                        </p>
+                        <p className="font-mono text-xs text-white/90 sm:text-sm">
+                            {expiry}
+                        </p>
+                    </div>
                 )}
-                <div
-                    id={cvvId}
-                    className="font-mono text-sm"
-                    style={{ display: revealed ? 'block' : 'none' }}
-                />
+
+                <div>
+                    <p className="text-[9px] font-semibold uppercase tracking-wider text-white/50">
+                        CVV
+                    </p>
+                    {!revealed && (
+                        <p className="font-mono text-xs tracking-widest text-white sm:text-sm">
+                            •••
+                        </p>
+                    )}
+                    <div
+                        id={cvvId}
+                        className="font-mono text-xs text-white sm:text-sm"
+                        style={{ display: revealed ? "block" : "none" }}
+                    />
+                </div>
             </div>
 
-            {error && <p className="text-xs text-destructive">{error}</p>}
-
-            <Button size="sm" variant="outline" onClick={handleReveal} disabled={loading || disabled} className="gap-2">
-                {loading ? (
-                    <Loader2 className="h-3 w-3 animate-spin" />
-                ) : revealed ? (
-                    <EyeOff className="h-3 w-3" />
-                ) : (
-                    <Eye className="h-3 w-3" />
-                )}
-                {loading ? 'Loading…' : revealed ? 'Hide' : 'Reveal card details'}
-            </Button>
+            {error && (
+                <p className="rounded-lg bg-black/30 px-2.5 py-1.5 text-xs text-red-200">
+                    {error}
+                </p>
+            )}
         </div>
     );
 }

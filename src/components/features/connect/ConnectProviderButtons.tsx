@@ -1,15 +1,16 @@
-'use client';
+"use client";
 
-import { useEffect, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useQueryClient } from '@tanstack/react-query';
-import { Button } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/Badge';
-import { dashboardKeys } from '@/lib/query-keys';
+import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/Button";
+import { Badge } from "@/components/ui/Badge";
+import { dashboardKeys } from "@/lib/query-keys";
 
 interface ConnectProviderButtonsProps {
-    provider: 'plaid' | 'mono';
-    preferredProvider: 'plaid' | 'mono';
+    provider: "plaid" | "mono";
+    preferredProvider: "plaid" | "mono";
     accountId?: string;
     compact?: boolean;
     monoPublicKey?: string;
@@ -20,7 +21,10 @@ declare global {
         Plaid?: {
             create: (config: {
                 token: string;
-                onSuccess: (publicToken: string, metadata: unknown) => void | Promise<void>;
+                onSuccess: (
+                    publicToken: string,
+                    metadata: unknown,
+                ) => void | Promise<void>;
                 onExit?: () => void;
             }) => {
                 open: () => void;
@@ -37,17 +41,17 @@ declare global {
     }
 }
 
-const PLAID_SCRIPT_ID = 'plaid-link-script';
-const MONO_SCRIPT_ID = 'mono-connect-script';
+const PLAID_SCRIPT_ID = "plaid-link-script";
+const MONO_SCRIPT_ID = "mono-connect-script";
 
 const loadScript = (id: string, src: string): Promise<void> =>
     new Promise((resolve, reject) => {
-        if (typeof document === 'undefined') return;
+        if (typeof document === "undefined") return;
         if (document.getElementById(id)) {
             resolve();
             return;
         }
-        const script = document.createElement('script');
+        const script = document.createElement("script");
         script.id = id;
         script.src = src;
         script.async = true;
@@ -61,7 +65,7 @@ export const ConnectProviderButtons = ({
     preferredProvider,
     accountId,
     compact = false,
-    monoPublicKey = '',
+    monoPublicKey = "",
 }: ConnectProviderButtonsProps) => {
     const router = useRouter();
     const queryClient = useQueryClient();
@@ -74,10 +78,16 @@ export const ConnectProviderButtons = ({
     useEffect(() => {
         const loadSdk = async () => {
             try {
-                if (provider === 'plaid') {
-                    await loadScript(PLAID_SCRIPT_ID, 'https://cdn.plaid.com/link/v2/stable/link-initialize.js');
-                } else if (provider === 'mono') {
-                    await loadScript(MONO_SCRIPT_ID, 'https://connect.withmono.com/connect.js');
+                if (provider === "plaid") {
+                    await loadScript(
+                        PLAID_SCRIPT_ID,
+                        "https://cdn.plaid.com/link/v2/stable/link-initialize.js",
+                    );
+                } else if (provider === "mono") {
+                    await loadScript(
+                        MONO_SCRIPT_ID,
+                        "https://connect.withmono.com/connect.js",
+                    );
                 }
             } catch {
                 // Handled at interaction
@@ -89,7 +99,9 @@ export const ConnectProviderButtons = ({
     const waitForSdk = async (): Promise<boolean> => {
         try {
             await sdkLoadRef.current;
-            return provider === 'plaid' ? Boolean(window.Plaid) : Boolean(window.Connect);
+            return provider === "plaid"
+                ? Boolean(window.Plaid)
+                : Boolean(window.Connect);
         } catch {
             return false;
         }
@@ -100,19 +112,20 @@ export const ConnectProviderButtons = ({
         setIsBusy(true);
         const ready = await waitForSdk();
         if (!ready) {
-            setError('Plaid SDK not loaded — please try again');
+            setError("Plaid SDK not loaded — please try again");
+            toast.error("Plaid did not load. Please try again.");
             setIsBusy(false);
             return;
         }
         try {
             let token = plaidToken;
             if (!token) {
-                const res = await fetch('/api/connect/plaid/link-token', {
-                    method: 'POST',
-                    headers: { 'content-type': 'application/json' },
+                const res = await fetch("/api/connect/plaid/link-token", {
+                    method: "POST",
+                    headers: { "content-type": "application/json" },
                     body: JSON.stringify(accountId ? { accountId } : {}),
                 });
-                if (!res.ok) throw new Error('Init failed');
+                if (!res.ok) throw new Error("Init failed");
                 const payload = await res.json();
                 token = payload.linkToken;
                 setPlaidToken(token);
@@ -122,24 +135,38 @@ export const ConnectProviderButtons = ({
                 onSuccess: async (publicToken, metadata) => {
                     setIsPending(true);
                     try {
-                        const res = await fetch('/api/connect/plaid/exchange', {
-                            method: 'POST',
-                            headers: { 'content-type': 'application/json' },
+                        const res = await fetch("/api/connect/plaid/exchange", {
+                            method: "POST",
+                            headers: { "content-type": "application/json" },
                             body: JSON.stringify({ publicToken, metadata }),
                         });
                         if (!res.ok) {
-                            setError('Exchange failed');
+                            setError("Exchange failed");
+                            toast.error(
+                                "Could not link your Plaid account. Try again.",
+                            );
                             setIsBusy(false);
                             return;
                         }
-                        await queryClient.invalidateQueries({ queryKey: dashboardKeys.connectedAccounts() });
-                        await queryClient.invalidateQueries({ queryKey: dashboardKeys.payloads() });
-                        await queryClient.refetchQueries({ queryKey: dashboardKeys.connectedAccounts(), type: 'active' });
-                        router.push('/dashboard/connect?connected=plaid');
+                        await queryClient.invalidateQueries({
+                            queryKey: dashboardKeys.connectedAccounts(),
+                        });
+                        await queryClient.invalidateQueries({
+                            queryKey: dashboardKeys.payloads(),
+                        });
+                        await queryClient.refetchQueries({
+                            queryKey: dashboardKeys.connectedAccounts(),
+                            type: "active",
+                        });
+                        toast.success("Plaid account connected.");
+                        router.push("/dashboard/connect?connected=plaid");
                         setIsBusy(false);
                         router.refresh();
                     } catch {
-                        setError('Exchange error');
+                        setError("Exchange error");
+                        toast.error(
+                            "Could not link your Plaid account. Try again.",
+                        );
                         setIsBusy(false);
                     } finally {
                         setIsPending(false);
@@ -149,7 +176,8 @@ export const ConnectProviderButtons = ({
             });
             handler.open();
         } catch {
-            setError('Plaid initialization failed');
+            setError("Plaid initialization failed");
+            toast.error("Could not start Plaid. Try again.");
             setIsBusy(false);
         }
     };
@@ -157,13 +185,15 @@ export const ConnectProviderButtons = ({
     const handleMonoSetup = async () => {
         setError(null);
         if (!monoPublicKey) {
-            setError('Mono key missing');
+            setError("Mono key missing");
+            toast.error("Mono is not configured. Try again later.");
             return;
         }
         setIsBusy(true);
         const ready = await waitForSdk();
         if (!ready) {
-            setError('Mono SDK not loaded — please try again');
+            setError("Mono SDK not loaded — please try again");
+            toast.error("Mono did not load. Please try again.");
             setIsBusy(false);
             return;
         }
@@ -173,24 +203,38 @@ export const ConnectProviderButtons = ({
                 onSuccess: async ({ code }) => {
                     setIsPending(true);
                     try {
-                        const res = await fetch('/api/connect/mono/exchange', {
-                            method: 'POST',
-                            headers: { 'content-type': 'application/json' },
+                        const res = await fetch("/api/connect/mono/exchange", {
+                            method: "POST",
+                            headers: { "content-type": "application/json" },
                             body: JSON.stringify({ code }),
                         });
                         if (!res.ok) {
-                            setError('Exchange failed');
+                            setError("Exchange failed");
+                            toast.error(
+                                "Could not link your Mono account. Try again.",
+                            );
                             setIsBusy(false);
                             return;
                         }
-                        await queryClient.invalidateQueries({ queryKey: dashboardKeys.connectedAccounts() });
-                        await queryClient.invalidateQueries({ queryKey: dashboardKeys.payloads() });
-                        await queryClient.refetchQueries({ queryKey: dashboardKeys.connectedAccounts(), type: 'active' });
-                        router.push('/dashboard/connect?connected=mono');
+                        await queryClient.invalidateQueries({
+                            queryKey: dashboardKeys.connectedAccounts(),
+                        });
+                        await queryClient.invalidateQueries({
+                            queryKey: dashboardKeys.payloads(),
+                        });
+                        await queryClient.refetchQueries({
+                            queryKey: dashboardKeys.connectedAccounts(),
+                            type: "active",
+                        });
+                        toast.success("Mono account connected.");
+                        router.push("/dashboard/connect?connected=mono");
                         setIsBusy(false);
                         router.refresh();
                     } catch {
-                        setError('Exchange error');
+                        setError("Exchange error");
+                        toast.error(
+                            "Could not link your Mono account. Try again.",
+                        );
                         setIsBusy(false);
                     } finally {
                         setIsPending(false);
@@ -201,7 +245,8 @@ export const ConnectProviderButtons = ({
             if (mono.setup) mono.setup();
             mono.open();
         } catch {
-            setError('Mono interaction failed');
+            setError("Mono interaction failed");
+            toast.error("Could not start Mono. Try again.");
             setIsBusy(false);
         }
     };
@@ -214,7 +259,9 @@ export const ConnectProviderButtons = ({
                 <div className="absolute inset-0 z-10 bg-bg-surface/60 backdrop-blur-xs flex items-center justify-center">
                     <div className="flex flex-col items-center gap-3 animate-pulse">
                         <div className="h-8 w-8 animate-spin rounded-full border-[3px] border-brand border-t-transparent" />
-                        <p className="text-xs font-bold uppercase tracking-widest text-brand">Connecting...</p>
+                        <p className="text-xs font-bold uppercase tracking-widest text-brand">
+                            Connecting...
+                        </p>
                     </div>
                 </div>
             )}
@@ -227,15 +274,19 @@ export const ConnectProviderButtons = ({
 
             <Button
                 type="button"
-                variant={isPreferred ? 'primary' : 'secondary'}
-                size={compact ? 'sm' : 'default'}
-                onClick={provider === 'plaid' ? handlePlaidSetup : handleMonoSetup}
+                variant={isPreferred ? "primary" : "secondary"}
+                size={compact ? "sm" : "default"}
+                onClick={
+                    provider === "plaid" ? handlePlaidSetup : handleMonoSetup
+                }
                 disabled={isBusy || isPending}
                 className={compact ? "h-8" : "w-full mt-4"}
             >
                 {isBusy || isPending
                     ? `Opening ${provider}...`
-                    : accountId ? `Reconnect ${provider}` : `Setup ${provider}`}
+                    : accountId
+                      ? `Reconnect ${provider}`
+                      : `Setup ${provider}`}
             </Button>
         </div>
     );

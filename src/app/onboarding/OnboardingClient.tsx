@@ -1,9 +1,10 @@
-'use client';
+"use client";
 
-import { useTransition } from 'react';
-import { Sparkles, ArrowRight, ShieldCheck } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
+import { useTransition } from "react";
+import { toast } from "sonner";
+import { Sparkles, ArrowRight, ShieldCheck } from "lucide-react";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
 
 export default function OnboardingClient() {
     const [isPending, startTransition] = useTransition();
@@ -11,21 +12,24 @@ export default function OnboardingClient() {
     const handleContinue = () => {
         startTransition(async () => {
             try {
-                const res = await fetch('/api/user/settings', {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
+                const res = await fetch("/api/user/settings", {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ onboarding_completed: true }),
                 });
 
                 if (res.ok) {
                     // Hard-navigate so the server-side dashboard layout re-runs its
                     // DB check fresh and doesn't redirect back to /onboarding.
-                    window.location.href = '/dashboard/connect';
+                    window.location.href = "/dashboard/connect";
                 } else if (res.status === 401) {
-                    window.location.href = '/login';
+                    window.location.href = "/login";
+                } else {
+                    toast.error("Could not start your audit. Try again.");
                 }
             } catch (error) {
-                console.error('Failed to complete onboarding:', error);
+                console.error("Failed to complete onboarding:", error);
+                toast.error("Could not start your audit. Try again.");
             }
         });
     };
@@ -46,13 +50,20 @@ export default function OnboardingClient() {
 
                     {/* Heading */}
                     <h1 className="text-3xl font-bold tracking-tight text-text-primary mb-3">
-                        Stop paying for<br />
+                        Stop paying for
+                        <br />
                         <span className="text-brand">forgotten services</span>
                     </h1>
 
                     {/* Value Prop */}
                     <p className="text-sm text-text-secondary leading-relaxed mb-6">
-                        The average person wastes <span className="font-semibold text-brand">$156/month</span> on forgotten subscriptions. Unplug analyzes your spending to identify unused accounts and money you can reclaim.
+                        The average person wastes{" "}
+                        <span className="font-semibold text-brand">
+                            $156/month
+                        </span>{" "}
+                        on forgotten subscriptions. Unplug analyzes your
+                        spending to identify unused accounts and money you can
+                        reclaim.
                     </p>
 
                     {/* CTAs */}
@@ -61,7 +72,7 @@ export default function OnboardingClient() {
                         disabled={isPending}
                         className="w-full h-12 rounded-xl shadow-lg shadow-brand/10 gap-2 text-xs font-bold uppercase tracking-wider mb-4 transition-transform active:scale-[0.98]"
                     >
-                        {isPending ? 'Starting...' : 'Start Your Audit'}
+                        {isPending ? "Starting..." : "Start Your Audit"}
                         <ArrowRight className="w-4 h-4" />
                     </Button>
 

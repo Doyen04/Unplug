@@ -23,14 +23,19 @@
  * subscription payment method to the Unplug virtual card. We mark migration_status = 'confirmed'
  * so the user sees a ✓ confirmation in the UI.
  *
+ * BILLING DAY:
+ * The user never enters a billing day up front — it's set here, automatically, from
+ * the day-of-month of the first approved authorization (i.e. the first real charge).
+ * This is the only reliable source of truth for when a subscription actually bills.
+ *
  * AUTHENTICATION:
  * Sudo sends the Authorization Token you configured on the webhook (plain Bearer token,
  * no HMAC signing). We compare it directly against SUDO_AFRICA_WEBHOOK_SECRET.
  * Unverified requests get a 401.
  */
 
-import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/server/db';
+import { NextRequest, NextResponse } from "next/server";
+import { db } from "@/lib/server/db";
 
 /**
  * Validates that the webhook payload came from Sudo Africa and wasn't tampered with.
@@ -44,16 +49,18 @@ export async function POST(req: NextRequest) {
     // IMPORTANT: Read rawBody first as a string before any JSON.parse().
     // Once we parse, we can't reconstruct the exact bytes for HMAC verification.
     // Sudo sends the token you configured as: Authorization: Bearer <token>
-    const authHeader = req.headers.get('authorization');
+    const authHeader = req.headers.get("authorization");
     const expectedToken = process.env.SUDO_AFRICA_WEBHOOK_SECRET!;
 
-    const token = authHeader?.startsWith('Bearer ')
+    const token = authHeader?.startsWith("Bearer ")
         ? authHeader?.slice(7)
         : authHeader;
 
     if (!token || token !== expectedToken) {
-        console.warn('[sudo-webhook] Unauthorized - invalid or missing Authorization header');
-        return Response.json({ error: 'Unauthorized' }, { status: 401 });
+        console.warn(
+            "[sudo-webhook] Unauthorized - invalid or missing Authorization header",
+        );
+        return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const body = await req.json();
@@ -63,11 +70,15 @@ export async function POST(req: NextRequest) {
 
     // card is a string ID on transaction.created, an object on authorization events
     const sudoCardId =
-        typeof obj.card === 'string'
+        typeof obj.card === "string"
             ? obj.card
-            : obj.card?._id ?? obj.cardId ?? null;
+            : (obj.card?._id ?? obj.cardId ?? null);
     if (!sudoCardId) {
-        console.warn('[sudo-webhook] Could not extract sudoCardId from event:', type, obj._id);
+        console.warn(
+            "[sudo-webhook] Could not extract sudoCardId from event:",
+            type,
+            obj._id,
+        );
         return NextResponse.json({ received: true }); // ack so Sudo doesn't retry forever
     }
 
@@ -78,9 +89,9 @@ export async function POST(req: NextRequest) {
 
     // Look up which subscription this card belongs to (for linking transactions to subscriptions)
     const cardRecord = await db
-        .selectFrom('subscription_cards')
-        .select('subscription_id')
-        .where('sudo_card_id', '=', sudoCardId)
+        .selectFrom("subscription_cards")
+        .select("subscription_id")
+        .where("sudo_card_id", "=", sudoCardId)
         .executeTakeFirst();
 
     const subscriptionId = cardRecord?.subscription_id ?? null;
@@ -88,14 +99,14 @@ export async function POST(req: NextRequest) {
     // ── authorization.request / authorization.updated ────────────────────────────
     // An authorization is Sudo asking: "Can this merchant charge this card?"
     // We record/update it so the user can see pending or declined charges in their history.
-    if (type === 'authorization.request' || type === 'authorization.updated') {
+    if (type === "authorization.request" || type === "authorization.updated") {
         await db
-            .insertInto('card_transactions')
+            .insertInto("card_transactions")
             .values({
                 sudo_card_id: sudoCardId,
                 subscription_id: subscriptionId,
                 sudo_transaction_id: obj._id,
-                type: 'authorization',
+                type: "authorization",
                 status: obj.status,
                 amount_kobo: toKobo(obj.amount),
                 currency: obj.currency,
@@ -106,39 +117,55 @@ export async function POST(req: NextRequest) {
             // If we've already seen this transaction ID (duplicate delivery), just update the status.
             // Sudo can deliver the same event more than once — this is normal webhook behavior.
             .onConflict((oc) =>
-                oc.column('sudo_transaction_id').doUpdateSet({ status: obj.status })
+                oc
+                    .column("sudo_transaction_id")
+                    .doUpdateSet({ status: obj.status }),
             )
             .execute();
 
         // MIGRATION CONFIRMATION: First approved charge on this card = user successfully
         // switched their payment method. Mark the card as 'confirmed' in migration_status.
         // We only update if NOT already confirmed to avoid redundant writes.
-        if (obj.status === 'approved' && subscriptionId) {
-            await db
-                .updateTable('subscription_cards')
+        if (obj.status === "approved" && subscriptionId) {
+            const migrationUpdate = await db
+                .updateTable("subscription_cards")
                 .set({
-                    migration_status: 'confirmed',
+                    migration_status: "confirmed",
                     migration_confirmed_at: new Date(),
                     updated_at: new Date(),
                 })
-                .where('subscription_id', '=', subscriptionId)
-                .where('migration_status', '!=', 'confirmed')  // idempotent guard
-                .execute();
+                .where("subscription_id", "=", subscriptionId)
+                .where("migration_status", "!=", "confirmed") // idempotent guard
+                .executeTakeFirst();
+
+            // BILLING DAY: only the first confirmed charge should set it — this is the
+            // moment we learn, for real, what day of the month the card gets used.
+            // Later approved charges in the same billing cycle must not overwrite it.
+            if (migrationUpdate.numUpdatedRows > 0n) {
+                await db
+                    .updateTable("user_subscriptions")
+                    .set({
+                        billing_day: new Date().getDate(),
+                        updated_at: new Date(),
+                    })
+                    .where("id", "=", subscriptionId)
+                    .execute();
+            }
         }
     }
 
     // ── transaction.created ──────────────────────────────────────────────────────
     // A settled transaction (actual debit or refund) was recorded by Sudo.
     // We insert it for completeness; the user can see it in their card history.
-    if (type === 'transaction.created') {
+    if (type === "transaction.created") {
         await db
-            .insertInto('card_transactions')
+            .insertInto("card_transactions")
             .values({
                 sudo_card_id: sudoCardId,
                 subscription_id: subscriptionId,
                 sudo_transaction_id: obj._id,
-                type: obj.type === 'refund' ? 'refund' : 'transaction',
-                status: 'closed',         // settled transactions are always 'closed'
+                type: obj.type === "refund" ? "refund" : "transaction",
+                status: "closed", // settled transactions are always 'closed'
                 amount_kobo: toKobo(obj.amount),
                 currency: obj.currency,
                 merchant_name: obj.merchant?.name ?? null,
@@ -146,7 +173,7 @@ export async function POST(req: NextRequest) {
                 channel: obj.channel ?? null,
             })
             // If already inserted (duplicate delivery), silently skip
-            .onConflict((oc) => oc.column('sudo_transaction_id').doNothing())
+            .onConflict((oc) => oc.column("sudo_transaction_id").doNothing())
             .execute();
     }
 

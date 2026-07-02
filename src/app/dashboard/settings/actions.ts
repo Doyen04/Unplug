@@ -6,7 +6,10 @@ import { getServerSession } from "@/lib/server/auth-session";
 import { auth } from "@/lib/auth";
 
 import { cancelPaystackSubscriptionForUser } from "@/lib/paystack";
-import { freezeAllCardsForUser } from "@/lib/sudo/freeze-cards";
+import {
+    freezeAllCardsForUser,
+    closeAllCardsForUser,
+} from "@/lib/sudo/freeze-cards";
 
 export async function updateProfileAction(formData: FormData) {
     const session = await getServerSession();
@@ -73,7 +76,46 @@ export async function deleteAccountAction() {
     const userId = session.user.id;
 
     try {
-        // Delete app-level data first (FK children), then Better Auth's own tables.
+        // Stop any live billing before touching records — deleting rows doesn't
+        // cancel the Paystack subscription, so it would keep renewing otherwise.
+        await cancelPaystackSubscriptionForUser(userId);
+
+        // Close every virtual card in Sudo Africa so they stop working immediately.
+        // This must happen before we delete subscription_cards below, since we
+        // still need the sudo_card_id / ownership join at this point.
+        await closeAllCardsForUser(userId);
+
+        // card_transactions has no user_id column and no FK to "user" — it's keyed
+        // by sudo_card_id / subscription_id, so it survives deleting user_subscriptions
+        // (subscription_id gets SET NULL, not cascaded). Delete it explicitly using
+        // the user's card IDs before those cards are cascade-deleted.
+        const userCardIds = await db
+            .selectFrom("subscription_cards as sc")
+            .innerJoin("user_subscriptions as s", "s.id", "sc.subscription_id")
+            .select("sc.sudo_card_id")
+            .where("s.user_id", "=", userId)
+            .execute();
+
+        if (userCardIds.length > 0) {
+            await db
+                .deleteFrom("card_transactions")
+                .where(
+                    "sudo_card_id",
+                    "in",
+                    userCardIds.map((c) => c.sudo_card_id),
+                )
+                .execute();
+        }
+
+        // card_funding_transactions has a user_id column but no FK constraint at
+        // all, so it's never cleaned up automatically — delete it explicitly.
+        await db
+            .deleteFrom("card_funding_transactions")
+            .where("user_id", "=", userId)
+            .execute();
+
+        // Delete remaining app-level data (subscription_cards cascades from this),
+        // then Better Auth's own tables.
         await db
             .deleteFrom("connected_accounts")
             .where("user_id", "=", userId)
@@ -87,7 +129,9 @@ export async function deleteAccountAction() {
             .where("user_id", "=", userId)
             .execute();
 
-        // Better Auth tables (session → account → verification → user)
+        // Better Auth tables (session → account → verification → user).
+        // Deleting "user" cascades sudo_customers and user_funding_sources,
+        // both of which have ON DELETE CASCADE foreign keys to user(id).
         await db.deleteFrom("session").where("userId", "=", userId).execute();
         await db.deleteFrom("account").where("userId", "=", userId).execute();
         await db

@@ -17,11 +17,17 @@
  * Sudo call fails, our DB would say "inactive" but Sudo would still be "active",
  * meaning the card accepts charges despite appearing frozen in the UI.
  * Updating Sudo first prevents this inconsistency.
+ *
+ * PRO GATE:
+ * Virtual cards are a Pro-only feature. A user who has cancelled Pro must not
+ * be able to unfreeze (or re-freeze) a card — otherwise cancelling wouldn't
+ * actually stop the card from being usable again.
  */
 
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/server/db";
+import { isProUser } from "@/lib/server/plan";
 import { setCardStatus } from "@/lib/sudo/freeze-cards";
 
 export async function POST(
@@ -40,6 +46,13 @@ export async function POST(
 
     const resolvedParams = await params;
     const { subscriptionId } = resolvedParams;
+
+    if (!(await isProUser(session.user.id))) {
+        return NextResponse.json(
+            { error: "Virtual cards require a Pro plan" },
+            { status: 403 },
+        );
+    }
 
     const { action } = await req.json();
     if (action !== "freeze" && action !== "unfreeze") {

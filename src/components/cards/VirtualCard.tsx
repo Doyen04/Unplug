@@ -1,17 +1,17 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Lock, Unlock } from 'lucide-react';
-import { toast } from 'sonner';
-import { CardSensitiveData } from '@/components/cards/CardSensitiveData';
+import { useState } from "react";
+import { Lock, Unlock, Wifi } from "lucide-react";
+import { toast } from "sonner";
+import { CardSensitiveData } from "@/components/cards/CardSensitiveData";
 
 interface CardData {
     sudo_card_id: string;
-    currency: 'NGN' | 'USD';
+    currency: "NGN" | "USD";
     last_four: string;
     expiry_month: string;
     expiry_year: string;
-    status: 'active' | 'inactive' | 'closed';
+    status: "active" | "inactive" | "closed";
     migration_status: string;
 }
 
@@ -30,82 +30,119 @@ export function VirtualCard({
 }: VirtualCardProps) {
     const [isTogglingFreeze, setIsTogglingFreeze] = useState(false);
 
-    const isFrozen = card.status === 'inactive';
+    const isFrozen = card.status === "inactive";
+    const expiry = `${card.expiry_month.padStart(2, "0")}/${card.expiry_year.slice(-2)}`;
 
     async function handleFreezeToggle() {
         setIsTogglingFreeze(true);
-        const action = isFrozen ? 'unfreeze' : 'freeze';
+        const action = isFrozen ? "unfreeze" : "freeze";
         try {
             const res = await fetch(`/api/cards/${subscriptionId}/freeze`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ action }),
             });
-            if (!res.ok) throw new Error();
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                throw new Error(
+                    err.error ?? "Could not update card. Try again.",
+                );
+            }
             const data = await res.json();
             onStatusChange?.(data.status);
-            toast.success(action === 'freeze' ? 'Card frozen — no charges will go through' : 'Card unfrozen');
-        } catch {
-            toast.error('Could not update card. Try again.');
+            toast.success(
+                action === "freeze"
+                    ? "Card frozen — no charges will go through"
+                    : "Card unfrozen",
+            );
+        } catch (err: any) {
+            toast.error(err.message ?? "Could not update card. Try again.");
         } finally {
             setIsTogglingFreeze(false);
         }
     }
 
     return (
-        <div className="space-y-3">
-            <div className={`
-        relative rounded-2xl p-5 select-none overflow-hidden transition-all duration-300
-        ${isFrozen
-                    ? 'bg-neutral-800 grayscale opacity-70'
-                    : card.currency === 'USD'
-                        ? 'bg-neutral-900'
-                        : 'bg-[#E8482C]'}
-      `}>
+        <div className="mx-auto w-full max-w-sm space-y-3">
+            {/* Card face — a fixed aspect ratio keeps it looking like a real card at any width */}
+            <div
+                className={`
+                    relative aspect-[1.586/1] w-full select-none overflow-hidden rounded-2xl
+                    p-4 shadow-lg shadow-black/10 ring-1 ring-black/5 transition-all duration-300 sm:p-5
+                    ${
+                        ${isFrozen
+                            ? 'bg-linear-to-br from-text-muted to-text-secondary grayscale'
+                            : card.currency === 'USD'
+                                ? 'bg-linear-to-br from-[#232219] to-text-primary'
+                                : 'bg-linear-to-br from-brand to-brand-dark'
+                        }
+                `}
+            >
                 {isFrozen && (
-                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-10">
-                        <div className="flex items-center gap-2 text-white/80 text-sm font-medium">
-                            <Lock className="w-4 h-4" />
+                    <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/50">
+                        <div className="flex items-center gap-2 rounded-full bg-black/40 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-sm">
+                            <Lock className="h-3.5 w-3.5" />
                             Card frozen
                         </div>
                     </div>
                 )}
 
-                <div className="relative flex justify-between items-start mb-8">
-                    <span className="text-white/60 text-xs font-mono uppercase tracking-widest">
-                        {serviceName}
-                    </span>
-                    <span className="text-white/50 text-[10px] uppercase tracking-wider">
-                        {card.currency} · Virtual
-                    </span>
-                </div>
+                <div className="relative flex h-full flex-col justify-between">
+                    <div className="flex items-start justify-between gap-2">
+                        <span className="truncate text-xs font-bold uppercase tracking-widest text-white/70 sm:text-sm">
+                            {serviceName}
+                        </span>
+                        <Wifi className="h-4 w-4 shrink-0 rotate-90 text-white/50" />
+                    </div>
 
-                <div className="space-y-4">
-                    <CardSensitiveData
-                        subscriptionId={subscriptionId}
-                        lastFour={card.last_four}
-                        disabled={isFrozen}
-                    />
-                </div>
+                    <div className="space-y-2.5">
+                        <CardSensitiveData
+                            subscriptionId={subscriptionId}
+                            lastFour={card.last_four}
+                            expiry={expiry}
+                            disabled={isFrozen}
+                        />
 
-                <div className="absolute bottom-4 right-5 flex -space-x-2.5 pointer-events-none">
-                    <div className="w-7 h-7 rounded-full bg-red-500/90" />
-                    <div className="w-7 h-7 rounded-full bg-amber-400/90" />
+                        <div className="flex items-center justify-between">
+                            <span className="text-[10px] font-semibold uppercase tracking-wider text-white/50">
+                                {card.currency} · Virtual
+                            </span>
+                            <div className="flex -space-x-2.5">
+                                <div className="h-5 w-5 rounded-full bg-red-500/90" />
+                                <div className="h-5 w-5 rounded-full bg-amber-400/90" />
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div className="flex gap-2">
-                <button onClick={handleFreezeToggle}
-                    disabled={isTogglingFreeze}
-                    className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-sm transition-all disabled:opacity-40 cursor-pointer
-            ${isFrozen
-                            ? 'bg-green-500/10 border border-green-500/30 text-green-400 hover:bg-green-500/20'
-                            : 'border border-neutral-700 text-neutral-300 hover:text-white hover:border-neutral-500'}`}>
-                    {isFrozen
-                        ? <><Unlock className="w-3.5 h-3.5" /> Unfreeze</>
-                        : <><Lock className="w-3.5 h-3.5" /> Freeze</>}
-                </button>
-            </div>
+            <button
+                onClick={handleFreezeToggle}
+                disabled={isTogglingFreeze}
+                className={`
+                    flex w-full items-center justify-center gap-1.5 rounded-btn border py-2.5 text-sm font-semibold
+                    transition-all disabled:cursor-not-allowed disabled:opacity-40
+                    ${
+                        ${isFrozen
+                            ? 'border-success/30 bg-success-light text-success hover:bg-success-light'
+                            : 'border-border-strong bg-bg-surface text-text-secondary hover:border-text-muted hover:text-text-primary'
+                        }
+                `}
+            >
+                {isTogglingFreeze ? (
+                    <span className="animate-pulse">
+                        {isFrozen ? "Unfreezing…" : "Freezing…"}
+                    </span>
+                ) : isFrozen ? (
+                    <>
+                        <Unlock className="h-3.5 w-3.5" /> Unfreeze card
+                    </>
+                ) : (
+                    <>
+                        <Lock className="h-3.5 w-3.5" /> Freeze card
+                    </>
+                )}
+            </button>
         </div>
     );
 }
