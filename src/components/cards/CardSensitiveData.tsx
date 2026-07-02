@@ -133,7 +133,7 @@ export function CardSensitiveData({
                     headers: { Authorization: `Bearer ${token}` },
                     
                     jsonPathSelector: "data.number",
-                    htmlWrapper: `text`,
+                    htmlWrapper: "text",
                     serializers: [
                         panProxy.SERIALIZERS.replace(
                             "(\\d{4})(\\d{4})(\\d{4})(\\d{4})",
