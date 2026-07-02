@@ -11,7 +11,8 @@ also when we create or initalise anythin whether sudo or paystack and a error pr
 how to set funding source for card through api cause default funding source did not work 
 and how come we are getting this {"statusCode":200,"message":"Simulated successfully."} een thought it failed
 
-
+sudocustomer was not deleted alot check action page
+is should not show get card when the user has not subscribe it should be disabled 
 
 
 

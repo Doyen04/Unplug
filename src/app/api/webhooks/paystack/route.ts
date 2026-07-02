@@ -4,9 +4,15 @@
  *
  * Handles all events from Paystack, covering two distinct concerns:
  *
- * 1. PRO PLAN LIFECYCLE (subscription.create / subscription.disable / invoice.update)
+ * 1. PRO PLAN LIFECYCLE (subscription.create / subscription.enable / subscription.disable / invoice.update)
  *    Keeps the user's plan status in sync with their Paystack subscription.
  *    - subscription.create  → user upgraded to Pro, set plan='pro' + expiry date
+ *    - subscription.enable  → user RE-subscribed after a previous cancellation.
+ *                              Paystack subscriptions are unique per customer+plan,
+ *                              so resubscribing reactivates the existing (disabled)
+ *                              subscription instead of creating a new one — meaning
+ *                              subscription.create never fires again for returning
+ *                              subscribers. Handled identically to subscription.create.
  *    - subscription.disable → user cancelled, set plan='free' and freeze all
  *                              of their virtual cards (Pro-only feature)
  *    - invoice.update (paid) → subscription renewed, extend plan expiry

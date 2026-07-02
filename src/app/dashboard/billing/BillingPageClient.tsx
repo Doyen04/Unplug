@@ -146,12 +146,12 @@ export default function BillingPageClient({
     }, [subs.length, protectedCount]);
 
     return (
-        <div className="max-w-[960px] mx-auto pt-6 px-6 max-sm:px-4 space-y-4">
+        <div className="max-w-240 mx-auto pt-6 px-6 max-sm:px-4 space-y-4">
             <header className="mb-5">
-                <h1 className="text-[28px] font-semibold leading-tight text-[var(--color-text-primary)] font-display">
+                <h1 className="text-[28px] font-semibold leading-tight text-text-primary font-display">
                     Billing & Cards
                 </h1>
-                <p className="text-sm text-[var(--color-text-secondary)] mt-1 font-ui">
+                <p className="text-sm text-text-secondary mt-1 font-ui">
                     Manage billing and virtual cards.
                 </p>
             </header>
@@ -161,30 +161,30 @@ export default function BillingPageClient({
                 {isPro ? (
                     <div className="grid grid-cols-1 sm:grid-cols-[1.4fr_1fr] gap-4">
                         {/* Plan Card (Pro) */}
-                        <Card className="p-5 bg-[var(--color-brand-light)] border-[var(--color-brand)]/20 flex flex-col justify-between">
+                        <Card className="p-5 bg-brand-light border-brand/20 flex flex-col justify-between">
                             <div className="space-y-3">
                                 <div>
                                     <Badge
                                         variant="default"
-                                        className="bg-[var(--color-brand)] text-white hover:bg-[var(--color-brand)]"
+                                        className="bg-brand text-white hover:bg-brand"
                                     >
                                         Pro active
                                     </Badge>
                                 </div>
                                 <div>
-                                    <h2 className="text-sm font-semibold text-[var(--color-text-secondary)] uppercase tracking-wider">
+                                    <h2 className="text-sm font-semibold text-text-secondary uppercase tracking-wider">
                                         Current plan
                                     </h2>
-                                    <p className="text-[13px] text-[var(--color-text-secondary)] mt-1">
+                                    <p className="text-[13px] text-text-secondary mt-1">
                                         You have access to virtual cards
                                     </p>
                                 </div>
                             </div>
                             <div className="mt-6 flex flex-col">
-                                <span className="text-[10px] uppercase tracking-widest text-[var(--color-text-secondary)]">
+                                <span className="text-[10px] uppercase tracking-widest text-text-secondary">
                                     Monthly spend
                                 </span>
-                                <span className="text-[36px] font-semibold leading-tight text-[var(--color-text-primary)] font-display tabular-nums">
+                                <span className="text-[36px] font-semibold leading-tight text-text-primary font-display tabular-nums">
                                     ₦
                                     {totalMonthly.toLocaleString("en-US", {
                                         minimumFractionDigits: 0,
@@ -199,40 +199,40 @@ export default function BillingPageClient({
                             <div className="space-y-3">
                                 <div className="flex gap-4">
                                     <div>
-                                        <div className="text-[20px] font-semibold text-[var(--color-brand)]">
+                                        <div className="text-[20px] font-semibold text-brand">
                                             {protectedCount}
                                         </div>
-                                        <div className="text-[12px] text-[var(--color-text-secondary)]">
+                                        <div className="text-[12px] text-text-secondary">
                                             protected
                                         </div>
                                     </div>
                                     <div>
-                                        <div className="text-[20px] font-semibold text-[var(--color-text-secondary)]">
+                                        <div className="text-[20px] font-semibold text-text-secondary">
                                             {unprotectedCount}
                                         </div>
-                                        <div className="text-[12px] text-[var(--color-text-secondary)]">
+                                        <div className="text-[12px] text-text-secondary">
                                             unprotected
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="w-full h-[6px] rounded-[var(--radius-pill)] bg-[var(--color-bg-muted)] overflow-hidden">
+                                <div className="w-full h-1.5 rounded-pill bg-bg-muted overflow-hidden">
                                     <div
-                                        className="h-full bg-[var(--color-brand)] rounded-[var(--radius-pill)] transition-all duration-300"
+                                        className="h-full bg-brand rounded-pill transition-all duration-300"
                                         style={{
                                             width: `${percentProtected}%`,
                                         }}
                                     />
                                 </div>
 
-                                <p className="text-[13px] text-[var(--color-text-secondary)]">
+                                <p className="text-[13px] text-text-secondary">
                                     {percentProtected}% of spend protected
                                 </p>
                             </div>
                             <div className="mt-4">
                                 <Link
                                     href="/dashboard/subscriptions"
-                                    className="text-xs font-semibold text-[var(--color-brand)] hover:underline inline-flex items-center gap-1"
+                                    className="text-xs font-semibold text-brand hover:underline inline-flex items-center gap-1"
                                 >
                                     View all subscriptions &rarr;
                                 </Link>
@@ -243,10 +243,10 @@ export default function BillingPageClient({
                     /* Plan Card (Free - Full Width) */
                     <Card className="p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
                         <div className="space-y-2">
-                            <h2 className="text-lg font-semibold text-[var(--color-text-primary)]">
+                            <h2 className="text-lg font-semibold text-text-primary">
                                 Upgrade to Pro
                             </h2>
-                            <p className="text-sm text-[var(--color-text-secondary)] leading-relaxed max-w-xl">
+                            <p className="text-sm text-text-secondary leading-relaxed max-w-xl">
                                 Upgrade to Pro to issue dedicated virtual cards
                                 for your subscriptions and keep every renewal
                                 protected.
@@ -270,10 +270,10 @@ export default function BillingPageClient({
             <Card className="p-5 font-ui">
                 <div className="flex justify-between items-start gap-4 mb-3.5">
                     <div>
-                        <h2 className="text-base font-semibold text-[var(--color-text-primary)]">
+                        <h2 className="text-base font-semibold text-text-primary">
                             Subscriptions ready for cards
                         </h2>
-                        <p className="text-xs text-[var(--color-text-secondary)]">
+                        <p className="text-xs text-text-secondary">
                             Issue a dedicated card or review the current setup
                             for each service.
                         </p>
@@ -281,19 +281,19 @@ export default function BillingPageClient({
                 </div>
 
                 {subs.length === 0 ? (
-                    <div className="text-center py-8 text-sm text-[var(--color-text-secondary)]">
+                    <div className="text-center py-8 text-sm text-text-secondary">
                         No subscriptions are available yet. Connect your
                         accounts to start managing billing and card coverage.
                     </div>
                 ) : (
-                    <div className="divide-y divide-[var(--color-border)]/30">
+                    <div className="divide-y divide-border/30">
                         {subs.map((sub) => {
                             const isFrozen = sub.cardStatus === "inactive";
                             const isExpanded = expandedSub === sub.id;
                             return (
                                 <div
                                     key={sub.id}
-                                    className="border-b border-[var(--color-border)]/20 last:border-b-0"
+                                    className="border-b border-border/20 last:border-b-0"
                                 >
                                     {/* Desktop View */}
                                     <div
@@ -302,22 +302,22 @@ export default function BillingPageClient({
                                                 isExpanded ? null : sub.id,
                                             )
                                         }
-                                        className="hidden sm:grid grid-cols-[minmax(140px,2fr)_100px_90px_120px] items-center gap-3 py-3.5 cursor-pointer hover:bg-[var(--color-bg-muted)]/20 px-2 rounded-lg transition-colors"
+                                        className="hidden sm:grid grid-cols-[minmax(140px,2fr)_100px_90px_120px] items-center gap-3 py-3.5 cursor-pointer hover:bg-bg-muted/20 px-2 rounded-lg transition-colors"
                                     >
                                         <div className="flex flex-col">
-                                            <span className="text-sm font-semibold text-[var(--color-text-primary)] flex items-center gap-2">
+                                            <span className="text-sm font-semibold text-text-primary flex items-center gap-2">
                                                 {sub.serviceName}
-                                                <span className="text-[10px] text-[var(--color-text-muted)] font-normal border border-[var(--color-border)] px-1.5 py-0.5 rounded-md bg-[var(--color-bg-base)]">
+                                                <span className="text-[10px] text-text-muted font-normal border border-border px-1.5 py-0.5 rounded-md bg-bg-base">
                                                     {isExpanded
                                                         ? "Hide Card"
                                                         : "View Card"}
                                                 </span>
                                             </span>
-                                            <span className="text-[12px] text-[var(--color-text-secondary)]">
+                                            <span className="text-[12px] text-text-secondary">
                                                 monthly
                                             </span>
                                         </div>
-                                        <div className="text-sm font-medium text-right tabular-nums text-[var(--color-text-primary)]">
+                                        <div className="text-sm font-medium text-right tabular-nums text-text-primary">
                                             {sub.currency === "USD" ? "$" : "₦"}
                                             {sub.amountMonthly.toFixed(2)}
                                         </div>
@@ -354,7 +354,7 @@ export default function BillingPageClient({
                                                                 isFrozen,
                                                             );
                                                         }}
-                                                        className="w-full text-xs h-[30px] border border-[var(--color-border-strong)] bg-[var(--color-bg-surface)] text-[var(--color-text-primary)] hover:bg-[var(--color-bg-muted)]"
+                                                        className="w-full text-xs h-7.5 border border-border-strong bg-bg-surface text-text-primary hover:bg-bg-muted"
                                                     >
                                                         {actionLoading ===
                                                         sub.id
@@ -373,7 +373,7 @@ export default function BillingPageClient({
                                                             e.stopPropagation();
                                                             handleUpgrade();
                                                         }}
-                                                        className="w-full text-xs h-[30px] px-2"
+                                                        className="w-full text-xs h-7.5 px-2"
                                                     >
                                                         {isUpgrading
                                                             ? "..."
@@ -392,7 +392,7 @@ export default function BillingPageClient({
                                                             sub.id,
                                                         );
                                                     }}
-                                                    className="w-full text-xs h-[30px]"
+                                                    className="w-full text-xs h-7.5"
                                                 >
                                                     {actionLoading === sub.id
                                                         ? "..."
@@ -409,23 +409,23 @@ export default function BillingPageClient({
                                                 isExpanded ? null : sub.id,
                                             )
                                         }
-                                        className="flex sm:hidden flex-col gap-2 py-3.5 cursor-pointer hover:bg-[var(--color-bg-muted)]/20 px-2 rounded-lg transition-colors"
+                                        className="flex sm:hidden flex-col gap-2 py-3.5 cursor-pointer hover:bg-bg-muted/20 px-2 rounded-lg transition-colors"
                                     >
                                         <div className="flex justify-between items-center">
                                             <div className="flex flex-col">
-                                                <span className="text-sm font-semibold text-[var(--color-text-primary)] flex items-center gap-2">
+                                                <span className="text-sm font-semibold text-text-primary flex items-center gap-2">
                                                     {sub.serviceName}
-                                                    <span className="text-[10px] text-[var(--color-text-muted)] font-normal border border-[var(--color-border)] px-1 rounded-md bg-[var(--color-bg-base)]">
+                                                    <span className="text-[10px] text-text-muted font-normal border border-border px-1 rounded-md bg-bg-base">
                                                         {isExpanded
                                                             ? "Hide"
                                                             : "View"}
                                                     </span>
                                                 </span>
-                                                <span className="text-[12px] text-[var(--color-text-secondary)]">
+                                                <span className="text-[12px] text-text-secondary">
                                                     monthly
                                                 </span>
                                             </div>
-                                            <div className="text-sm font-medium tabular-nums text-[var(--color-text-primary)]">
+                                            <div className="text-sm font-medium tabular-nums text-text-primary">
                                                 {sub.currency === "USD"
                                                     ? "$"
                                                     : "₦"}
@@ -468,7 +468,7 @@ export default function BillingPageClient({
                                                                     isFrozen,
                                                                 );
                                                             }}
-                                                            className="text-xs h-[30px] px-3 border border-[var(--color-border-strong)] bg-[var(--color-bg-surface)] text-[var(--color-text-primary)] hover:bg-[var(--color-bg-muted)]"
+                                                            className="text-xs h-7.5 px-3 border border-border-strong bg-bg-surface text-text-primary hover:bg-bg-muted"
                                                         >
                                                             {actionLoading ===
                                                             sub.id
@@ -487,7 +487,7 @@ export default function BillingPageClient({
                                                                 e.stopPropagation();
                                                                 handleUpgrade();
                                                             }}
-                                                            className="text-xs h-[30px] px-3"
+                                                            className="text-xs h-7.5 px-3"
                                                         >
                                                             {isUpgrading
                                                                 ? "..."
@@ -507,7 +507,7 @@ export default function BillingPageClient({
                                                                 sub.id,
                                                             );
                                                         }}
-                                                        className="text-xs h-[30px] px-3"
+                                                        className="text-xs h-7.5 px-3"
                                                     >
                                                         {actionLoading ===
                                                         sub.id
@@ -521,7 +521,7 @@ export default function BillingPageClient({
 
                                     {/* Expandable Virtual Card Details (SubscriptionCardPanel) */}
                                     {isExpanded && (
-                                        <div className="p-4 bg-[var(--color-bg-muted)] border-t border-[var(--color-border)] rounded-b-lg mb-3 mt-1">
+                                        <div className="p-4 bg-bg-muted border-t border-border rounded-b-lg mb-3 mt-1">
                                             <SubscriptionCardPanel
                                                 subscriptionId={sub.id}
                                                 serviceName={sub.serviceName}

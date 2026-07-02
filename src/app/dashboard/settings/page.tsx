@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 
 import { getServerSession } from "@/lib/server/auth-session";
 import { NotificationSwitches } from "@/components/features/settings/NotificationSwitches";
@@ -13,14 +13,8 @@ import { Badge } from "@/components/ui/Badge";
 import { Input } from "@/components/ui/Input";
 import { isProUser } from "@/lib/server/plan";
 import { updateProfileAction } from "./actions";
+import { signOutAction } from "@/lib/client/logoutAction";
 
-const hasAuthSessionCookie = async (): Promise<boolean> => {
-    const cookieStore = await cookies();
-    return (
-        Boolean(cookieStore.get("better-auth.session_token")?.value) ||
-        Boolean(cookieStore.get("__Secure-better-auth.session_token")?.value)
-    );
-};
 
 const getSessionUserField = (
     session: unknown,
@@ -40,7 +34,6 @@ interface SettingsPageProps {
 export default async function DashboardSettingsPage({
     searchParams,
 }: SettingsPageProps) {
-    const hasSessionCookie = await hasAuthSessionCookie();
     let session = null;
     let isOffline = false;
 
@@ -51,7 +44,7 @@ export default async function DashboardSettingsPage({
     }
 
     if (!session) {
-        if (hasSessionCookie || isOffline) {
+        if (session || isOffline) {
             isOffline = true;
         } else {
             redirect("/login");
@@ -72,13 +65,15 @@ export default async function DashboardSettingsPage({
     // Fetch user plan status from DB
     const isPro = session?.user?.id ? await isProUser(session.user.id) : false;
 
+    const router = useRouter();
+
     return (
-        <div className="max-w-[880px] mx-auto pt-6 px-6 max-sm:px-4 space-y-4">
+        <div className="max-w-220 mx-auto pt-6 px-6 max-sm:px-4 space-y-4">
             <header className="mb-5">
-                <h1 className="text-[28px] font-semibold leading-tight text-[var(--color-text-primary)] font-display">
+                <h1 className="text-[28px] font-semibold leading-tight text-text-primary font-display">
                     Settings
                 </h1>
-                <p className="text-sm text-[var(--color-text-secondary)] mt-1 font-ui">
+                <p className="text-sm text-text-secondary mt-1 font-ui">
                     Manage your personal information and preferences.
                 </p>
             </header>
@@ -121,10 +116,10 @@ export default async function DashboardSettingsPage({
             {/* Profile & Security Card */}
             <Card className="p-5 font-ui">
                 <div className="flex flex-col gap-1 mb-3.5">
-                    <h2 className="text-base font-semibold text-[var(--color-text-primary)]">
+                    <h2 className="text-base font-semibold text-text-primary">
                         Profile & Security
                     </h2>
-                    <p className="text-xs text-[var(--color-text-secondary)]">
+                    <p className="text-xs text-text-secondary">
                         Edit your account details and security settings.
                     </p>
                 </div>
@@ -132,7 +127,7 @@ export default async function DashboardSettingsPage({
                 <form action={updateProfileAction} className="space-y-4">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="flex flex-col gap-1.5">
-                            <label className="text-xs font-medium text-[var(--color-text-primary)]">
+                            <label className="text-xs font-medium text-text-primary">
                                 Display Name
                             </label>
                             <Input
@@ -143,7 +138,7 @@ export default async function DashboardSettingsPage({
                             />
                         </div>
                         <div className="flex flex-col gap-1.5">
-                            <label className="text-xs font-medium text-[var(--color-text-primary)]">
+                            <label className="text-xs font-medium text-text-primary">
                                 Email Address
                             </label>
                             <Input
@@ -159,7 +154,7 @@ export default async function DashboardSettingsPage({
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-6">
                         <Link
                             href="/forgot-password"
-                            className="text-sm font-medium text-[var(--color-brand)] hover:underline"
+                            className="text-sm font-medium text-brand hover:underline"
                         >
                             Change Password &rarr;
                         </Link>
@@ -176,18 +171,18 @@ export default async function DashboardSettingsPage({
                 <Card className="p-5 flex flex-col justify-between">
                     <div>
                         <div className="flex flex-col gap-1 mb-3.5">
-                            <h2 className="text-base font-semibold text-[var(--color-text-primary)]">
+                            <h2 className="text-base font-semibold text-text-primary">
                                 Connected Accounts
                             </h2>
-                            <p className="text-xs text-[var(--color-text-secondary)]">
+                            <p className="text-xs text-text-secondary">
                                 Manage linked providers.
                             </p>
                         </div>
-                        <div className="flex flex-col gap-1 py-3.5 border-b border-[var(--color-border)] last:border-b-0">
-                            <p className="text-sm font-semibold text-[var(--color-text-primary)]">
+                        <div className="flex flex-col gap-1 py-3.5 border-b border-border last:border-b-0">
+                            <p className="text-sm font-semibold text-text-primary">
                                 Sync Your Financial Data
                             </p>
-                            <p className="text-xs text-[var(--color-text-secondary)] leading-relaxed">
+                            <p className="text-xs text-text-secondary leading-relaxed">
                                 Securely connect new accounts or update
                                 credentials via Plaid and Mono.
                             </p>
@@ -205,38 +200,38 @@ export default async function DashboardSettingsPage({
                 {/* Preferences Card */}
                 <Card className="p-5">
                     <div className="flex flex-col gap-1 mb-3.5">
-                        <h2 className="text-base font-semibold text-[var(--color-text-primary)]">
+                        <h2 className="text-base font-semibold text-text-primary">
                             Preferences
                         </h2>
-                        <p className="text-xs text-[var(--color-text-secondary)]">
+                        <p className="text-xs text-text-secondary">
                             Choose how Unplug reaches you.
                         </p>
                     </div>
-                    <div className="divide-y divide-[var(--color-border)]/30">
+                    <div className="divide-y divide-border/30">
                         <NotificationSwitches />
                     </div>
                 </Card>
             </div>
 
             {/* Safety & Account Card (Danger Zone) */}
-            <Card className="p-5 border-[var(--color-border-strong)] font-ui">
+            <Card className="p-5 border-border-strong font-ui">
                 <div className="flex flex-col gap-1 mb-3.5">
-                    <h2 className="text-base font-semibold text-[var(--color-danger)]">
+                    <h2 className="text-base font-semibold text-danger">
                         Critical Actions
                     </h2>
-                    <p className="text-xs text-[var(--color-text-secondary)]">
+                    <p className="text-xs text-text-secondary">
                         Destructive actions and account removal.
                     </p>
                 </div>
 
-                <div className="divide-y divide-[var(--color-border)]">
+                <div className="divide-y divide-border">
                     {/* Log Out Row */}
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 py-3.5">
                         <div>
-                            <p className="text-sm font-semibold text-[var(--color-text-primary)]">
+                            <p className="text-sm font-semibold text-text-primary">
                                 Log Out
                             </p>
-                            <p className="text-xs text-[var(--color-text-secondary)] mt-1">
+                            <p className="text-xs text-text-secondary mt-1">
                                 End your current session.
                             </p>
                         </div>
@@ -244,8 +239,9 @@ export default async function DashboardSettingsPage({
                             variant="secondary"
                             asChild
                             className="w-full sm:w-auto"
+                            onClick={() => signOutAction(() => router.push("/login"))}
                         >
-                            <Link href="/logout">Log Out</Link>
+                            Log Out
                         </Button>
                     </div>
 
@@ -253,10 +249,10 @@ export default async function DashboardSettingsPage({
                     {isPro && (
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 py-3.5">
                             <div>
-                                <p className="text-sm font-semibold text-[var(--color-text-primary)]">
+                                <p className="text-sm font-semibold text-text-primary">
                                     Unsubscribe from Pro
                                 </p>
-                                <p className="text-xs text-[var(--color-text-secondary)] mt-1 max-w-md leading-relaxed">
+                                <p className="text-xs text-text-secondary mt-1 max-w-md leading-relaxed">
                                     Cancel your Pro plan. You&apos;ll keep
                                     virtual card access until the end of your
                                     current billing period.
@@ -269,10 +265,10 @@ export default async function DashboardSettingsPage({
                     {/* Delete Account Row */}
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 py-3.5">
                         <div>
-                            <p className="text-sm font-semibold text-[var(--color-text-primary)]">
+                            <p className="text-sm font-semibold text-text-primary">
                                 Delete Account
                             </p>
-                            <p className="text-xs text-[var(--color-text-secondary)] mt-1 max-w-md leading-relaxed">
+                            <p className="text-xs text-text-secondary mt-1 max-w-md leading-relaxed">
                                 Permanently remove all your personal and
                                 financial data. This can&apos;t be undone.
                             </p>

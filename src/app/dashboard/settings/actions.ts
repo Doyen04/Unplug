@@ -128,7 +128,7 @@ export async function deleteAccountAction() {
             .deleteFrom("user_settings")
             .where("user_id", "=", userId)
             .execute();
-
+        //TODO: delete sudo_customer table too and user funding source too
         // Better Auth tables (session → account → verification → user).
         // Deleting "user" cascades sudo_customers and user_funding_sources,
         // both of which have ON DELETE CASCADE foreign keys to user(id).

@@ -4,18 +4,13 @@ import { Globe } from 'lucide-react';
 
 import { ConnectProviderButtons } from '@/components/features/connect/ConnectProviderButtons';
 import { ConnectedAccountsSection } from '@/components/features/connect/ConnectedAccountsSection';
+import { ConnectStatusToast } from '@/components/features/connect/ConnectStatusToast';
 import { getServerSession } from '@/lib/server/auth-session';
 
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 
 const MONO_COUNTRIES = new Set(['NG', 'GH', 'KE', 'ZA', 'UG', 'TZ']);
-
-// const hasAuthSessionCookie = async (): Promise<boolean> => {
-//     const cookieStore = await cookies();
-//     return Boolean(cookieStore.get('better-auth.session_token')?.value)
-//         || Boolean(cookieStore.get('__Secure-better-auth.session_token')?.value);
-// };
 
 const resolveCountry = (
     countryHeader: string | null,
@@ -95,15 +90,20 @@ const ConnectAccountsPage = async ({ searchParams }: ConnectAccountsPageProps) =
                 </div>
             </header>
 
-            {(isOffline || hasWelcome || hasConnectSuccess || hasDisconnected || hasDisconnectError) && (
+            {(isOffline || hasWelcome) && (
                 <div className="space-y-3">
                     {isOffline && <Badge variant="warning" className="w-full justify-center py-3 h-auto">Offline Mode: Some data may be unavailable.</Badge>}
                     {hasWelcome && <Badge variant="success" className="w-full justify-center py-3 h-auto">Welcome! Connect an account to get started.</Badge>}
-                    {hasConnectSuccess && <Badge variant="success" className="w-full justify-center py-3 h-auto">Account connected successfully.</Badge>}
-                    {hasDisconnected && <Badge variant="secondary" className="w-full justify-center py-3 h-auto">Account disconnected.</Badge>}
-                    {hasDisconnectError && <Badge variant="danger" className="w-full justify-center py-3 h-auto">Could not disconnect account.</Badge>}
                 </div>
             )}
+
+            {hasConnectSuccess || hasDisconnected || hasDisconnectError ? (
+                <ConnectStatusToast
+                    hasConnectSuccess={hasConnectSuccess}
+                    hasDisconnected={hasDisconnected}
+                    hasDisconnectError={hasDisconnectError}
+                />
+            ) : null}
 
             <div className="grid gap-6 lg:grid-cols-5">
                 <ConnectedAccountsSection

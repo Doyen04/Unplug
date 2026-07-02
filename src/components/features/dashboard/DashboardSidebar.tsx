@@ -1,4 +1,4 @@
-import { authClient } from "@/lib/auth-client";
+import { signOutAction } from "@/lib/client/logoutAction";
 import { ChevronLeft, ChevronRight, CreditCard, Home, LinkIcon, List, LogOut, Receipt, Settings, User, Zap } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -31,12 +31,6 @@ export const Sidebar = ({ expanded, toggleExpanded, isMobileOpen, setIsMobileOpe
     const [isLoading, setIsLoading] = useState(true);
 
     const router = useRouter();
-
-    const signOutAction = async () => {
-        await authClient.signOut({
-            fetchOptions: { onSuccess: () => router.push('/login') },
-        });
-    };
 
     useEffect(() => {
         const fetchUser = async () => {
@@ -160,7 +154,7 @@ export const Sidebar = ({ expanded, toggleExpanded, isMobileOpen, setIsMobileOpe
                     <div
                         className={`flex items-center rounded-btn px-2 py-2 text-text-secondary transition-colors hover:bg-bg-muted hover:text-danger ${!expanded ? 'justify-center' : ''
                             }`}
-                        onClick={() => signOutAction()}
+                        onClick = {() => signOutAction(() => router.push("/login"))}
                     >
                         <LogOut size={18} className={expanded ? 'mr-3 shrink-0' : 'shrink-0'} />
                         {expanded && <span className="text-sm font-medium">Log out</span>}
