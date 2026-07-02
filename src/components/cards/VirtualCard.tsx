@@ -70,12 +70,12 @@ export function VirtualCard({
                     relative aspect-[1.586/1] w-full select-none overflow-hidden rounded-2xl
                     p-4 shadow-lg shadow-black/10 ring-1 ring-black/5 transition-all duration-300 sm:p-5
                     ${
-                        ${isFrozen
-                            ? 'bg-linear-to-br from-text-muted to-text-secondary grayscale'
-                            : card.currency === 'USD'
-                                ? 'bg-linear-to-br from-[#232219] to-text-primary'
-                                : 'bg-linear-to-br from-brand to-brand-dark'
-                        }
+                        isFrozen
+                            ? "bg-linear-to-br from-text-muted to-text-secondary grayscale"
+                            : card.currency === "USD"
+                              ? "bg-linear-to-br from-[#232219] to-text-primary"
+                              : "bg-linear-to-br from-brand to-brand-dark"
+                    }
                 `}
             >
                 {isFrozen && (
@@ -123,10 +123,10 @@ export function VirtualCard({
                     flex w-full items-center justify-center gap-1.5 rounded-btn border py-2.5 text-sm font-semibold
                     transition-all disabled:cursor-not-allowed disabled:opacity-40
                     ${
-                        ${isFrozen
-                            ? 'border-success/30 bg-success-light text-success hover:bg-success-light'
-                            : 'border-border-strong bg-bg-surface text-text-secondary hover:border-text-muted hover:text-text-primary'
-                        }
+                        isFrozen
+                            ? "border-success/30 bg-success-light text-success hover:bg-success-light"
+                            : "border-border-strong bg-bg-surface text-text-secondary hover:border-text-muted hover:text-text-primary"
+                    }
                 `}
             >
                 {isTogglingFreeze ? (
