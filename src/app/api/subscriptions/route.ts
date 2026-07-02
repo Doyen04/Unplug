@@ -91,7 +91,9 @@ export async function POST(req: NextRequest) {
             id: subscriptionId,
             user_id: session.user.id,
             provider: "manual",
-            subscription_id: null,
+            // Ensure a non-null subscription_id to satisfy the DB constraint.
+            // For manual subscriptions we use the generated internal id here.
+            subscription_id: subscriptionId,
             service_name: serviceName,
             amount_monthly: amountMonthly,
             frequency_label: "monthly",

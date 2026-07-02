@@ -1,6 +1,5 @@
 import Link from "next/link";
-import { cookies } from "next/headers";
-import { redirect, useRouter } from "next/navigation";
+import { redirect } from "next/navigation";
 
 import { getServerSession } from "@/lib/server/auth-session";
 import { NotificationSwitches } from "@/components/features/settings/NotificationSwitches";
@@ -12,8 +11,8 @@ import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Input } from "@/components/ui/Input";
 import { isProUser } from "@/lib/server/plan";
-import { updateProfileAction } from "./actions";
-import { signOutAction } from "@/lib/client/logoutAction";
+import { serverSignOutAction, updateProfileAction } from "./actions";
+
 
 
 const getSessionUserField = (
@@ -65,7 +64,6 @@ export default async function DashboardSettingsPage({
     // Fetch user plan status from DB
     const isPro = session?.user?.id ? await isProUser(session.user.id) : false;
 
-    const router = useRouter();
 
     return (
         <div className="max-w-220 mx-auto pt-6 px-6 max-sm:px-4 space-y-4">
@@ -235,14 +233,15 @@ export default async function DashboardSettingsPage({
                                 End your current session.
                             </p>
                         </div>
-                        <Button
-                            variant="secondary"
-                            asChild
-                            className="w-full sm:w-auto"
-                            onClick={() => signOutAction(() => router.push("/login"))}
-                        >
-                            Log Out
-                        </Button>
+                        <form action={serverSignOutAction}>
+                            <Button
+                                variant="secondary"
+                                type="submit"
+                                className="w-full sm:w-auto"
+                            >
+                                Log Out
+                            </Button>
+                        </form>
                     </div>
 
                     {/* Unsubscribe Row (Only if Pro) */}

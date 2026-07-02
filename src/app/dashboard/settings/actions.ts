@@ -11,6 +11,11 @@ import {
     closeAllCardsForUser,
 } from "@/lib/sudo/freeze-cards";
 
+export async function serverSignOutAction() {
+    await auth.api.signOut({ headers: await headers() });
+    redirect("/login");
+}
+
 export async function updateProfileAction(formData: FormData) {
     const session = await getServerSession();
     if (!session || !session.user) {

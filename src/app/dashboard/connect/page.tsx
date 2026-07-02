@@ -50,7 +50,7 @@ const ConnectAccountsPage = async ({ searchParams }: ConnectAccountsPageProps) =
     let isOffline = false;
     const session = await getServerSession();
 
-    if(!session) {
+    if (!session) {
         isOffline = true;
     }
 
