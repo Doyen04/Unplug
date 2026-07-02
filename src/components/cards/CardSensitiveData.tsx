@@ -156,6 +156,18 @@ export function CardSensitiveData({
 
     return (
         <div className="space-y-3">
+            <style>{`
+                /* Force SecureProxy-injected content to match the card styles */
+                #${panId}, #${cvvId} {
+                    color: white !important;
+                    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', 'Segoe UI Mono', monospace !important;
+                    letter-spacing: 0.15em !important;
+                    font-variant-numeric: tabular-nums !important;
+                    white-space: pre !important;
+                    display: block !important;
+                    -webkit-text-fill-color: white !important;
+                }
+            `}</style>
             <div className="flex items-end justify-between gap-3">
                 <div className="min-w-0">
                     <p className="text-[9px] font-semibold uppercase tracking-wider text-white/50">
@@ -169,7 +181,7 @@ export function CardSensitiveData({
                     <div
                         id={panId}
                         className="font-mono text-base tracking-widest text-white sm:text-lg"
-                        style={{ display: revealed ? "block" : "none" }}
+                        style={{ display: revealed ? "block" : "none", color: 'white' }}
                     />
                 </div>
 
@@ -216,7 +228,7 @@ export function CardSensitiveData({
                     <div
                         id={cvvId}
                         className="font-mono text-xs text-white sm:text-sm"
-                        style={{ display: revealed ? "block" : "none" }}
+                        style={{ display: revealed ? "block" : "none", color: 'white' }}
                     />
                 </div>
             </div>
