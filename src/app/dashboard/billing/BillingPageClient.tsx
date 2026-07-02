@@ -373,11 +373,11 @@ export default function BillingPageClient({
                                                             e.stopPropagation();
                                                             handleUpgrade();
                                                         }}
-                                                        className="w-full text-xs h-[30px]"
+                                                        className="w-full text-xs h-[30px] px-2"
                                                     >
                                                         {isUpgrading
                                                             ? "..."
-                                                            : "Upgrade to manage"}
+                                                            : "Upgrade"}
                                                     </Button>
                                                 )
                                             ) : (
