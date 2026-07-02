@@ -91,9 +91,10 @@ export async function POST(req: NextRequest) {
             id: subscriptionId,
             user_id: session.user.id,
             provider: "manual",
-            // Ensure a non-null subscription_id to satisfy the DB constraint.
-            // For manual subscriptions we use the generated internal id here.
-            subscription_id: subscriptionId,
+            // Ensure a non-null, provider-scoped `subscription_id` to satisfy the DB
+            // constraint and keep the same shape as detected subscriptions.
+            // Use a `manual-<uuid>` prefix so manual rows are clearly identifiable.
+            subscription_id: `manual-${subscriptionId}`,
             service_name: serviceName,
             amount_monthly: amountMonthly,
             frequency_label: "monthly",
@@ -101,7 +102,9 @@ export async function POST(req: NextRequest) {
             status: "pending_card",
             confidence: "manual",
             usage_score: 0,
-            verdict: null,
+            // `verdict` is NOT NULL in the DB migration; use 'unknown' for manual entries
+            // so downstream code (which expects a string) can operate safely.
+            verdict: 'unknown',
             alert: null,
             previous_status: null,
             currency,
