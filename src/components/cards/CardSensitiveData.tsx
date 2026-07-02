@@ -65,16 +65,23 @@ interface CardSensitiveDataProps {
     disabled?: boolean;
 }
 
+// Regex patterns that pull out one 4-digit block from a 16-digit PAN string
+const GROUP_PATTERNS = [
+    { pattern: "^(\\d{4})\\d{4}\\d{4}\\d{4}$", replacement: "$1" },
+    { pattern: "^\\d{4}(\\d{4})\\d{4}\\d{4}$", replacement: "$1" },
+    { pattern: "^\\d{4}\\d{4}(\\d{4})\\d{4}$", replacement: "$1" },
+    { pattern: "^\\d{4}\\d{4}\\d{4}(\\d{4})$", replacement: "$1" },
+];
+
 /**
  * Renders the front-of-card sensitive fields (number, expiry, CVV) in white
  * text, since this is only ever rendered on top of the branded, colored
  * virtual card face in <VirtualCard />.
  *
- * NOTE: this previously used shadcn-style utility classes (`text-foreground`,
- * `text-muted-foreground`, `text-destructive`) that have no matching CSS
- * variables in this app's Tailwind v4 theme (see `globals.css`), so the text
- * rendered with the browser's default color — effectively invisible against
- * the colored card. All colors here are explicit for that reason.
+ * The PAN is rendered as 4 independently-positioned group elements (rather
+ * than one injected string) so the masked state ("•••• •••• •••• 1234") and
+ * revealed state line up exactly — same widths, same gaps, no letter-spacing
+ * tricks needed, no layout shift on toggle.
  */
 export function CardSensitiveData({
     subscriptionId,
@@ -88,7 +95,7 @@ export function CardSensitiveData({
     const [error, setError] = useState<string | null>(null);
     const didRender = useRef(false);
 
-    const panId = `sudo-pan-${uid}`;
+    const panGroupIds = [0, 1, 2, 3].map((i) => `sudo-pan-${uid}-g${i}`);
     const cvvId = `sudo-cvv-${uid}`;
 
     async function handleReveal() {
@@ -111,23 +118,27 @@ export function CardSensitiveData({
             }
 
             const { token, sudoCardId } = body;
-            const panProxy = window.SecureProxy.create(VAULT_ID);
-            panProxy
-                .request({
-                    name: `pan-${uid}`,
-                    method: "GET",
-                    path: `/cards/${sudoCardId}/secure-data/number`,
-                    headers: { Authorization: `Bearer ${token}` },
-                    htmlWrapper: "text",
-                    jsonPathSelector: "data.number",
-                    serializers: [
-                        panProxy.SERIALIZERS.replace(
-                            "(\\d{4})(\\d{4})(\\d{4})(\\d{4})",
-                            "$1 $2 $3 $4",
-                        ),
-                    ],
-                })
-                .render(`#${panId}`);
+
+            // One request per 4-digit group, each rendered into its own span
+            panGroupIds.forEach((groupId, i) => {
+                const proxy = window.SecureProxy.create(VAULT_ID);
+                proxy
+                    .request({
+                        name: `pan-${uid}-g${i}`,
+                        method: "GET",
+                        path: `/cards/${sudoCardId}/secure-data/number`,
+                        headers: { Authorization: `Bearer ${token}` },
+                        htmlWrapper: "text",
+                        jsonPathSelector: "data.number",
+                        serializers: [
+                            proxy.SERIALIZERS.replace(
+                                GROUP_PATTERNS[i].pattern,
+                                GROUP_PATTERNS[i].replacement,
+                            ),
+                        ],
+                    })
+                    .render(`#${groupId}`);
+            });
 
             const cvvProxy = window.SecureProxy.create(VAULT_ID);
             cvvProxy
@@ -158,10 +169,10 @@ export function CardSensitiveData({
         <div className="space-y-3">
             <style>{`
                 /* Force SecureProxy-injected content to match the card styles */
-                #${panId}, #${panId} *, #${cvvId}, #${cvvId} * {
+                ${panGroupIds.map((id) => `#${id}, #${id} *`).join(", ")},
+                #${cvvId}, #${cvvId} * {
                     color: white !important;
                     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', 'Segoe UI Mono', monospace !important;
-                    letter-spacing: 0.15em !important;
                     font-variant-numeric: tabular-nums !important;
                     white-space: pre !important;
                     line-height: 1.1 !important;
@@ -175,16 +186,32 @@ export function CardSensitiveData({
                     <p className="text-[9px] font-semibold uppercase tracking-wider text-white/50">
                         Card number
                     </p>
-                    {!revealed && (
-                        <p className="truncate font-mono text-base tracking-[0.15em] text-white sm:text-lg">
-                            •••• •••• •••• {lastFour ?? "••••"}
-                        </p>
-                    )}
-                    <div
-                        id={panId}
-                        className="font-mono text-base tracking-widest text-white sm:text-lg"
-                        style={{ display: revealed ? "block" : "none", color: 'white' }}
-                    />
+                    <div className="flex gap-2 font-mono text-base text-white sm:text-lg">
+                        {panGroupIds.map((groupId, i) => {
+                            const isLastGroup = i === 3;
+                            const maskedGroup =
+                                isLastGroup && lastFour ? lastFour : "••••";
+                            return (
+                                <span
+                                    key={groupId}
+                                    className="inline-block w-[4ch] text-center tabular-nums"
+                                >
+                                    {!revealed && (
+                                        <span>{maskedGroup}</span>
+                                    )}
+                                    <span
+                                        id={groupId}
+                                        style={{
+                                            display: revealed
+                                                ? "inline"
+                                                : "none",
+                                            color: "white",
+                                        }}
+                                    />
+                                </span>
+                            );
+                        })}
+                    </div>
                 </div>
 
                 <button
