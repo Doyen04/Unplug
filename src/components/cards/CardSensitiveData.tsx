@@ -158,13 +158,15 @@ export function CardSensitiveData({
         <div className="space-y-3">
             <style>{`
                 /* Force SecureProxy-injected content to match the card styles */
-                #${panId}, #${cvvId} {
+                #${panId}, #${panId} *, #${cvvId}, #${cvvId} * {
                     color: white !important;
                     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', 'Segoe UI Mono', monospace !important;
                     letter-spacing: 0.15em !important;
                     font-variant-numeric: tabular-nums !important;
                     white-space: pre !important;
-                    display: block !important;
+                    line-height: 1.1 !important;
+                    font-size: inherit !important;
+                    background: transparent !important;
                     -webkit-text-fill-color: white !important;
                 }
             `}</style>

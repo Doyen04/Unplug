@@ -13,6 +13,9 @@ and how come we are getting this {"statusCode":200,"message":"Simulated successf
 
 sudocustomer was not deleted alot check action page
 is should not show get card when the user has not subscribe it should be disabled 
+when creating card and sub one failed card but the rest pased which cause a lot of problem we should let user see alert for the one that failed and pass
+when i click the get card button and the card drop down is open it does not show the card automatically
+and when i click the button shown inside the drop down the row does not show the badge actie and does not update the button
 
 
 
