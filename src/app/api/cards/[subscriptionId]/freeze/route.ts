@@ -19,53 +19,54 @@
  * Updating Sudo first prevents this inconsistency.
  */
 
-import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/lib/auth';
-import { db } from '@/lib/server/db';
-import { updateSudoCardStatus } from '@/lib/sudo/client';
+import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
+import { db } from "@/lib/server/db";
+import { setCardStatus } from "@/lib/sudo/freeze-cards";
 
 export async function POST(
-  req: NextRequest,
-  { params }: { params: Promise<{ subscriptionId: string }> | { subscriptionId: string } }
+    req: NextRequest,
+    {
+        params,
+    }: {
+        params:
+            Promise<{ subscriptionId: string }> | { subscriptionId: string };
+    },
 ) {
-  const session = await auth.api.getSession({ headers: req.headers });
-  if (!session?.user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+    const session = await auth.api.getSession({ headers: req.headers });
+    if (!session?.user) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
-  const resolvedParams = await params;
-  const { subscriptionId } = resolvedParams;
+    const resolvedParams = await params;
+    const { subscriptionId } = resolvedParams;
 
-  const { action } = await req.json();
-  if (action !== 'freeze' && action !== 'unfreeze') {
-    return NextResponse.json({ error: 'action must be freeze or unfreeze' }, { status: 400 });
-  }
+    const { action } = await req.json();
+    if (action !== "freeze" && action !== "unfreeze") {
+        return NextResponse.json(
+            { error: "action must be freeze or unfreeze" },
+            { status: 400 },
+        );
+    }
 
-  // Ownership check: JOIN ensures the card belongs to the requesting user
-  const card = await db
-    .selectFrom('subscription_cards as sc')
-    .innerJoin('user_subscriptions as s', 's.id', 'sc.subscription_id')
-    .select(['sc.id', 'sc.sudo_card_id', 'sc.status'])
-    .where('sc.subscription_id', '=', subscriptionId)
-    .where('s.user_id', '=', session.user.id)
-    .executeTakeFirst();
+    // Ownership check: JOIN ensures the card belongs to the requesting user
+    const card = await db
+        .selectFrom("subscription_cards as sc")
+        .innerJoin("user_subscriptions as s", "s.id", "sc.subscription_id")
+        .select(["sc.id", "sc.sudo_card_id", "sc.status"])
+        .where("sc.subscription_id", "=", subscriptionId)
+        .where("s.user_id", "=", session.user.id)
+        .executeTakeFirst();
 
-  if (!card) {
-    return NextResponse.json({ error: 'Card not found' }, { status: 404 });
-  }
+    if (!card) {
+        return NextResponse.json({ error: "Card not found" }, { status: 404 });
+    }
 
-  const newStatus = action === 'freeze' ? 'inactive' : 'active';
+    const newStatus = action === "freeze" ? "inactive" : "active";
 
-  // Update Sudo Africa FIRST — source of truth.
-  // If this fails, we abort before touching our DB, keeping both systems in sync.
-  await updateSudoCardStatus(card.sudo_card_id, newStatus);
+    // Shared helper: updates Sudo Africa first (source of truth), then mirrors
+    // the new status in our local DB.
+    await setCardStatus(card.id, card.sudo_card_id, newStatus);
 
-  // Mirror the new status in our local DB for fast reads (no need to hit Sudo on every page load)
-  await db
-    .updateTable('subscription_cards')
-    .set({ status: newStatus, updated_at: new Date() })
-    .where('id', '=', card.id)
-    .execute();
-
-  return NextResponse.json({ status: newStatus });
+    return NextResponse.json({ status: newStatus });
 }

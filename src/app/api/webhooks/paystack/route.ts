@@ -7,7 +7,8 @@
  * 1. PRO PLAN LIFECYCLE (subscription.create / subscription.disable / invoice.update)
  *    Keeps the user's plan status in sync with their Paystack subscription.
  *    - subscription.create  → user upgraded to Pro, set plan='pro' + expiry date
- *    - subscription.disable → user cancelled, set plan='free'
+ *    - subscription.disable → user cancelled, set plan='free' and freeze all
+ *                              of their virtual cards (Pro-only feature)
  *    - invoice.update (paid) → subscription renewed, extend plan expiry
  *
  * 2. CARD AUTHORIZATION SAVE (charge.success)
@@ -23,9 +24,10 @@
  * Paystack signs payloads with HMAC-SHA512 using PAYSTACK_WEBHOOK_SECRET.
  */
 
-import { NextRequest, NextResponse } from 'next/server';
-import crypto from 'crypto';
-import { db } from '@/lib/server/db';
+import { NextRequest, NextResponse } from "next/server";
+import crypto from "crypto";
+import { db } from "@/lib/server/db";
+import { freezeAllCardsForUser } from "@/lib/sudo/freeze-cards";
 
 /**
  * Verifies the webhook payload came from Paystack.
@@ -35,68 +37,85 @@ import { db } from '@/lib/server/db';
  */
 function verifyPaystackSignature(rawBody: string, signature: string): boolean {
     const secret = process.env.PAYSTACK_SECRET_KEY!;
-    console.log('[paystack webhook] verifying signature', rawBody);
-    const expected = crypto.createHmac('sha512', secret).update(rawBody).digest('hex');
+    console.log("[paystack webhook] verifying signature", rawBody);
+    const expected = crypto
+        .createHmac("sha512", secret)
+        .update(rawBody)
+        .digest("hex");
     return expected === signature;
 }
 
 export async function POST(req: NextRequest) {
     // Must read raw body string before parsing to preserve bytes for HMAC check
     const rawBody = await req.text();
-    const signature = req.headers.get('x-paystack-signature') ?? '';
+    const signature = req.headers.get("x-paystack-signature") ?? "";
 
     if (!verifyPaystackSignature(rawBody, signature)) {
-        return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
+        return NextResponse.json(
+            { error: "Invalid signature" },
+            { status: 401 },
+        );
     }
 
-    const event = JSON.parse(rawBody) as { event: string; data: Record<string, any> };
+    const event = JSON.parse(rawBody) as {
+        event: string;
+        data: Record<string, any>;
+    };
     const { event: type, data } = event;
 
     // ── Pro subscription events ────────────────────────────────────────────────
 
-    if (type === 'subscription.create') {
+    if (type === "subscription.create") {
         // Pro plan activated — user paid for first billing cycle
         const email = data.customer?.email;
         if (email) {
             await db
-                .updateTable('user')
+                .updateTable("user")
                 .set({
-                    plan: 'pro',
+                    plan: "pro",
                     plan_expires_at: new Date(data.next_payment_date),
-                    paystack_customer_code: data.customer?.customer_code ?? null,
+                    paystack_customer_code:
+                        data.customer?.customer_code ?? null,
                 })
-                .where('email', '=', email)
+                .where("email", "=", email)
                 .execute();
         }
     }
 
-    if (type === 'subscription.disable') {
+    if (type === "subscription.disable") {
         // User cancelled — revert to free plan immediately
         const email = data.customer?.email;
         if (email) {
-            await db
-                .updateTable('user')
-                .set({ plan: 'free', plan_expires_at: null })
-                .where('email', '=', email)
-                .execute();
+            const user = await db
+                .updateTable("user")
+                .set({ plan: "free", plan_expires_at: null })
+                .where("email", "=", email)
+                .returning("id")
+                .executeTakeFirst();
+
+            // Virtual cards are a Pro-only feature — freeze every card the user
+            // still has so none of them can be charged on a plan they cancelled.
+            if (user) {
+                await freezeAllCardsForUser(user.id);
+            }
         }
     }
 
-    if (type === 'invoice.update' && data.paid) {
+    if (type === "invoice.update" && data.paid) {
         // Subscription renewed automatically — extend expiry to next payment date
         const email = data.customer?.email;
         if (email) {
             await db
-                .updateTable('user')
+                .updateTable("user")
                 .set({ plan_expires_at: new Date(data.next_payment_date) })
-                .where('email', '=', email)
+                .where("email", "=", email)
                 .execute();
         }
     }
 
     // ── Charge authorization save ───────────────────────────────────────────────
 
-    if (type === 'charge.success') {
+    if (type === "charge.success") {
         // Every successful charge includes an authorization_code.
         // We save (or update) it so we can charge the user again later without a UI prompt.
         // UNIQUE constraint on user_id: we only keep one active authorization per user.
@@ -106,14 +125,14 @@ export async function POST(req: NextRequest) {
 
         if (authCode && email) {
             const user = await db
-                .selectFrom('user')
-                .select('id')
-                .where('email', '=', email)
+                .selectFrom("user")
+                .select("id")
+                .where("email", "=", email)
                 .executeTakeFirst();
 
             if (user) {
                 await db
-                    .insertInto('user_funding_sources')
+                    .insertInto("user_funding_sources")
                     .values({
                         user_id: user.id,
                         paystack_authorization_code: authCode,
@@ -121,18 +140,18 @@ export async function POST(req: NextRequest) {
                         card_type: data.authorization?.card_type ?? null,
                         last_four: data.authorization?.last4 ?? null,
                         bank: data.authorization?.bank ?? null,
-                        status: 'active',
+                        status: "active",
                         updated_at: new Date(),
                     })
                     .onConflict((oc) =>
                         // Already have a funding source → update auth code (user may have changed cards)
-                        oc.column('user_id').doUpdateSet({
+                        oc.column("user_id").doUpdateSet({
                             paystack_authorization_code: authCode,
                             card_type: data.authorization?.card_type ?? null,
                             last_four: data.authorization?.last4 ?? null,
                             bank: data.authorization?.bank ?? null,
                             updated_at: new Date(),
-                        })
+                        }),
                     )
                     .execute();
             }
