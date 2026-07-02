@@ -131,26 +131,31 @@ export function CardSensitiveData({
                     method: "GET",
                     path: `/cards/${sudoCardId}/secure-data/number`,
                     headers: { Authorization: `Bearer ${token}` },
-                    htmlWrapper: "text",
+                    
                     jsonPathSelector: "data.number",
-                    styles: {
-                        body: {
-                            color: '#1a1a1a',          // Tailwind slate-900 equivalent
-                            fontFamily: 'Inter, sans-serif',
-                            fontSize: '16px',
-                            fontWeight: '600',
-                            letterSpacing: '2px',
-                            margin: '0',               // Removes default iframe text shifting
-                            padding: '0'
+                    htmlWrapper: `
+                        <style>
+                        body {
+                            color: #1a1a1a;
+                            font-family: 'Inter', sans-serif;
+                            font-size: 16px;
+                            font-weight: 600;
+                            letter-spacing: 2px;
+                            margin: 0;
+                            padding: 0;
+                            display: flex;
+                            align-items: center;
                         }
-                    },
+                        </style>
+                        <span>{{value}}</span>
+                    `,
                     serializers: [
                         panProxy.SERIALIZERS.replace(
                             "(\\d{4})(\\d{4})(\\d{4})(\\d{4})",
                             "$1 $2 $3 $4 ",
                         ),
                     ],
-                } as any)
+                })
                 .render(`#${panId}`);
 
             const cvvProxy = window.SecureProxy.create(VAULT_ID);
