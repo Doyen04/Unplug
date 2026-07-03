@@ -68,9 +68,19 @@ export default function BillingPageClient({
         }
     };
 
+    const syncSubscriptionCardState = (
+        subscriptionId: string,
+        cardStatus: string | null,
+    ) => {
+        setSubs((prev) =>
+            prev.map((sub) =>
+                sub.id === subscriptionId ? { ...sub, cardStatus } : sub,
+            ),
+        );
+    };
+
     const handleGetVirtualCard = async (subscriptionId: string) => {
         if (!isPro) {
-            window.location.href = "/dashboard/billing";
             return;
         }
 
@@ -86,13 +96,8 @@ export default function BillingPageClient({
                 throw new Error(err.error ?? "Failed to request card");
             }
             toast.success("Virtual card issued successfully.");
-            setSubs((prev) =>
-                prev.map((s) =>
-                    s.id === subscriptionId
-                        ? { ...s, cardStatus: "active" }
-                        : s,
-                ),
-            );
+            setExpandedSub(subscriptionId);
+            syncSubscriptionCardState(subscriptionId, "active");
         } catch (err: any) {
             toast.error(err.message ?? "Could not issue card. Try again.");
         } finally {
@@ -384,7 +389,8 @@ export default function BillingPageClient({
                                                 <Button
                                                     size="sm"
                                                     disabled={
-                                                        actionLoading === sub.id
+                                                        actionLoading === sub.id ||
+                                                        !isPro
                                                     }
                                                     onClick={(e) => {
                                                         e.stopPropagation();
@@ -396,7 +402,9 @@ export default function BillingPageClient({
                                                 >
                                                     {actionLoading === sub.id
                                                         ? "..."
-                                                        : "Get card"}
+                                                        : isPro
+                                                          ? "Get card"
+                                                          : "Upgrade"}
                                                 </Button>
                                             )}
                                         </div>
@@ -499,7 +507,7 @@ export default function BillingPageClient({
                                                         size="sm"
                                                         disabled={
                                                             actionLoading ===
-                                                            sub.id
+                                                            sub.id || !isPro
                                                         }
                                                         onClick={(e) => {
                                                             e.stopPropagation();
@@ -512,7 +520,9 @@ export default function BillingPageClient({
                                                         {actionLoading ===
                                                         sub.id
                                                             ? "..."
-                                                            : "Get card"}
+                                                            : isPro
+                                                              ? "Get card"
+                                                              : "Upgrade"}
                                                     </Button>
                                                 )}
                                             </div>
@@ -526,6 +536,15 @@ export default function BillingPageClient({
                                                 subscriptionId={sub.id}
                                                 serviceName={sub.serviceName}
                                                 isPro={isPro}
+                                                onCardStateChange={(
+                                                    subscriptionId,
+                                                    cardStatus,
+                                                ) => {
+                                                    syncSubscriptionCardState(
+                                                        subscriptionId,
+                                                        cardStatus,
+                                                    );
+                                                }}
                                             />
                                         </div>
                                     )}

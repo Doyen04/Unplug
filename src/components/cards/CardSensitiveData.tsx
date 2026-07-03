@@ -134,17 +134,6 @@ export function CardSensitiveData({
                     
                     jsonPathSelector: "data.number",
                     htmlWrapper: "text",
-                    styles: {
-                        body: {
-                            color: '#3A3939',
-                            fontWeight: '600',
-                            fontFamily: '"Credit Card Font", "OCR A Std", "OCR A Extended", monospace',
-                            fontSize: '14px',
-                            letterSpacing: '0.18em',
-                            margin: '0',
-                            padding: '0'
-                        }
-                    },
                     serializers: [
                         panProxy.SERIALIZERS.replace(
                             "(\\d{4})(\\d{4})(\\d{4})(\\d{4})",

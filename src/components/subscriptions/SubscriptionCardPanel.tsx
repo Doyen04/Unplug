@@ -38,6 +38,10 @@ interface SubscriptionCardPanelProps {
     subscriptionId: string;
     serviceName: string;
     isPro: boolean;
+    onCardStateChange?: (
+        subscriptionId: string,
+        cardStatus: string | null,
+    ) => void;
 }
 
 type CardState =
@@ -49,6 +53,7 @@ export function SubscriptionCardPanel({
     subscriptionId,
     serviceName,
     isPro,
+    onCardStateChange,
 }: SubscriptionCardPanelProps) {
     const [cardState, setCardState] = useState<CardState>({ state: "loading" });
 
@@ -107,7 +112,10 @@ export function SubscriptionCardPanel({
             <IssueCardPrompt
                 subscriptionId={subscriptionId}
                 serviceName={serviceName}
-                onIssued={fetchCard} // re-fetch after issuance delay to pick up the new card
+                onIssued={() => {
+                    onCardStateChange?.(subscriptionId, "active");
+                    fetchCard();
+                }}
                 isPro={isPro}
             />
         );
@@ -118,14 +126,15 @@ export function SubscriptionCardPanel({
             subscriptionId={subscriptionId}
             serviceName={serviceName}
             card={cardState.card}
-            onStatusChange={(newStatus) =>
+            onStatusChange={(newStatus) => {
+                onCardStateChange?.(subscriptionId, newStatus);
                 // Optimistically update local state without a full re-fetch
                 setCardState((prev) =>
                     prev.state === "has-card"
                         ? { ...prev, card: { ...prev.card, status: newStatus } }
                         : prev,
-                )
-            }
+                );
+            }}
         />
     );
 }
