@@ -37,6 +37,9 @@ export default function BillingPageClient({
     const [isUpgrading, setIsUpgrading] = useState(false);
     const [actionLoading, setActionLoading] = useState<string | null>(null);
     const [expandedSub, setExpandedSub] = useState<string | null>(null);
+    const [cardPanelRefreshKeys, setCardPanelRefreshKeys] = useState<
+        Record<string, number>
+    >({});
 
     const totalMonthly = useMemo(
         () => subs.reduce((sum, sub) => sum + sub.amountMonthly, 0),
@@ -68,15 +71,35 @@ export default function BillingPageClient({
         }
     };
 
+    const updateSubscription = (
+        subscriptionId: string,
+        updates: Partial<BillingSubscription>,
+    ) => {
+        setSubs((prev) =>
+            prev.map((sub) =>
+                sub.id === subscriptionId ? { ...sub, ...updates } : sub,
+            ),
+        );
+    };
+
+    const toggleSubscriptionExpansion = (subscriptionId: string) => {
+        setExpandedSub((current) =>
+            current === subscriptionId ? null : subscriptionId,
+        );
+    };
+
+    const refreshSubscriptionCardPanel = (subscriptionId: string) => {
+        setCardPanelRefreshKeys((prev) => ({
+            ...prev,
+            [subscriptionId]: (prev[subscriptionId] ?? 0) + 1,
+        }));
+    };
+
     const syncSubscriptionCardState = (
         subscriptionId: string,
         cardStatus: string | null,
     ) => {
-        setSubs((prev) =>
-            prev.map((sub) =>
-                sub.id === subscriptionId ? { ...sub, cardStatus } : sub,
-            ),
-        );
+        updateSubscription(subscriptionId, { cardStatus });
     };
 
     const handleGetVirtualCard = async (subscriptionId: string) => {
@@ -98,6 +121,7 @@ export default function BillingPageClient({
             toast.success("Virtual card issued successfully.");
             setExpandedSub(subscriptionId);
             syncSubscriptionCardState(subscriptionId, "active");
+            refreshSubscriptionCardPanel(subscriptionId);
         } catch (err: any) {
             toast.error(err.message ?? "Could not issue card. Try again.");
         } finally {
@@ -124,13 +148,7 @@ export default function BillingPageClient({
                     ? "Card frozen — no charges will go through"
                     : "Card unfrozen",
             );
-            setSubs((prev) =>
-                prev.map((s) =>
-                    s.id === subscriptionId
-                        ? { ...s, cardStatus: data.status }
-                        : s,
-                ),
-            );
+            syncSubscriptionCardState(subscriptionId, data.status);
         } catch {
             toast.error("Could not update card. Try again.");
         } finally {
@@ -303,9 +321,7 @@ export default function BillingPageClient({
                                     {/* Desktop View */}
                                     <div
                                         onClick={() =>
-                                            setExpandedSub(
-                                                isExpanded ? null : sub.id,
-                                            )
+                                            toggleSubscriptionExpansion(sub.id)
                                         }
                                         className="hidden sm:grid grid-cols-[minmax(140px,2fr)_100px_90px_120px] items-center gap-3 py-3.5 cursor-pointer hover:bg-bg-muted/20 px-2 rounded-lg transition-colors"
                                     >
@@ -328,7 +344,7 @@ export default function BillingPageClient({
                                         </div>
                                         <div>
                                             {sub.cardStatus &&
-                                            sub.cardStatus !== "closed" ? (
+                                                sub.cardStatus !== "closed" ? (
                                                 <Badge
                                                     variant={
                                                         isFrozen
@@ -344,7 +360,7 @@ export default function BillingPageClient({
                                         </div>
                                         <div className="text-right">
                                             {sub.cardStatus &&
-                                            sub.cardStatus !== "closed" ? (
+                                                sub.cardStatus !== "closed" ? (
                                                 isPro ? (
                                                     <Button
                                                         size="sm"
@@ -362,13 +378,13 @@ export default function BillingPageClient({
                                                         className="w-full text-xs h-7.5 border border-border-strong bg-bg-surface text-text-primary hover:bg-bg-muted"
                                                     >
                                                         {actionLoading ===
-                                                        sub.id
+                                                            sub.id
                                                             ? isFrozen
                                                                 ? "..."
                                                                 : "..."
                                                             : isFrozen
-                                                              ? "Unfreeze"
-                                                              : "Freeze"}
+                                                                ? "Unfreeze"
+                                                                : "Freeze"}
                                                     </Button>
                                                 ) : (
                                                     <Button
@@ -403,8 +419,8 @@ export default function BillingPageClient({
                                                     {actionLoading === sub.id
                                                         ? "..."
                                                         : isPro
-                                                          ? "Get card"
-                                                          : "Upgrade"}
+                                                            ? "Get card"
+                                                            : "Upgrade"}
                                                 </Button>
                                             )}
                                         </div>
@@ -413,9 +429,7 @@ export default function BillingPageClient({
                                     {/* Mobile View */}
                                     <div
                                         onClick={() =>
-                                            setExpandedSub(
-                                                isExpanded ? null : sub.id,
-                                            )
+                                            toggleSubscriptionExpansion(sub.id)
                                         }
                                         className="flex sm:hidden flex-col gap-2 py-3.5 cursor-pointer hover:bg-bg-muted/20 px-2 rounded-lg transition-colors"
                                     >
@@ -443,7 +457,7 @@ export default function BillingPageClient({
                                         <div className="flex justify-between items-center">
                                             <div>
                                                 {sub.cardStatus &&
-                                                sub.cardStatus !== "closed" ? (
+                                                    sub.cardStatus !== "closed" ? (
                                                     <Badge
                                                         variant={
                                                             isFrozen
@@ -461,7 +475,7 @@ export default function BillingPageClient({
                                             </div>
                                             <div>
                                                 {sub.cardStatus &&
-                                                sub.cardStatus !== "closed" ? (
+                                                    sub.cardStatus !== "closed" ? (
                                                     isPro ? (
                                                         <Button
                                                             size="sm"
@@ -479,11 +493,11 @@ export default function BillingPageClient({
                                                             className="text-xs h-7.5 px-3 border border-border-strong bg-bg-surface text-text-primary hover:bg-bg-muted"
                                                         >
                                                             {actionLoading ===
-                                                            sub.id
+                                                                sub.id
                                                                 ? "..."
                                                                 : isFrozen
-                                                                  ? "Unfreeze"
-                                                                  : "Freeze"}
+                                                                    ? "Unfreeze"
+                                                                    : "Freeze"}
                                                         </Button>
                                                     ) : (
                                                         <Button
@@ -518,11 +532,11 @@ export default function BillingPageClient({
                                                         className="text-xs h-7.5 px-3"
                                                     >
                                                         {actionLoading ===
-                                                        sub.id
+                                                            sub.id
                                                             ? "..."
                                                             : isPro
-                                                              ? "Get card"
-                                                              : "Upgrade"}
+                                                                ? "Get card"
+                                                                : "Upgrade"}
                                                     </Button>
                                                 )}
                                             </div>
@@ -533,6 +547,7 @@ export default function BillingPageClient({
                                     {isExpanded && (
                                         <div className="p-4 bg-bg-muted border-t border-border rounded-b-lg mb-3 mt-1">
                                             <SubscriptionCardPanel
+                                                key={cardPanelRefreshKeys[sub.id] ?? 0}
                                                 subscriptionId={sub.id}
                                                 serviceName={sub.serviceName}
                                                 isPro={isPro}
