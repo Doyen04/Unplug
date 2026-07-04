@@ -173,7 +173,7 @@ export function CardSensitiveData({
                 .request({
                     name: `pin-${uid}`,
                     method: "GET",
-                    path: `/cards/${sudoCardId}/secure-data/pin`,
+                    path: `/cards/${sudoCardId}/secure-data/defaultPin`,
                     headers: { Authorization: `Bearer ${token}` },
                     htmlWrapper: "text",
                     jsonPathSelector: "data.defaultPin",
