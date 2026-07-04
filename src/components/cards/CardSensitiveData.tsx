@@ -176,7 +176,7 @@ export function CardSensitiveData({
                     path: `/cards/${sudoCardId}/secure-data/pin`,
                     headers: { Authorization: `Bearer ${token}` },
                     htmlWrapper: "text",
-                    jsonPathSelector: "data.pin",
+                    jsonPathSelector: "data.defaultPin",
                     serializers: [],
                 })
                 .render(`#${pinId}`);
