@@ -6,10 +6,6 @@
  * card_transactions table in sync with what Sudo sees.
  *
  * EVENTS HANDLED:
- *  - authorization.request   → A merchant is attempting to charge the card.
- *                               We record it with status 'pending'.
- *  - authorization.updated   → Sudo finalized the authorization (approved/declined).
- *                               We upsert the row with the new status.
  *  - transaction.created     → A settled transaction (debit or refund) was recorded.
  *                               We insert it for ledger completeness.
  *
@@ -32,6 +28,11 @@
  * Sudo sends the Authorization Token you configured on the webhook (plain Bearer token,
  * no HMAC signing). We compare it directly against SUDO_AFRICA_WEBHOOK_SECRET.
  * Unverified requests get a 401.
+ *
+ * NOTE:
+ * This route handles Sudo's general card-event webhook stream. Gateway funding sources
+ * use the dedicated JIT gateway route at /api/webhooks/sudo/jit-gateway to approve or
+ * decline authorization requests in real time.
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -95,64 +96,6 @@ export async function POST(req: NextRequest) {
         .executeTakeFirst();
 
     const subscriptionId = cardRecord?.subscription_id ?? null;
-
-    // ── authorization.request / authorization.updated ────────────────────────────
-    // An authorization is Sudo asking: "Can this merchant charge this card?"
-    // We record/update it so the user can see pending or declined charges in their history.
-    if (type === "authorization.request" || type === "authorization.updated") {
-        await db
-            .insertInto("card_transactions")
-            .values({
-                sudo_card_id: sudoCardId,
-                subscription_id: subscriptionId,
-                sudo_transaction_id: obj._id,
-                type: "authorization",
-                status: obj.status,
-                amount_kobo: toKobo(obj.amount),
-                currency: obj.currency,
-                merchant_name: obj.merchant?.name ?? null,
-                merchant_category: obj.merchant?.category ?? null,
-                channel: obj.transactionMetadata?.channel ?? null,
-            })
-            // If we've already seen this transaction ID (duplicate delivery), just update the status.
-            // Sudo can deliver the same event more than once — this is normal webhook behavior.
-            .onConflict((oc) =>
-                oc
-                    .column("sudo_transaction_id")
-                    .doUpdateSet({ status: obj.status }),
-            )
-            .execute();
-
-        // MIGRATION CONFIRMATION: First approved charge on this card = user successfully
-        // switched their payment method. Mark the card as 'confirmed' in migration_status.
-        // We only update if NOT already confirmed to avoid redundant writes.
-        if (obj.status === "approved" && subscriptionId) {
-            const migrationUpdate = await db
-                .updateTable("subscription_cards")
-                .set({
-                    migration_status: "confirmed",
-                    migration_confirmed_at: new Date(),
-                    updated_at: new Date(),
-                })
-                .where("subscription_id", "=", subscriptionId)
-                .where("migration_status", "!=", "confirmed") // idempotent guard
-                .executeTakeFirst();
-
-            // BILLING DAY: only the first confirmed charge should set it — this is the
-            // moment we learn, for real, what day of the month the card gets used.
-            // Later approved charges in the same billing cycle must not overwrite it.
-            if (migrationUpdate.numUpdatedRows > 0n) {
-                await db
-                    .updateTable("user_subscriptions")
-                    .set({
-                        billing_day: new Date().getDate(),
-                        updated_at: new Date(),
-                    })
-                    .where("id", "=", subscriptionId)
-                    .execute();
-            }
-        }
-    }
 
     // ── transaction.created ──────────────────────────────────────────────────────
     // A settled transaction (actual debit or refund) was recorded by Sudo.

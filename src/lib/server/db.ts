@@ -126,6 +126,7 @@ interface SubscriptionCardsTable {
     migration_status: string;
     migration_confirmed_at: Date | null;
     next_billing_date: Date | null;
+    locked_merchant_name: string | null;
     created_at: Generated<Date>;
     updated_at: Date;
 }

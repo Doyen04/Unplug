@@ -60,6 +60,7 @@ export default function DashboardPage() {
     const [ledgerTab, setLedgerTab] = useState<'subscriptions' | 'transactions'>('subscriptions');
     const [userInitials, setUserInitials] = useState('?');
     const [userName, setUserName] = useState('');
+    const [walletBalanceKobo, setWalletBalanceKobo] = useState<number | undefined>(undefined);
 
     const initialProviderParam = searchParams.get('provider');
     const initialProvider = initialProviderParam === 'plaid' || initialProviderParam === 'mono'
@@ -107,6 +108,16 @@ export default function DashboardPage() {
             .then((u) => {
                 setUserName(u.name || '');
                 setUserInitials(getNameInitials(u.name || ''));
+            })
+            .catch(() => { });
+
+        // Fetch wallet balance for the stats card on the main dashboard
+        fetch('/api/user/wallet')
+            .then((r) => r.json())
+            .then((data) => {
+                if (typeof data?.wallet?.balanceKobo === 'number') {
+                    setWalletBalanceKobo(data.wallet.balanceKobo);
+                }
             })
             .catch(() => { });
     }, []);
@@ -169,6 +180,7 @@ export default function DashboardPage() {
                 providers={providers} currency={currency} scoreColor={interpolateScoreColor(summary.shameScore)}
                 strokeDashoffset={strokeDashoffset} dialX={22 + 20 * Math.cos(scoreAngle)} dialY={22 + 20 * Math.sin(scoreAngle)}
                 userName={userName}
+                walletBalanceKobo={walletBalanceKobo}
             />
 
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">

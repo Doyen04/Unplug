@@ -29,10 +29,11 @@
  *                    ever seeing their (still-existing) card details.
  */
 
-import { useState, useEffect, useCallback } from "react";
+import { useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import { VirtualCard } from "@/components/cards/VirtualCard";
 import { IssueCardPrompt } from "@/components/cards/IssueCardPrompt";
+import { useState } from "react";
 
 interface SubscriptionCardPanelProps {
     subscriptionId: string;
@@ -56,6 +57,7 @@ export function SubscriptionCardPanel({
     onCardStateChange,
 }: SubscriptionCardPanelProps) {
     const [cardState, setCardState] = useState<CardState>({ state: "loading" });
+
 
     /**
      * Fetches the current card state from the API.
@@ -122,19 +124,20 @@ export function SubscriptionCardPanel({
     }
 
     return (
-        <VirtualCard
-            subscriptionId={subscriptionId}
-            serviceName={serviceName}
-            card={cardState.card}
-            onStatusChange={(newStatus) => {
-                onCardStateChange?.(subscriptionId, newStatus);
-                // Optimistically update local state without a full re-fetch
-                setCardState((prev) =>
-                    prev.state === "has-card"
-                        ? { ...prev, card: { ...prev.card, status: newStatus } }
-                        : prev,
-                );
-            }}
-        />
+        <div className="space-y-3">
+            <VirtualCard
+                subscriptionId={subscriptionId}
+                serviceName={serviceName}
+                card={cardState.card}
+                onStatusChange={(newStatus) => {
+                    onCardStateChange?.(subscriptionId, newStatus);
+                    setCardState((prev) =>
+                        prev.state === "has-card"
+                            ? { ...prev, card: { ...prev.card, status: newStatus } }
+                            : prev,
+                    );
+                }}
+            />
+        </div>
     );
 }

@@ -10,6 +10,7 @@ import {
     freezeAllCardsForUser,
     closeAllCardsForUser,
 } from "@/lib/sudo/freeze-cards";
+import { deactivateSudoCustomer } from "@/lib/sudo/client";
 
 export async function serverSignOutAction() {
     await auth.api.signOut({ headers: await headers() });
@@ -112,6 +113,21 @@ export async function deleteAccountAction() {
                 .execute();
         }
 
+        // Deactivate the Sudo customer profile on Sudo Africa's side.
+        // Sudo has no DELETE /customers endpoint — setting status to 'inactive'
+        // prevents any new cards being issued and disables the profile.
+        // The local sudo_customers row is cleaned up automatically by
+        // the ON DELETE CASCADE on user(id) when we delete the user below.
+        const sudoCustomerRow = await db
+            .selectFrom("sudo_customers")
+            .select("sudo_customer_id")
+            .where("user_id", "=", userId)
+            .executeTakeFirst();
+
+        if (sudoCustomerRow?.sudo_customer_id) {
+            await deactivateSudoCustomer(sudoCustomerRow.sudo_customer_id);
+        }
+
         // card_funding_transactions has a user_id column but no FK constraint at
         // all, so it's never cleaned up automatically — delete it explicitly.
         await db
@@ -133,10 +149,9 @@ export async function deleteAccountAction() {
             .deleteFrom("user_settings")
             .where("user_id", "=", userId)
             .execute();
-        //TODO: delete sudo_customer table too and user funding source too
         // Better Auth tables (session → account → verification → user).
-        // Deleting "user" cascades sudo_customers and user_funding_sources,
-        // both of which have ON DELETE CASCADE foreign keys to user(id).
+        // Deleting "user" cascades sudo_customers (ON DELETE CASCADE from user_id)
+        // and user_funding_sources (ON DELETE CASCADE from user_id).
         await db.deleteFrom("session").where("userId", "=", userId).execute();
         await db.deleteFrom("account").where("userId", "=", userId).execute();
         await db

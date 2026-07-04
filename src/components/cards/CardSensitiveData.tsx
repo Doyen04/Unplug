@@ -66,8 +66,13 @@ interface CardSensitiveDataProps {
 }
 
 /**
- * Renders the front-of-card sensitive fields (number, expiry, CVV) on top
+ * Renders the front-of-card sensitive fields (number, expiry, CVV, PIN) on top
  * of the branded, colored virtual card face in <VirtualCard />.
+ *
+ * PIN is now rendered here via Secure Proxy — the same iframe mechanism used
+ * for PAN and CVV — so the PIN value never passes through our backend or
+ * client-side JS memory. Sudo's Secure Proxy fetches and renders it directly
+ * inside a cross-origin iframe that we cannot inspect.
  *
  * IMPORTANT — Secure Proxy Show renders revealed values inside a real
  * cross-origin <iframe> (docs.sudo.africa/docs/displaying-sensitive-card-data).
@@ -100,6 +105,7 @@ export function CardSensitiveData({
 
     const panId = `sudo-pan-${uid}`;
     const cvvId = `sudo-cvv-${uid}`;
+    const pinId = `sudo-pin-${uid}`;
 
     async function handleReveal() {
         if (disabled) return;
@@ -122,6 +128,7 @@ export function CardSensitiveData({
 
             const { token, sudoCardId } = body;
 
+            // ── PAN ─────────────────────────────────────────────────────────
             // Single request, single target — the replace serializer
             // inserts the group spaces itself in one pass.
             const panProxy = window.SecureProxy.create(VAULT_ID);
@@ -131,7 +138,6 @@ export function CardSensitiveData({
                     method: "GET",
                     path: `/cards/${sudoCardId}/secure-data/number`,
                     headers: { Authorization: `Bearer ${token}` },
-                    
                     jsonPathSelector: "data.number",
                     htmlWrapper: "text",
                     serializers: [
@@ -143,6 +149,7 @@ export function CardSensitiveData({
                 } as any)
                 .render(`#${panId}`);
 
+            // ── CVV ─────────────────────────────────────────────────────────
             const cvvProxy = window.SecureProxy.create(VAULT_ID);
             cvvProxy
                 .request({
@@ -155,6 +162,24 @@ export function CardSensitiveData({
                     serializers: [],
                 })
                 .render(`#${cvvId}`);
+
+            // ── PIN ─────────────────────────────────────────────────────────
+            // Rendered via the same Secure Proxy mechanism — PIN never touches
+            // our server or client-side JS. The token obtained from /pan is
+            // reused because it authorises access to all secure-data fields for
+            // the same card (it is a card-level token, not field-specific).
+            const pinProxy = window.SecureProxy.create(VAULT_ID);
+            pinProxy
+                .request({
+                    name: `pin-${uid}`,
+                    method: "GET",
+                    path: `/cards/${sudoCardId}/secure-data/pin`,
+                    headers: { Authorization: `Bearer ${token}` },
+                    htmlWrapper: "text",
+                    jsonPathSelector: "data.pin",
+                    serializers: [],
+                })
+                .render(`#${pinId}`);
 
             didRender.current = true;
             setRevealed(true);
@@ -194,7 +219,16 @@ export function CardSensitiveData({
                     border: none;
                     background: transparent;
                 }
+                #${pinId} iframe {
+                    display: block;
+                    width: 48px;
+                    height: 18px;
+                    border: none;
+                    background: transparent;
+                }
             `}</style>
+
+            {/* Card number row */}
             <div className="flex items-end justify-between gap-3">
                 <div className="min-w-0">
                     <p className="text-[9px] font-semibold uppercase tracking-wider text-white/50">
@@ -231,6 +265,7 @@ export function CardSensitiveData({
                 </button>
             </div>
 
+            {/* Expiry, CVV, and PIN row */}
             <div className="flex items-end justify-between gap-3">
                 {expiry && (
                     <div>
@@ -254,6 +289,23 @@ export function CardSensitiveData({
                     )}
                     <div
                         id={cvvId}
+                        className="font-mono text-xs sm:text-sm"
+                        style={{ display: revealed ? "block" : "none" }}
+                    />
+                </div>
+
+                {/* PIN — rendered via Secure Proxy iframe, never exposed to JS */}
+                <div>
+                    <p className="text-[9px] font-semibold uppercase tracking-wider text-white/50">
+                        PIN
+                    </p>
+                    {!revealed && (
+                        <p className="font-mono text-xs tracking-widest text-white sm:text-sm">
+                            ••••
+                        </p>
+                    )}
+                    <div
+                        id={pinId}
                         className="font-mono text-xs sm:text-sm"
                         style={{ display: revealed ? "block" : "none" }}
                     />

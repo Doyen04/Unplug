@@ -7,10 +7,7 @@ import { toast } from "sonner";
 import {
     Search,
     Receipt,
-    AlertTriangle,
-    RefreshCcw,
-    ChevronLeft,
-    ChevronRight,
+    CreditCard,
 } from "lucide-react";
 
 import { useDashboardData } from "@/hooks/useDashboardData";
@@ -68,6 +65,9 @@ export default function TransactionsPage() {
     const searchParams = useSearchParams();
     const [days, setDays] = useState(90);
     const [page, setPage] = useState(1);
+    const [ledgerTab, setLedgerTab] = useState<'bank' | 'card'>('bank');
+    const [cardTxs, setCardTxs] = useState<any[]>([]);
+    const [cardTxLoading, setCardTxLoading] = useState(false);
     const [search, setSearch] = useState("");
     const [debouncedSearch, setDebouncedSearch] = useState("");
     const pageSize = 20;
@@ -145,6 +145,17 @@ export default function TransactionsPage() {
         }
     }, [isError]);
 
+    // Fetch card transactions when the card tab is selected
+    useEffect(() => {
+        if (ledgerTab !== 'card') return;
+        setCardTxLoading(true);
+        fetch('/api/cards/transactions')
+            .then((r) => r.json())
+            .then((d) => setCardTxs(d.transactions ?? []))
+            .catch(() => toast.error('Could not load card transactions.'))
+            .finally(() => setCardTxLoading(false));
+    }, [ledgerTab]);
+
     if (isDashboardLoading && !selectedProvider)
         return (
             <div className="space-y-6">
@@ -167,11 +178,31 @@ export default function TransactionsPage() {
                         Transactions
                     </h1>
                     <p className="text-sm text-text-secondary">
-                        Real transaction feed from your linked bank account.
+                        Bank feed and virtual card transactions.
                     </p>
                 </div>
-                <div className="flex items-center gap-2 bg-bg-muted p-1 rounded-pill">
-                    {[30, 60, 90].map((window: number) => (
+                <div className="flex items-center gap-2">
+                    {/* Tab switcher */}
+                    <div className="flex items-center gap-1 bg-bg-muted p-1 rounded-pill">
+                        <Button
+                            variant={ledgerTab === 'bank' ? 'primary' : 'ghost'}
+                            size="sm"
+                            onClick={() => setLedgerTab('bank')}
+                            className="rounded-pill gap-1.5"
+                        >
+                            <Receipt size={14} /> Bank
+                        </Button>
+                        <Button
+                            variant={ledgerTab === 'card' ? 'primary' : 'ghost'}
+                            size="sm"
+                            onClick={() => setLedgerTab('card')}
+                            className="rounded-pill gap-1.5"
+                        >
+                            <CreditCard size={14} /> Virtual Cards
+                        </Button>
+                    </div>
+                    {/* Day range filter — only relevant for bank tab */}
+                    {ledgerTab === 'bank' && [30, 60, 90].map((window: number) => (
                         <Button
                             key={window}
                             variant={days === window ? "primary" : "ghost"}
@@ -188,6 +219,7 @@ export default function TransactionsPage() {
                 </div>
             </header>
 
+            {ledgerTab === 'bank' && (
             <div className="flex flex-wrap items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
                     {providers.hasBoth && (
@@ -253,41 +285,113 @@ export default function TransactionsPage() {
                     />
                 </div>
             </div>
+            )}
 
-            <DataTable
-                data={data?.transactions ?? []}
-                renderItem={(tx: Transaction, i: number) => (
-                    <TransactionRow
-                        key={tx.transaction_id}
-                        transaction={tx}
-                        currency={currencyForTransaction(tx)}
-                        index={i}
-                    />
-                )}
-                isLoading={isLoading || isFetching}
-                isError={isError}
-                onRetry={refetch}
-                errorTitle="Failed to load transactions"
-                errorMessage="There was a problem connecting to your bank feed."
-                emptyIcon={<Receipt size={32} />}
-                emptyTitle="No transactions found"
-                emptyMessage="Try a different search or date range."
-                header={
+            {ledgerTab === 'bank' ? (
+                <DataTable
+                    data={data?.transactions ?? []}
+                    renderItem={(tx: Transaction, i: number) => (
+                        <TransactionRow
+                            key={tx.transaction_id}
+                            transaction={tx}
+                            currency={currencyForTransaction(tx)}
+                            index={i}
+                        />
+                    )}
+                    isLoading={isLoading || isFetching}
+                    isError={isError}
+                    onRetry={refetch}
+                    errorTitle="Failed to load transactions"
+                    errorMessage="There was a problem connecting to your bank feed."
+                    emptyIcon={<Receipt size={32} />}
+                    emptyTitle="No transactions found"
+                    emptyMessage="Try a different search or date range."
+                    header={
+                        <div className="px-5 py-3 border-b border-border bg-bg-muted/30 flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-text-muted">
+                            <span>{data?.total ?? 0} transactions</span>
+                            <span>
+                                Page {data?.page ?? 1} / {data?.pageCount ?? 1}
+                            </span>
+                        </div>
+                    }
+                    pagination={{
+                        page: data?.page ?? 1,
+                        pageCount: data?.pageCount ?? 1,
+                        total: data?.total ?? 0,
+                        pageSize: data?.pageSize ?? 20,
+                        onPageChange: (p) => setPage(p),
+                    }}
+                />
+            ) : (
+                /* Virtual Card Transactions */
+                <Card className="overflow-hidden">
                     <div className="px-5 py-3 border-b border-border bg-bg-muted/30 flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-text-muted">
-                        <span>{data?.total ?? 0} transactions</span>
-                        <span>
-                            Page {data?.page ?? 1} / {data?.pageCount ?? 1}
-                        </span>
+                        <span>{cardTxLoading ? 'Loading…' : `${cardTxs.length} card transactions`}</span>
+                        <CreditCard size={14} className="text-brand" />
                     </div>
-                }
-                pagination={{
-                    page: data?.page ?? 1,
-                    pageCount: data?.pageCount ?? 1,
-                    total: data?.total ?? 0,
-                    pageSize: data?.pageSize ?? 20,
-                    onPageChange: (p) => setPage(p),
-                }}
-            />
+
+                    {cardTxLoading ? (
+                        <div className="divide-y divide-border">
+                            {Array.from({ length: 5 }).map((_, i) => (
+                                <div key={i} className="flex items-center justify-between px-5 py-4 animate-pulse">
+                                    <div className="flex items-center gap-3">
+                                        <div className="h-9 w-9 rounded-full bg-bg-muted" />
+                                        <div className="space-y-1.5">
+                                            <div className="h-3 w-32 rounded bg-bg-muted" />
+                                            <div className="h-2.5 w-20 rounded bg-bg-muted" />
+                                        </div>
+                                    </div>
+                                    <div className="h-3 w-16 rounded bg-bg-muted" />
+                                </div>
+                            ))}
+                        </div>
+                    ) : cardTxs.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center gap-3 py-16 text-text-secondary">
+                            <CreditCard size={32} className="opacity-30" />
+                            <p className="text-sm font-medium">No card transactions yet</p>
+                            <p className="text-xs">Transactions will appear here once a virtual card is used.</p>
+                        </div>
+                    ) : (
+                        <div className="divide-y divide-border">
+                            {cardTxs.map((tx: any) => {
+                                const statusColor: Record<string, string> = {
+                                    approved: 'text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20',
+                                    pending:  'text-amber-600  bg-amber-50  dark:bg-amber-900/20',
+                                    declined: 'text-red-600    bg-red-50    dark:bg-red-900/20',
+                                    failed:   'text-red-600    bg-red-50    dark:bg-red-900/20',
+                                };
+                                const color = statusColor[tx.status] ?? 'text-text-secondary bg-bg-muted';
+                                return (
+                                    <div key={tx.id} className="flex items-center justify-between px-5 py-4 hover:bg-bg-muted/40 transition-colors">
+                                        <div className="flex items-center gap-3 min-w-0">
+                                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-light">
+                                                <CreditCard size={16} className="text-brand" />
+                                            </div>
+                                            <div className="min-w-0">
+                                                <p className="truncate text-sm font-semibold text-text-primary">
+                                                    {tx.merchant_name ?? tx.service_name ?? 'Virtual Card'}
+                                                </p>
+                                                <p className="text-xs text-text-secondary">
+                                                    {tx.merchant_category && <span className="mr-2 capitalize">{tx.merchant_category}</span>}
+                                                    {tx.created_at ? new Date(tx.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-3 shrink-0">
+                                            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${color}`}>
+                                                {tx.status}
+                                            </span>
+                                            <p className="font-mono text-sm font-semibold text-text-primary tabular-nums">
+                                                {tx.currency === 'NGN' ? '₦' : '$'}{((tx.amount_kobo ?? 0) / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                            </p>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+                </Card>
+            )}
         </div>
     );
 }

@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { toast } from "sonner";
+import { Wallet, ShieldCheck } from "lucide-react";
 
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -23,14 +24,21 @@ interface BillingSubscription {
     currency: string;
 }
 
+interface WalletSummary {
+    balanceKobo: number;
+    balanceLabel: string;
+}
+
 interface BillingPageClientProps {
     subscriptions: BillingSubscription[];
     isPro: boolean;
+    initialWallet?: WalletSummary;
 }
 
 export default function BillingPageClient({
     subscriptions: initialSubscriptions,
     isPro,
+    initialWallet,
 }: BillingPageClientProps) {
     const [subs, setSubs] =
         useState<BillingSubscription[]>(initialSubscriptions);
@@ -40,6 +48,16 @@ export default function BillingPageClient({
     const [cardPanelRefreshKeys, setCardPanelRefreshKeys] = useState<
         Record<string, number>
     >({});
+    const [wallet, setWallet] = useState<WalletSummary | null>(initialWallet ?? null);
+
+    useEffect(() => {
+        fetch("/api/user/wallet")
+            .then((r) => r.json())
+            .then((data) => {
+                if (data?.wallet) setWallet(data.wallet);
+            })
+            .catch(() => {});
+    }, []);
 
     const totalMonthly = useMemo(
         () => subs.reduce((sum, sub) => sum + sub.amountMonthly, 0),
@@ -178,6 +196,28 @@ export default function BillingPageClient({
                     Manage billing and virtual cards.
                 </p>
             </header>
+
+            <div className="grid grid-cols-1 gap-4">
+                <Card className="p-5 bg-brand-light border-brand/20">
+                    <div className="flex items-start justify-between gap-3">
+                        <div>
+                            <p className="text-[11px] uppercase tracking-[0.24em] text-text-secondary">
+                                Wallet balance
+                            </p>
+                            <p className="mt-2 text-[30px] font-semibold text-text-primary font-display tabular-nums">
+                                {wallet ? `₦${(wallet.balanceKobo / 100).toLocaleString("en-US")}` : "—"}
+                            </p>
+                        </div>
+                        <div className="rounded-2xl bg-white/70 p-3 text-brand shadow-sm">
+                            <Wallet className="h-5 w-5" />
+                        </div>
+                    </div>
+                    <div className="mt-4 flex items-center gap-2 text-sm text-text-secondary">
+                        <ShieldCheck className="h-4 w-4 text-brand" />
+                        <span>Available to fund protected subscriptions</span>
+                    </div>
+                </Card>
+            </div>
 
             {/* Plan and Protection Grid */}
             <div className="font-ui">

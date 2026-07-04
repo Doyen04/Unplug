@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { CreditCard, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
@@ -18,11 +19,11 @@ export function IssueCardPrompt({
     isPro,
 }: IssueCardPromptProps) {
     const [isLoading, setIsLoading] = useState(false);
+    const router = useRouter();
 
     async function handleIssueCard() {
         if (!isPro) {
-            // Redirect to upgrade page
-            window.location.href = "/dashboard/billing";
+            router.push("/dashboard/billing");
             return;
         }
 

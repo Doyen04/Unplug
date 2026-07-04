@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Flame, Layers, Link as LinkIcon, Check, ArrowUpRight, Share2 } from 'lucide-react';
+import { Flame, Layers, Link as LinkIcon, Check, ArrowUpRight, Share2, Wallet } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { formatCurrency } from '@/lib/utils/format';
@@ -26,6 +26,7 @@ interface DashboardStatsProps {
     dialX: number;
     dialY: number;
     userName?: string;
+    walletBalanceKobo?: number;
 }
 
 const providerLabel = (provider: string): string =>
@@ -42,11 +43,32 @@ export function DashboardStats({
     dialX,
     dialY,
     userName,
+    walletBalanceKobo,
 }: DashboardStatsProps) {
     const [isSharing, setIsSharing] = useState(false);
 
     return (
         <section className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+            {/* Wallet Balance */}
+            <Card className="group flex flex-col gap-3 p-3.5">
+                <div className="flex items-center gap-3">
+                    <div className="flex h-9.5 w-9.5 items-center justify-center rounded-full bg-brand-light text-brand ring-1 ring-brand/10 transition-colors group-hover:bg-brand group-hover:text-white">
+                        <Wallet size={20} />
+                    </div>
+                    <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-text-secondary">Wallet Balance</p>
+                </div>
+                <div className="flex min-h-14 items-center">
+                    <p className="font-ui text-3xl font-bold tabular-nums leading-none text-text-primary">
+                        {typeof walletBalanceKobo === 'number'
+                            ? `₦${(walletBalanceKobo / 100).toLocaleString('en-US')}`
+                            : '—'}
+                    </p>
+                </div>
+                <div className="inline-flex items-center gap-1.5 text-[11px] text-text-secondary tabular-nums">
+                    <span>Available to fund protected subscriptions</span>
+                </div>
+            </Card>
+
             {/* Monthly Burn */}
             <Card className="group flex flex-col gap-3 p-3.5">
                 <div className="flex items-center gap-3">

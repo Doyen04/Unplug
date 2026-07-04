@@ -70,6 +70,9 @@ export async function issueCardForSubscription(
         brand: "Verve",
         status: 'active',
         debitAccountId: process.env.SUDO_POOL_ACCOUNT_ID!,
+        fundingSourceId: process.env.SUDO_GATEWAY_FUNDING_SOURCE_ID
+            || process.env.SUDO_FUNDING_SOURCE_ID
+            || undefined,
         amount: spendLimitWithBuffer, //what if there is no money at the time of creation
         spendingControls: {
             spendingLimits: [{ amount: spendLimitWithBuffer, interval: 'monthly', billing_day: billingDay }],

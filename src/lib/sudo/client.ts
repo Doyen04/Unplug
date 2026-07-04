@@ -78,9 +78,24 @@ export interface CreateCardPayload {
     currency: SudoCardCurrency;
     brand: 'Verve' | 'MasterCard' | 'Visa' | 'AfriGo';
     debitAccountId: string;
+    fundingSourceId?: string;
     amount: number;
     status: 'active';
     spendingControls?: SpendingControls;
+}
+
+function withConfiguredFundingSource(payload: Omit<CreateCardPayload, 'fundingSourceId'>) {
+    const configuredFundingSourceId = process.env.SUDO_GATEWAY_FUNDING_SOURCE_ID?.trim()
+        || process.env.SUDO_FUNDING_SOURCE_ID?.trim();
+
+    if (!configuredFundingSourceId) {
+        return payload;
+    }
+
+    return {
+        ...payload,
+        fundingSourceId: configuredFundingSourceId,
+    };
 }
 
 /** Safe card metadata returned by Sudo — no PAN, no CVV */
@@ -127,10 +142,11 @@ export async function createSudoCustomer(
  * Returns safe metadata only — PAN is not included in this response.
  */
 export async function createSudoCard(payload: CreateCardPayload): Promise<SudoCard> {
+    const normalizedPayload = withConfiguredFundingSource(payload);
     const res = await fetch(`${SUDO_BASE_URL}/cards`, {
         method: 'POST',
         headers: SUDO_HEADERS,
-        body: JSON.stringify(payload),
+        body: JSON.stringify(normalizedPayload),
     });
     const data = await res.json();
 
@@ -197,4 +213,27 @@ export async function updateSudoCardStatus(
     }
     const data = await res.json();
     return data.data;
+}
+/**
+ * Deactivates a Sudo customer when an Unplug user deletes their account.
+ *
+ * WHY NOT DELETE: Sudo Africa has no DELETE /customers endpoint. The recommended
+ * approach for account closure is to set status to 'inactive', which prevents
+ * new cards from being issued under that customer and disables their profile.
+ * All cards under the customer should be closed separately (closeAllCardsForUser)
+ * before calling this.
+ */
+export async function deactivateSudoCustomer(sudoCustomerId: string): Promise<void> {
+    const res = await fetch(`${SUDO_BASE_URL}/customers/${sudoCustomerId}`, {
+        method: 'PUT',
+        headers: SUDO_HEADERS,
+        body: JSON.stringify({ status: 'inactive' }),
+    });
+
+    if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        // Log but don't throw — a failed deactivation should not block local account deletion.
+        // The local sudo_customers row will still be deleted by the ON DELETE CASCADE on user(id).
+        console.error(`[deactivateSudoCustomer] Sudo PUT /customers/${sudoCustomerId} failed [${res.status}]:`, err);
+    }
 }

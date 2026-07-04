@@ -3,20 +3,16 @@ what happen if there is no cash in card connected to user account and we try to 
 can window.location.href be chane to redirect or router
 when creating user phonenumber is needed and should be erify
 all stored subcription is ngn
-what haapen when user uses newly created card for a sub for another sun entirely that it is not created for
-how do we preent a card from being charge twice and also how do we preent users from using a card for another sub that 
-it was not created for and also how do we test the cards in sandbox mode
+
+lock to the first merchant that the card was used for and how do we make sure it is the merchant they created if for
 also when we create or initalise anythin whether sudo or paystack and a error preent full completion allong the path we should reert all our preius changes back
+when creating card and sub one failed card but the rest pased which cause a lot of problem we should let user see alert for the one that failed and pass
 
 how to set funding source for card through api cause default funding source did not work 
 and how come we are getting this {"statusCode":200,"message":"Simulated successfully."} een thought it failed
 
 sudocustomer was not deleted alot check action page
-is should not show get card when the user has not subscribe it should be disabled 
-when creating card and sub one failed card but the rest pased which cause a lot of problem we should let user see alert for the one that failed and pass
-when i click the get card button on the subscription list row and the card drop down is open it does not show the card automatically
-and when i click the button shown inside the drop down the subscription list row does not show the badge active and does not update the button
-
+simplify event and state management in billings page
 
 
 

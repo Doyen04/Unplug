@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { toast } from "sonner";
 import { Sparkles, ArrowRight, ShieldCheck } from "lucide-react";
@@ -8,6 +9,7 @@ import { Card } from "@/components/ui/Card";
 
 export default function OnboardingClient() {
     const [isPending, startTransition] = useTransition();
+    const router = useRouter();
 
     const handleContinue = () => {
         startTransition(async () => {
@@ -23,7 +25,7 @@ export default function OnboardingClient() {
                     // DB check fresh and doesn't redirect back to /onboarding.
                     window.location.href = "/dashboard/connect";
                 } else if (res.status === 401) {
-                    window.location.href = "/login";
+                    router.push("/login");
                 } else {
                     toast.error("Could not start your audit. Try again.");
                 }
