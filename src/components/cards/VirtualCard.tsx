@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import { Lock, Unlock, Wifi } from "lucide-react";
 import { toast } from "sonner";
 import { CardSensitiveData } from "@/components/cards/CardSensitiveData";
+import { Input } from "@/components/ui/Input";
 
 interface CardData {
     sudo_card_id: string;
@@ -29,9 +30,43 @@ export function VirtualCard({
     onStatusChange,
 }: VirtualCardProps) {
     const [isTogglingFreeze, setIsTogglingFreeze] = useState(false);
+    const [isChangingPin, setIsChangingPin] = useState(false);
+    const [oldPin, setOldPin] = useState("");
+    const [newPin, setNewPin] = useState("");
 
     const isFrozen = card.status === "inactive";
     const expiry = `${card.expiry_month.padStart(2, "0")}/${card.expiry_year.slice(-2)}`;
+
+    async function handleChangePin(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+
+        if (!oldPin || !newPin) {
+            toast.error("Both PIN fields are required.");
+            return;
+        }
+
+        setIsChangingPin(true);
+        try {
+            const res = await fetch(`/api/cards/${subscriptionId}/pin`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ oldPin, newPin }),
+            });
+
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                throw new Error(err.error ?? "Could not change PIN.");
+            }
+
+            toast.success("PIN updated successfully.");
+            setOldPin("");
+            setNewPin("");
+        } catch (err: any) {
+            toast.error(err.message ?? "Could not change PIN.");
+        } finally {
+            setIsChangingPin(false);
+        }
+    }
 
     async function handleFreezeToggle() {
         setIsTogglingFreeze(true);
@@ -143,6 +178,54 @@ export function VirtualCard({
                     </>
                 )}
             </button>
+
+            <form onSubmit={handleChangePin} className="space-y-3">
+                <div className="rounded-2xl border border-border bg-bg-base p-4">
+                    <div className="mb-3">
+                        <p className="text-sm font-semibold text-text-primary">
+                            Change card PIN
+                        </p>
+                        <p className="text-xs text-text-secondary mt-1">
+                            Use the current PIN and choose a new one.
+                        </p>
+                    </div>
+
+                    <div className="space-y-3">
+                        <div>
+                            <label className="mb-1 block text-xs font-medium text-text-secondary">
+                                Current PIN
+                            </label>
+                            <Input
+                                type="password"
+                                value={oldPin}
+                                onChange={(event) => setOldPin(event.target.value)}
+                                placeholder="Enter current PIN"
+                                required
+                            />
+                        </div>
+                        <div>
+                            <label className="mb-1 block text-xs font-medium text-text-secondary">
+                                New PIN
+                            </label>
+                            <Input
+                                type="password"
+                                value={newPin}
+                                onChange={(event) => setNewPin(event.target.value)}
+                                placeholder="Enter new PIN"
+                                required
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                <button
+                    type="submit"
+                    disabled={isChangingPin || isTogglingFreeze}
+                    className="inline-flex w-full items-center justify-center rounded-btn bg-brand px-4 py-2.5 text-sm font-semibold text-white transition-all disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                    {isChangingPin ? "Updating PIN…" : "Update PIN"}
+                </button>
+            </form>
         </div>
     );
 }

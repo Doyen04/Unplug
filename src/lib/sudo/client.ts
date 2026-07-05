@@ -214,6 +214,22 @@ export async function updateSudoCardStatus(
     const data = await res.json();
     return data.data;
 }
+
+export async function changeSudoCardPin(
+    cardId: string,
+    payload: { oldPin: string; newPin: string },
+): Promise<void> {
+    const res = await fetch(`${SUDO_BASE_URL}/cards/${cardId}/pin`, {
+        method: 'PUT',
+        headers: SUDO_HEADERS,
+        body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(`Sudo changeCardPin [${res.status}]: ${JSON.stringify(err)}`);
+    }
+}
 /**
  * Deactivates a Sudo customer when an Unplug user deletes their account.
  *
