@@ -1,396 +1,530 @@
 "use client";
 
 import Link from 'next/link';
+import { useState } from 'react';
 import { Syne, Manrope } from 'next/font/google';
-import { motion } from 'framer-motion';
-import { ArrowRight, CheckCircle2, ShieldAlert, Sparkles, TrendingDown, EyeOff, Scissors, Lock } from 'lucide-react';
+import { motion, useReducedMotion } from 'framer-motion';
+import {
+  ArrowRight,
+  BellRing,
+  CheckCircle2,
+  CircleDollarSign,
+  CreditCard,
+  ShieldCheck,
+  Snowflake,
+  Sparkles,
+  Zap,
+} from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 
 const displayFont = Syne({ subsets: ['latin'], weight: ['400', '600', '700', '800'] });
 const uiFont = Manrope({ subsets: ['latin'], weight: ['400', '500', '600', '700'] });
 
-const fadeIn = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 }
-};
-
-const stagger = {
-    hidden: { opacity: 0 },
-    visible: {
-        opacity: 1,
-        transition: { staggerChildren: 0.1 }
-    }
-};
-
 function Header() {
-    return (
-        <header className="sticky top-0 z-50 bg-bg-base/80 backdrop-blur-xl border-b border-border/40">
-            <div className="mx-auto max-w-6xl px-6 py-4 flex items-center justify-between">
-                <Link href="/" className={`${displayFont.className} text-2xl font-bold tracking-tight`}>
-                    Unplug.
-                </Link>
-                <nav className="hidden md:flex items-center gap-10">
-                    <a href="#features" className="text-[10px] font-bold uppercase tracking-widest text-text-secondary hover:text-brand transition-colors">Features</a>
-                    <a href="#metrics" className="text-[10px] font-bold uppercase tracking-widest text-text-secondary hover:text-brand transition-colors">Impact</a>
-                    <a href="#pricing" className="text-[10px] font-bold uppercase tracking-widest text-text-secondary hover:text-brand transition-colors">Pricing</a>
-                </nav>
-                <div className="flex items-center gap-3">
-                    <Button variant="ghost" size="sm" asChild className="hidden sm:inline-flex">
-                        <Link href="/login">Log In</Link>
-                    </Button>
-                    <Button size="sm" asChild className="rounded-full shadow-lg shadow-brand/20">
-                        <Link href="/signup">Get Started</Link>
-                    </Button>
-                </div>
+  return (
+    <header className="sticky top-0 z-50 border-b border-border/70 bg-bg-base/80 backdrop-blur-xl">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+        <Link href="/" className={`${displayFont.className} text-2xl font-semibold tracking-tight text-text-primary`}>
+          Unplug.
+        </Link>
+        <nav className="hidden items-center gap-8 text-[10px] font-semibold uppercase tracking-[0.25em] text-text-secondary md:flex">
+          <a href="#how-it-works" className="transition-colors hover:text-brand">
+            How it works
+          </a>
+          <a href="#security" className="transition-colors hover:text-brand">
+            Security
+          </a>
+          <a href="#pricing" className="transition-colors hover:text-brand">
+            Pricing
+          </a>
+          <a href="#faq" className="transition-colors hover:text-brand">
+            FAQ
+          </a>
+        </nav>
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="sm" asChild className="hidden sm:inline-flex">
+            <Link href="/login">Log in</Link>
+          </Button>
+          <Button size="sm" asChild className="rounded-full shadow-lg shadow-brand/20">
+            <Link href="/signup">Get started</Link>
+          </Button>
+        </div>
+      </div>
+    </header>
+  );
+}
+
+function FreezeCardDemo() {
+  const [isFrozen, setIsFrozen] = useState(false);
+  const prefersReducedMotion = useReducedMotion();
+
+  return (
+    <div className="mx-auto mt-12 max-w-xl lg:mt-0">
+      <button
+        type="button"
+        onClick={() => setIsFrozen((value) => !value)}
+        className="w-full rounded-[28px] border border-white/70 bg-white/70 p-2 text-left shadow-[0_25px_90px_-30px_rgba(31,26,22,0.45)] backdrop-blur-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
+        aria-pressed={isFrozen}
+        aria-live="polite"
+      >
+        <motion.div
+          animate={{
+            background: isFrozen
+              ? 'linear-gradient(135deg, #DCEEF5 0%, #CFE6F2 100%)'
+              : 'linear-gradient(135deg, #FF5C35 0%, #FF8A5B 100%)',
+            color: isFrozen ? '#1B3A4B' : '#FFF8F2',
+            scale: prefersReducedMotion ? 1 : isFrozen ? 0.98 : 1,
+          }}
+          transition={{ duration: prefersReducedMotion ? 0 : 0.35, ease: 'easeOut' }}
+          className="rounded-[24px] p-6 sm:p-8"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.3em] opacity-80">
+                {isFrozen ? 'Frozen' : 'Active'}
+              </p>
+              <p className="mt-2 text-2xl font-semibold">Streaming Plan</p>
             </div>
-        </header>
-    );
+            <div className={`flex h-10 w-10 items-center justify-center rounded-full ${isFrozen ? 'bg-[#1B3A4B]/10' : 'bg-white/20'}`}>
+              <Snowflake className="h-5 w-5" />
+            </div>
+          </div>
+
+          <div className="mt-8 rounded-[20px] border border-white/30 bg-black/5 p-4 backdrop-blur-sm">
+            <div className="flex items-center justify-between text-sm">
+              <span className="opacity-80">Monthly charge</span>
+              <span className={`font-mono text-lg font-semibold ${isFrozen ? 'line-through opacity-70' : ''}`}>
+                ₦4,500
+              </span>
+            </div>
+            <div className="mt-6 flex items-center justify-between border-t border-white/20 pt-4 text-sm">
+              <div>
+                <p className="opacity-80">Card number</p>
+                <p className="mt-1 font-mono tracking-[0.25em]">•••• 4471</p>
+              </div>
+              <div className="text-right">
+                <p className="opacity-80">Renews</p>
+                <p className="mt-1 font-mono">08/26</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-8 flex items-center justify-between rounded-full border border-white/30 bg-white/15 px-4 py-3 text-sm backdrop-blur-sm">
+            <span className="font-medium">
+              {isFrozen ? 'Charge blocked. Unfreeze anytime.' : 'Tap to freeze this recurring charge.'}
+            </span>
+            <ArrowRight className="h-4 w-4" />
+          </div>
+        </motion.div>
+      </button>
+
+      <div className="mt-4 flex flex-wrap items-center justify-center gap-2 text-[11px] font-semibold uppercase tracking-[0.3em] text-text-secondary sm:justify-start">
+        {['Netflix', 'Spotify', 'YouTube Premium', 'ChatGPT'].map((item) => (
+          <span key={item} className="rounded-full border border-border bg-bg-surface px-3 py-1.5">
+            {item}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 function HeroSection() {
-    return (
-        <section className="relative pt-24 pb-32 overflow-hidden border-b border-border">
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,var(--tw-gradient-stops))] from-brand-light/40 via-bg-base to-bg-base -z-10" />
-            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.02] -z-10" />
+  return (
+    <section className="relative overflow-hidden border-b border-border/70 pb-24 pt-16 sm:pb-28 sm:pt-24">
+      <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_left,rgba(255,92,53,0.16),transparent_45%)]" />
+      <div className="mx-auto grid max-w-6xl gap-14 px-6 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.35em] text-brand">
+            For everyone paying in naira and dollars
+          </p>
+          <h1 className="mt-6 text-4xl font-semibold leading-[1.05] text-text-primary sm:text-5xl lg:text-6xl">
+            Freeze any subscription. Instantly.
+          </h1>
+          <p className="mt-6 max-w-xl text-lg leading-8 text-text-secondary">
+            Unplug gives every recurring charge its own virtual card. See something you no longer want? Freeze the card and the charge stops at the payment rail.
+          </p>
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <Button size="lg" asChild className="rounded-full px-8 shadow-xl shadow-brand/20">
+              <Link href="/signup">
+                Find my subscriptions
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+            <Button variant="secondary" size="lg" asChild className="rounded-full px-8">
+              <Link href="#how-it-works">See how it works</Link>
+            </Button>
+          </div>
+          <div className="mt-8 flex flex-wrap items-center gap-4 text-sm text-text-secondary">
+            <span className="flex items-center gap-2 rounded-full border border-border bg-bg-surface px-3 py-2">
+              <ShieldCheck className="h-4 w-4 text-brand" /> Read-only bank connection
+            </span>
+            <span className="flex items-center gap-2 rounded-full border border-border bg-bg-surface px-3 py-2">
+              <Sparkles className="h-4 w-4 text-brand" /> One card per subscription
+            </span>
+          </div>
+        </div>
 
-            <div className="mx-auto max-w-6xl px-6 relative z-10 text-center">
-                <motion.div initial="hidden" animate="visible" variants={stagger} className="max-w-4xl mx-auto">
-                    <motion.h1 variants={fadeIn} className={`${displayFont.className} text-5xl md:text-7xl lg:text-[5.5rem] leading-[1.05] tracking-tight text-text-primary mb-8 mt-4`}>
-                        Stop throwing money at <br className="hidden md:block" />
-                        <span className="text-brand">forgotten</span> services.
-                    </motion.h1>
-
-                    <motion.p variants={fadeIn} className="text-xl text-text-secondary leading-relaxed max-w-2xl mx-auto mb-12">
-                        Connect your bank securely. We uncover hidden recurring charges, analyze your true usage, and cancel the dead weight.
-                    </motion.p>
-
-                    <motion.div variants={fadeIn} className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                        <Button size="lg" className="rounded-full h-14 px-8 shadow-xl shadow-brand/20" asChild>
-                            <Link href="/signup">Run Free Audit <ArrowRight className="ml-2 w-4 h-4" /></Link>
-                        </Button>
-                        <p className="text-[10px] uppercase font-bold tracking-widest text-text-muted sm:ml-4">
-                            Avg. savings: <span className="text-brand">$156/mo</span>
-                        </p>
-                    </motion.div>
-                </motion.div>
-
-                {/* Abstract UI Reveal */}
-                <motion.div
-                    initial={{ opacity: 0, y: 60 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 1, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                    className="mt-24 mx-auto max-w-4xl"
-                >
-                    <div className="rounded-[24px] border border-border-strong bg-white/40 p-2 shadow-2xl backdrop-blur-xl">
-                        <div className="rounded-[20px] bg-white border border-border overflow-hidden">
-                            <div className="flex border-b border-border bg-bg-muted/30 px-6 py-4 items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                    <div className="w-3 h-3 rounded-full bg-danger/80" />
-                                    <div className="w-3 h-3 rounded-full bg-warning/80" />
-                                    <div className="w-3 h-3 rounded-full bg-success/80" />
-                                </div>
-                                <div className="text-[10px] uppercase tracking-widest font-bold text-text-muted">Unplug Dashboard</div>
-                                <div className="w-16" />
-                            </div>
-                            <div className="p-8 text-left">
-                                <div className="flex justify-between items-end mb-8">
-                                    <div>
-                                        <h3 className={`${displayFont.className} text-2xl mb-1`}>Identified Waste</h3>
-                                        <p className="text-sm text-text-secondary">AI found 3 unused subscriptions</p>
-                                    </div>
-                                    <div className="text-right">
-                                        <p className="text-4xl font-light tracking-tight text-brand tabular-nums">-$84.00</p>
-                                    </div>
-                                </div>
-                                <div className="space-y-3">
-                                    {[
-                                        { name: 'Creative Cloud', amount: '$54.99', status: 'Unused (14 days)' },
-                                        { name: 'Unknown Gym', amount: '$29.01', status: 'Unused (3 mos)' }
-                                    ].map((sub, i) => (
-                                        <div key={i} className="flex justify-between items-center p-4 border border-danger-light bg-danger-light/20 rounded-xl">
-                                            <div className="flex items-center gap-4">
-                                                <div className="w-10 h-10 rounded-full bg-white border border-danger/20 flex items-center justify-center text-danger font-bold text-sm">
-                                                    {sub.name[0]}
-                                                </div>
-                                                <div>
-                                                    <p className="font-semibold text-sm">{sub.name}</p>
-                                                    <p className="text-xs text-danger uppercase tracking-wider font-bold mt-1">{sub.status}</p>
-                                                </div>
-                                            </div>
-                                            <div className="flex items-center gap-4">
-                                                <span className="font-bold tabular-nums text-text-primary text-sm sm:text-base">{sub.amount}</span>
-                                                <Button variant="dangerOutline" size="sm" className="rounded-full hidden sm:flex">Cancel Now</Button>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </motion.div>
-            </div>
-        </section>
-    );
+        <FreezeCardDemo />
+      </div>
+    </section>
+  );
 }
 
-function ImpactSection() {
-    return (
-        <section id="metrics" className="py-24 border-b border-border bg-text-primary text-bg-base">
-            <div className="mx-auto max-w-6xl px-6">
-                <div className="grid md:grid-cols-3 gap-12 text-center md:text-left divide-y md:divide-y-0 md:divide-x divide-white/10">
-                    <div className="pt-8 md:pt-0 md:pr-12">
-                        <TrendingDown className="w-8 h-8 text-brand mb-6 mx-auto md:mx-0" />
-                        <p className={`${displayFont.className} text-5xl mb-2`}>$2.4T</p>
-                        <p className="text-xs uppercase tracking-widest text-white/50 font-bold">Annual Waste</p>
-                    </div>
-                    <div className="pt-8 md:pt-0 md:px-12">
-                        <EyeOff className="w-8 h-8 text-brand mb-6 mx-auto md:mx-0" />
-                        <p className={`${displayFont.className} text-5xl mb-2`}>12+</p>
-                        <p className="text-xs uppercase tracking-widest text-white/50 font-bold">Hidden Subs</p>
-                    </div>
-                    <div className="pt-8 md:pt-0 md:pl-12">
-                        <CheckCircle2 className="w-8 h-8 text-brand mb-6 mx-auto md:mx-0" />
-                        <p className={`${displayFont.className} text-5xl mb-2`}>85%</p>
-                        <p className="text-xs uppercase tracking-widest text-white/50 font-bold">AI Accuracy</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-    );
+function ProblemSection() {
+  const items = [
+    {
+      title: 'Forgotten trials',
+      body: 'The free month ends and the charge keeps rolling forward.',
+    },
+    {
+      title: 'Naira value swings',
+      body: 'USD bills move with the exchange rate and the cost feels different every month.',
+    },
+    {
+      title: 'Cancel flows built to make you give up',
+      body: 'Menus, hold times, and “are you sure?” screens make simple cancellations feel like a chore.',
+    },
+  ];
+
+  return (
+    <section className="border-b border-border/70 bg-bg-surface py-24">
+      <div className="mx-auto max-w-6xl px-6">
+        <div className="max-w-2xl">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.35em] text-brand">
+            The problem
+          </p>
+          <h2 className="mt-4 text-3xl font-semibold text-text-primary sm:text-4xl">
+            Your subscriptions are not trying to help you remember them.
+          </h2>
+        </div>
+        <div className="mt-12 grid gap-6 md:grid-cols-3">
+          {items.map((item) => (
+            <Card key={item.title} className="border-border/70 bg-bg-base p-8">
+              <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-brand/10 text-brand">
+                <Zap className="h-5 w-5" />
+              </div>
+              <h3 className="text-xl font-semibold text-text-primary">{item.title}</h3>
+              <p className="mt-3 leading-7 text-text-secondary">{item.body}</p>
+            </Card>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
 }
 
-function FeaturesSection() {
-    const features = [
-        {
-            icon: ShieldAlert,
-            title: 'Flawless Detection',
-            desc: 'Securely sync your bank via Plaid. We parse thousands of transactions to map your recurring footprint.'
-        },
-        {
-            icon: Scissors,
-            title: '1-Click Cancels',
-            desc: 'Stop navigating dark patterns. We provide direct cancellation links or handle it entirely on your behalf.'
-        },
-        {
-            icon: Lock,
-            title: 'Bank-Grade Privacy',
-            desc: 'Read-only access. We never store your credentials. Your financial data is encrypted and immediately analyzed.'
-        }
-    ];
+function HowItWorksSection() {
+  const steps = [
+    {
+      title: 'Connect your bank once',
+      body: 'We use a read-only bank connection to spot the subscriptions you already pay for.',
+    },
+    {
+      title: 'Get a dedicated card per subscription',
+      body: 'Every recurring charge gets its own virtual card, whether it is billed in NGN or USD.',
+    },
+    {
+      title: 'Freeze or cancel anytime',
+      body: 'If a charge no longer feels worth it, freeze the card and the payment stops instantly.',
+    },
+  ];
 
-    return (
-        <section id="features" className="py-32 border-b border-border relative">
-            <div className="mx-auto max-w-6xl px-6">
-                <div className="max-w-xl mb-20 text-center md:text-left mx-auto md:mx-0">
-                    <h2 className={`${displayFont.className} text-4xl md:text-5xl mb-6`}>Precision analytics for your expenses.</h2>
-                    <p className="text-lg text-text-secondary">We didn't just build a list. We built an intelligence layer that evaluates if a subscription is actually worth keeping.</p>
-                </div>
-
-                <div className="grid md:grid-cols-3 gap-8">
-                    {features.map((F, i) => (
-                        <Card key={i} className="p-8 border-border hover:shadow-xl hover:shadow-brand/5 hover:border-brand/30 transition-all bg-white group">
-                            <div className="w-12 h-12 rounded-full bg-brand/10 text-brand flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                                <F.icon className="w-5 h-5" />
-                            </div>
-                            <h3 className={`${displayFont.className} text-2xl mb-3`}>{F.title}</h3>
-                            <p className="text-text-secondary leading-relaxed">{F.desc}</p>
-                        </Card>
-                    ))}
-                </div>
+  return (
+    <section id="how-it-works" className="border-b border-border/70 bg-bg-base py-24">
+      <div className="mx-auto max-w-6xl px-6">
+        <div className="max-w-2xl">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.35em] text-brand">How it works</p>
+          <h2 className="mt-4 text-3xl font-semibold text-text-primary sm:text-4xl">
+            A real sequence, not a vague promise.
+          </h2>
+        </div>
+        <div className="mt-12 grid gap-8 md:grid-cols-3">
+          {steps.map((step, index) => (
+            <div key={step.title} className="rounded-[24px] border border-border/70 bg-bg-surface p-8">
+              <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-full bg-brand/10 text-lg font-semibold text-brand">
+                0{index + 1}
+              </div>
+              <h3 className="text-xl font-semibold text-text-primary">{step.title}</h3>
+              <p className="mt-3 leading-7 text-text-secondary">{step.body}</p>
             </div>
-        </section>
-    );
+          ))}
+        </div>
+      </div>
+    </section>
+  );
 }
 
-function CustomersSection() {
-    const TESTIMONIALS = [
-        {
-            quote: '"I found $2,400 in annual subscriptions I\'d completely forgotten about. Unplug paid for itself on day one."',
-            author: 'Sarah Chen',
-            role: 'Founder',
-            company: 'TechStart',
-        },
-        {
-            quote: '"Finally, a tool that makes subscription management effortless. The shame score gamification is genuinely motivating."',
-            author: 'Marcus Reynolds',
-            role: 'Product Manager',
-            company: 'Growth Labs',
-        },
-        {
-            quote: '"The AI insights are spot-on. I cancelled 7 subscriptions and recovered $156/month just like that."',
-            author: 'Jessica Park',
-            role: 'Freelancer',
-            company: 'Park Creative',
-        },
-    ];
+function TourSection() {
+  const panels = [
+    {
+      title: 'Per-subscription cards',
+      body: 'NGN and USD recurring charges each get their own card in the same dashboard.',
+      icon: CreditCard,
+    },
+    {
+      title: 'One-tap freeze or cancel',
+      body: 'When a payment is no longer worth it, you stop it from the same screen you manage it on.',
+      icon: Snowflake,
+    },
+    {
+      title: 'Renewal alerts before you’re charged',
+      body: 'See upcoming renewals early and take action before the debit lands.',
+      icon: BellRing,
+    },
+    {
+      title: 'Everything in one place',
+      body: 'Subscriptions, cards, and renewal dates live side by side so nothing disappears into the noise.',
+      icon: CircleDollarSign,
+    },
+  ];
 
-    return (
-        <section id="customers" className="py-32 border-b border-border bg-bg-base">
-            <div className="mx-auto max-w-6xl px-6">
-                <div className="mb-20 text-center max-w-2xl mx-auto">
-                    <h2 className={`${displayFont.className} text-4xl md:text-5xl mb-6`}>Real results from real people.</h2>
+  return (
+    <section className="border-b border-border/70 bg-bg-surface py-24">
+      <div className="mx-auto max-w-6xl px-6">
+        <div className="max-w-2xl">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.35em] text-brand">Product tour</p>
+          <h2 className="mt-4 text-3xl font-semibold text-text-primary sm:text-4xl">
+            Everything lives on one dashboard.
+          </h2>
+        </div>
+        <div className="mt-12 grid gap-6 md:grid-cols-2">
+          {panels.map((panel) => {
+            const Icon = panel.icon;
+            return (
+              <Card key={panel.title} className="border-border/70 bg-bg-base p-8 transition-transform hover:-translate-y-1">
+                <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-brand/10 text-brand">
+                  <Icon className="h-5 w-5" />
                 </div>
-                <div className="grid md:grid-cols-3 gap-8">
-                    {TESTIMONIALS.map((t, i) => (
-                        <Card key={i} className="p-8 border-border hover:shadow-xl hover:shadow-brand/5 hover:border-brand/30 transition-all bg-white flex flex-col justify-between">
-                            <p className="text-text-secondary leading-relaxed mb-8 italic">{t.quote}</p>
-                            <div>
-                                <p className="font-bold text-text-primary">{t.author}</p>
-                                <p className="text-[10px] uppercase tracking-widest text-text-muted mt-1">{t.role} at {t.company}</p>
-                            </div>
-                        </Card>
-                    ))}
-                </div>
+                <h3 className="text-xl font-semibold text-text-primary">{panel.title}</h3>
+                <p className="mt-3 leading-7 text-text-secondary">{panel.body}</p>
+              </Card>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function SecuritySection() {
+  return (
+    <section id="security" className="border-b border-border/70 bg-[#1F1A16] py-24 text-[#F8F1E9]">
+      <div className="mx-auto grid max-w-6xl gap-10 px-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.35em] text-[#FF9A76]">Security</p>
+          <h2 className="mt-4 text-3xl font-semibold sm:text-4xl">
+            We built this so you do not have to trust us blindly.
+          </h2>
+          <p className="mt-6 max-w-xl text-lg leading-8 text-[#D7CFC2]">
+            Your bank connection is read-only, and we only use it once to find your recurring charges. Card numbers are never stored on our servers for everyday use.
+          </p>
+        </div>
+        <div className="space-y-4 rounded-[28px] border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
+          {[
+            'Read-only access to find subscriptions without watching your full account.',
+            'Card numbers are shown through a secure, sandboxed display instead of being stored on our servers.',
+            'Freezing is instant and reversible, and it never touches your main bank account.',
+          ].map((item) => (
+            <div key={item} className="flex gap-3 rounded-[18px] border border-white/10 bg-black/10 p-4">
+              <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-[#FF9A76]" />
+              <p className="leading-7 text-[#F5EDE2]">{item}</p>
             </div>
-        </section>
-    );
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ProofSection() {
+  return (
+    <section className="border-b border-border/70 bg-bg-base py-24">
+      <div className="mx-auto max-w-6xl px-6">
+        <div className="max-w-3xl rounded-[28px] border border-border/70 bg-bg-surface p-8 sm:p-10">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.35em] text-brand">Proof</p>
+          <h2 className="mt-4 text-3xl font-semibold text-text-primary sm:text-4xl">
+            This was built because a dollar-priced surprise can still hit hard in naira.
+          </h2>
+          <p className="mt-6 text-lg leading-8 text-text-secondary">
+            We started Unplug after seeing how quickly a forgotten subscription or a renewals surprise could quietly drain a budget. The product is designed to make that exact moment feel manageable instead of inevitable.
+          </p>
+          <div className="mt-8 flex items-center gap-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand/10 text-lg font-semibold text-brand">
+              U
+            </div>
+            <div>
+              <p className="font-semibold text-text-primary">The Unplug team</p>
+              <p className="text-sm text-text-secondary">Built for recurring charges that should be easier to stop</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
 }
 
 function PricingSection() {
-    return (
-        <section id="pricing" className="py-32 bg-bg-muted/50 border-b border-border">
-            <div className="mx-auto max-w-6xl px-6">
-                <div className="text-center max-w-2xl mx-auto mb-20">
-                    <h2 className={`${displayFont.className} text-4xl md:text-5xl mb-6`}>A fraction of what you'll save.</h2>
+  const plans = [
+    {
+      name: 'Free',
+      price: '₦0',
+      description: 'Start with one bank connection and discover your recurring charges.',
+      features: ['1 bank connection', 'Subscription discovery', 'Virtual cards in NGN', 'Freeze or cancel on demand'],
+      cta: 'Get started',
+      href: '/signup',
+      highlight: false,
+    },
+    {
+      name: 'Pro',
+      price: '₦4,000/mo',
+      description: 'Get the full control layer for all your subscriptions, including USD bills.',
+      features: ['Unlimited subscriptions', 'NGN + USD cards', 'Renewal alerts', 'Priority support'],
+      cta: 'Start Pro',
+      href: '/signup',
+      highlight: true,
+    },
+  ];
+
+  return (
+    <section id="pricing" className="border-b border-border/70 bg-bg-muted/40 py-24">
+      <div className="mx-auto max-w-6xl px-6">
+        <div className="max-w-2xl">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.35em] text-brand">Pricing</p>
+          <h2 className="mt-4 text-3xl font-semibold text-text-primary sm:text-4xl">
+            Simple pricing for the subscriptions you actually keep.
+          </h2>
+        </div>
+        <div className="mt-12 grid gap-8 lg:grid-cols-2">
+          {plans.map((plan) => (
+            <Card key={plan.name} className={`p-8 ${plan.highlight ? 'border-brand/30 bg-white shadow-[0_22px_60px_-30px_rgba(255,92,53,0.35)]' : 'border-border/70 bg-bg-surface'}`}>
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h3 className="text-2xl font-semibold text-text-primary">{plan.name}</h3>
+                  <p className="mt-2 leading-7 text-text-secondary">{plan.description}</p>
                 </div>
-
-                <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto items-stretch">
-                    <Card className="p-10 bg-white border-border-strong shadow-sm group hover:-translate-y-1 transition-transform">
-                        <h3 className={`${displayFont.className} text-3xl mb-2`}>Free</h3>
-                        <p className="text-text-secondary mb-8">Core detection only.</p>
-                        <div className="mb-8 border-b border-border pb-8">
-                            <span className={`${displayFont.className} text-5xl`}>$0</span>
-                            <span className="text-text-muted ml-2 font-medium">/mo</span>
-                        </div>
-                        <ul className="space-y-4 mb-8">
-                            <li className="flex items-center gap-3 text-sm text-text-secondary"><CheckCircle2 className="w-4 h-4 text-brand" /> Bank link (1 acc)</li>
-                            <li className="flex items-center gap-3 text-sm text-text-secondary"><CheckCircle2 className="w-4 h-4 text-brand" /> Subscription detection</li>
-                            <li className="flex items-center gap-3 text-sm text-text-secondary"><CheckCircle2 className="w-4 h-4 text-brand" /> Total spend summary</li>
-                            <li className="flex items-center gap-3 text-sm text-text-muted opacity-60"><CheckCircle2 className="w-4 h-4 text-text-muted" /> AI usage & engagement score</li>
-                            <li className="flex items-center gap-3 text-sm text-text-muted opacity-60"><CheckCircle2 className="w-4 h-4 text-text-muted" /> Real-time price hike detection</li>
-                            <li className="flex items-center gap-3 text-sm text-text-muted opacity-60"><CheckCircle2 className="w-4 h-4 text-text-muted" /> 1-Click cancellation assistance</li>
-                        </ul>
-                        <Button variant="outline" className="w-full rounded-full" asChild>
-                            <Link href="/signup">Get Started</Link>
-                        </Button>
-                    </Card>
-
-                    <Card className="p-10 bg-white border-border-strong shadow-sm group hover:-translate-y-1 transition-transform border-t-4 border-t-brand">
-                        <h3 className={`${displayFont.className} text-3xl mb-2`}>Standard</h3>
-                        <p className="text-text-secondary mb-8">Full toolkit to audit and cancel.</p>
-                        <div className="mb-8 border-b border-border pb-8">
-                            <span className={`${displayFont.className} text-5xl`}>$4</span>
-                            <span className="text-text-muted ml-2 font-medium">/mo</span>
-                        </div>
-                        <ul className="space-y-4 mb-8">
-                            <li className="flex items-center gap-3 text-sm text-text-secondary"><CheckCircle2 className="w-4 h-4 text-brand" /> Unlimited bank links</li>
-                            <li className="flex items-center gap-3 text-sm text-text-secondary"><CheckCircle2 className="w-4 h-4 text-brand" /> Advanced subscription detection</li>
-                            <li className="flex items-center gap-3 text-sm text-text-secondary"><CheckCircle2 className="w-4 h-4 text-brand" /> AI usage & engagement score</li>
-                            <li className="flex items-center gap-3 text-sm text-text-secondary"><CheckCircle2 className="w-4 h-4 text-brand" /> Real-time price hike detection</li>
-                            <li className="flex items-center gap-3 text-sm text-text-secondary"><CheckCircle2 className="w-4 h-4 text-brand" /> 1-Click cancellation assistance</li>
-                            <li className="flex items-center gap-3 text-sm text-text-muted opacity-60"><CheckCircle2 className="w-4 h-4 text-text-muted" /> Dedicated concierge</li>
-                        </ul>
-                        <Button className="w-full rounded-full bg-text-primary text-white hover:bg-black" asChild>
-                            <Link href="/signup">Start Trial</Link>
-                        </Button>
-                    </Card>
-
-                    <Card className="p-10 bg-text-primary text-bg-base border-text-primary shadow-xl relative overflow-hidden transform md:-translate-y-4 hover:translate-y-0 md:hover:-translate-y-5 transition-transform">
-                        <div className="absolute top-0 right-0 p-4">
-                            <span className="inline-block bg-brand text-white border-none shadow-lg shadow-brand/20 font-bold uppercase tracking-wider text-[10px] px-3 py-1 rounded-full">Concierge</span>
-                        </div>
-                        <h3 className={`${displayFont.className} text-3xl mb-2`}>White-Glove</h3>
-                        <p className="text-white/60 mb-8 w-11/12">We cancel directly for you.</p>
-                        <div className="mb-8 border-b border-white/10 pb-8">
-                            <span className={`${displayFont.className} text-5xl text-brand`}>$9</span>
-                            <span className="text-white/40 ml-2 font-medium">/mo</span>
-                        </div>
-                        <ul className="space-y-4 mb-8">
-                            <li className="flex items-center gap-3 text-sm text-white/80"><CheckCircle2 className="w-4 h-4 text-brand" /> Everything in Standard</li>
-                            <li className="flex items-center gap-3 text-sm text-white/80"><CheckCircle2 className="w-4 h-4 text-brand" /> We handle cancellation phone calls</li>
-                            <li className="flex items-center gap-3 text-sm text-white/80"><CheckCircle2 className="w-4 h-4 text-brand" /> Proactive refund negotiation</li>
-                            <li className="flex items-center gap-3 text-sm text-white/80"><CheckCircle2 className="w-4 h-4 text-brand" /> Monthly detailed AI spend debrief</li>
-                            <li className="flex items-center gap-3 text-sm text-white/80"><CheckCircle2 className="w-4 h-4 text-brand" /> Priority email & chat support</li>
-                            <li className="flex items-center gap-3 text-sm text-white/80"><CheckCircle2 className="w-4 h-4 text-brand" /> Dedicated concierge advisor</li>
-                        </ul>
-                        <Button className="w-full rounded-full bg-brand text-white hover:bg-brand-dark" asChild>
-                            <Link href="/signup">Get Concierge</Link>
-                        </Button>
-                    </Card>
-                </div>
-            </div>
-        </section>
-    );
+                {plan.highlight ? (
+                  <span className="rounded-full bg-brand/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.3em] text-brand">
+                    Most popular
+                  </span>
+                ) : null}
+              </div>
+              <p className="mt-8 text-4xl font-semibold text-text-primary">{plan.price}</p>
+              <ul className="mt-8 space-y-3">
+                {plan.features.map((feature) => (
+                  <li key={feature} className="flex items-center gap-3 text-sm text-text-secondary">
+                    <CheckCircle2 className="h-4 w-4 shrink-0 text-brand" />
+                    <span>{feature}</span>
+                  </li>
+                ))}
+              </ul>
+              <Button asChild className={`mt-8 w-full rounded-full ${plan.highlight ? '' : 'border border-border bg-white text-text-primary hover:bg-bg-muted'}`}>
+                <Link href={plan.href}>{plan.cta}</Link>
+              </Button>
+            </Card>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
 }
 
 function FAQSection() {
-    const FAQs = [
-        {
-            q: 'Is my bank data secure?',
-            a: 'Yes. We use Plaid for secure connections and OAuth authentication. Your login credentials are never stored, and we only access transaction data.',
-        },
-        {
-            q: 'How does the AI usage scoring work?',
-            a: 'Our AI analyzes login frequency, transaction patterns, and usage signals to estimate if you actively use a service. No machine is perfect, but it catches ~85% of truly unused subscriptions.',
-        },
-        {
-            q: 'Can I be refunded if I just cancel?',
-            a: 'Most subscriptions offer prorated refunds for the remainder of the month. On Concierge, we handle refund negotiations for you.',
-        },
-    ];
+  const items = [
+    {
+      question: 'Is my banking information safe?',
+      answer: 'Yes. We use a read-only bank connection and do not store your login details. We only use the data needed to identify recurring payments.',
+    },
+    {
+      question: 'How is this different from freezing a card in my bank app?',
+      answer: 'Bank-level freezes block the whole card. Unplug gives each subscription its own virtual card, so one freeze only affects that merchant.',
+    },
+    {
+      question: 'What happens with my dollar subscriptions?',
+      answer: 'USD subscriptions are handled in the same dashboard, so you can manage both NGN and USD recurring charges without switching tools.',
+    },
+    {
+      question: 'Do I need to tell Netflix or Spotify about the new card myself?',
+      answer: 'Yes. The card is assigned to the subscription, so you will need to update the payment method with that merchant once to complete the handoff.',
+    },
+  ];
 
-    return (
-        <section id="faq" className="py-32 border-b border-border bg-bg-base">
-            <div className="mx-auto max-w-4xl px-6">
-                <div className="mb-20 text-center">
-                    <h2 className={`${displayFont.className} text-4xl md:text-5xl mb-6`}>Common questions.</h2>
-                </div>
-                <div className="divide-y divide-border">
-                    {FAQs.map((item, i) => (
-                        <div key={i} className="py-8 first:pt-0 last:pb-0">
-                            <h3 className={`${displayFont.className} text-2xl font-bold mb-4`}>{item.q}</h3>
-                            <p className="text-text-secondary leading-relaxed">{item.a}</p>
-                        </div>
-                    ))}
-                </div>
-                <div className="mt-16 text-center">
-                    <p className="text-text-secondary mb-6">Still have questions?</p>
-                    <Button variant="outline" className="rounded-full" asChild>
-                        <a href="mailto:support@unplug.app">Email Support</a>
-                    </Button>
-                </div>
-            </div>
-        </section>
-    );
+  return (
+    <section id="faq" className="bg-bg-base py-24">
+      <div className="mx-auto max-w-4xl px-6">
+        <div className="text-center">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.35em] text-brand">FAQ</p>
+          <h2 className="mt-4 text-3xl font-semibold text-text-primary sm:text-4xl">
+            Common questions, answered plainly.
+          </h2>
+        </div>
+        <div className="mt-12 divide-y divide-border/70 rounded-[24px] border border-border/70 bg-bg-surface">
+          {items.map((item) => (
+            <details key={item.question} className="group p-6 sm:p-8">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-lg font-semibold text-text-primary">
+                <span>{item.question}</span>
+                <span className="text-xl text-brand">+</span>
+              </summary>
+              <p className="mt-4 leading-8 text-text-secondary">{item.answer}</p>
+            </details>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function FinalCtaSection() {
+  return (
+    <section className="border-t border-border/70 bg-bg-surface py-20">
+      <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-6 rounded-4xl border border-border/70 bg-bg-base p-8 text-center sm:flex-row sm:text-left">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.35em] text-brand">Ready to stop guessing?</p>
+          <h2 className="mt-3 text-3xl font-semibold text-text-primary">
+            Stop guessing what is leaving your account every month.
+          </h2>
+        </div>
+        <Button size="lg" asChild className="rounded-full px-8 shadow-lg shadow-brand/15">
+          <Link href="/signup">Find my subscriptions</Link>
+        </Button>
+      </div>
+    </section>
+  );
 }
 
 function Footer() {
-    return (
-        <footer className="bg-text-primary text-bg-base py-12">
-            <div className="mx-auto max-w-6xl px-6 flex flex-col md:flex-row justify-between items-center gap-6">
-                <div className={`${displayFont.className} text-2xl font-bold`}>Unplug.</div>
-                <div className="text-[10px] uppercase tracking-widest text-white/50 font-bold">
-                    © {new Date().getFullYear()} Unplug. Audit. Score. Cancel.
-                </div>
-            </div>
-        </footer>
-    );
+  return (
+    <footer className="bg-[#1F1A16] py-10 text-[#F8F1E9]">
+      <div className="mx-auto flex max-w-6xl flex-col gap-6 px-6 text-sm sm:flex-row sm:items-center sm:justify-between">
+        <div className="text-xl font-semibold">Unplug.</div>
+        <div className="flex flex-wrap items-center gap-4 text-[11px] font-semibold uppercase tracking-[0.3em] text-[#D7CFC2]">
+          <a href="#how-it-works" className="transition-colors hover:text-brand">How it works</a>
+          <a href="#pricing" className="transition-colors hover:text-brand">Pricing</a>
+          <a href="#faq" className="transition-colors hover:text-brand">FAQ</a>
+          <a href="mailto:support@unplug.app" className="transition-colors hover:text-brand">Support</a>
+        </div>
+      </div>
+    </footer>
+  );
 }
 
 export default function HomePage() {
-    return (
-        <main className={`${uiFont.className} bg-bg-base text-text-primary min-h-screen selection:bg-brand selection:text-white flex flex-col`}>
-            <Header />
-            <div className="flex-1">
-                <HeroSection />
-                <ImpactSection />
-                <FeaturesSection />
-                <CustomersSection />
-                <PricingSection />
-                <FAQSection />
-            </div>
-            <Footer />
-        </main>
-    );
+  return (
+    <main className={`${uiFont.className} flex min-h-screen flex-col bg-bg-base text-text-primary selection:bg-brand selection:text-white`}>
+      <Header />
+      <div className="flex-1">
+        <HeroSection />
+        <ProblemSection />
+        <HowItWorksSection />
+        <TourSection />
+        <SecuritySection />
+        <ProofSection />
+        <PricingSection />
+        <FAQSection />
+        <FinalCtaSection />
+      </div>
+      <Footer />
+    </main>
+  );
 }

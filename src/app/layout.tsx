@@ -8,7 +8,7 @@ import { QueryProvider } from '@/components/providers/QueryProvider';
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ['latin'],
-  weight: ['400', '500', '600'],
+  weight: ['400', '500', '600', '700'],
   variable: '--font-ui',
 });
 
@@ -19,8 +19,8 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: 'Unplug — Subscription Waste Dashboard',
-  description: 'Detect, score, and cancel unused subscriptions. Unplug scans your recurring charges and shows you exactly where your money goes.',
+  title: 'Unplug — Freeze Any Subscription, Instantly',
+  description: 'Unplug gives every recurring charge its own virtual card so you can freeze a subscription the moment you no longer want it.',
 };
 
 interface RootLayoutProps {
