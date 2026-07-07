@@ -1,17 +1,26 @@
 @import "tailwindcss";
 
 @theme {
+  --color-cream: #FBF5EC;
+  --color-ink: #1F1A16;
+  --color-ink-70: #5B534C;
+  --color-line: #E5DDD0;
+  --color-orange: #FF5C35;
+  --color-orange-deep: #E5522F;
+  --color-frost-wash: #DCEEF5;
+  --color-frost-deep: #1B3A4B;
+
   --color-brand: #FF5C35;
   --color-brand-light: #FFEDE6;
-  --color-brand-dark: #C93A1A;
+  --color-brand-dark: #E5522F;
 
-  --color-bg-base: #FAFAF7;
-  --color-bg-surface: #FFFFFF;
-  --color-bg-muted: #F4F3EE;
+  --color-bg-base: #FBF5EC;
+  --color-bg-surface: #FFFDF9;
+  --color-bg-muted: #F3EBDD;
 
-  --color-text-primary: #1A1A17;
-  --color-text-secondary: #6B6960;
-  --color-text-muted: #A9A79E;
+  --color-text-primary: #1F1A16;
+  --color-text-secondary: #5B534C;
+  --color-text-muted: #8B8176;
 
   --color-danger: #E53434;
   --color-danger-light: #FEEEEE;
@@ -22,15 +31,16 @@
   --color-success: #1C9E5B;
   --color-success-light: #EBF7F0;
 
-  --color-border: #E8E7E0;
-  --color-border-strong: #DCDAD0;
+  --color-border: #E5DDD0;
+  --color-border-strong: #D2C6B5;
 
   --radius-card: 24px;
-  --radius-btn: 14px;
+  --radius-btn: 9999px;
   --radius-pill: 9999px;
 
   --font-display: "Playfair Display", Georgia, serif;
   --font-ui: "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
 }
 
 @layer base {
@@ -42,8 +52,8 @@
   }
 
   body {
-    background-color: var(--color-bg-base);
-    color: var(--color-text-primary);
+    background-color: var(--color-cream);
+    color: var(--color-ink);
     font-family: var(--font-ui);
     -webkit-font-smoothing: antialiased;
   }

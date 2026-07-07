@@ -12,6 +12,7 @@ and how come we are getting this {"statusCode":200,"message":"Simulated successf
 
 sudocustomer was not deleted alot check action page
 simplify event and state management in billings page
+sub page should show when payment was made and when next it would be made
 
 
 
