@@ -8,14 +8,16 @@ interface RevealProps {
     className?: string;
     delay?: number;
     as?: 'section' | 'div';
+    id?: string;
 }
 
-export function Reveal({ children, className, delay = 0, as = 'section' }: RevealProps) {
+export function Reveal({ children, className, delay = 0, as = 'section', id }: RevealProps) {
     const prefersReducedMotion = useReducedMotion();
     const Component = as === 'section' ? motion.section : motion.div;
 
     return (
         <Component
+            id={id}
             initial={prefersReducedMotion ? false : { opacity: 0, y: 14 }}
             whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-80px' }}

@@ -1,58 +1,54 @@
-import Link from 'next/link';
-
+import { CtaLink } from '@/components/marketing/CtaLink';
+import { FaqList } from '@/components/marketing/FaqList';
+import { PricingCards } from '@/components/marketing/PricingCards';
+import { SectionTitle } from '@/components/marketing/SectionTitle';
 import { SiteFooter } from '@/components/marketing/SiteFooter';
 import { SiteHeader } from '@/components/marketing/SiteHeader';
-import { SectionTitle } from '@/components/marketing/SectionTitle';
-import { Card } from '@/components/ui/Card';
-import { Check } from 'lucide-react';
 
 export const metadata = {
     title: 'Pricing',
-    description: 'Expanded pricing for Unplug: Free and Pro plans with the features each plan includes.',
+    description:
+        'Unplug pricing: start free with Naira virtual cards and subscription discovery, or go Pro for dollar cards and a 3-day billing forecast.',
 };
-
-const plans = [
-    {
-        name: 'Free',
-        price: '₦0',
-        features: ['1 bank connection', 'Subscription discovery', 'Naira virtual cards', 'Freeze / cancel'],
-    },
-    {
-        name: 'Pro',
-        price: '₦4,000/mo',
-        features: ['Unlimited bank connections', 'Subscription discovery', 'Naira virtual cards', 'Dollar virtual cards', '3-day billing forecast', 'Freeze / cancel', 'Priority support'],
-    },
-] as const;
 
 export default function PricingPage() {
     return (
-        <main className="min-h-screen bg-cream text-ink">
+        <>
             <SiteHeader />
-            <section className="py-20 sm:py-24">
-                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                    <SectionTitle eyebrow="Pricing" title="A clearer look at Free and Pro." description="The homepage already includes a concise version. This page expands the comparison for people who want it." />
-                    <div className="mt-12 grid gap-6 lg:grid-cols-2">
-                        {plans.map((plan, index) => (
-                            <Card key={plan.name} className={index === 1 ? 'rounded-[24px] border-orange/30 bg-white p-8' : 'rounded-[24px] border-line bg-white p-8'}>
-                                <h2 className="text-2xl font-semibold text-ink">{plan.name}</h2>
-                                <p className="mt-4 font-display text-5xl leading-none text-ink">{plan.price}</p>
-                                <ul className="mt-8 space-y-3 text-sm text-ink-70">
-                                    {plan.features.map((feature) => (
-                                        <li key={feature} className="flex items-center gap-3">
-                                            <Check className="h-4 w-4 text-orange" />
-                                            <span>{feature}</span>
-                                        </li>
-                                    ))}
-                                </ul>
-                                <Link href="/signup" className="mt-8 inline-flex min-h-12 items-center justify-center rounded-full bg-orange px-6 text-sm font-semibold text-ink transition-colors hover:bg-orange-deep">
-                                    Get started free
-                                </Link>
-                            </Card>
-                        ))}
+            <main id="main" className="bg-cream text-ink">
+                <section className="py-16 sm:py-24">
+                    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                        <SectionTitle
+                            align="center"
+                            eyebrow="Pricing"
+                            title="Pay for control, not for a spreadsheet."
+                            description="Free finds what you're paying for and gives you Naira cards. Pro adds dollar cards, unlimited connections, and a warning three days before every charge."
+                        />
+                        <PricingCards />
+                        <p className="mx-auto mt-8 max-w-2xl text-center text-[14px] leading-7 text-ink-70">
+                            Billed through Paystack. Cancel from Settings at any time — your cards stay frozen rather than
+                            disappearing, so nothing charges you by surprise on the way out.
+                        </p>
                     </div>
-                </div>
-            </section>
+                </section>
+
+                <section className="border-t border-line py-16 sm:py-24">
+                    <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+                        <SectionTitle align="center" eyebrow="FAQ" title="Before you pick a plan." />
+                        <FaqList />
+                    </div>
+                </section>
+
+                <section className="border-t border-line py-16 sm:py-24">
+                    <div className="mx-auto flex max-w-7xl flex-col items-center gap-8 px-4 text-center sm:px-6 lg:px-8">
+                        <h2 className="max-w-2xl font-display text-[clamp(30px,4.5vw,48px)] leading-[1.05] tracking-tight text-ink text-balance">
+                            Stop the next charge before it happens.
+                        </h2>
+                        <CtaLink href="/signup">Get started free</CtaLink>
+                    </div>
+                </section>
+            </main>
             <SiteFooter />
-        </main>
+        </>
     );
 }

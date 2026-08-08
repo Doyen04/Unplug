@@ -100,19 +100,20 @@ export function SubscriptionCreepCalculator() {
                                     <p className="font-medium text-ink">{preset.label}</p>
                                     <p className="mt-1 text-sm text-ink-70">Edit the amount if your bill is different.</p>
                                 </div>
-                                <label className="flex items-center rounded-xl border border-line bg-bg-surface px-4 py-3 text-sm text-ink">
-                                    <span className="mr-2 font-semibold">₦</span>
+                                <label className="flex items-center rounded-xl border border-line bg-bg-surface px-4 py-3 text-sm text-ink focus-within:border-ink">
+                                    <span className="mr-2 font-semibold" aria-hidden="true">₦</span>
                                     <input
                                         className="w-full bg-transparent font-mono tabular-nums outline-none"
                                         type="number"
                                         min={0}
+                                        aria-label={`${preset.label} — monthly amount in Naira`}
                                         value={amount}
                                         onChange={(event) => {
                                             const nextValue = Number(event.target.value || 0);
                                             setSelected((current) => ({ ...current, [preset.id]: nextValue }));
                                         }}
                                     />
-                                    <span className="ml-2 text-ink-70">/mo</span>
+                                    <span className="ml-2 text-ink-70" aria-hidden="true">/mo</span>
                                 </label>
                             </div>
                         );
@@ -133,7 +134,7 @@ export function SubscriptionCreepCalculator() {
                     <p className="max-w-2xl text-base leading-7 text-ink">
                         That&apos;s <span className="font-semibold text-orange">₦{annualTotal.toLocaleString()}</span> a year. Want to make sure none of it surprises you again?
                     </p>
-                    <a href="/signup" className="inline-flex min-h-11 items-center justify-center rounded-full bg-orange px-5 text-sm font-semibold text-ink transition-colors hover:bg-orange-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2">
+                    <a href="/signup" className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-full bg-orange px-5 text-sm font-semibold text-ink transition-colors hover:bg-orange-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2 focus-visible:ring-offset-cream">
                         Get started free
                     </a>
                 </div>
