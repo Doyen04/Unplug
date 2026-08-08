@@ -24,6 +24,25 @@ export function toSmallestUnit(amount: number): number {
 }
 
 /**
+ * Converts an amount as it arrives on a Sudo webhook payload into absolute kobo.
+ *
+ * Sudo reports transaction amounts as DECIMAL NAIRA and SIGNED — debits are
+ * negative, credits positive. Our `card_transactions` / `card_funding_transactions`
+ * columns are bigint kobo and store the magnitude only, so the sign is dropped
+ * here. That is why this is not just toSmallestUnit(): passing a debit through
+ * that would persist a negative bigint and quietly corrupt every downstream sum.
+ *
+ * The sign itself is currently discarded rather than recorded — see the TODO in
+ * the sudo webhook route about adding a debit/refund direction column.
+ *
+ * @param amount signed decimal naira from Sudo, e.g. -4500 (a ₦4,500 debit)
+ * @returns absolute kobo, e.g. 450000
+ */
+export function sudoAmountToKobo(amount: number): number {
+  return Math.round(Math.abs(amount) * 100);
+}
+
+/**
  * Determines whether to issue an NGN or USD virtual card for a subscription.
  *
  * If the subscription currency is USD, a USD card must be issued so that

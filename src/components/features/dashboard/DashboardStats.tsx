@@ -4,6 +4,7 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { formatCurrency } from '@/lib/utils/format';
 import { ShareCard } from '@/components/shame-score/ShareCard';
+import { providerLabel } from '@/lib/utils/provider';
 
 interface DashboardStatsProps {
     summary: {
@@ -31,6 +32,11 @@ interface DashboardStatsProps {
 
 const providerLabel = (provider: string): string =>
     provider === 'plaid' ? 'Plaid' : 'Mono';
+
+
+const providerLabel = (provider: string): string =>
+    provider === 'plaid' ? 'Plaid' : 'Mono';
+
 
 export function DashboardStats({
     summary,

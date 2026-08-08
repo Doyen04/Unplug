@@ -19,7 +19,7 @@ import {
 import { isoDateDaysAgo, toMonoDate } from '@/lib/utils/date';
 import { clamp } from '@/lib/utils/math';
 import { normalizeMerchantLabel, toMerchantKey } from '@/lib/utils/format';
-import { PLAID_BASE_URLS, MONO_DEFAULT_BASE_URL } from '@/lib/constants/providers';
+import { PLAID_BASE_URLS, MONO_DEFAULT_BASE_URL, RECONNECT_ERROR_CODES } from '@/lib/constants/providers';
 
 export interface DashboardPayload {
     summary: DashboardSummary;
@@ -70,8 +70,6 @@ interface BankSnapshot {
     transactions: BankTransaction[];
     noAccount?: boolean;
 }
-
-const RECONNECT_ERROR_CODES = new Set(['INVALID_ACCESS_TOKEN', 'ITEM_LOGIN_REQUIRED']);
 
 const daysBetween = (a: string, b: string): number => {
     const first = new Date(a).getTime();

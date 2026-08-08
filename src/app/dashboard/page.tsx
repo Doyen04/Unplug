@@ -13,7 +13,7 @@ import { DASHBOARD_FILTER_OPTIONS } from '@/lib/constants/dashboard';
 import { getNameInitials } from '@/lib/utils/format';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { interpolateScoreColor } from '@/lib/utils/shameScore';
-import { providerCurrency } from '@/lib/utils/provider';
+import { providerCurrency, currencyForSubscriptionId } from '@/lib/utils/provider';
 import type { DashboardFilter, DashboardProvider, Subscription } from '@/types/subscription';
 import type { Transaction } from '@/lib/client/dashboard-api';
 import { SubscriptionRow } from '@/components/features/subscriptions/SubscriptionRow';
@@ -45,9 +45,6 @@ const startOfMonth = (date: Date): Date => {
 
 const getMonthKey = (date: Date): string =>
     `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-
-const currencyForSubscription = (subscriptionId: string): string =>
-    subscriptionId.startsWith('mono-') ? 'NGN' : 'USD';
 
 const currencyForTransaction = (transaction: Transaction): string =>
     transaction.iso_currency_code ?? (transaction.transaction_id.startsWith('mono-') ? 'NGN' : 'USD');
@@ -284,7 +281,7 @@ export default function DashboardPage() {
                 renderItem={(item: Subscription | Transaction, i: number) => {
                     if (ledgerTab === 'subscriptions') {
                         const s = item as Subscription;
-                        return <SubscriptionRow key={s.id} subscription={s} onCancel={cancelSubscription} index={i} currency={currencyForSubscription(s.id)} />;
+                        return <SubscriptionRow key={s.id} subscription={s} onCancel={cancelSubscription} index={i} currency={currencyForSubscriptionId(s.id)} />;
                     }
                     const t = item as Transaction;
                     return <TransactionRow key={t.transaction_id} transaction={t} currency={currencyForTransaction(t)} index={i} />;

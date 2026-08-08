@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/server/db";
 import { getSudoCard } from "@/lib/sudo/client";
+import { sudoAmountToKobo } from "@/lib/sudo/currency";
 
 // ─── Response helpers ─────────────────────────────────────────────────────────
 
@@ -115,8 +116,6 @@ export async function POST(req: NextRequest) {
     const eventType = body?.type;
     const obj = body?.data?.object;
 
-    const toKobo = (amount: number) => Math.round(Math.abs(amount) * 100);
-
     // ── card.balance event: return our virtual JIT balance ───────────────────
     if (eventType === "card.balance") {
         return NextResponse.json({
@@ -217,7 +216,7 @@ export async function POST(req: NextRequest) {
         }
 
         // ── 5. Spend limit ────────────────────────────────────────────────────
-        const requestedAmountKobo = toKobo(Number(obj?.amount ?? 0));
+        const requestedAmountKobo = sudoAmountToKobo(Number(obj?.amount ?? 0));
         const spendLimitKobo = cardRecord.spend_limit_kobo ?? null;
 
         if (spendLimitKobo && requestedAmountKobo > spendLimitKobo) {

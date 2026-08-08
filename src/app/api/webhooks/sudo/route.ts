@@ -37,6 +37,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/server/db";
+import { sudoAmountToKobo } from "@/lib/sudo/currency";
 
 /**
  * Validates that the webhook payload came from Sudo Africa and wasn't tampered with.
@@ -84,8 +85,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Sudo amounts are decimal naira, signed (debits negative, credits positive).
-    // Our DB stores absolute values in kobo as bigint.
-    const toKobo = (amount: number) => Math.round(Math.abs(amount) * 100);
+    // Our DB stores absolute values in kobo as bigint — see sudoAmountToKobo.
     //TODO: create a sign db column to keep track if it is a debit or refund
 
     // Look up which subscription this card belongs to (for linking transactions to subscriptions)
@@ -109,7 +109,7 @@ export async function POST(req: NextRequest) {
                 sudo_transaction_id: obj._id,
                 type: obj.type === "refund" ? "refund" : "transaction",
                 status: "closed", // settled transactions are always 'closed'
-                amount_kobo: toKobo(obj.amount),
+                amount_kobo: sudoAmountToKobo(obj.amount),
                 currency: obj.currency,
                 merchant_name: obj.merchant?.name ?? null,
                 merchant_category: obj.merchant?.category ?? null,

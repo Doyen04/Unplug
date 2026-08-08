@@ -9,17 +9,11 @@ import { getServerSession } from '@/lib/server/auth-session';
 import { decryptToken } from '@/lib/server/token-crypto';
 import type { AuthSession } from '@/types/subscription';
 import { isoDateDaysAgo, toMonoDate } from '@/lib/utils/date';
-
-
-const PLAID_BASE_URLS: Record<string, string> = {
-    sandbox: 'https://sandbox.plaid.com',
-    development: 'https://development.plaid.com',
-    production: 'https://production.plaid.com',
-};
-
-const MONO_DEFAULT_BASE_URL = 'https://api.withmono.com/v2';
-
-const RECONNECT_ERROR_CODES = new Set(['INVALID_ACCESS_TOKEN', 'ITEM_LOGIN_REQUIRED']);
+import {
+    MONO_DEFAULT_BASE_URL,
+    PLAID_BASE_URLS,
+    RECONNECT_ERROR_CODES,
+} from '@/lib/constants/providers';
 
 type NormalizedTransaction = {
     transaction_id: string;

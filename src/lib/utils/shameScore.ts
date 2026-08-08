@@ -1,3 +1,5 @@
+import { clamp } from '@/lib/utils/math';
+
 export const getShameLabel = (score: number): string => {
   if (score >= 80) return "Ouch. Let's fix this.";
   if (score >= 60) return 'Some room to improve.';
@@ -5,9 +7,6 @@ export const getShameLabel = (score: number): string => {
   if (score >= 20) return 'Nearly there.';
   return 'Clean slate. Nice work.';
 };
-
-const clamp = (value: number, min: number, max: number): number =>
-  Math.min(max, Math.max(min, value));
 
 const lerp = (a: number, b: number, t: number): number =>
   Math.round(a + (b - a) * t);

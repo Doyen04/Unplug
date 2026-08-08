@@ -16,12 +16,10 @@ import { Badge } from "@/components/ui/Badge";
 import { Input } from "@/components/ui/Input";
 import { DataTable } from "@/components/ui/DataTable";
 import { CreateCardModal } from "@/components/features/subscriptions/CreateCardModal";
+import { currencyForSubscriptionId } from "@/lib/utils/provider";
 
 const providerLabel = (provider: DashboardProvider): string =>
     provider === "plaid" ? "Plaid" : "Mono";
-
-const currencyForSubscription = (subscriptionId: string): string =>
-    subscriptionId.startsWith("mono-") ? "NGN" : "USD";
 
 export default function SubscriptionsPage() {
     const router = useRouter();
@@ -190,7 +188,7 @@ export default function SubscriptionsPage() {
                         key={s.id}
                         subscription={s}
                         index={i}
-                        currency={currencyForSubscription(s.id)}
+                        currency={currencyForSubscriptionId(s.id)}
                         onCancel={cancelSubscription}
                     />
                 )}

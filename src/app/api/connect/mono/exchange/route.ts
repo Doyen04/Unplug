@@ -4,12 +4,11 @@ import { z } from 'zod';
 import { getServerSession } from '@/lib/server/auth-session';
 import { upsertConnectedAccount } from '@/lib/server/connected-accounts-store';
 import type { AuthSession } from '@/types/subscription';
+import { MONO_DEFAULT_BASE_URL } from '@/lib/constants/providers';
 
 const monoSchema = z.object({
     code: z.string(),
 });
-
-const MONO_DEFAULT_BASE_URL = 'https://api.withmono.com/v2';
 
 const toStringOrNull = (value: unknown): string | null =>
     typeof value === 'string' && value.trim().length > 0 ? value.trim() : null;
