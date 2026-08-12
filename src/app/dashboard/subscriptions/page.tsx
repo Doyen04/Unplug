@@ -16,10 +16,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Input } from "@/components/ui/Input";
 import { DataTable } from "@/components/ui/DataTable";
 import { CreateCardModal } from "@/components/features/subscriptions/CreateCardModal";
-import { currencyForSubscriptionId } from "@/lib/utils/provider";
-
-const providerLabel = (provider: DashboardProvider): string =>
-    provider === "plaid" ? "Plaid" : "Mono";
+import { currencyForSubscriptionId, providerLabel } from "@/lib/utils/provider";
 
 export default function SubscriptionsPage() {
     const router = useRouter();

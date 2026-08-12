@@ -21,9 +21,7 @@ import { Input } from "@/components/ui/Input";
 import { DataTable } from "@/components/ui/DataTable";
 import { TransactionRow } from "@/components/features/transactions/TransactionRow";
 import type { Transaction } from "@/lib/client/dashboard-api";
-
-const providerLabel = (provider: DashboardProvider): string =>
-    provider === "plaid" ? "Plaid" : "Mono";
+import { providerLabel } from "@/lib/utils/provider";
 
 const currencyForTransaction = (transaction: Transaction): string =>
     transaction.iso_currency_code ??

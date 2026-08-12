@@ -30,14 +30,6 @@ interface DashboardStatsProps {
     walletBalanceKobo?: number;
 }
 
-const providerLabel = (provider: string): string =>
-    provider === 'plaid' ? 'Plaid' : 'Mono';
-
-
-const providerLabel = (provider: string): string =>
-    provider === 'plaid' ? 'Plaid' : 'Mono';
-
-
 export function DashboardStats({
     summary,
     totalSubscriptions,
