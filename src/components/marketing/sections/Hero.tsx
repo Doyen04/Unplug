@@ -30,7 +30,7 @@ export function Hero() {
                     </div>
 
                     {/* Social proof metrics strip */}
-                    <div className="mt-12 flex items-center gap-8 border-t border-line pt-6">
+                    <div className="mt-12 flex items-center gap-8 pt-6">
                         <div>
                             <p className="font-display text-2xl font-bold text-ink">2,400+</p>
                             <p className="text-xs text-ink-70">Cards frozen</p>
