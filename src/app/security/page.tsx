@@ -40,7 +40,7 @@ export default function SecurityPage() {
             <SiteHeader />
             <main id="main" className="bg-white text-ink">
                 <section className="bg-ink py-16 sm:py-24">
-                    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                    <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
                         <SectionTitle
                             tone="inverse"
                             eyebrow="Security"
@@ -51,7 +51,7 @@ export default function SecurityPage() {
                 </section>
 
                 <section className="py-16 sm:py-24">
-                    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                    <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
                         <ul role="list" className="grid gap-10 sm:grid-cols-2 lg:gap-14">
                             {guarantees.map(({ icon: Icon, title, body }) => (
                                 <li key={title} className="border-t border-line pt-7">
@@ -67,7 +67,7 @@ export default function SecurityPage() {
                 </section>
 
                 <section className="border-t border-line py-16 sm:py-24">
-                    <div className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
+                    <div className="mx-auto max-w-3xl px-6 text-center sm:px-8 lg:px-12">
                         <h2 className="font-display text-[clamp(26px,3.6vw,38px)] leading-tight tracking-tight text-ink text-balance">
                             One card per subscription is itself a security decision.
                         </h2>

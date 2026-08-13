@@ -59,7 +59,7 @@ export function SiteHeader() {
                     scrolled || menuOpen ? 'border-b border-line bg-white/95 backdrop-blur-md py-3' : 'bg-transparent py-5',
                 )}
             >
-                <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+                <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 sm:px-8 lg:px-12">
                     <Link
                         href="/"
                         className="font-display text-[22px] font-bold tracking-tight text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink"
@@ -104,7 +104,7 @@ export function SiteHeader() {
                     <nav
                         id="mobile-nav"
                         aria-label="Main"
-                        className="border-t border-line bg-white px-4 pb-5 pt-2 sm:px-6 md:hidden"
+                        className="border-t border-line bg-white px-6 pb-5 pt-2 sm:px-8 md:hidden"
                     >
                         <ul className="flex flex-col">
                             {[...NAV_LINKS, { href: '/login', label: 'Log in' }].map(({ href, label }) => (

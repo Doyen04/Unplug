@@ -102,7 +102,7 @@ export function ProductTour() {
                 role="tablist"
                 aria-label="Product tour"
                 aria-orientation="vertical"
-                className="scrollbar-hidden -mx-4 flex gap-2 overflow-x-auto px-4 lg:mx-0 lg:flex-col lg:overflow-visible lg:px-0"
+                className="scrollbar-hidden -mx-6 flex gap-2 overflow-x-auto px-6 lg:mx-0 lg:flex-col lg:overflow-visible lg:px-0"
             >
                 {TOUR_PANELS.map((panel, index) => {
                     const Icon = panel.icon;

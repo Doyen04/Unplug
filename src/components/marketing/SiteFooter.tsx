@@ -36,7 +36,7 @@ export function SiteFooter() {
 
     return (
         <footer className="border-t-2 border-orange bg-white">
-            <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
+            <div className="mx-auto max-w-7xl px-6 py-14 sm:px-8 lg:px-12">
                 <div className="grid gap-10 md:grid-cols-[1.2fr_1fr_0.8fr_0.8fr]">
                     <div className="space-y-4">
                         <p className="font-display text-[22px] font-bold tracking-tight text-ink">Unplug.</p>

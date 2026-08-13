@@ -33,14 +33,14 @@ export default function PricingPage() {
                 </section>
 
                 <section className="border-t border-line py-16 sm:py-24">
-                    <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+                    <div className="mx-auto max-w-4xl px-6 sm:px-8 lg:px-12">
                         <SectionTitle align="center" eyebrow="FAQ" title="Before you pick a plan." />
                         <FaqList />
                     </div>
                 </section>
 
                 <section className="border-t border-line py-16 sm:py-24">
-                    <div className="mx-auto flex max-w-7xl flex-col items-center gap-8 px-4 text-center sm:px-6 lg:px-8">
+                    <div className="mx-auto flex max-w-7xl flex-col items-center gap-8 px-6 text-center sm:px-8 lg:px-12">
                         <h2 className="max-w-2xl font-display text-[clamp(30px,4.5vw,48px)] leading-[1.05] tracking-tight text-ink text-balance">
                             Stop the next charge before it happens.
                         </h2>
