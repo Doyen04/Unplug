@@ -6,6 +6,8 @@ import { useEffect, useRef, useState } from 'react';
 
 import { cn } from '@/lib/utils';
 
+import { UnplugLogo } from '@/components/ui/UnplugLogo';
+
 import { CtaLink } from './CtaLink';
 
 const NAV_LINKS = [
@@ -62,9 +64,9 @@ export function SiteHeader() {
                 <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 sm:px-8 lg:px-12">
                     <Link
                         href="/"
-                        className="font-display text-[22px] font-bold tracking-tight text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink"
+                        className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2"
                     >
-                        Unplug.
+                        <UnplugLogo size="md" />
                     </Link>
 
                     <nav aria-label="Main" className="hidden items-center gap-8 text-[14px] font-medium text-ink md:flex">

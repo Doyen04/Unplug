@@ -8,8 +8,10 @@ interface UnplugLogoProps {
 }
 
 /**
- * UnplugLogo — Modern, iconic brand mark for Unplug.
- * Features a power plug disconnect symbol fused inside a credit card silhouette.
+ * UnplugLogo — Dual-tone Unplug Icon & Wordmark.
+ * Features the electric power plug on the left in dark ink (#1F1A16)
+ * unplugging from the credit card EMV chip on the right in brand orange (#FF5C35),
+ * with NO background container box.
  */
 export function UnplugLogo({
     className,
@@ -20,44 +22,51 @@ export function UnplugLogo({
     const isInverse = tone === 'inverse';
 
     const iconSizes = {
-        sm: 'h-8 w-8 rounded-lg',
-        md: 'h-9 w-9 rounded-xl',
-        lg: 'h-11 w-11 rounded-2xl',
+        sm: 'h-6 w-7',
+        md: 'h-8 w-9',
+        lg: 'h-10 w-11',
     };
 
     const textSizes = {
-        sm: 'text-lg',
+        sm: 'text-base',
         md: 'text-xl sm:text-2xl',
         lg: 'text-2xl sm:text-3xl',
     };
 
+    const darkColor = isInverse ? '#FFFFFF' : '#1F1A16';
+    const brandOrange = '#FF5C35';
+
     return (
-        <div className={cn('inline-flex items-center gap-2.5 select-none group', className)}>
-            {/* Iconic Brand Mark */}
-            <div
-                className={cn(
-                    'flex shrink-0 items-center justify-center bg-orange text-ink font-bold transition-transform duration-300 group-hover:scale-105',
-                    iconSizes[size],
-                )}
-            >
+        <div className={cn('inline-flex items-center gap-3 select-none group', className)}>
+            {/* Dual-Tone Logo Mark: Black Plug (Left) + Orange EMV Chip (Right) */}
+            <div className={cn('flex shrink-0 items-center justify-center transition-transform duration-300 group-hover:scale-105', iconSizes[size])}>
                 <svg
-                    viewBox="0 0 24 24"
+                    viewBox="0 0 32 24"
                     fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="h-5 w-5 text-ink"
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-full w-full"
                 >
-                    {/* Power Plug Prongs */}
-                    <path d="M9 3v4" />
-                    <path d="M15 3v4" />
-                    {/* Main Plug Body */}
-                    <path d="M7 7h10v3a5 5 0 0 1-10 0V7z" />
-                    {/* Disconnect Cable */}
-                    <path d="M12 15v6" />
-                    {/* Instant Disconnect Slash */}
-                    <path d="M4 20L20 4" className="stroke-ink stroke-[3]" />
+                    {/* LEFT SIDE: Electric Power Plug in Dark Ink */}
+                    <g stroke={darkColor} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                        {/* Power Cable coming from left */}
+                        <path d="M2 12h5" />
+                        {/* Plug Head Body */}
+                        <path d="M7 6h6v12H7z" fill={darkColor} fillOpacity="0.08" />
+                        {/* Plug Prongs extending right */}
+                        <path d="M13 9h4" />
+                        <path d="M13 15h4" />
+                    </g>
+
+                    {/* RIGHT SIDE: Credit Card EMV Chip in BRAND ORANGE (#FF5C35) */}
+                    <g stroke={brandOrange} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                        {/* EMV Chip Outer Shell */}
+                        <rect x="20" y="6" width="10" height="12" rx="2" fill={brandOrange} fillOpacity="0.15" />
+                        {/* Internal EMV Contact Lines */}
+                        <path d="M20 12h10" />
+                        <path d="M25 6v12" />
+                        <path d="M20 9.5h10" />
+                        <path d="M20 14.5h10" />
+                    </g>
                 </svg>
             </div>
 

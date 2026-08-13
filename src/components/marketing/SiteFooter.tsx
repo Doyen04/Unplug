@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { useState } from 'react';
 
+import { UnplugLogo } from '@/components/ui/UnplugLogo';
+
 const columns = [
     {
         heading: 'Product',
@@ -39,7 +41,7 @@ export function SiteFooter() {
             <div className="mx-auto max-w-7xl px-6 py-14 sm:px-8 lg:px-12">
                 <div className="grid gap-10 md:grid-cols-[1.2fr_1fr_0.8fr_0.8fr]">
                     <div className="space-y-4">
-                        <p className="font-display text-[22px] font-bold tracking-tight text-ink">Unplug.</p>
+                        <UnplugLogo size="md" />
                         <p className="max-w-xs text-[15px] leading-7 text-ink-70">
                             One card per subscription — Naira or dollar. Freeze it and the charge can&apos;t go through.
                         </p>
