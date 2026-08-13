@@ -7,12 +7,16 @@
     --color-line: #E5DDD0;
     --color-orange: #FF5C35;
     --color-orange-deep: #E5522F;
+    --color-green: #1C9E5B;
+    --color-green-deep: #147A45;
+    --color-green-light: #EBF7F0;
     --color-frost-wash: #DCEEF5;
     --color-frost-deep: #1B3A4B;
 
     --color-brand: #FF5C35;
     --color-brand-light: #FFEDE6;
     --color-brand-dark: #E5522F;
+    --color-brand-green: #1C9E5B;
 
     --color-bg-base: #FFFFFF;
     --color-bg-surface: #FAFAFA;

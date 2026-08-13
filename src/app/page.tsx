@@ -50,13 +50,15 @@ function Hero() {
                         </div>
                         <div className="h-8 w-px bg-line" />
                         <div>
-                            <p className="font-display text-2xl font-bold text-ink">₦18M+</p>
-                            <p className="text-xs text-ink-70">Saved from creep</p>
+                            <p className="font-display text-2xl font-extrabold text-green">₦18M+</p>
+                            <p className="text-xs font-medium text-ink-70">Saved from creep</p>
                         </div>
                         <div className="h-8 w-px bg-line" />
                         <div>
-                            <p className="font-display text-2xl font-bold text-ink">4.9/5</p>
-                            <p className="text-xs text-ink-70">User rating</p>
+                            <p className="font-display text-2xl font-extrabold text-ink flex items-center gap-1">
+                                4.9<span className="text-green text-lg">★</span>
+                            </p>
+                            <p className="text-xs font-medium text-ink-70">User rating</p>
                         </div>
                     </div>
                 </Reveal>

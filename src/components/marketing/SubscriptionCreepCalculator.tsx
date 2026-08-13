@@ -136,23 +136,29 @@ export function SubscriptionCreepCalculator() {
             ) : null}
 
             <div className="mt-8 rounded-[20px] border border-line bg-bg-muted p-6 text-center">
-                <p className="text-[13px] font-semibold uppercase tracking-[0.08em] text-ink-70">Monthly total</p>
+                <p className="text-[13px] font-semibold uppercase tracking-[0.08em] text-ink-70">Monthly subscription bill</p>
                 <div className="mt-3 flex justify-center">
                     <AnimatedTotal value={monthlyTotal} />
                 </div>
                 <p className="mt-3 font-mono text-sm text-ink-70 tabular-nums">₦{annualTotal.toLocaleString()} per year</p>
                 {contextMessage ? (
-                    <p className="mt-2 text-[15px] font-medium text-orange">{contextMessage}</p>
+                    <p className="mt-2 text-[15px] font-semibold text-green">{contextMessage}</p>
                 ) : null}
             </div>
 
             {Object.keys(selected).length > 0 ? (
-                <div className="mt-6 flex flex-col items-start gap-4 rounded-[20px] border-l-4 border-orange bg-orange/5 p-5 sm:flex-row sm:items-center sm:justify-between">
-                    <p className="max-w-2xl text-base leading-7 text-ink">
-                        That&apos;s <span className="font-semibold text-orange">₦{annualTotal.toLocaleString()}</span> a year. Want to make sure none of it surprises you again?
-                    </p>
-                    <a href="/signup" className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-full bg-orange px-5 text-sm font-semibold text-ink transition-colors hover:bg-orange-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2 focus-visible:ring-offset-cream">
-                        Get started free
+                <div className="mt-6 flex flex-col items-start gap-4 rounded-[20px] border-l-4 border-green bg-green/8 p-5 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <div className="flex items-center gap-2">
+                            <span className="h-2 w-2 rounded-full bg-green animate-pulse" />
+                            <span className="text-xs font-bold uppercase tracking-wider text-green">Savings Potential</span>
+                        </div>
+                        <p className="mt-1 max-w-xl text-base leading-7 text-ink">
+                            You could save up to <span className="font-bold text-green">₦{annualTotal.toLocaleString()}</span> a year by freezing unused subscriptions.
+                        </p>
+                    </div>
+                    <a href="/signup" className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-full bg-orange px-6 text-sm font-semibold text-ink transition-colors hover:bg-orange-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink">
+                        Protect my money
                     </a>
                 </div>
             ) : null}

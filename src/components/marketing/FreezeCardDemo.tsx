@@ -15,9 +15,9 @@ interface FreezeCardDemoProps {
 }
 
 /**
- * FreezeCardDemo — Streamlined & Lean Surrounding Shell.
- * Keeps the 100% authentic credit card face, while simplifying the outer
- * surrounding container to a single, clean control strip without double-nested boxes.
+ * FreezeCardDemo — Real Credit Card Face with Single-Line PAN formatting.
+ * Positioned in authentic credit card layout (EMV chip above card number)
+ * so the 16-digit PAN never breaks into another line.
  */
 export function FreezeCardDemo({
     merchant = 'Streaming Plan',
@@ -34,10 +34,10 @@ export function FreezeCardDemo({
             {/* Clean & Lean Card Container */}
             <div className="relative rounded-[22px] border border-line bg-white p-3 sm:p-3.5 shadow-md">
 
-                {/* Authentic Real-Life Credit Card Face (UNTOUCHED) */}
+                {/* Authentic Real-Life Credit Card Face */}
                 <div
                     className={cn(
-                        'relative aspect-[1.586/1] w-full select-none overflow-hidden rounded-[16px] p-5 sm:p-6 border border-white/20 shadow-lg transition-all duration-300',
+                        'relative aspect-[1.586/1] w-full select-none overflow-hidden rounded-[16px] p-4 sm:p-5 border border-white/20 shadow-lg transition-all duration-300',
                         frozen
                             ? 'bg-gradient-to-br from-[#262626] via-[#1A1A1A] to-[#121212] text-white grayscale'
                             : 'bg-gradient-to-br from-[#1C1A17] via-[#2D2620] to-[#12100E] text-white',
@@ -69,55 +69,54 @@ export function FreezeCardDemo({
                         {/* Header: Merchant Title & Contactless Wifi */}
                         <div className="flex items-start justify-between gap-2">
                             <div>
-                                <span className="block font-mono text-[9px] uppercase tracking-[0.18em] text-white/50 font-bold">
+                                <span className="block font-mono text-[8px] uppercase tracking-[0.18em] text-white/50 font-bold">
                                     MERCHANT VIRTUAL CARD
                                 </span>
-                                <span className="mt-0.5 block truncate font-display text-sm font-bold uppercase tracking-widest text-white">
+                                <span className="mt-0.5 block truncate font-display text-xs sm:text-sm font-bold uppercase tracking-widest text-white">
                                     {merchant}
                                 </span>
                             </div>
                             <Wifi className="h-4 w-4 shrink-0 rotate-90 text-white/70" />
                         </div>
 
-                        {/* Middle Row: Realistic EMV Golden Chip & Masked PAN Number */}
-                        <div className="my-auto flex items-center gap-4 py-1">
-                            {/* Metallic Golden EMV Smart Chip */}
-                            <div className="relative h-7 w-9 shrink-0 rounded-[5px] bg-gradient-to-br from-amber-200 via-yellow-400 to-amber-500 p-[1px] border border-amber-600/40 shadow-xs overflow-hidden">
-                                <div className="h-full w-full rounded-[4px] border border-amber-800/30 grid grid-cols-2 gap-0.5 p-[2px]">
+                        {/* Metallic Golden EMV Smart Chip */}
+                        <div className="my-0.5">
+                            <div className="relative h-5.5 sm:h-6.5 w-7.5 sm:w-8.5 rounded-[4px] bg-gradient-to-br from-amber-200 via-yellow-400 to-amber-500 p-[1px] border border-amber-600/40 shadow-xs overflow-hidden">
+                                <div className="h-full w-full rounded-[3px] border border-amber-800/30 grid grid-cols-2 gap-0.5 p-[2px]">
                                     <div className="border-r border-b border-amber-800/30" />
                                     <div className="border-b border-amber-800/30" />
                                     <div className="border-r border-amber-800/30" />
                                     <div />
                                 </div>
                             </div>
+                        </div>
 
-                            {/* Masked Card PAN */}
-                            <div className="font-mono text-base sm:text-lg font-bold tracking-[0.22em] text-white/95 drop-shadow-sm">
-                                •••• •••• •••• {last4}
-                            </div>
+                        {/* Masked Card PAN — Guaranteed Single Line */}
+                        <div className="font-mono text-[13px] sm:text-[15px] font-bold tracking-[0.16em] sm:tracking-[0.2em] text-white/95 whitespace-nowrap drop-shadow-sm">
+                            •••• •••• •••• {last4}
                         </div>
 
                         {/* Footer: Expiry, Currency & Mastercard Brand Circles */}
-                        <div className="flex items-end justify-between border-t border-white/15 pt-2.5">
+                        <div className="flex items-end justify-between border-t border-white/15 pt-2">
                             <div>
                                 <span className="block font-mono text-[8px] uppercase tracking-widest text-white/50 font-bold">
                                     VALID THRU / CURRENCY
                                 </span>
-                                <span className="mt-0.5 block font-mono text-[11px] font-bold tracking-wider text-white/90">
+                                <span className="mt-0.5 block font-mono text-[10px] sm:text-[11px] font-bold tracking-wider text-white/90">
                                     {expiry} · {currency} VIRTUAL
                                 </span>
                             </div>
 
                             {/* Official Mastercard Red & Yellow Overlapping Circles */}
-                            <div className="flex items-center -space-x-2.5">
-                                <div className="h-6 sm:h-7 w-6 sm:w-7 rounded-full bg-[#EB001B]" />
-                                <div className="h-6 sm:h-7 w-6 sm:w-7 rounded-full bg-[#F79E1B] mix-blend-screen opacity-95" />
+                            <div className="flex items-center -space-x-2">
+                                <div className="h-5.5 sm:h-6.5 w-5.5 sm:w-6.5 rounded-full bg-[#EB001B]" />
+                                <div className="h-5.5 sm:h-6.5 w-5.5 sm:w-6.5 rounded-full bg-[#F79E1B] mix-blend-screen opacity-95" />
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Lean Single-Layer Control Strip (No nested boxes) */}
+                {/* Lean Single-Layer Control Strip */}
                 <div className="mt-3 flex items-center justify-between gap-3 pt-1 px-1">
                     <div className="flex flex-col">
                         <span className="text-[11px] font-medium uppercase tracking-wider text-ink-70">Monthly Bill</span>
@@ -126,7 +125,7 @@ export function FreezeCardDemo({
                         </span>
                     </div>
 
-                    {/* Single Clean Interactive Toggle Button */}
+                    {/* Interactive Freeze / Unfreeze Button */}
                     <button
                         type="button"
                         onClick={() => setFrozen((prev) => !prev)}

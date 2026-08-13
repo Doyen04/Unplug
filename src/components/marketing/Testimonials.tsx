@@ -46,11 +46,17 @@ const testimonials: readonly Testimonial[] = [
 
 function Stars({ count }: { count: number }) {
     return (
-        <span className="flex gap-0.5">
-            {Array.from({ length: count }).map((_, i) => (
-                <Star key={i} aria-hidden="true" className="h-4 w-4 fill-orange text-orange" />
-            ))}
-        </span>
+        <div className="flex items-center justify-between">
+            <span className="flex gap-0.5">
+                {Array.from({ length: count }).map((_, i) => (
+                    <Star key={i} aria-hidden="true" className="h-4 w-4 fill-green text-green" />
+                ))}
+            </span>
+            <span className="inline-flex items-center gap-1 rounded-full bg-green-light px-2.5 py-0.5 text-[11px] font-bold text-green">
+                <span className="h-1.5 w-1.5 rounded-full bg-green" />
+                Verified User
+            </span>
+        </div>
     );
 }
 
