@@ -1,6 +1,7 @@
 'use client';
 
 import { motion, useReducedMotion } from 'framer-motion';
+import type { TargetAndTransition } from 'framer-motion';
 import type { ReactNode } from 'react';
 
 type RevealVariant = 'fade' | 'slide-up' | 'scale' | 'blur';
@@ -16,7 +17,7 @@ interface RevealProps {
     stagger?: boolean;
 }
 
-const variants: Record<RevealVariant, { initial: object; animate: object }> = {
+const variants: Record<RevealVariant, { initial: TargetAndTransition; animate: TargetAndTransition }> = {
     fade: {
         initial: { opacity: 0, y: 14 },
         animate: { opacity: 1, y: 0 },

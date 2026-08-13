@@ -11,11 +11,6 @@ import { TourPanelMock } from './TourPanelMock';
 const AUTO_ADVANCE_MS = 5000;
 const IDLE_RESUME_MS = 10000;
 
-/**
- * Vertical tab interface following the WAI-ARIA tabs pattern: roving tabindex,
- * arrow-key navigation, and manual activation on mobile where the rail becomes
- * a horizontal scroller. Now with auto-advance and a progress indicator.
- */
 export function ProductTour() {
     const [active, setActive] = useState(0);
     const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
@@ -42,7 +37,6 @@ export function ProductTour() {
         }, AUTO_ADVANCE_MS);
     }, [clearTimers]);
 
-    /* Start auto-advance on mount. */
     useEffect(() => {
         startAutoAdvance();
         return clearTimers;
@@ -97,12 +91,13 @@ export function ProductTour() {
     const activePanel = TOUR_PANELS[active];
 
     return (
-        <div className="mt-12 grid gap-6 lg:grid-cols-[minmax(0,0.62fr)_minmax(0,1.38fr)] lg:gap-8">
+        <div className="mt-12 grid gap-6 lg:grid-cols-[minmax(0,0.55fr)_minmax(0,1.45fr)] lg:gap-10">
+            {/* Tab Rail */}
             <div
                 role="tablist"
                 aria-label="Product tour"
                 aria-orientation="vertical"
-                className="scrollbar-hidden -mx-6 flex gap-2 overflow-x-auto px-6 lg:mx-0 lg:flex-col lg:overflow-visible lg:px-0"
+                className="scrollbar-hidden -mx-6 flex gap-2 overflow-x-auto px-6 lg:mx-0 lg:flex-col lg:gap-1.5 lg:overflow-visible lg:px-0"
             >
                 {TOUR_PANELS.map((panel, index) => {
                     const Icon = panel.icon;
@@ -123,20 +118,40 @@ export function ProductTour() {
                             onClick={() => handleUserInteraction(index)}
                             onKeyDown={(event) => onKeyDown(event, index)}
                             className={cn(
-                                'relative flex shrink-0 items-center gap-3 rounded-[18px] border px-4 py-3.5 text-left text-[15px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2 focus-visible:ring-offset-cream lg:w-full lg:shrink overflow-hidden',
+                                'relative flex shrink-0 items-center gap-3.5 rounded-2xl px-4 py-3.5 text-left text-[14px] font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink overflow-hidden lg:w-full lg:shrink',
                                 selected
-                                    ? 'border-orange/40 bg-orange/8 text-ink'
-                                    : 'border-transparent text-ink-70 hover:border-line hover:bg-bg-surface hover:text-ink',
+                                    ? 'bg-ink text-white'
+                                    : 'text-ink-70 hover:bg-slate-50 hover:text-ink',
                             )}
                         >
-                            {/* Animated tab indicator */}
-                            {selected ? (
-                                <motion.span
-                                    layoutId="tour-active-indicator"
-                                    className="absolute inset-0 rounded-[18px] border-2 border-orange"
-                                    transition={{ type: 'spring', bounce: 0.15, duration: 0.5 }}
-                                />
-                            ) : null}
+                            {/* Step Number */}
+                            <span
+                                className={cn(
+                                    'flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[11px] font-extrabold tracking-wide transition-colors',
+                                    selected
+                                        ? 'bg-orange text-ink'
+                                        : 'bg-slate-100 text-ink-70',
+                                )}
+                            >
+                                {index + 1}
+                            </span>
+
+                            <span className="flex flex-col gap-0.5 min-w-0">
+                                <span className="whitespace-nowrap font-semibold">{panel.label}</span>
+                                {selected && (
+                                    <span className="hidden text-[11px] font-normal text-white/70 lg:block truncate">
+                                        {activePanel.headline}
+                                    </span>
+                                )}
+                            </span>
+
+                            <Icon
+                                aria-hidden="true"
+                                className={cn(
+                                    'ml-auto h-4 w-4 shrink-0',
+                                    selected ? 'text-orange' : 'text-ink-70/40',
+                                )}
+                            />
 
                             {/* Progress bar inside active tab */}
                             {selected && !isPaused.current ? (
@@ -145,23 +160,27 @@ export function ProductTour() {
                                     className="absolute bottom-0 left-0 h-[2px] bg-orange animate-progress"
                                 />
                             ) : null}
-
-                            <Icon
-                                aria-hidden="true"
-                                className={cn('h-[18px] w-[18px] shrink-0 relative z-10', selected ? 'text-orange' : 'text-ink-70')}
-                            />
-                            <span className="whitespace-nowrap relative z-10">{panel.label}</span>
                         </button>
                     );
                 })}
+
+                {/* Step Counter */}
+                <div className="hidden lg:flex items-center justify-between mt-3 px-1 text-[11px] font-bold uppercase tracking-wider text-ink-70">
+                    <span>Step {active + 1} of {TOUR_PANELS.length}</span>
+                    <span className="flex items-center gap-1.5">
+                        <span className="h-1.5 w-1.5 rounded-full bg-green animate-pulse" />
+                        Auto-playing
+                    </span>
+                </div>
             </div>
 
+            {/* Panel Content */}
             <div
                 role="tabpanel"
                 id={`tour-panel-${activePanel.id}`}
                 aria-labelledby={`tour-tab-${activePanel.id}`}
                 tabIndex={0}
-                className="rounded-[24px] border border-line bg-bg-surface p-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2 focus-visible:ring-offset-cream sm:p-8"
+                className="rounded-[24px] border border-line bg-white p-5 sm:p-7 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink"
             >
                 <motion.div
                     key={activePanel.id}
@@ -169,12 +188,22 @@ export function ProductTour() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: prefersReducedMotion ? 0 : 0.24, ease: 'easeOut' }}
                 >
-                    <h3 className="font-display text-[clamp(22px,2.6vw,30px)] leading-tight tracking-tight text-ink text-balance">
-                        {activePanel.headline}
-                    </h3>
-                    <p className="mt-3 max-w-xl text-[16px] leading-7 text-ink-70">{activePanel.body}</p>
+                    {/* Panel Header */}
+                    <div className="flex items-start justify-between gap-4 border-b border-line pb-5 mb-5">
+                        <div>
+                            <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-orange">
+                                <span className="h-1.5 w-1.5 rounded-full bg-orange" />
+                                Step {active + 1}
+                            </span>
+                            <h3 className="mt-1.5 font-display text-[clamp(20px,2.4vw,28px)] font-bold leading-tight tracking-tight text-ink text-balance">
+                                {activePanel.headline}
+                            </h3>
+                        </div>
+                    </div>
 
-                    <div className="mt-7">
+                    <p className="max-w-xl text-[15px] leading-7 text-ink-70">{activePanel.body}</p>
+
+                    <div className="mt-6">
                         <TourPanelMock id={activePanel.id} />
                     </div>
                 </motion.div>
