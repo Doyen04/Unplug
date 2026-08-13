@@ -208,7 +208,7 @@ export default function BillingPageClient({
                                 {wallet ? `₦${(wallet.balanceKobo / 100).toLocaleString("en-US")}` : "—"}
                             </p>
                         </div>
-                        <div className="rounded-2xl bg-white/70 p-3 text-brand shadow-sm">
+                        <div className="rounded-2xl bg-white/70 p-3 text-brand">
                             <Wallet className="h-5 w-5" />
                         </div>
                     </div>

@@ -105,7 +105,7 @@ export function CreateCardModal({ onSuccess }: CreateCardModalProps) {
                             initial={{ opacity: 0, scale: 0.95, y: 10 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                            className="relative z-10 w-full max-w-md max-h-[90vh] overflow-y-auto rounded-card border border-border bg-bg-surface shadow-2xl"
+                            className="relative z-10 w-full max-w-md max-h-[90vh] overflow-y-auto rounded-card border border-border bg-bg-surface"
                             role="dialog"
                             aria-modal="true"
                             aria-labelledby="create-card-modal-title"

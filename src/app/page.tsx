@@ -96,7 +96,7 @@ const problems = [
         title: 'Forgotten free trials.',
         body: 'Free trials quiet-convert into paid monthly charges. The free trial ends, but the recurring charges never do.',
         widget: (
-            <div className="mt-5 rounded-2xl border border-rose-200/80 bg-rose-50/60 p-3.5 shadow-2xs">
+            <div className="mt-5 rounded-2xl border border-rose-200/80 bg-rose-50/60 p-3.5">
                 <div className="flex items-center justify-between text-xs">
                     <span className="font-bold text-rose-700 flex items-center gap-1.5">
                         <span className="h-2 w-2 rounded-full bg-rose-500 animate-pulse" />
@@ -118,7 +118,7 @@ const problems = [
         title: 'Naira swings on dollar bills.',
         body: 'Volatile exchange rates double your Netflix, Spotify, and ChatGPT charges overnight without notice.',
         widget: (
-            <div className="mt-5 rounded-2xl border border-line bg-slate-50 p-3.5 shadow-2xs">
+            <div className="mt-5 rounded-2xl border border-line bg-slate-50 p-3.5">
                 <div className="flex items-center justify-between text-xs">
                     <span className="font-semibold text-ink-70">USD FX Volatility</span>
                     <span className="font-mono font-bold text-orange flex items-center gap-0.5">
@@ -139,7 +139,7 @@ const problems = [
         title: 'Cancel flows built to trap you.',
         body: 'Multi-step menus, hidden buttons, and "are you sure?" screens engineered deliberately so you give up.',
         widget: (
-            <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50/70 p-3.5 shadow-2xs">
+            <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50/70 p-3.5">
                 <div className="flex items-center justify-between text-xs">
                     <span className="font-bold text-amber-900">Cancellation Wall</span>
                     <span className="rounded-full bg-amber-200/80 px-2 py-0.5 text-[10px] font-bold text-amber-900">
@@ -166,7 +166,7 @@ function Problem() {
                 <Reveal as="div" stagger className="mt-14 grid gap-8 lg:grid-cols-3 lg:gap-8">
                     {problems.map(({ icon: Icon, stat, statLabel, title, body, widget }) => (
                         <RevealItem key={title}>
-                            <div className="group relative flex h-full flex-col justify-between rounded-[24px] border border-line bg-white p-6 sm:p-7 transition-all duration-300 hover:border-ink/20 hover:shadow-md">
+                            <div className="group relative flex h-full flex-col justify-between rounded-[24px] border border-line bg-white p-6 sm:p-7 transition-all duration-300 hover:border-ink/20">
                                 <div>
                                     <div className="flex items-center justify-between">
                                         <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-orange/10 text-orange">
@@ -284,7 +284,7 @@ function HowItWorks() {
                             </div>
                             <div className="space-y-3">
                                 {/* Card 1: Netflix NGN Card */}
-                                <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-[#1C1A17] via-[#2A241F] to-[#12100E] p-3 text-white border border-white/20 shadow-md">
+                                <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-[#1C1A17] via-[#2A241F] to-[#12100E] p-3 text-white border border-white/20">
                                     <div className="flex items-center justify-between text-[10px]">
                                         <div className="flex items-center gap-2">
                                             {/* Mini Golden EMV Chip */}
@@ -305,7 +305,7 @@ function HowItWorks() {
                                 </div>
 
                                 {/* Card 2: ChatGPT USD Card */}
-                                <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-[#26211C] via-[#1E1915] to-[#0E0C0A] p-3 text-white border border-white/20 shadow-md">
+                                <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-[#26211C] via-[#1E1915] to-[#0E0C0A] p-3 text-white border border-white/20">
                                     <div className="flex items-center justify-between text-[10px]">
                                         <div className="flex items-center gap-2">
                                             {/* Mini Golden EMV Chip */}

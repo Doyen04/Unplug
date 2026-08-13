@@ -219,7 +219,7 @@ export default function SubscriptionsPage() {
                                     }}
                                     className={`h-8 rounded-pill px-4 flex shrink-0 items-center justify-center text-[10px] font-bold uppercase tracking-widest transition-all ${
                                         item.key === filter
-                                            ? "bg-brand text-white shadow-md"
+                                            ? "bg-brand text-white"
                                             : "bg-bg-muted text-text-secondary hover:bg-bg-subtle border border-border"
                                     }`}
                                 >
@@ -246,7 +246,7 @@ export default function SubscriptionsPage() {
                         transition={{ duration: 0.25, ease: "easeOut" }}
                         className="fixed bottom-6 left-1/2 z-50"
                     >
-                        <Card className="bg-text-primary text-white border-none shadow-2xl p-4 flex items-center gap-6">
+                        <Card className="bg-text-primary text-white border-none p-4 flex items-center gap-6">
                             <span className="text-sm">
                                 Subscription cancelled.
                             </span>

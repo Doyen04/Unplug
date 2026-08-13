@@ -32,12 +32,12 @@ export function FreezeCardDemo({
     return (
         <div className="w-full max-w-sm sm:max-w-md mx-auto">
             {/* Clean & Lean Card Container */}
-            <div className="relative rounded-[22px] border border-line bg-white p-3 sm:p-3.5 shadow-md">
+            <div className="relative rounded-[22px] border border-line bg-white p-3 sm:p-3.5">
 
                 {/* Authentic Real-Life Credit Card Face */}
                 <div
                     className={cn(
-                        'relative aspect-[1.586/1] w-full select-none overflow-hidden rounded-[16px] p-4 sm:p-5 border border-white/20 shadow-lg transition-all duration-300',
+                        'relative aspect-[1.586/1] w-full select-none overflow-hidden rounded-[16px] p-4 sm:p-5 border border-white/20 transition-all duration-300',
                         frozen
                             ? 'bg-gradient-to-br from-[#262626] via-[#1A1A1A] to-[#121212] text-white grayscale'
                             : 'bg-gradient-to-br from-[#1C1A17] via-[#2D2620] to-[#12100E] text-white',
@@ -81,7 +81,7 @@ export function FreezeCardDemo({
 
                         {/* Metallic Golden EMV Smart Chip */}
                         <div className="my-0.5">
-                            <div className="relative h-5.5 sm:h-6.5 w-7.5 sm:w-8.5 rounded-[4px] bg-gradient-to-br from-amber-200 via-yellow-400 to-amber-500 p-[1px] border border-amber-600/40 shadow-xs overflow-hidden">
+                            <div className="relative h-5.5 sm:h-6.5 w-7.5 sm:w-8.5 rounded-[4px] bg-gradient-to-br from-amber-200 via-yellow-400 to-amber-500 p-[1px] border border-amber-600/40 overflow-hidden">
                                 <div className="h-full w-full rounded-[3px] border border-amber-800/30 grid grid-cols-2 gap-0.5 p-[2px]">
                                     <div className="border-r border-b border-amber-800/30" />
                                     <div className="border-b border-amber-800/30" />
@@ -92,7 +92,7 @@ export function FreezeCardDemo({
                         </div>
 
                         {/* Masked Card PAN — Guaranteed Single Line */}
-                        <div className="font-mono text-[13px] sm:text-[15px] font-bold tracking-[0.16em] sm:tracking-[0.2em] text-white/95 whitespace-nowrap drop-shadow-sm">
+                        <div className="font-mono text-[13px] sm:text-[15px] font-bold tracking-[0.16em] sm:tracking-[0.2em] text-white/95 whitespace-nowrap">
                             •••• •••• •••• {last4}
                         </div>
 
@@ -133,8 +133,8 @@ export function FreezeCardDemo({
                         className={cn(
                             'inline-flex items-center justify-center gap-2 rounded-xl py-2 px-4 text-xs font-bold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink',
                             frozen
-                                ? 'bg-orange text-ink hover:bg-orange-deep shadow-xs'
-                                : 'bg-ink text-white hover:bg-black shadow-xs',
+                                ? 'bg-orange text-ink hover:bg-orange-deep'
+                                : 'bg-ink text-white hover:bg-black',
                         )}
                     >
                         {frozen ? (

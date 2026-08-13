@@ -43,7 +43,7 @@ export default function OnboardingClient() {
             <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] rounded-full bg-brand/5 blur-3xl" />
 
             <div className="relative z-10 w-full max-w-md">
-                <Card className="p-8 border border-border bg-bg-surface/85 backdrop-blur-md shadow-2xl flex flex-col items-center text-center">
+                <Card className="p-8 border border-border bg-bg-surface/85 backdrop-blur-md flex flex-col items-center text-center">
                     {/* Heading */}
                     <h1 className="text-3xl font-bold tracking-tight text-text-primary mb-3">
                         Stop paying for
@@ -66,7 +66,7 @@ export default function OnboardingClient() {
                     <Button
                         onClick={handleContinue}
                         disabled={isPending}
-                        className="w-full h-12 rounded-xl shadow-lg shadow-brand/10 gap-2 text-xs font-bold uppercase tracking-wider mb-4 transition-transform active:scale-[0.98]"
+                        className="w-full h-12 rounded-xl gap-2 text-xs font-bold uppercase tracking-wider mb-4 transition-transform active:scale-[0.98]"
                     >
                         {isPending ? "Starting..." : "Start Your Audit"}
                         <ArrowRight className="w-4 h-4" />

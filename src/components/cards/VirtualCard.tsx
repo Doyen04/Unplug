@@ -105,7 +105,7 @@ export function VirtualCard({
                     <div
                         className={`
                             relative aspect-[1.586/1] w-full select-none overflow-hidden rounded-2xl
-                            p-4 shadow-lg shadow-black/10 ring-1 ring-black/5 transition-all duration-300 sm:p-5
+                            p-4 ring-1 ring-black/5 transition-all duration-300 sm:p-5
                             ${isFrozen
                                 ? "bg-linear-to-br from-text-muted to-text-secondary grayscale"
                                 : card.currency === "USD"

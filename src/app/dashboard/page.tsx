@@ -268,7 +268,7 @@ export default function DashboardPage() {
                                     {DASHBOARD_FILTER_OPTIONS.map(f => (
                                         <button
                                             key={f.key} onClick={() => setFilter(f.key)}
-                                            className={`h-8 px-4 rounded-full flex shrink-0 items-center justify-center text-[10px] font-bold uppercase transition-all ${filter === f.key ? 'bg-brand text-white shadow-sm' : 'bg-bg-muted text-text-secondary border border-border-strong hover:bg-bg-subtle'}`}
+                                            className={`h-8 px-4 rounded-full flex shrink-0 items-center justify-center text-[10px] font-bold uppercase transition-all ${filter === f.key ? 'bg-brand text-white' : 'bg-bg-muted text-text-secondary border border-border-strong hover:bg-bg-subtle'}`}
                                         >
                                             {f.label} ({filterCounts[f.key]})
                                         </button>
@@ -304,7 +304,7 @@ export default function DashboardPage() {
                         transition={{ duration: 0.25, ease: 'easeOut' }}
                         className="fixed bottom-6 left-1/2 z-50"
                     >
-                        <Card className="bg-text-primary text-white border-none shadow-2xl p-4 flex items-center gap-6">
+                        <Card className="bg-text-primary text-white border-none p-4 flex items-center gap-6">
                             <span className="text-sm">Subscription cancelled.</span>
                             <Button variant="secondary" size="sm" className="bg-white text-text-primary border-none" onClick={undoCancel} disabled={isCancelling}>
                                 {isCancelling ? <span className="animate-pulse">Undoing...</span> : 'Undo'}
