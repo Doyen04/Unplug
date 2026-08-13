@@ -1,21 +1,11 @@
 import { BellOff, DoorClosed, TrendingUp } from 'lucide-react';
-import type { ReactNode } from 'react';
 
 import { Reveal, RevealItem } from '@/components/marketing/Reveal';
 import { SectionTitle } from '@/components/marketing/SectionTitle';
 
 const shell = 'mx-auto max-w-7xl px-6 sm:px-8 lg:px-12';
 
-interface ProblemCard {
-    icon: typeof BellOff;
-    stat: string;
-    statLabel: string;
-    title: string;
-    body: string;
-    widget: ReactNode;
-}
-
-const problems: ProblemCard[] = [
+const problems = [
     {
         icon: BellOff,
         stat: '73%',
@@ -79,7 +69,7 @@ const problems: ProblemCard[] = [
             </div>
         ),
     },
-];
+] as const;
 
 export function Problem() {
     return (

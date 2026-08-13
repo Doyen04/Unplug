@@ -80,10 +80,11 @@ export function HowItWorks() {
                             </div>
                             <div className="space-y-3">
                                 {/* Card 1: Netflix NGN Card */}
-                                <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-[#1C1A17] via-[#2A241F] to-[#12100E] p-3 text-white border border-white/20">
+                                <div className="relative overflow-hidden rounded-xl bg-linear-to-br from-[#1C1A17] via-[#2A241F] to-[#12100E] p-3 text-white border border-white/20">
                                     <div className="flex items-center justify-between text-[10px]">
                                         <div className="flex items-center gap-2">
-                                            <div className="h-4 w-5 rounded-[3px] bg-gradient-to-br from-amber-200 via-yellow-400 to-amber-500 border border-amber-600/40 p-[1px]">
+                                            {/* Mini Golden EMV Chip */}
+                                            <div className="h-4 w-5 rounded-[3px] bg-linear-to-br from-amber-200 via-yellow-400 to-amber-500 border border-amber-600/40 p-px">
                                                 <div className="h-full w-full border border-amber-800/30 grid grid-cols-2" />
                                             </div>
                                             <span className="font-bold tracking-widest uppercase text-white">NETFLIX</span>
@@ -100,10 +101,11 @@ export function HowItWorks() {
                                 </div>
 
                                 {/* Card 2: ChatGPT USD Card */}
-                                <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-[#26211C] via-[#1E1915] to-[#0E0C0A] p-3 text-white border border-white/20">
+                                <div className="relative overflow-hidden rounded-xl bg-linear-to-br from-[#26211C] via-[#1E1915] to-[#0E0C0A] p-3 text-white border border-white/20">
                                     <div className="flex items-center justify-between text-[10px]">
                                         <div className="flex items-center gap-2">
-                                            <div className="h-4 w-5 rounded-[3px] bg-gradient-to-br from-amber-200 via-yellow-400 to-amber-500 border border-amber-600/40 p-[1px]">
+                                            {/* Mini Golden EMV Chip */}
+                                            <div className="h-4 w-5 rounded-[3px] bg-linear-to-br from-amber-200 via-yellow-400 to-amber-500 border border-amber-600/40 p-[1px]">
                                                 <div className="h-full w-full border border-amber-800/30 grid grid-cols-2" />
                                             </div>
                                             <span className="font-bold tracking-widest uppercase text-orange">CHATGPT PLUS</span>
@@ -132,7 +134,7 @@ export function HowItWorks() {
                                 Freeze or cancel, anytime.
                             </h3>
                             <p className="mt-2 text-[15px] leading-relaxed text-ink-70">
-                                See a charge you don&apos;t want next cycle? Tap to freeze the card. The merchant gets declined instantly.
+                                See a charge you don’t want next cycle? Tap to freeze the card. The merchant gets declined instantly.
                             </p>
                         </div>
 

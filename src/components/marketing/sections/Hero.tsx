@@ -52,10 +52,10 @@ export function Hero() {
 
                 {/* Hero Graphic: Isolated Cutout Photo on White Base + Floating Demo Card */}
                 <Reveal as="div" variant="scale" delay={0.1} className="relative lg:justify-self-end">
-                    <div className="relative mx-auto w-full max-w-[460px]">
+                    <div className="relative mx-auto w-full max-w-115">
                         {/* Cutout Photo container */}
                         <div className="relative overflow-hidden rounded-[28px] border-2 border-line bg-white p-4">
-                            <div className="relative aspect-[4/5] w-full overflow-hidden rounded-[20px] bg-slate-50 flex items-center justify-center">
+                            <div className="relative aspect-4/5 w-full overflow-hidden rounded-[20px] bg-slate-50 flex items-center justify-center">
                                 <img
                                     src="/images/hero-1.png"
                                     alt="Young Nigerian professional managing subscriptions on smartphone"
@@ -65,7 +65,7 @@ export function Hero() {
                         </div>
 
                         {/* Floating FreezeCardDemo overlaying the bottom right */}
-                        <div className="absolute -bottom-6 -left-4 right-4 sm:-left-8 sm:right-6 max-w-[360px] z-10">
+                        <div className="absolute -bottom-6 -left-4 right-4 sm:-left-8 sm:right-6 max-w-90 z-10">
                             <FreezeCardDemo />
                         </div>
                     </div>

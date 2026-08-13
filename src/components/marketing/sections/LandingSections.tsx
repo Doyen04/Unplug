@@ -55,7 +55,7 @@ export function Calculator() {
 const securityPoints = [
     'Your bank connection is read-only, and we only use it once — to find your subscriptions, not to watch your account.',
     'Card numbers are never stored on our servers. You view them through a sandboxed, secured display.',
-    `Funds sit with a licensed banking partner — Unplug doesn't hold your money directly.`,
+    `Funds sit with a licensed banking partner — Unplug doesn’t hold your money directly.`,
     'Your Pro subscription is billed securely through Paystack.',
 ] as const;
 
