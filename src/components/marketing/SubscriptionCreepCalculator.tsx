@@ -1,5 +1,6 @@
 'use client';
 
+import { motion, useReducedMotion } from 'framer-motion';
 import { useEffect, useMemo, useState } from 'react';
 
 const SUBSCRIPTION_PRESETS = [
@@ -12,6 +13,14 @@ const SUBSCRIPTION_PRESETS = [
 ] as const;
 
 type SelectedAmounts = Record<string, number>;
+
+function getContextMessage(annual: number): string | null {
+    if (annual <= 0) return null;
+    if (annual < 120_000) return 'Just getting started.';
+    if (annual < 360_000) return "That's a weekend getaway every month.";
+    if (annual < 720_000) return "That's a Lagos–Abuja flight, monthly.";
+    return "That's someone's rent in Lekki.";
+}
 
 function AnimatedTotal({ value }: { value: number }) {
     const [displayValue, setDisplayValue] = useState(value);
@@ -40,6 +49,7 @@ function AnimatedTotal({ value }: { value: number }) {
 
 export function SubscriptionCreepCalculator() {
     const [selected, setSelected] = useState<SelectedAmounts>({});
+    const prefersReducedMotion = useReducedMotion();
 
     const monthlyTotal = useMemo(
         () => Object.values(selected).reduce((sum, amount) => sum + amount, 0),
@@ -47,9 +57,10 @@ export function SubscriptionCreepCalculator() {
     );
 
     const annualTotal = monthlyTotal * 12;
+    const contextMessage = getContextMessage(annualTotal);
 
     return (
-        <div className="rounded-[24px] border border-line bg-bg-surface p-6 shadow-[0_20px_60px_-35px_rgba(31,26,22,0.35)] sm:p-8">
+        <div className="rounded-[24px] border border-line bg-bg-surface p-6 sm:p-8">
             <div className="mb-8 max-w-2xl">
                 <p className="text-[13px] font-semibold uppercase tracking-[0.08em] text-ink-70">Subscription creep calculator</p>
                 <h3 className="mt-3 font-display text-[clamp(28px,4vw,40px)] leading-tight text-ink">What&apos;s your subscription creep?</h3>
@@ -62,7 +73,7 @@ export function SubscriptionCreepCalculator() {
                     const isSelected = selectedAmount !== undefined;
 
                     return (
-                        <button
+                        <motion.button
                             key={preset.id}
                             type="button"
                             aria-pressed={isSelected}
@@ -76,20 +87,23 @@ export function SubscriptionCreepCalculator() {
                                     return { ...current, [preset.id]: preset.defaultAmount };
                                 })
                             }
+                            whileTap={prefersReducedMotion ? undefined : { scale: 0.95 }}
+                            animate={prefersReducedMotion ? undefined : { scale: isSelected ? [1, 1.04, 1] : 1 }}
+                            transition={{ duration: 0.25, ease: 'easeOut' }}
                             className={[
                                 'rounded-xl border px-4 py-3 text-left text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2',
-                                isSelected ? 'border-orange bg-orange text-ink' : 'border-line bg-cream text-ink hover:border-ink',
+                                isSelected ? 'border-orange bg-orange text-ink' : 'border-line bg-white text-ink hover:border-ink',
                             ].join(' ')}
                         >
                             <span>{preset.label}</span>
                             <span className="mt-1 block font-mono text-xs text-ink-70 tabular-nums">₦{preset.defaultAmount.toLocaleString()}/mo</span>
-                        </button>
+                        </motion.button>
                     );
                 })}
             </div>
 
             {Object.keys(selected).length > 0 ? (
-                <div className="mt-8 grid gap-5 rounded-[20px] border border-line bg-cream p-5 sm:p-6">
+                <div className="mt-8 grid gap-5 rounded-[20px] border border-line bg-white p-5 sm:p-6">
                     {Object.entries(selected).map(([id, amount]) => {
                         const preset = SUBSCRIPTION_PRESETS.find((item) => item.id === id);
                         if (!preset) return null;
@@ -127,6 +141,9 @@ export function SubscriptionCreepCalculator() {
                     <AnimatedTotal value={monthlyTotal} />
                 </div>
                 <p className="mt-3 font-mono text-sm text-ink-70 tabular-nums">₦{annualTotal.toLocaleString()} per year</p>
+                {contextMessage ? (
+                    <p className="mt-2 text-[15px] font-medium text-orange">{contextMessage}</p>
+                ) : null}
             </div>
 
             {Object.keys(selected).length > 0 ? (

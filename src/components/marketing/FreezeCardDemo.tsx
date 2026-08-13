@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, useReducedMotion } from 'framer-motion';
-import { Snowflake } from 'lucide-react';
+import { Lock, Snowflake, Unlock, Wifi } from 'lucide-react';
 import { useState } from 'react';
 
 import { cn } from '@/lib/utils';
@@ -10,111 +10,136 @@ interface FreezeCardDemoProps {
     merchant?: string;
     amount?: string;
     last4?: string;
+    currency?: 'NGN' | 'USD';
+    expiry?: string;
 }
 
 /**
- * The brand signature: a real, tappable card rather than a video or a static
- * image. Deliberately uses a generic merchant name — never a real brand — so
- * nothing here implies an endorsement.
+ * FreezeCardDemo — Redesigned to mirror the exact VirtualCard component
+ * used on Unplug's billing page for high fidelity & product accuracy.
  */
 export function FreezeCardDemo({
     merchant = 'Streaming Plan',
     amount = '₦4,500',
     last4 = '4471',
+    currency = 'NGN',
+    expiry = '08/28',
 }: FreezeCardDemoProps) {
     const [frozen, setFrozen] = useState(false);
     const prefersReducedMotion = useReducedMotion();
 
     return (
-        <div className="w-full">
-            <motion.button
-                type="button"
-                onClick={() => setFrozen((value) => !value)}
-                aria-pressed={frozen}
-                className="group relative block w-full overflow-hidden rounded-[24px] p-6 text-left text-ink shadow-[0_30px_70px_-40px_rgba(31,26,22,0.55)] outline-none transition-shadow focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2 focus-visible:ring-offset-cream sm:p-7"
-                animate={prefersReducedMotion ? undefined : { backgroundColor: frozen ? '#DCEEF5' : '#FF5C35' }}
-                initial={false}
-                style={prefersReducedMotion ? { backgroundColor: frozen ? '#DCEEF5' : '#FF5C35' } : undefined}
-                transition={{ duration: 0.35, ease: 'easeOut' }}
-            >
-                {/* Frost texture, only present once frozen. */}
-                <motion.span
-                    aria-hidden="true"
-                    className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_15%,rgba(255,255,255,0.75),transparent_45%),radial-gradient(circle_at_85%_80%,rgba(255,255,255,0.5),transparent_40%)]"
-                    initial={false}
-                    animate={{ opacity: frozen ? 1 : 0 }}
-                    transition={{ duration: prefersReducedMotion ? 0 : 0.35 }}
-                />
+        <div className="w-full max-w-sm sm:max-w-md mx-auto">
+            {/* Card Shell Container */}
+            <div className="relative rounded-[24px] border border-line bg-white p-3.5 sm:p-4 transition-all duration-300">
 
-                <span className="relative block">
-                    <span className="flex items-start justify-between gap-4">
-                        <span className="block">
-                            <span
-                                className={cn(
-                                    'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] transition-colors',
-                                    frozen ? 'bg-frost-deep text-frost-wash' : 'bg-ink/12 text-ink',
-                                )}
-                            >
-                                {frozen ? <Snowflake aria-hidden="true" className="h-3 w-3" /> : null}
-                                {frozen ? 'Frozen' : 'Active'}
-                            </span>
-                            <span className="mt-3 block font-display text-[clamp(26px,3.6vw,32px)] leading-tight tracking-tight">
-                                {merchant}
-                            </span>
-                        </span>
-
-                        <motion.span
-                            aria-hidden="true"
-                            className={cn(
-                                'flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition-colors',
-                                frozen ? 'bg-frost-deep text-frost-wash' : 'bg-ink/12 text-ink',
-                            )}
-                            animate={prefersReducedMotion ? undefined : { rotate: frozen ? 0 : -12, scale: frozen ? 1 : 0.94 }}
-                            transition={{ duration: 0.35, ease: 'easeOut' }}
+                {/* Main Credit Card Face (Aspect ratio matches real credit card) */}
+                <div
+                    className={cn(
+                        'relative aspect-[1.586/1] w-full select-none overflow-hidden rounded-2xl p-5 sm:p-6 transition-all duration-300',
+                        frozen
+                            ? 'bg-neutral-800 text-white'
+                            : 'bg-linear-to-br from-ink via-[#2D2620] to-ink text-white',
+                    )}
+                >
+                    {/* Frozen Dark Blur Overlay */}
+                    {frozen && (
+                        <motion.div
+                            initial={prefersReducedMotion ? false : { opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 0.25 }}
+                            className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/60 backdrop-blur-xs p-4 text-center"
                         >
-                            <Snowflake className="h-5 w-5" />
-                        </motion.span>
-                    </span>
+                            <div className="flex items-center gap-2 rounded-full bg-black/60 border border-white/20 px-3.5 py-1.5 text-xs font-semibold text-white">
+                                <Lock className="h-3.5 w-3.5 text-orange" />
+                                <span>Card Frozen</span>
+                            </div>
+                            <p className="mt-2 text-[11px] text-white/80 font-medium">
+                                Charges from {merchant} will be declined
+                            </p>
+                        </motion.div>
+                    )}
 
-                    <span className="mt-7 block rounded-[18px] border border-white/35 bg-white/25 p-4 backdrop-blur-sm">
-                        <span className="flex items-center justify-between text-[14px]">
-                            <span className="text-ink/75">Monthly charge</span>
-                            <span
-                                className={cn(
-                                    'font-mono text-[17px] font-medium tabular-nums transition-opacity',
-                                    frozen && 'line-through opacity-60',
-                                )}
-                            >
-                                {amount}
-                            </span>
+                    {/* Card Content Layout */}
+                    <div className="relative flex h-full flex-col justify-between z-10">
+                        {/* Header: Merchant Name & Contactless Wifi */}
+                        <div className="flex items-start justify-between gap-2">
+                            <div>
+                                <span className="block text-[10px] uppercase tracking-wider text-white/50 font-semibold">
+                                    Merchant Card
+                                </span>
+                                <span className="mt-0.5 block truncate text-sm font-bold uppercase tracking-widest text-white">
+                                    {merchant}
+                                </span>
+                            </div>
+                            <Wifi className="h-4 w-4 shrink-0 rotate-90 text-white/60" />
+                        </div>
+
+                        {/* Middle: Masked PAN Number */}
+                        <div className="my-auto py-1">
+                            <div className="font-mono text-base sm:text-lg font-bold tracking-[0.22em] text-white/90">
+                                •••• •••• •••• {last4}
+                            </div>
+                        </div>
+
+                        {/* Footer: Expiry, Currency Tag & Mastercard Brand Circles */}
+                        <div className="flex items-end justify-between border-t border-white/15 pt-2.5">
+                            <div>
+                                <span className="block text-[9px] uppercase tracking-widest text-white/50">
+                                    EXP / CURRENCY
+                                </span>
+                                <span className="mt-0.5 block font-mono text-[11px] font-semibold tracking-wider text-white/80">
+                                    {expiry} · {currency} VIRTUAL
+                                </span>
+                            </div>
+
+                            {/* Mastercard Red & Amber Circles */}
+                            <div className="flex items-center -space-x-2">
+                                <div className="h-6 w-6 rounded-full bg-red-500/90" />
+                                <div className="h-6 w-6 rounded-full bg-amber-400/90" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Sub-Card Charge & Control Panel */}
+                <div className="mt-3 rounded-xl border border-line bg-bg-surface p-3 sm:p-3.5">
+                    <div className="flex items-center justify-between text-xs sm:text-sm">
+                        <span className="text-ink-70 font-medium">Monthly Charge</span>
+                        <span className={cn('font-mono font-semibold text-ink', frozen && 'line-through text-ink-70')}>
+                            {amount}/mo
                         </span>
+                    </div>
 
-                        <span className="mt-5 flex items-end justify-between border-t border-white/30 pt-4 text-[14px]">
-                            <span className="block">
-                                <span className="block text-[11px] uppercase tracking-[0.08em] text-ink/65">Card</span>
-                                <span className="mt-1 block font-mono tabular-nums tracking-[0.18em]">•••• {last4}</span>
-                            </span>
-                            <span className="block text-right">
-                                <span className="block text-[11px] uppercase tracking-[0.08em] text-ink/65">Next charge</span>
-                                <span className="mt-1 block font-medium">{frozen ? 'Blocked' : '12 Aug'}</span>
-                            </span>
-                        </span>
-                    </span>
-
-                    <span
+                    {/* Interactive Freeze / Unfreeze Action Button */}
+                    <button
+                        type="button"
+                        onClick={() => setFrozen((prev) => !prev)}
+                        aria-pressed={frozen}
                         className={cn(
-                            'mt-5 flex items-center justify-between gap-3 rounded-full px-4 py-3 text-[14px] font-medium transition-colors',
-                            frozen ? 'bg-frost-deep text-frost-wash' : 'bg-ink text-cream',
+                            'mt-3 flex w-full items-center justify-center gap-2 rounded-xl py-2.5 px-4 text-xs font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink',
+                            frozen
+                                ? 'bg-orange text-ink hover:bg-orange-deep'
+                                : 'border border-line bg-white text-ink hover:border-ink',
                         )}
                     >
-                        {frozen ? 'Charge blocked. Tap to unfreeze.' : 'Tap to freeze this charge.'}
-                        <span aria-hidden="true">{frozen ? '↺' : '→'}</span>
-                    </span>
-                </span>
-            </motion.button>
+                        {frozen ? (
+                            <>
+                                <Unlock className="h-3.5 w-3.5" />
+                                <span>Unfreeze Card (Allow Charges)</span>
+                            </>
+                        ) : (
+                            <>
+                                <Snowflake className="h-3.5 w-3.5 text-orange" />
+                                <span>Freeze Card (Block Charges)</span>
+                            </>
+                        )}
+                    </button>
+                </div>
+            </div>
 
             <span role="status" aria-live="polite" className="sr-only">
-                {frozen ? `${merchant} card frozen. The next charge will be declined.` : `${merchant} card active.`}
+                {frozen ? `${merchant} card frozen. Next charge blocked.` : `${merchant} card active.`}
             </span>
         </div>
     );

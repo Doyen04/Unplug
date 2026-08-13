@@ -2,25 +2,25 @@ import './globals.css';
 
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
-import { IBM_Plex_Mono, Playfair_Display, Plus_Jakarta_Sans } from 'next/font/google';
+import { DM_Sans, Sora, Space_Mono } from 'next/font/google';
 
 import { QueryProvider } from '@/components/providers/QueryProvider';
 
-const jakarta = Plus_Jakarta_Sans({
+const dmSans = DM_Sans({
     subsets: ['latin'],
     weight: ['400', '500', '600', '700'],
     variable: '--font-ui',
 });
 
-const playfair = Playfair_Display({
+const sora = Sora({
     subsets: ['latin'],
-    weight: ['600'],
+    weight: ['400', '500', '600', '700'],
     variable: '--font-display',
 });
 
-const mono = IBM_Plex_Mono({
+const mono = Space_Mono({
     subsets: ['latin'],
-    weight: ['500'],
+    weight: ['400', '700'],
     variable: '--font-mono',
 });
 
@@ -39,8 +39,8 @@ interface RootLayoutProps {
 }
 
 const RootLayout = ({ children }: RootLayoutProps) => (
-    <html lang="en" className={`${jakarta.variable} ${playfair.variable} ${mono.variable}`}>
-        <body className="bg-cream font-ui text-ink antialiased">
+    <html lang="en" className={`${dmSans.variable} ${sora.variable} ${mono.variable}`}>
+        <body className="bg-white font-ui text-ink antialiased">
             <QueryProvider>{children}</QueryProvider>
         </body>
     </html>

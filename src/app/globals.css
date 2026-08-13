@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 @theme {
-    --color-cream: #FBF5EC;
+    --color-cream: #FFFFFF;
     --color-ink: #1F1A16;
     --color-ink-70: #5B534C;
     --color-line: #E5DDD0;
@@ -14,9 +14,9 @@
     --color-brand-light: #FFEDE6;
     --color-brand-dark: #E5522F;
 
-    --color-bg-base: #FBF5EC;
-    --color-bg-surface: #FFFDF9;
-    --color-bg-muted: #F3EBDD;
+    --color-bg-base: #FFFFFF;
+    --color-bg-surface: #FAFAFA;
+    --color-bg-muted: #F3F4F6;
 
     --color-text-primary: #1F1A16;
     --color-text-secondary: #5B534C;
@@ -38,12 +38,16 @@
     --radius-btn: 9999px;
     --radius-pill: 9999px;
 
-    --font-display: "Playfair Display", Georgia, serif;
-    --font-ui: "Plus Jakarta Sans", system-ui, sans-serif;
-    --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+    --font-display: "Sora", system-ui, sans-serif;
+    --font-ui: "DM Sans", system-ui, sans-serif;
+    --font-mono: "Space Mono", ui-monospace, monospace;
 }
 
 @layer base {
+
+    html {
+        scroll-behavior: smooth;
+    }
 
     *,
     ::before,
@@ -72,6 +76,82 @@
     .tabular-nums {
         font-variant-numeric: tabular-nums;
     }
+
+    /* Marquee / infinite scroll */
+    .marquee-track {
+        display: flex;
+        animation: marquee 30s linear infinite;
+        width: max-content;
+    }
+
+    .marquee-track:hover {
+        animation-play-state: paused;
+    }
+
+    /* Fade masks for marquee edges */
+    .fade-edge-x {
+        mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+        -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+    }
+
+    /* Dot grid background */
+    .dot-grid {
+        background-image: radial-gradient(circle, var(--color-border) 1px, transparent 1px);
+        background-size: 24px 24px;
+    }
+
+    .dot-grid-light {
+        background-image: radial-gradient(circle, rgba(251, 245, 236, 0.06) 1px, transparent 1px);
+        background-size: 24px 24px;
+    }
+}
+
+/* ───── Keyframe animations ───── */
+
+@keyframes marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+@keyframes pulse-ring {
+    0% {
+        outline-offset: 0;
+        outline-color: rgba(255, 92, 53, 0.6);
+    }
+    70% {
+        outline-offset: 6px;
+        outline-color: rgba(255, 92, 53, 0);
+    }
+    100% {
+        outline-offset: 0;
+        outline-color: rgba(255, 92, 53, 0);
+    }
+}
+
+@keyframes slide-up {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
+
+@keyframes progress-fill {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
 }
 
 @keyframes alert-border-pulse {
@@ -104,6 +184,24 @@
 
 .animate-blink {
     animation: blink 1s step-end infinite;
+}
+
+.animate-shimmer {
+    animation: shimmer 2.5s ease-in-out infinite;
+}
+
+.animate-pulse-ring {
+    outline: 2px solid rgba(255, 92, 53, 0.6);
+    animation: pulse-ring 2s ease-out infinite;
+}
+
+.animate-float {
+    animation: float 4s ease-in-out infinite;
+}
+
+.animate-progress {
+    transform-origin: left;
+    animation: progress-fill 5s linear forwards;
 }
 
 /* Auth Page specific (Old styles kept for compatibility) */

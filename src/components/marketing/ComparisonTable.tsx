@@ -13,8 +13,8 @@ const COLUMNS = [
     'Finds subscriptions automatically',
     'Actually stops the charge',
     'Naira + dollar cards',
-    'Works even if the merchant hides cancel',
-    'Subscriptions are the core product',
+    'Works even if merchant hides cancel',
+    'Subscriptions are core product',
 ] as const;
 
 const ROWS: readonly { label: string; highlight?: boolean; cells: readonly Cell[] }[] = [
@@ -29,7 +29,7 @@ const ROWS: readonly { label: string; highlight?: boolean; cells: readonly Cell[
         ],
     },
     {
-        label: 'gomoney / Payora / Cardtonic / TransferXO',
+        label: 'gomoney / Payora / Cardtonic',
         cells: [
             { support: 'no' },
             { support: 'partial' },
@@ -39,10 +39,10 @@ const ROWS: readonly { label: string; highlight?: boolean; cells: readonly Cell[
         ],
     },
     {
-        label: "Your bank's own card controls",
+        label: "Your bank's card controls",
         cells: [
             { support: 'no' },
-            { support: 'partial', note: 'Freezes the whole card' },
+            { support: 'partial', note: 'Freezes whole card' },
             { support: 'no' },
             { support: 'yes', note: 'Bluntly' },
             { support: 'no' },
@@ -61,10 +61,6 @@ const ROWS: readonly { label: string; highlight?: boolean; cells: readonly Cell[
     },
 ];
 
-/**
- * Icon + text, never colour alone — a red/green-only table is unreadable for
- * the ~8% of men with a colour-vision deficiency (WCAG 1.4.1).
- */
 function SupportMark({ support, note }: Cell) {
     const config = {
         yes: { Icon: Check, label: 'Yes', className: 'text-success' },
@@ -85,10 +81,10 @@ function SupportMark({ support, note }: Cell) {
 
 export function ComparisonTable() {
     return (
-        <div className="mt-12 overflow-hidden rounded-[24px] border border-line bg-bg-surface">
-            {/* Tables cannot wrap, so the container scrolls rather than the page. */}
-            <div className="overflow-x-auto">
-                <table className="w-full min-w-[860px] border-collapse text-left">
+        <div className="mt-12">
+            {/* Desktop Table View */}
+            <div className="hidden overflow-hidden rounded-[24px] border border-line bg-bg-surface md:block">
+                <table className="w-full border-collapse text-left">
                     <caption className="sr-only">
                         How Unplug compares with subscription trackers, virtual-card apps, and bank card controls
                     </caption>
@@ -110,12 +106,12 @@ export function ComparisonTable() {
                     </thead>
                     <tbody className="divide-y divide-line">
                         {ROWS.map((row) => (
-                            <tr key={row.label} className={cn(row.highlight && 'bg-orange/6')}>
+                            <tr key={row.label} className={cn(row.highlight && 'bg-orange/8 border-l-4 border-orange')}>
                                 <th
                                     scope="row"
                                     className={cn(
                                         'px-5 py-4 align-top text-[14px] font-medium',
-                                        row.highlight ? 'text-ink' : 'text-ink-70',
+                                        row.highlight ? 'text-ink font-semibold' : 'text-ink-70',
                                     )}
                                 >
                                     {row.highlight ? (
@@ -138,6 +134,36 @@ export function ComparisonTable() {
                         ))}
                     </tbody>
                 </table>
+            </div>
+
+            {/* Mobile Stacked Card View */}
+            <div className="grid gap-4 md:hidden">
+                {ROWS.map((row) => (
+                    <div
+                        key={row.label}
+                        className={cn(
+                            'rounded-[20px] border p-5 bg-bg-surface',
+                            row.highlight ? 'border-2 border-orange bg-orange/5' : 'border-line',
+                        )}
+                    >
+                        <div className="flex items-center justify-between border-b border-line pb-3">
+                            <h4 className="font-semibold text-ink text-[16px]">{row.label}</h4>
+                            {row.highlight ? (
+                                <span className="rounded-full bg-orange px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-ink">
+                                    Unplug
+                                </span>
+                            ) : null}
+                        </div>
+                        <ul className="mt-4 space-y-3">
+                            {row.cells.map((cell, index) => (
+                                <li key={COLUMNS[index]} className="flex items-start justify-between text-sm">
+                                    <span className="text-ink-70 max-w-[60%]">{COLUMNS[index]}</span>
+                                    <SupportMark {...cell} />
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                ))}
             </div>
         </div>
     );

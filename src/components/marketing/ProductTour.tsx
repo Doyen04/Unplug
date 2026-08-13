@@ -1,25 +1,69 @@
 'use client';
 
 import { motion, useReducedMotion } from 'framer-motion';
-import { useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { TOUR_PANELS } from '@/lib/constants/marketing';
 import { cn } from '@/lib/utils';
 
 import { TourPanelMock } from './TourPanelMock';
 
+const AUTO_ADVANCE_MS = 5000;
+const IDLE_RESUME_MS = 10000;
+
 /**
  * Vertical tab interface following the WAI-ARIA tabs pattern: roving tabindex,
  * arrow-key navigation, and manual activation on mobile where the rail becomes
- * a horizontal scroller.
+ * a horizontal scroller. Now with auto-advance and a progress indicator.
  */
 export function ProductTour() {
     const [active, setActive] = useState(0);
     const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
     const prefersReducedMotion = useReducedMotion();
+    const autoRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    const idleRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const isPaused = useRef(false);
+    const [progressKey, setProgressKey] = useState(0);
+
+    const clearTimers = useCallback(() => {
+        if (autoRef.current) clearInterval(autoRef.current);
+        if (idleRef.current) clearTimeout(idleRef.current);
+    }, []);
+
+    const startAutoAdvance = useCallback(() => {
+        clearTimers();
+        isPaused.current = false;
+        setProgressKey((k) => k + 1);
+        autoRef.current = setInterval(() => {
+            if (!isPaused.current) {
+                setActive((prev) => (prev + 1) % TOUR_PANELS.length);
+                setProgressKey((k) => k + 1);
+            }
+        }, AUTO_ADVANCE_MS);
+    }, [clearTimers]);
+
+    /* Start auto-advance on mount. */
+    useEffect(() => {
+        startAutoAdvance();
+        return clearTimers;
+    }, [startAutoAdvance, clearTimers]);
+
+    const handleUserInteraction = useCallback(
+        (index: number) => {
+            setActive(index);
+            isPaused.current = true;
+            clearTimers();
+            setProgressKey((k) => k + 1);
+
+            idleRef.current = setTimeout(() => {
+                startAutoAdvance();
+            }, IDLE_RESUME_MS);
+        },
+        [clearTimers, startAutoAdvance],
+    );
 
     const focusTab = (index: number) => {
-        setActive(index);
+        handleUserInteraction(index);
         tabRefs.current[index]?.focus();
     };
 
@@ -76,20 +120,37 @@ export function ProductTour() {
                             aria-selected={selected}
                             aria-controls={`tour-panel-${panel.id}`}
                             tabIndex={selected ? 0 : -1}
-                            onClick={() => setActive(index)}
+                            onClick={() => handleUserInteraction(index)}
                             onKeyDown={(event) => onKeyDown(event, index)}
                             className={cn(
-                                'relative flex shrink-0 items-center gap-3 rounded-[18px] border px-4 py-3.5 text-left text-[15px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2 focus-visible:ring-offset-cream lg:w-full lg:shrink',
+                                'relative flex shrink-0 items-center gap-3 rounded-[18px] border px-4 py-3.5 text-left text-[15px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2 focus-visible:ring-offset-cream lg:w-full lg:shrink overflow-hidden',
                                 selected
                                     ? 'border-orange/40 bg-orange/8 text-ink'
                                     : 'border-transparent text-ink-70 hover:border-line hover:bg-bg-surface hover:text-ink',
                             )}
                         >
+                            {/* Animated tab indicator */}
+                            {selected ? (
+                                <motion.span
+                                    layoutId="tour-active-indicator"
+                                    className="absolute inset-0 rounded-[18px] border-2 border-orange"
+                                    transition={{ type: 'spring', bounce: 0.15, duration: 0.5 }}
+                                />
+                            ) : null}
+
+                            {/* Progress bar inside active tab */}
+                            {selected && !isPaused.current ? (
+                                <span
+                                    key={progressKey}
+                                    className="absolute bottom-0 left-0 h-[2px] bg-orange animate-progress"
+                                />
+                            ) : null}
+
                             <Icon
                                 aria-hidden="true"
-                                className={cn('h-[18px] w-[18px] shrink-0', selected ? 'text-orange' : 'text-ink-70')}
+                                className={cn('h-[18px] w-[18px] shrink-0 relative z-10', selected ? 'text-orange' : 'text-ink-70')}
                             />
-                            <span className="whitespace-nowrap">{panel.label}</span>
+                            <span className="whitespace-nowrap relative z-10">{panel.label}</span>
                         </button>
                     );
                 })}

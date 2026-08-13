@@ -16,7 +16,7 @@ const NAV_LINKS = [
 ] as const;
 
 const linkClass =
-    'rounded-full px-1 py-1 transition-colors hover:text-orange focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2 focus-visible:ring-offset-cream';
+    'rounded-full px-2 py-1 transition-colors hover:text-orange focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2 focus-visible:ring-offset-cream';
 
 export function SiteHeader() {
     const [scrolled, setScrolled] = useState(false);
@@ -24,13 +24,12 @@ export function SiteHeader() {
     const toggleRef = useRef<HTMLButtonElement>(null);
 
     useEffect(() => {
-        const onScroll = () => setScrolled(window.scrollY > 80);
+        const onScroll = () => setScrolled(window.scrollY > 40);
         onScroll();
         window.addEventListener('scroll', onScroll, { passive: true });
         return () => window.removeEventListener('scroll', onScroll);
     }, []);
 
-    // Escape closes the menu and returns focus to the control that opened it.
     useEffect(() => {
         if (!menuOpen) return;
 
@@ -56,14 +55,14 @@ export function SiteHeader() {
 
             <header
                 className={cn(
-                    'sticky top-0 z-50 transition-colors duration-200',
-                    scrolled || menuOpen ? 'border-b border-line bg-cream/95 backdrop-blur-md' : 'bg-transparent',
+                    'sticky top-0 z-50 transition-all duration-200',
+                    scrolled || menuOpen ? 'border-b border-line bg-white/95 backdrop-blur-md py-3' : 'bg-transparent py-5',
                 )}
             >
-                <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
+                <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
                     <Link
                         href="/"
-                        className="text-[20px] font-semibold tracking-tight text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2 focus-visible:ring-offset-cream"
+                        className="font-display text-[22px] font-bold tracking-tight text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink"
                     >
                         Unplug.
                     </Link>
@@ -76,14 +75,14 @@ export function SiteHeader() {
                         ))}
                     </nav>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3">
                         <Link
                             href="/login"
                             className={cn('hidden text-[14px] font-medium text-ink sm:inline-flex', linkClass)}
                         >
                             Log in
                         </Link>
-                        <CtaLink href="/signup" className="min-h-11 px-5">
+                        <CtaLink href="/signup" className="min-h-11 px-5 animate-pulse-ring">
                             Get started free
                         </CtaLink>
 
@@ -94,7 +93,7 @@ export function SiteHeader() {
                             aria-expanded={menuOpen}
                             aria-controls="mobile-nav"
                             aria-label={menuOpen ? 'Close menu' : 'Open menu'}
-                            className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-line text-ink transition-colors hover:border-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2 focus-visible:ring-offset-cream md:hidden"
+                            className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-line text-ink transition-colors hover:border-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink md:hidden"
                         >
                             {menuOpen ? <X aria-hidden="true" className="h-5 w-5" /> : <Menu aria-hidden="true" className="h-5 w-5" />}
                         </button>
@@ -105,7 +104,7 @@ export function SiteHeader() {
                     <nav
                         id="mobile-nav"
                         aria-label="Main"
-                        className="border-t border-line bg-cream px-4 pb-5 pt-2 sm:px-6 md:hidden"
+                        className="border-t border-line bg-white px-4 pb-5 pt-2 sm:px-6 md:hidden"
                     >
                         <ul className="flex flex-col">
                             {[...NAV_LINKS, { href: '/login', label: 'Log in' }].map(({ href, label }) => (

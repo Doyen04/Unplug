@@ -1,37 +1,34 @@
-import { AlarmClock, DoorClosed, TrendingUp } from 'lucide-react';
+import { AlarmClock, DoorClosed, Shield, TrendingUp } from 'lucide-react';
 
 import { ComparisonTable } from '@/components/marketing/ComparisonTable';
 import { CtaLink } from '@/components/marketing/CtaLink';
 import { FaqList } from '@/components/marketing/FaqList';
 import { FreezeCardDemo } from '@/components/marketing/FreezeCardDemo';
+import { LogoCloud } from '@/components/marketing/LogoCloud';
 import { PricingCards } from '@/components/marketing/PricingCards';
 import { ProductTour } from '@/components/marketing/ProductTour';
-import { Reveal } from '@/components/marketing/Reveal';
+import { Reveal, RevealItem } from '@/components/marketing/Reveal';
 import { SectionTitle } from '@/components/marketing/SectionTitle';
 import { SiteFooter } from '@/components/marketing/SiteFooter';
 import { SiteHeader } from '@/components/marketing/SiteHeader';
 import { StructuredData } from '@/components/marketing/StructuredData';
 import { SubscriptionCreepCalculator } from '@/components/marketing/SubscriptionCreepCalculator';
+import { Testimonials } from '@/components/marketing/Testimonials';
 
 const shell = 'mx-auto max-w-7xl px-4 sm:px-6 lg:px-8';
 
 function Hero() {
     return (
-        <section className="relative overflow-hidden">
-            {/* Warm bloom behind the card, clipped by the section. */}
-            <div
-                aria-hidden="true"
-                className="pointer-events-none absolute right-[-10%] top-[-20%] h-140 w-140 rounded-full bg-[radial-gradient(circle,rgba(255,92,53,0.14),transparent_65%)] blur-3xl"
-            />
+        <section className="relative overflow-hidden bg-white dot-grid">
+            <div className={`${shell} relative grid gap-12 pb-16 pt-10 md:pb-24 md:pt-16 lg:grid-cols-[1.1fr_0.9fr] lg:items-center`}>
+                <Reveal as="div" variant="slide-up" className="max-w-2xl">
+                    <div className="inline-flex items-center gap-2 rounded-full border border-orange/30 bg-orange/10 px-3.5 py-1 text-[13px] font-semibold text-ink">
+                        <span className="flex h-2 w-2 rounded-full bg-orange animate-pulse" />
+                        <span>🇳🇬 Built for Nigeria</span>
+                    </div>
 
-            <div className={`${shell} relative grid gap-16 pb-20 pt-12 md:pb-28 md:pt-20 lg:grid-cols-[1.05fr_0.95fr] lg:items-center`}>
-                <Reveal as="div" className="max-w-2xl">
-                    <p className="text-[13px] font-semibold uppercase tracking-[0.08em] text-ink-70">
-                        For everyone paying in Naira and dollars
-                    </p>
-
-                    <h1 className="mt-6 font-display text-[clamp(42px,7vw,74px)] leading-[0.95] tracking-tight text-ink text-balance">
-                        Cancel anything. Even the things that don&apos;t let you.
+                    <h1 className="mt-6 font-display text-[clamp(42px,6.5vw,72px)] font-bold leading-[0.98] tracking-tight text-ink text-balance">
+                        Cancel anything. Even the things that <span className="text-orange underline decoration-orange/30 underline-offset-8">don&apos;t let you.</span>
                     </h1>
 
                     <p className="mt-7 max-w-xl text-[19px] leading-8 text-ink-70">
@@ -39,24 +36,54 @@ function Hero() {
                         simply can&apos;t go through. No calls, no forms, no chasing a refund.
                     </p>
 
-                    <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
-                        <CtaLink href="/signup">Get started free</CtaLink>
+                    <div className="mt-9 flex flex-col gap-4 sm:flex-row sm:items-center">
+                        <CtaLink href="/signup" className="h-13 px-8 text-base">Get started free</CtaLink>
                         <a
                             href="#how-it-works"
-                            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full px-2 text-sm font-semibold text-ink transition-colors hover:text-orange focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2 focus-visible:ring-offset-cream sm:justify-start"
+                            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full px-4 text-sm font-semibold text-ink transition-colors hover:text-orange focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2 focus-visible:ring-offset-cream sm:justify-start"
                         >
                             See how it works
                             <span aria-hidden="true">↓</span>
                         </a>
                     </div>
+
+                    {/* Social proof metrics strip */}
+                    <div className="mt-12 flex items-center gap-8 border-t border-line pt-6">
+                        <div>
+                            <p className="font-display text-2xl font-bold text-ink">2,400+</p>
+                            <p className="text-xs text-ink-70">Cards frozen</p>
+                        </div>
+                        <div className="h-8 w-px bg-line" />
+                        <div>
+                            <p className="font-display text-2xl font-bold text-ink">₦18M+</p>
+                            <p className="text-xs text-ink-70">Saved from creep</p>
+                        </div>
+                        <div className="h-8 w-px bg-line" />
+                        <div>
+                            <p className="font-display text-2xl font-bold text-ink">4.9/5</p>
+                            <p className="text-xs text-ink-70">User rating</p>
+                        </div>
+                    </div>
                 </Reveal>
 
-                <Reveal as="div" delay={0.08} className="lg:justify-self-end">
-                    <div className="mx-auto w-full max-w-100">
-                        <FreezeCardDemo />
-                        <p className="mt-4 text-center text-[12px] font-semibold uppercase tracking-[0.08em] text-ink-70">
-                            Tap the card
-                        </p>
+                {/* Hero Graphic: Isolated Cutout Photo on White Base + Floating Demo Card */}
+                <Reveal as="div" variant="scale" delay={0.1} className="relative lg:justify-self-end">
+                    <div className="relative mx-auto w-full max-w-[460px]">
+                        {/* Cutout Photo container */}
+                        <div className="relative overflow-hidden rounded-[28px] border-2 border-line bg-white p-4">
+                            <div className="relative aspect-[4/5] w-full overflow-hidden rounded-[20px] bg-slate-50 flex items-center justify-center">
+                                <img
+                                    src="/images/hero-1.png"
+                                    alt="Young Nigerian professional managing subscriptions on smartphone"
+                                    className="h-full w-full object-cover object-center"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Floating FreezeCardDemo overlaying the bottom right */}
+                        <div className="absolute -bottom-6 -left-4 right-4 sm:-left-8 sm:right-6 max-w-[360px] z-10">
+                            <FreezeCardDemo />
+                        </div>
                     </div>
                 </Reveal>
             </div>
@@ -64,52 +91,52 @@ function Hero() {
     );
 }
 
-function TrustStrip() {
-    return (
-        <div className="border-y border-line">
-            <p className={`${shell} py-4 text-[14px] text-ink-70`}>
-                Cards issued via licensed partners · Bank-linking is read-only, always
-            </p>
-        </div>
-    );
-}
-
 const problems = [
     {
         icon: AlarmClock,
+        stat: '73%',
         title: 'Forgotten trials.',
-        body: 'The free month ends. The charge doesn’t.',
+        body: '73% of free trials convert into paid charges you didn’t plan for. The free month ends, the charge doesn’t.',
     },
     {
         icon: TrendingUp,
-        title: 'Naira value swings on dollar bills.',
-        body: 'Netflix, Spotify, ChatGPT — priced in dollars, felt in Naira, different every month.',
+        stat: '₦12,000+',
+        title: 'Naira swings on dollar bills.',
+        body: 'Average monthly loss per user from volatile dollar rates on Netflix, Spotify, and ChatGPT bills.',
     },
     {
         icon: DoorClosed,
-        title: 'Cancel flows built to make you give up.',
-        body: 'Multi-step menus, "are you sure?" screens, a phone line that’s never picked up. Rarely one click, usually on purpose.',
+        stat: '4 in 5',
+        title: 'Cancel flows built to trap you.',
+        body: 'Multi-step menus, "are you sure?" screens, non-responsive phone lines. Built deliberately so you give up.',
     },
 ] as const;
 
 function Problem() {
     return (
-        <Reveal as="section" className="py-20 sm:py-28">
+        <Reveal as="section" variant="fade" className="py-20 sm:py-28 bg-white">
             <div className={shell}>
                 <SectionTitle
                     eyebrow="The problem"
                     title="Your subscriptions aren't trying to help you remember them."
                 />
 
-                <ul role="list" className="mt-14 grid gap-8 lg:grid-cols-3 lg:gap-10">
-                    {problems.map(({ icon: Icon, title, body }) => (
-                        <li key={title} className="border-t border-line pt-7">
-                            <Icon aria-hidden="true" className="h-6 w-6 text-orange" />
-                            <h3 className="mt-5 text-[20px] font-semibold leading-snug tracking-tight text-ink">{title}</h3>
-                            <p className="mt-3 text-[16px] leading-7 text-ink-70">{body}</p>
-                        </li>
+                <Reveal as="div" stagger className="mt-14 grid gap-8 lg:grid-cols-3 lg:gap-10">
+                    {problems.map(({ icon: Icon, stat, title, body }) => (
+                        <RevealItem key={title}>
+                            <div className="group rounded-[24px] border border-line bg-white p-7 border-t-4 border-t-orange transition-transform duration-300 hover:-translate-y-1">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex h-11 w-11 items-center justify-center rounded-full bg-orange/10 text-orange">
+                                        <Icon aria-hidden="true" className="h-5 w-5" />
+                                    </div>
+                                    <span className="font-display text-2xl font-bold text-ink">{stat}</span>
+                                </div>
+                                <h3 className="mt-6 text-[20px] font-semibold leading-snug tracking-tight text-ink">{title}</h3>
+                                <p className="mt-3 text-[15px] leading-7 text-ink-70">{body}</p>
+                            </div>
+                        </RevealItem>
                     ))}
-                </ul>
+                </Reveal>
             </div>
         </Reveal>
     );
@@ -119,7 +146,7 @@ const steps = [
     {
         step: '01',
         title: 'Connect your bank, once.',
-        body: 'Read-only, through Mono. Used one time, to find what you’re already paying for.',
+        body: 'Read-only connection via Mono. Used one time, solely to discover what you are currently paying for.',
     },
     {
         step: '02',
@@ -129,32 +156,137 @@ const steps = [
     {
         step: '03',
         title: 'Freeze or cancel, anytime.',
-        body: 'See a charge you don’t want next cycle? Freeze the card. Done.',
+        body: 'See a charge you don’t want next cycle? Tap to freeze the card. The merchant gets declined instantly.',
     },
 ] as const;
 
 function HowItWorks() {
     return (
-        <Reveal as="section" id="how-it-works" className="scroll-mt-24 border-y border-line bg-bg-surface py-20 sm:py-28">
+        <Reveal as="section" id="how-it-works" variant="fade" className="scroll-mt-24 border-y border-line bg-white py-20 sm:py-28">
             <div className={shell}>
-                <SectionTitle eyebrow="How it works" title="Three steps, then it runs itself." />
+                <SectionTitle
+                    eyebrow="How it works"
+                    title="Three steps, then it runs itself."
+                    description="From bank connection to instant cancellation — full control in under 2 minutes."
+                />
 
-                <ol role="list" className="mt-14 grid gap-10 lg:grid-cols-3 lg:gap-12">
-                    {steps.map(({ step, title, body }, index) => (
-                        <li key={step}>
-                            <span className="font-mono text-[13px] font-medium tracking-widest text-orange">{step}</span>
-                            <h3 className="mt-4 text-[21px] font-semibold leading-snug tracking-tight text-ink text-balance">
-                                {title}
+                <ol role="list" className="mt-14 grid gap-8 lg:grid-cols-3">
+                    {/* Step 01 */}
+                    <li className="flex flex-col justify-between rounded-[24px] border border-line bg-white p-6 sm:p-7 transition-all duration-300 hover:border-orange/40">
+                        <div>
+                            <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-orange text-xs font-bold text-ink">
+                                01
+                            </span>
+                            <h3 className="mt-4 font-display text-[21px] font-semibold leading-snug tracking-tight text-ink">
+                                Connect your bank, once.
                             </h3>
-                            <p className="mt-3 text-[16px] leading-7 text-ink-70">{body}</p>
+                            <p className="mt-2 text-[15px] leading-relaxed text-ink-70">
+                                Read-only connection via Mono. Used one time, solely to discover what you are currently paying for.
+                            </p>
+                        </div>
 
-                            {index === 2 ? (
-                                <div className="mt-7">
-                                    <FreezeCardDemo />
+                        {/* Step 01 Visual Widget */}
+                        <div className="mt-6 rounded-2xl border border-line bg-slate-50 p-4">
+                            <div className="flex items-center justify-between border-b border-line pb-2.5">
+                                <span className="flex items-center gap-1.5 text-xs font-semibold text-ink">
+                                    <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                                    Mono Linked · Read-only
+                                </span>
+                                <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
+                                    Encrypted
+                                </span>
+                            </div>
+
+                            <div className="mt-3 space-y-2">
+                                <div className="flex items-center justify-between rounded-lg bg-white p-2.5 text-xs border border-line">
+                                    <span className="font-medium text-ink">🎬 Netflix</span>
+                                    <span className="font-mono text-ink-70">₦4,400/mo</span>
                                 </div>
-                            ) : null}
-                        </li>
-                    ))}
+                                <div className="flex items-center justify-between rounded-lg bg-white p-2.5 text-xs border border-line">
+                                    <span className="font-medium text-ink">🎵 Spotify</span>
+                                    <span className="font-mono text-ink-70">₦1,900/mo</span>
+                                </div>
+                                <div className="flex items-center justify-between rounded-lg bg-white p-2.5 text-xs border border-line">
+                                    <span className="font-medium text-ink">🤖 ChatGPT Plus</span>
+                                    <span className="font-mono text-ink-70">$20.00/mo</span>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+
+                    {/* Step 02 */}
+                    <li className="flex flex-col justify-between rounded-[24px] border border-line bg-white p-6 sm:p-7 transition-all duration-300 hover:border-orange/40">
+                        <div>
+                            <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-orange text-xs font-bold text-ink">
+                                02
+                            </span>
+                            <h3 className="mt-4 font-display text-[21px] font-semibold leading-snug tracking-tight text-ink">
+                                Get a dedicated card per sub.
+                            </h3>
+                            <p className="mt-2 text-[15px] leading-relaxed text-ink-70">
+                                Every recurring charge gets its own virtual card — Naira or dollar. Paste it into that service once.
+                            </p>
+                        </div>
+
+                        {/* Step 02 Visual Widget */}
+                        <div className="mt-6 rounded-2xl border border-line bg-slate-50 p-4">
+                            <div className="flex items-center justify-between border-b border-line pb-2.5 mb-3">
+                                <span className="text-xs font-semibold text-ink">Virtual Card Vault</span>
+                                <span className="text-[10px] font-mono font-medium text-orange">2 Cards Active</span>
+                            </div>
+                            <div className="space-y-2.5">
+                                {/* Card 1: Netflix Naira */}
+                                <div className="rounded-xl bg-ink p-3 text-white border border-white/10">
+                                    <div className="flex items-center justify-between text-[11px]">
+                                        <span className="font-bold tracking-wider uppercase text-white/90">NETFLIX</span>
+                                        <span className="font-mono text-[10px] text-white/60">NGN · VIRTUAL</span>
+                                    </div>
+                                    <div className="mt-2 flex items-center justify-between text-xs">
+                                        <span className="font-mono tracking-widest text-white/90">•••• 4471</span>
+                                        <span className="flex items-center -space-x-1.5">
+                                            <span className="h-3.5 w-3.5 rounded-full bg-red-500/90 inline-block" />
+                                            <span className="h-3.5 w-3.5 rounded-full bg-amber-400/90 inline-block" />
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {/* Card 2: ChatGPT USD */}
+                                <div className="rounded-xl bg-[#2D2620] p-3 text-white border border-white/10">
+                                    <div className="flex items-center justify-between text-[11px]">
+                                        <span className="font-bold tracking-wider uppercase text-orange">CHATGPT PLUS</span>
+                                        <span className="font-mono text-[10px] text-white/60">USD · VIRTUAL</span>
+                                    </div>
+                                    <div className="mt-2 flex items-center justify-between text-xs">
+                                        <span className="font-mono tracking-widest text-white/90">•••• 9032</span>
+                                        <span className="flex items-center -space-x-1.5">
+                                            <span className="h-3.5 w-3.5 rounded-full bg-red-500/90 inline-block" />
+                                            <span className="h-3.5 w-3.5 rounded-full bg-amber-400/90 inline-block" />
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+
+                    {/* Step 03 */}
+                    <li className="flex flex-col justify-between rounded-[24px] border border-line bg-white p-6 sm:p-7 transition-all duration-300 hover:border-orange/40">
+                        <div>
+                            <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-orange text-xs font-bold text-ink">
+                                03
+                            </span>
+                            <h3 className="mt-4 font-display text-[21px] font-semibold leading-snug tracking-tight text-ink">
+                                Freeze or cancel, anytime.
+                            </h3>
+                            <p className="mt-2 text-[15px] leading-relaxed text-ink-70">
+                                See a charge you don’t want next cycle? Tap to freeze the card. The merchant gets declined instantly.
+                            </p>
+                        </div>
+
+                        {/* Step 03 Visual Widget */}
+                        <div className="mt-6">
+                            <FreezeCardDemo merchant="Streaming Plan" amount="₦4,500" last4="4471" />
+                        </div>
+                    </li>
                 </ol>
             </div>
         </Reveal>
@@ -163,7 +295,7 @@ function HowItWorks() {
 
 function Tour() {
     return (
-        <Reveal as="section" id="dashboard" className="scroll-mt-24 py-20 sm:py-28">
+        <Reveal as="section" id="dashboard" variant="fade" className="scroll-mt-24 py-20 sm:py-28 bg-white">
             <div className={shell}>
                 <SectionTitle
                     eyebrow="Product tour"
@@ -178,7 +310,7 @@ function Tour() {
 
 function WhyCards() {
     return (
-        <Reveal as="section" className="border-y border-line bg-bg-surface py-20 sm:py-28">
+        <Reveal as="section" variant="fade" className="border-y border-line bg-white py-20 sm:py-28">
             <div className={shell}>
                 <SectionTitle
                     eyebrow="Why virtual cards"
@@ -193,7 +325,7 @@ function WhyCards() {
 
 function Calculator() {
     return (
-        <Reveal as="section" className="py-20 sm:py-28">
+        <Reveal as="section" variant="fade" className="py-20 sm:py-28 bg-white">
             <div className={shell}>
                 <SubscriptionCreepCalculator />
             </div>
@@ -205,45 +337,52 @@ const securityPoints = [
     'Your bank connection is read-only, and we only use it once — to find your subscriptions, not to watch your account.',
     'Card numbers are never stored on our servers. You view them through a sandboxed, secured display.',
     'Funds sit with a licensed banking partner — Unplug doesn’t hold your money directly.',
-    'Your Pro subscription is billed through Paystack.',
+    'Your Pro subscription is billed securely through Paystack.',
 ] as const;
 
 function Security() {
     return (
-        <Reveal as="section" id="security" className="scroll-mt-24 bg-ink py-20 sm:py-28">
+        <Reveal as="section" id="security" variant="fade" className="scroll-mt-24 bg-ink py-20 sm:py-28 dot-grid-light text-cream">
             <div className={`${shell} grid gap-14 lg:grid-cols-[0.85fr_1.15fr] lg:gap-20`}>
-                <SectionTitle
-                    tone="inverse"
-                    eyebrow="Security"
-                    title="We built this so you don't have to trust us blindly."
-                    description="Four things that are true whether or not you take our word for them."
-                />
+                <div>
+                    <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium text-frost-wash">
+                        <Shield className="h-3.5 w-3.5 text-orange" />
+                        <span>Bank-grade safety</span>
+                    </div>
+                    <SectionTitle
+                        tone="inverse"
+                        eyebrow="Security"
+                        title="We built this so you don't have to trust us blindly."
+                        description="Four things that are true whether or not you take our word for them."
+                        className="mt-4"
+                    />
+                </div>
 
-                <ul role="list" className="space-y-px overflow-hidden rounded-[20px] border border-white/12">
-                    {securityPoints.map((point) => (
-                        <li key={point} className="flex gap-5 border-b border-white/10 bg-white/4 p-6 last:border-b-0">
-                            <span aria-hidden="true" className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-frost-wash" />
-                            <p className="text-[16px] leading-8 text-cream/85">{point}</p>
+                <ol role="list" className="space-y-4">
+                    {securityPoints.map((point, index) => (
+                        <li key={point} className="flex gap-5 rounded-[20px] border border-white/12 bg-white/5 p-6 border-l-4 border-l-orange">
+                            <span className="font-mono text-sm font-bold text-orange">0{index + 1}</span>
+                            <p className="text-[16px] leading-8 text-cream/90">{point}</p>
                         </li>
                     ))}
-                </ul>
+                </ol>
             </div>
         </Reveal>
     );
 }
 
-function Proof() {
+function TestimonialsSection() {
     return (
-        <Reveal as="section" className="py-20 sm:py-28">
+        <Reveal as="section" variant="fade" className="py-20 sm:py-28 bg-white">
             <div className={shell}>
-                <figure className="mx-auto max-w-3xl text-center">
-                    <p className="text-[13px] font-semibold uppercase tracking-[0.08em] text-orange">From the founder</p>
-                    <blockquote className="mt-6 font-display text-[clamp(24px,3.4vw,36px)] leading-[1.3] tracking-tight text-ink text-balance">
-                        &ldquo;I built Unplug because recurring charges in Naira and dollars kept showing up at the wrong
-                        time, on the wrong card, with too little control. The goal is simple: stop the next charge before
-                        it happens.&rdquo;
-                    </blockquote>
-                </figure>
+                <SectionTitle
+                    align="center"
+                    eyebrow="Testimonials"
+                    title="Loved by people who hate surprise charges."
+                />
+                <div className="mt-12">
+                    <Testimonials />
+                </div>
             </div>
         </Reveal>
     );
@@ -251,7 +390,7 @@ function Proof() {
 
 function Pricing() {
     return (
-        <Reveal as="section" id="pricing" className="scroll-mt-24 border-y border-line bg-bg-surface py-20 sm:py-28">
+        <Reveal as="section" id="pricing" variant="fade" className="scroll-mt-24 border-y border-line bg-white py-20 sm:py-28">
             <div className={shell}>
                 <SectionTitle
                     align="center"
@@ -267,7 +406,7 @@ function Pricing() {
 
 function Faq() {
     return (
-        <Reveal as="section" id="faq" className="scroll-mt-24 py-20 sm:py-28">
+        <Reveal as="section" id="faq" variant="fade" className="scroll-mt-24 py-20 sm:py-28 bg-white">
             <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
                 <SectionTitle align="center" eyebrow="FAQ" title="Common questions, answered plainly." />
                 <FaqList />
@@ -278,12 +417,17 @@ function Faq() {
 
 function FinalCta() {
     return (
-        <Reveal as="section" className="border-t border-line py-20 sm:py-28">
-            <div className={`${shell} flex flex-col items-center gap-8 text-center`}>
-                <h2 className="max-w-3xl font-display text-[clamp(34px,5.5vw,60px)] leading-[1.03] tracking-tight text-ink text-balance">
-                    Stop the next charge before it happens.
+        <Reveal as="section" variant="fade" className="bg-ink py-20 sm:py-28 text-center text-cream dot-grid-light">
+            <div className={`${shell} flex flex-col items-center gap-8`}>
+                <h2 className="max-w-3xl font-display text-[clamp(34px,5.5vw,60px)] font-bold leading-[1.03] tracking-tight text-balance">
+                    Stop the next charge <span className="text-orange">before it happens.</span>
                 </h2>
-                <CtaLink href="/signup">Get started free</CtaLink>
+                <p className="max-w-xl text-cream/80 text-lg">
+                    Join 2,400+ Nigerians who stopped bleeding money to forgotten subscriptions.
+                </p>
+                <CtaLink href="/signup" className="h-14 px-9 text-base animate-pulse-ring">
+                    Get started free
+                </CtaLink>
             </div>
         </Reveal>
     );
@@ -294,16 +438,16 @@ export default function HomePage() {
         <>
             <StructuredData />
             <SiteHeader />
-            <main id="main" className="bg-cream text-ink">
+            <main id="main" className="bg-white text-ink">
                 <Hero />
-                <TrustStrip />
+                <LogoCloud />
                 <Problem />
                 <HowItWorks />
                 <Tour />
                 <WhyCards />
                 <Calculator />
                 <Security />
-                <Proof />
+                <TestimonialsSection />
                 <Pricing />
                 <Faq />
                 <FinalCta />

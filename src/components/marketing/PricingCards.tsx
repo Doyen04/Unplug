@@ -12,13 +12,19 @@ export function PricingCards() {
                 <div
                     key={plan.name}
                     className={cn(
-                        'relative rounded-[24px] border p-8 sm:p-9',
-                        plan.featured ? 'border-orange/45 bg-bg-surface shadow-[0_28px_70px_-45px_rgba(31,26,22,0.5)]' : 'border-line bg-cream',
+                        'group relative rounded-[24px] border p-8 transition-transform duration-300 hover:-translate-y-1 sm:p-9',
+                        plan.featured ? 'border-2 border-orange bg-bg-surface' : 'border-line bg-white',
                     )}
                 >
                     {plan.featured ? (
-                        <span className="absolute -top-3 left-8 rounded-full bg-orange px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-ink">
+                        <span className="absolute -top-3 left-8 overflow-hidden rounded-full bg-orange px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-ink">
                             Most popular
+                            {/* Shimmer sweep */}
+                            <span
+                                aria-hidden="true"
+                                className="absolute inset-0 animate-shimmer bg-white/25"
+                                style={{ width: '40%' }}
+                            />
                         </span>
                     ) : null}
 

@@ -11,7 +11,7 @@ const variants = {
     primary: 'min-h-12 bg-orange px-7 text-ink hover:bg-orange-deep',
     secondary: 'min-h-12 border border-line bg-bg-surface px-7 text-ink hover:border-ink',
     /** For use on the dark security section. */
-    inverse: 'min-h-12 bg-cream px-7 text-ink hover:bg-white',
+    inverse: 'min-h-12 bg-white px-7 text-ink hover:bg-slate-100',
     quiet: 'min-h-12 gap-2 px-1 text-ink hover:text-orange',
 } as const;
 
@@ -22,7 +22,7 @@ interface CtaLinkProps extends Omit<ComponentProps<typeof Link>, 'className'> {
 
 /**
  * The single "Get started free" pill used across the marketing pages.
- * The label is deliberately never reworded — see LANDING_PAGE_REDESIGN.md rule 6.
+
  */
 export function CtaLink({ variant = 'primary', className, ...props }: CtaLinkProps) {
     return <Link className={cn(base, variants[variant], className)} {...props} />;

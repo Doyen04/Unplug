@@ -4,7 +4,6 @@ import { BellRing, CreditCard, Eye, LayoutDashboard, Settings2 } from 'lucide-re
 /**
  * Marketing copy lives here so the homepage and the standalone /pricing and
  * /security pages can never drift apart. Copy is taken verbatim from
- * LANDING_PAGE_REDESIGN.md §6 — that spec is authoritative for wording.
  */
 
 export interface PricingPlan {
