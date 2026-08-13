@@ -15,9 +15,9 @@ interface FreezeCardDemoProps {
 }
 
 /**
- * FreezeCardDemo — Crafted with authentic 100% real-life credit card details:
- * Metallic golden EMV chip, contactless wifi wave, embossed PAN typography,
- * metallic glare finish, and official Mastercard branding.
+ * FreezeCardDemo — Streamlined & Lean Surrounding Shell.
+ * Keeps the 100% authentic credit card face, while simplifying the outer
+ * surrounding container to a single, clean control strip without double-nested boxes.
  */
 export function FreezeCardDemo({
     merchant = 'Streaming Plan',
@@ -31,13 +31,13 @@ export function FreezeCardDemo({
 
     return (
         <div className="w-full max-w-sm sm:max-w-md mx-auto">
-            {/* Card Outer Shell */}
-            <div className="relative rounded-[24px] border border-line bg-white p-3.5 sm:p-4 transition-all duration-300">
+            {/* Clean & Lean Card Container */}
+            <div className="relative rounded-[22px] border border-line bg-white p-3 sm:p-3.5 shadow-md">
 
-                {/* Authentic Real-Life Credit Card Face */}
+                {/* Authentic Real-Life Credit Card Face (UNTOUCHED) */}
                 <div
                     className={cn(
-                        'relative aspect-[1.586/1] w-full select-none overflow-hidden rounded-[16px] p-5 sm:p-6 border border-white/20 shadow-xl transition-all duration-300',
+                        'relative aspect-[1.586/1] w-full select-none overflow-hidden rounded-[16px] p-5 sm:p-6 border border-white/20 shadow-lg transition-all duration-300',
                         frozen
                             ? 'bg-gradient-to-br from-[#262626] via-[#1A1A1A] to-[#121212] text-white grayscale'
                             : 'bg-gradient-to-br from-[#1C1A17] via-[#2D2620] to-[#12100E] text-white',
@@ -117,36 +117,36 @@ export function FreezeCardDemo({
                     </div>
                 </div>
 
-                {/* Sub-Card Charge & Control Panel */}
-                <div className="mt-3 rounded-xl border border-line bg-bg-surface p-3 sm:p-3.5">
-                    <div className="flex items-center justify-between text-xs sm:text-sm">
-                        <span className="text-ink-70 font-medium">Monthly Charge</span>
-                        <span className={cn('font-mono font-semibold text-ink', frozen && 'line-through text-ink-70')}>
+                {/* Lean Single-Layer Control Strip (No nested boxes) */}
+                <div className="mt-3 flex items-center justify-between gap-3 pt-1 px-1">
+                    <div className="flex flex-col">
+                        <span className="text-[11px] font-medium uppercase tracking-wider text-ink-70">Monthly Bill</span>
+                        <span className={cn('font-mono text-sm font-bold text-ink', frozen && 'line-through text-ink-70')}>
                             {amount}/mo
                         </span>
                     </div>
 
-                    {/* Freeze / Unfreeze Interactive Button */}
+                    {/* Single Clean Interactive Toggle Button */}
                     <button
                         type="button"
                         onClick={() => setFrozen((prev) => !prev)}
                         aria-pressed={frozen}
                         className={cn(
-                            'mt-3 flex w-full items-center justify-center gap-2 rounded-xl py-2.5 px-4 text-xs font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink',
+                            'inline-flex items-center justify-center gap-2 rounded-xl py-2 px-4 text-xs font-bold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink',
                             frozen
-                                ? 'bg-orange text-ink hover:bg-orange-deep'
-                                : 'border border-line bg-white text-ink hover:border-ink',
+                                ? 'bg-orange text-ink hover:bg-orange-deep shadow-xs'
+                                : 'bg-ink text-white hover:bg-black shadow-xs',
                         )}
                     >
                         {frozen ? (
                             <>
                                 <Unlock className="h-3.5 w-3.5" />
-                                <span>Unfreeze Card (Allow Charges)</span>
+                                <span>Unfreeze Card</span>
                             </>
                         ) : (
                             <>
                                 <Snowflake className="h-3.5 w-3.5 text-orange" />
-                                <span>Freeze Card (Block Charges)</span>
+                                <span>Freeze Card</span>
                             </>
                         )}
                     </button>
