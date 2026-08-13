@@ -229,34 +229,46 @@ function HowItWorks() {
                                 <span className="text-xs font-semibold text-ink">Virtual Card Vault</span>
                                 <span className="text-[10px] font-mono font-medium text-orange">2 Cards Active</span>
                             </div>
-                            <div className="space-y-2.5">
-                                {/* Card 1: Netflix Naira */}
-                                <div className="rounded-xl bg-ink p-3 text-white border border-white/10">
-                                    <div className="flex items-center justify-between text-[11px]">
-                                        <span className="font-bold tracking-wider uppercase text-white/90">NETFLIX</span>
-                                        <span className="font-mono text-[10px] text-white/60">NGN · VIRTUAL</span>
+                            <div className="space-y-3">
+                                {/* Card 1: Netflix NGN Card */}
+                                <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-[#1C1A17] via-[#2A241F] to-[#12100E] p-3 text-white border border-white/20 shadow-md">
+                                    <div className="flex items-center justify-between text-[10px]">
+                                        <div className="flex items-center gap-2">
+                                            {/* Mini Golden EMV Chip */}
+                                            <div className="h-4 w-5 rounded-[3px] bg-gradient-to-br from-amber-200 via-yellow-400 to-amber-500 border border-amber-600/40 p-[1px]">
+                                                <div className="h-full w-full border border-amber-800/30 grid grid-cols-2" />
+                                            </div>
+                                            <span className="font-bold tracking-widest uppercase text-white">NETFLIX</span>
+                                        </div>
+                                        <span className="font-mono text-[9px] text-white/60">NGN · VIRTUAL</span>
                                     </div>
-                                    <div className="mt-2 flex items-center justify-between text-xs">
-                                        <span className="font-mono tracking-widest text-white/90">•••• 4471</span>
-                                        <span className="flex items-center -space-x-1.5">
-                                            <span className="h-3.5 w-3.5 rounded-full bg-red-500/90 inline-block" />
-                                            <span className="h-3.5 w-3.5 rounded-full bg-amber-400/90 inline-block" />
-                                        </span>
+                                    <div className="mt-2.5 flex items-center justify-between text-xs">
+                                        <span className="font-mono tracking-[0.2em] font-bold text-white/90">•••• •••• •••• 4471</span>
+                                        <div className="flex items-center -space-x-1.5">
+                                            <div className="h-4 w-4 rounded-full bg-[#EB001B]" />
+                                            <div className="h-4 w-4 rounded-full bg-[#F79E1B] mix-blend-screen opacity-90" />
+                                        </div>
                                     </div>
                                 </div>
 
-                                {/* Card 2: ChatGPT USD */}
-                                <div className="rounded-xl bg-[#2D2620] p-3 text-white border border-white/10">
-                                    <div className="flex items-center justify-between text-[11px]">
-                                        <span className="font-bold tracking-wider uppercase text-orange">CHATGPT PLUS</span>
-                                        <span className="font-mono text-[10px] text-white/60">USD · VIRTUAL</span>
+                                {/* Card 2: ChatGPT USD Card */}
+                                <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-[#26211C] via-[#1E1915] to-[#0E0C0A] p-3 text-white border border-white/20 shadow-md">
+                                    <div className="flex items-center justify-between text-[10px]">
+                                        <div className="flex items-center gap-2">
+                                            {/* Mini Golden EMV Chip */}
+                                            <div className="h-4 w-5 rounded-[3px] bg-gradient-to-br from-amber-200 via-yellow-400 to-amber-500 border border-amber-600/40 p-[1px]">
+                                                <div className="h-full w-full border border-amber-800/30 grid grid-cols-2" />
+                                            </div>
+                                            <span className="font-bold tracking-widest uppercase text-orange">CHATGPT PLUS</span>
+                                        </div>
+                                        <span className="font-mono text-[9px] text-white/60">USD · VIRTUAL</span>
                                     </div>
-                                    <div className="mt-2 flex items-center justify-between text-xs">
-                                        <span className="font-mono tracking-widest text-white/90">•••• 9032</span>
-                                        <span className="flex items-center -space-x-1.5">
-                                            <span className="h-3.5 w-3.5 rounded-full bg-red-500/90 inline-block" />
-                                            <span className="h-3.5 w-3.5 rounded-full bg-amber-400/90 inline-block" />
-                                        </span>
+                                    <div className="mt-2.5 flex items-center justify-between text-xs">
+                                        <span className="font-mono tracking-[0.2em] font-bold text-white/90">•••• •••• •••• 9032</span>
+                                        <div className="flex items-center -space-x-1.5">
+                                            <div className="h-4 w-4 rounded-full bg-[#EB001B]" />
+                                            <div className="h-4 w-4 rounded-full bg-[#F79E1B] mix-blend-screen opacity-90" />
+                                        </div>
                                     </div>
                                 </div>
                             </div>
