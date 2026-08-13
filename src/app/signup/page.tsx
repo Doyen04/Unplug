@@ -1,3 +1,4 @@
+import { Check } from 'lucide-react';
 import Link from 'next/link';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
@@ -6,9 +7,9 @@ import { FormSubmitButton } from '@/components/features/auth/FormSubmitButton';
 import { auth } from '@/lib/auth';
 import { sendWelcomeEmail } from '@/lib/server/mailer';
 import { getServerSession } from '@/lib/server/auth-session';
-import { Card } from '@/components/ui/Card';
-import { Input } from '@/components/ui/Input';
 import { Badge } from '@/components/ui/Badge';
+import { Input } from '@/components/ui/Input';
+import { UnplugLogo } from '@/components/ui/UnplugLogo';
 
 const signupAction = async (formData: FormData) => {
     'use server';
@@ -36,66 +37,106 @@ const signupAction = async (formData: FormData) => {
     redirect('/dashboard')
 };
 
+const features = [
+    {
+        title: 'Automatic detection',
+        body: 'Finds every subscription in your bank history — Naira or dollar.',
+    },
+    {
+        title: 'Usage scoring',
+        body: 'See what you actually use versus what you forgot about.',
+    },
+    {
+        title: 'Monthly debriefs',
+        body: 'A plain-language summary of every charge and why it happened.',
+    },
+] as const;
+
 export default async function SignupPage({ searchParams }: { searchParams?: Promise<{ error?: string }> }) {
     const params = (await searchParams) ?? {};
     const session = await getServerSession();
     if (session) redirect('/dashboard');
 
     return (
-        <main className="auth-page flex min-h-screen items-center justify-center p-4">
-            <div className="auth-page-pattern" />
-            <div className="relative z-10 w-full max-w-5xl grid lg:grid-cols-2 gap-4 items-stretch">
-                <Card className="hidden lg:flex flex-col justify-between p-10 bg-bg-surface">
-                    <div>
-                        <Badge variant="outline" className="mb-6">Unplug</Badge>
-                        <h1 className="font-display text-5xl leading-tight tracking-tight">Stop paying for<br />things you forgot.</h1>
-                        <p className="mt-6 text-text-secondary leading-7">The average person wastes $1,320 a year on subscriptions they don't use. We make the waste impossible to ignore.</p>
+        <main className="auth-page relative">
+            <div className="lg:grid lg:min-h-screen lg:grid-cols-2">
+                {/* Left: brand story */}
+                <section className="dot-grid relative hidden flex-col justify-between gap-10 overflow-hidden border-r border-line bg-bg-surface p-8 xl:p-12 lg:flex">
+                    <div className="relative space-y-5">
+                        <Link href="/" aria-label="Back to home" className="inline-block">
+                            <UnplugLogo size="md" />
+                        </Link>
+                        <h1 className="font-display text-[clamp(38px,4vw,54px)] font-bold leading-[1.05] tracking-tight text-ink">
+                            Stop paying for things you forgot.
+                        </h1>
+                        <p className="max-w-md text-[15px] leading-7 text-ink-70">
+                            Unplug gives every subscription its own virtual card — so you can freeze or cancel the
+                            charges you don&apos;t want, the moment you notice them.
+                        </p>
+                        <ul role="list" className="space-y-3.5 pt-2">
+                            {features.map((feature) => (
+                                <li key={feature.title} className="flex items-start gap-3">
+                                    <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-green-light text-green">
+                                        <Check aria-hidden="true" className="h-3.5 w-3.5" strokeWidth={3} />
+                                    </span>
+                                    <div>
+                                        <p className="text-sm font-bold text-ink">{feature.title}</p>
+                                        <p className="text-sm leading-6 text-ink-70">{feature.body}</p>
+                                    </div>
+                                </li>
+                            ))}
+                        </ul>
                     </div>
-                    <div className="space-y-4">
-                        {["Automatic detection", "Usage scoring", "Monthly debriefs"].map(item => (
-                            <div key={item} className="flex items-center gap-3 text-sm font-medium text-text-secondary">
-                                <span className="h-2 w-2 rounded-full bg-brand" /> {item}
+
+                    <div className="relative">
+                        <p className="font-display text-3xl font-extrabold text-green">₦18M+</p>
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-ink-70">Saved from subscription creep · 2,400+ accounts</p>
+                    </div>
+                </section>
+
+                {/* Right: form */}
+                <section className="flex min-h-screen flex-col bg-white px-4 py-12 sm:px-10">
+                    <div className="m-auto w-full max-w-md">
+                        <Link href="/" aria-label="Back to home" className="mb-10 inline-block lg:hidden">
+                            <UnplugLogo size="md" />
+                        </Link>
+
+                        <p className="text-xs font-bold uppercase tracking-widest text-ink-70 mb-6">Create Account</p>
+
+                        {params.error === 'signup_failed' && (
+                            <Badge variant="danger" className="w-full justify-center py-3 mb-6">Sign-up failed. Try again.</Badge>
+                        )}
+
+                        <form action={signupAction} className="space-y-4">
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold uppercase tracking-widest text-ink-70 ml-1">Full Name</label>
+                                <Input name="name" type="text" placeholder="Your name" required />
                             </div>
-                        ))}
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold uppercase tracking-widest text-ink-70 ml-1">Email</label>
+                                <Input name="email" type="email" placeholder="you@example.com" required />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold uppercase tracking-widest text-ink-70 ml-1">Phone Number</label>
+                                <Input name="phoneNumber" type="tel" placeholder="+234 801 234 5678" required />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold uppercase tracking-widest text-ink-70 ml-1">Password</label>
+                                <Input name="password" type="password" placeholder="At least 8 characters" required />
+                            </div>
+                            <FormSubmitButton
+                                idleLabel="Create account"
+                                pendingLabel="Creating..."
+                                className="w-full h-12 text-sm font-bold uppercase tracking-widest mt-4"
+                            />
+                        </form>
+
+                        <p className="mt-8 text-center text-xs font-bold uppercase tracking-widest text-ink-70">
+                            Already have an account?{' '}
+                            <Link href="/login" className="text-green hover:underline">Log in</Link>
+                        </p>
                     </div>
-                </Card>
-
-                <Card className="p-8 lg:p-12 flex flex-col justify-center">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted mb-8">Create Account</p>
-
-                    {params.error === 'signup_failed' && (
-                        <Badge variant="danger" className="w-full justify-center py-3 mb-6">Sign-up failed. Try again.</Badge>
-                    )}
-
-                    <form action={signupAction} className="space-y-4">
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-bold uppercase tracking-widest text-text-muted ml-1">Full Name</label>
-                            <Input name="name" type="text" placeholder="Your name" required />
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-bold uppercase tracking-widest text-text-muted ml-1">Email</label>
-                            <Input name="email" type="email" placeholder="you@example.com" required />
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-bold uppercase tracking-widest text-text-muted ml-1">Phone Number</label>
-                            <Input name="phoneNumber" type="tel" placeholder="+234 801 234 5678" required />
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-bold uppercase tracking-widest text-text-muted ml-1">Password</label>
-                            <Input name="password" type="password" placeholder="At least 8 characters" required />
-                        </div>
-                        <FormSubmitButton
-                            idleLabel="Create account"
-                            pendingLabel="Creating..."
-                            className="w-full h-12 text-[10px] font-bold uppercase tracking-widest mt-4"
-                        />
-                    </form>
-
-                    <p className="mt-8 text-center text-[10px] font-bold uppercase tracking-widest text-text-muted">
-                        Already have an account?{' '}
-                        <Link href="/login" className="text-brand hover:underline">Log in</Link>
-                    </p>
-                </Card>
+                </section>
             </div>
         </main>
     );

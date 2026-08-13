@@ -1,3 +1,4 @@
+import { Check } from 'lucide-react';
 import Link from 'next/link';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
@@ -5,6 +6,9 @@ import { redirect } from 'next/navigation';
 import { FormSubmitButton } from '@/components/features/auth/FormSubmitButton';
 import { auth } from '@/lib/auth';
 import { getServerSession } from '@/lib/server/auth-session';
+import { Badge } from '@/components/ui/Badge';
+import { Input } from '@/components/ui/Input';
+import { UnplugLogo } from '@/components/ui/UnplugLogo';
 
 const requestResetCodeAction = async (formData: FormData) => {
     'use server';
@@ -54,6 +58,21 @@ const resetPasswordAction = async (formData: FormData) => {
     redirect('/login?reset=success');
 };
 
+const features = [
+    {
+        title: 'Automatic detection',
+        body: 'Finds every subscription in your bank history — Naira or dollar.',
+    },
+    {
+        title: 'Usage scoring',
+        body: 'See what you actually use versus what you forgot about.',
+    },
+    {
+        title: 'Monthly debriefs',
+        body: 'A plain-language summary of every charge and why it happened.',
+    },
+] as const;
+
 interface ForgotPasswordPageProps {
     searchParams?: Promise<{
         sent?: string;
@@ -75,8 +94,18 @@ const ForgotPasswordPage = async ({ searchParams }: ForgotPasswordPageProps) => 
     const email = String(params.email ?? '').trim();
     const requestedStep = params.step === 'reset' ? 'reset' : params.step === 'request' ? 'request' : null;
     const mobileStep = requestedStep ?? (sent ? 'reset' : 'request');
-    const showRequestOnMobile = mobileStep === 'request';
-    const showResetOnMobile = mobileStep === 'reset';
+    const showRequest = mobileStep === 'request';
+    const showReset = mobileStep === 'reset';
+
+    const resetStepUrl = `/forgot-password?${new URLSearchParams({
+        ...(email ? { email } : {}),
+        ...(sent ? { sent: '1' } : {}),
+        step: 'reset',
+    }).toString()}`;
+    const requestStepUrl = `/forgot-password?${new URLSearchParams({
+        ...(email ? { email } : {}),
+        step: 'request',
+    }).toString()}`;
 
     const hasInvalidEmailError = params.error === 'invalid_email';
     const hasRequestFailedError = params.error === 'request_failed';
@@ -84,175 +113,135 @@ const ForgotPasswordPage = async ({ searchParams }: ForgotPasswordPageProps) => 
     const hasInvalidCodeError = params.error === 'invalid_code';
 
     return (
-        <main className="auth-page flex min-h-screen items-center justify-center px-4 py-8 text-text-primary md:px-6 md:py-10 lg:px-8">
-            <div aria-hidden="true" className="auth-page-pattern" />
-            <div className="auth-content mx-auto grid w-full max-w-6xl items-stretch gap-4 lg:grid-cols-[1.1fr_0.9fr]">
-                {/* Request Reset Code - Left */}
-                <section className={`auth-card scrollbar-hidden ${showRequestOnMobile ? 'flex' : 'hidden'} max-h-[calc(100vh-4rem)] flex-col overflow-y-auto rounded-2xl p-6 sm:p-8 lg:flex lg:p-10`}>
-                    <div className="my-auto w-full">
-                        <div className="mb-4 lg:hidden">
-                            <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-text-muted">Step 1 of 2</p>
-                            <Link
-                                href={`/forgot-password?${new URLSearchParams({
-                                    ...(email ? { email } : {}),
-                                    ...(sent ? { sent: '1' } : {}),
-                                    step: 'reset',
-                                }).toString()}`}
-                                className="mt-2 inline-block text-xs font-semibold uppercase tracking-[0.08em] text-[#E8482C] hover:text-[#D43D23] focus-visible:outline-2 focus-visible:outline-[#E8482C]"
-                            >
-                                Already have a code? Enter it
-                            </Link>
-                        </div>
-
-                        <Link
-                            href="/"
-                            className="inline-block focus-visible:outline-2 focus-visible:outline-brand"
-                            aria-label="Go to Unplug home page"
-                        >
-                            <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-text-muted">Password recovery</p>
+        <main className="auth-page relative">
+            <div className="lg:grid lg:min-h-screen lg:grid-cols-2">
+                {/* Left: brand story */}
+                <section className="dot-grid relative hidden flex-col justify-between gap-10 overflow-hidden border-r border-line bg-bg-surface p-8 xl:p-12 lg:flex">
+                    <div className="relative space-y-5">
+                        <Link href="/" aria-label="Back to home" className="inline-block">
+                            <UnplugLogo size="md" />
                         </Link>
-                        <h1 className="font-display mt-4 text-4xl leading-tight text-text-primary sm:text-5xl">
-                            Forgot your password?
+                        <h1 className="font-display text-[clamp(38px,4vw,54px)] font-bold leading-[1.05] tracking-tight text-ink">
+                            Let&apos;s get you back in.
                         </h1>
-                        <p className="mt-5 max-w-xl text-sm leading-7 text-text-secondary">
-                            Enter your email to receive a 6-digit reset code. Then set a new password.
+                        <p className="max-w-md text-[15px] leading-7 text-ink-70">
+                            Enter your email and we&apos;ll send a 6-digit reset code. Two minutes, tops — then you&apos;re
+                            back in your dashboard.
                         </p>
+                        <ul role="list" className="space-y-3.5 pt-2">
+                            {features.map((feature) => (
+                                <li key={feature.title} className="flex items-start gap-3">
+                                    <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-green-light text-green">
+                                        <Check aria-hidden="true" className="h-3.5 w-3.5" strokeWidth={3} />
+                                    </span>
+                                    <div>
+                                        <p className="text-sm font-bold text-ink">{feature.title}</p>
+                                        <p className="text-sm leading-6 text-ink-70">{feature.body}</p>
+                                    </div>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
 
-                        {hasInvalidEmailError ? (
-                            <div className="mt-6 rounded-[10px] border border-danger bg-[#FEF0F0] p-4 text-xs font-medium uppercase tracking-[0.08em] text-danger">
-                                Enter a valid email.
-                            </div>
-                        ) : null}
-
-                        {hasRequestFailedError ? (
-                            <div className="mt-6 rounded-[10px] border border-danger bg-[#FEF0F0] p-4 text-xs font-medium uppercase tracking-[0.08em] text-danger">
-                                Could not send reset code. Check email settings and try again.
-                            </div>
-                        ) : null}
-
-                        {sent ? (
-                            <div className="mt-6 rounded-[10px] border border-success bg-[#EDFAF3] p-4 text-xs font-medium uppercase tracking-[0.08em] text-success">
-                                If an account exists for this email, a reset code will arrive shortly.
-                            </div>
-                        ) : null}
-
-                        <form className="mt-8 space-y-5" action={requestResetCodeAction}>
-                            <div>
-                                <label htmlFor="email" className="text-xs font-medium uppercase tracking-[0.08em] text-text-muted">
-                                    Email
-                                </label>
-                                <input
-                                    id="email"
-                                    name="email"
-                                    type="email"
-                                    defaultValue={email}
-                                    required
-                                    className="auth-input mt-2 w-full rounded-[10px] border bg-bg-base px-4 py-3 text-sm text-text-primary placeholder-text-muted outline-none transition-colors focus:bg-white"
-                                    placeholder="you@example.com"
-                                />
-                            </div>
-
-                            <FormSubmitButton
-                                idleLabel="Send reset code"
-                                pendingLabel="Sending..."
-                                className="auth-btn-primary w-full rounded-[10px] border px-4 py-3 text-xs font-semibold uppercase tracking-[0.08em] text-white focus-visible:outline-2 focus-visible:outline-[#E8482C] disabled:cursor-not-allowed disabled:opacity-60"
-                            />
-                        </form>
+                    <div className="relative">
+                        <p className="font-display text-3xl font-extrabold text-green">₦18M+</p>
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-ink-70">Saved from subscription creep · 2,400+ accounts</p>
                     </div>
                 </section>
 
-                {/* Use Reset Code - Right */}
-                <section className={`auth-card scrollbar-hidden ${showResetOnMobile ? 'flex' : 'hidden'} max-h-[calc(100vh-4rem)] flex-col overflow-y-auto rounded-2xl p-6 sm:p-8 lg:flex`}>
-                    <div className="my-auto w-full">
-                        <div className="mb-4 lg:hidden">
-                            <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-text-muted">Step 2 of 2</p>
-                            <Link
-                                href={`/forgot-password?${new URLSearchParams({
-                                    ...(email ? { email } : {}),
-                                    step: 'request',
-                                }).toString()}`}
-                                className="mt-2 inline-block text-xs font-semibold uppercase tracking-[0.08em] text-text-secondary hover:text-text-primary focus-visible:outline-2 focus-visible:outline-[#E8482C]"
-                            >
-                                Need a new code? Go back
-                            </Link>
-                        </div>
+                {/* Right: form */}
+                <section className="flex min-h-screen flex-col bg-white px-4 py-12 sm:px-10">
+                    <div className="m-auto w-full max-w-md">
+                        <Link href="/" aria-label="Back to home" className="mb-10 inline-block lg:hidden">
+                            <UnplugLogo size="md" />
+                        </Link>
 
-                        <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-text-muted">Use code</p>
+                        <p className="text-xs font-bold uppercase tracking-widest text-ink-70 mb-6">Password Recovery</p>
 
-                        {hasInvalidResetInputError ? (
-                            <div className="mt-4 rounded-[10px] border border-danger bg-[#FEF0F0] p-4 text-xs font-medium uppercase tracking-[0.08em] text-danger">
-                                Enter email, 6-digit code, and a password with at least 8 characters.
-                            </div>
-                        ) : null}
+                        {showRequest && (
+                            <>
+                                {hasInvalidEmailError && (
+                                    <Badge variant="danger" className="w-full justify-center py-3 mb-6">Enter a valid email.</Badge>
+                                )}
+                                {hasRequestFailedError && (
+                                    <Badge variant="danger" className="w-full justify-center py-3 mb-6">Could not send reset code. Check email settings and try again.</Badge>
+                                )}
+                                {sent && (
+                                    <Badge variant="success" className="w-full justify-center py-3 mb-6">If an account exists for this email, a reset code will arrive shortly.</Badge>
+                                )}
 
-                        {hasInvalidCodeError ? (
-                            <div className="mt-4 rounded-[10px] border border-danger bg-[#FEF0F0] p-4 text-xs font-medium uppercase tracking-[0.08em] text-danger">
-                                Invalid or expired code. Request another code and retry.
-                            </div>
-                        ) : null}
+                                <form action={requestResetCodeAction} className="space-y-4">
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold uppercase tracking-widest text-ink-70 ml-1">Email</label>
+                                        <Input name="email" type="email" defaultValue={email} placeholder="you@example.com" required />
+                                    </div>
+                                    <FormSubmitButton
+                                        idleLabel="Send reset code"
+                                        pendingLabel="Sending..."
+                                        className="w-full h-12 text-sm font-bold uppercase tracking-widest mt-4"
+                                    />
+                                </form>
 
-                        <form className="mt-6 space-y-5" action={resetPasswordAction}>
-                            <div>
-                                <label htmlFor="reset-email" className="text-xs font-medium uppercase tracking-[0.08em] text-text-muted">
-                                    Email
-                                </label>
-                                <input
-                                    id="reset-email"
-                                    name="email"
-                                    type="email"
-                                    defaultValue={email}
-                                    required
-                                    className="auth-input mt-2 w-full rounded-[10px] border bg-bg-base px-4 py-3 text-sm text-text-primary placeholder-text-muted outline-none transition-colors focus:bg-white"
-                                    placeholder="you@example.com"
-                                />
-                            </div>
+                                <p className="mt-6 text-center text-xs font-bold uppercase tracking-widest text-ink-70">
+                                    Already have a code?{' '}
+                                    <Link href={resetStepUrl} className="text-green hover:underline">Enter it</Link>
+                                </p>
+                                <p className="mt-8 text-center text-xs font-bold uppercase tracking-widest text-ink-70">
+                                    Remembered your password?{' '}
+                                    <Link href="/login" className="text-green hover:underline">Back to login</Link>
+                                </p>
+                            </>
+                        )}
 
-                            <div>
-                                <label htmlFor="otp" className="text-xs font-medium uppercase tracking-[0.08em] text-text-muted">
-                                    Reset code
-                                </label>
-                                <input
-                                    id="otp"
-                                    name="otp"
-                                    type="text"
-                                    inputMode="numeric"
-                                    pattern="[0-9]{6}"
-                                    minLength={6}
-                                    maxLength={6}
-                                    required
-                                    className="auth-input mt-2 w-full rounded-[10px] border bg-bg-base px-4 py-3 text-sm tracking-[0.35em] text-text-primary placeholder-text-muted outline-none transition-colors focus:bg-white"
-                                    placeholder="123456"
-                                />
-                            </div>
+                        {showReset && (
+                            <>
+                                {hasInvalidResetInputError && (
+                                    <Badge variant="danger" className="w-full justify-center py-3 mb-6">Enter email, 6-digit code, and a password with at least 8 characters.</Badge>
+                                )}
+                                {hasInvalidCodeError && (
+                                    <Badge variant="danger" className="w-full justify-center py-3 mb-6">Invalid or expired code. Request another code and retry.</Badge>
+                                )}
 
-                            <div>
-                                <label htmlFor="new-password" className="text-xs font-medium uppercase tracking-[0.08em] text-text-muted">
-                                    New password
-                                </label>
-                                <input
-                                    id="new-password"
-                                    name="password"
-                                    type="password"
-                                    minLength={8}
-                                    required
-                                    className="auth-input mt-2 w-full rounded-[10px] border bg-bg-base px-4 py-3 text-sm text-text-primary placeholder-text-muted outline-none transition-colors focus:bg-white"
-                                    placeholder="At least 8 characters"
-                                />
-                            </div>
+                                <form action={resetPasswordAction} className="space-y-4">
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold uppercase tracking-widest text-ink-70 ml-1">Email</label>
+                                        <Input name="email" type="email" defaultValue={email} placeholder="you@example.com" required />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold uppercase tracking-widest text-ink-70 ml-1">Reset code</label>
+                                        <Input
+                                            name="otp"
+                                            type="text"
+                                            inputMode="numeric"
+                                            pattern="[0-9]{6}"
+                                            minLength={6}
+                                            maxLength={6}
+                                            className="text-center tracking-[0.35em]"
+                                            placeholder="123456"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold uppercase tracking-widest text-ink-70 ml-1">New password</label>
+                                        <Input name="password" type="password" minLength={8} placeholder="At least 8 characters" required />
+                                    </div>
+                                    <FormSubmitButton
+                                        idleLabel="Reset password"
+                                        pendingLabel="Resetting..."
+                                        className="w-full h-12 text-sm font-bold uppercase tracking-widest mt-4"
+                                    />
+                                </form>
 
-                            <FormSubmitButton
-                                idleLabel="Reset password"
-                                pendingLabel="Resetting..."
-                                className="auth-btn-primary w-full rounded-[10px] border px-4 py-3 text-xs font-semibold uppercase tracking-[0.08em] text-white focus-visible:outline-2 focus-visible:outline-[#E8482C] disabled:cursor-not-allowed disabled:opacity-60"
-                            />
-                        </form>
-
-                        <p className="mt-6 text-center text-xs uppercase tracking-[0.06em] text-text-secondary">
-                            Remembered your password?{' '}
-                            <Link href="/login" className="font-semibold text-[#E8482C] hover:text-[#D43D23] focus-visible:outline-2 focus-visible:outline-[#E8482C]">
-                                Back to login
-                            </Link>
-                        </p>
+                                <p className="mt-6 text-center text-xs font-bold uppercase tracking-widest text-ink-70">
+                                    Need a new code?{' '}
+                                    <Link href={requestStepUrl} className="text-green hover:underline">Go back</Link>
+                                </p>
+                                <p className="mt-8 text-center text-xs font-bold uppercase tracking-widest text-ink-70">
+                                    Remembered your password?{' '}
+                                    <Link href="/login" className="text-green hover:underline">Back to login</Link>
+                                </p>
+                            </>
+                        )}
                     </div>
                 </section>
             </div>

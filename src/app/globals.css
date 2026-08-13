@@ -208,21 +208,20 @@
     animation: progress-fill 5s linear forwards;
 }
 
-/* Auth Page specific (Old styles kept for compatibility) */
+/* Auth pages — white background with a faint brand-orange dot grid (matches the landing theme) */
 .auth-page {
     position: relative;
     isolation: isolate;
-    background: #f0ede6;
+    background: #ffffff;
 }
 
 .auth-page-pattern {
     position: fixed;
-    inset: -35%;
-    background-image:
-        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Crect x='8' y='12' width='40' height='16' rx='8' fill='none' stroke='%23E8482C' stroke-opacity='0.2' stroke-width='1'/%3E%3C/svg%3E"),
-        repeating-linear-gradient(-45deg, rgba(232, 72, 44, 0.06) 0px, rgba(232, 72, 44, 0.06) 1px, transparent 1px, transparent 20px);
-    background-size: 80px 80px, 20px 20px;
-    transform: rotate(45deg) scale(1.5);
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(255, 92, 53, 0.1) 1px, transparent 1px);
+    background-size: 28px 28px;
+    mask-image: radial-gradient(ellipse at 50% 0%, black 15%, transparent 65%);
+    -webkit-mask-image: radial-gradient(ellipse at 50% 0%, black 15%, transparent 65%);
     pointer-events: none;
     z-index: 0;
 }

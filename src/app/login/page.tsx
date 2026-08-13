@@ -1,3 +1,4 @@
+import { Check } from 'lucide-react';
 import Link from 'next/link';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
@@ -5,10 +6,9 @@ import { redirect } from 'next/navigation';
 import { FormSubmitButton } from '@/components/features/auth/FormSubmitButton';
 import { auth } from '@/lib/auth';
 import { getServerSession } from '@/lib/server/auth-session';
-import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
-import { Input } from '@/components/ui/Input';
 import { Badge } from '@/components/ui/Badge';
+import { Input } from '@/components/ui/Input';
+import { UnplugLogo } from '@/components/ui/UnplugLogo';
 
 const loginAction = async (formData: FormData) => {
     'use server';
@@ -17,7 +17,6 @@ const loginAction = async (formData: FormData) => {
 
     if (!email || !password) redirect('/login?error=invalid_credentials');
 
-    //work on this /dasboard redirect after login, it is currently hardcoded in the callbackURL above
     try {
         await auth.api.signInEmail({
             body: { email, password, callbackURL: '/dashboard' },
@@ -29,61 +28,104 @@ const loginAction = async (formData: FormData) => {
     redirect('/dashboard');
 };
 
+const features = [
+    {
+        title: 'Automatic detection',
+        body: 'Finds every subscription in your bank history — Naira or dollar.',
+    },
+    {
+        title: 'Usage scoring',
+        body: 'See what you actually use versus what you forgot about.',
+    },
+    {
+        title: 'Monthly debriefs',
+        body: 'A plain-language summary of every charge and why it happened.',
+    },
+] as const;
+
 export default async function LoginPage({ searchParams }: { searchParams?: Promise<{ error?: string; reset?: string }> }) {
     const params = (await searchParams) ?? {};
     const session = await getServerSession();
     if (session) redirect('/dashboard');
 
     return (
-        <main className="auth-page flex min-h-screen items-center justify-center p-4">
-            <div className="auth-page-pattern" />
-            <div className="relative z-10 w-full max-w-5xl grid lg:grid-cols-2 gap-4 items-stretch">
-                <Card className="hidden lg:flex flex-col justify-between p-10 bg-bg-surface">
-                    <div>
-                        <Badge variant="outline" className="mb-6">Unplug</Badge>
-                        <h1 className="font-display text-5xl leading-tight tracking-tight">Log in and face<br />your subscriptions.</h1>
-                        <p className="mt-6 text-text-secondary leading-7">No fluff. No fake optimism. Just a clear view of what you pay, what you use, and what should have been cancelled months ago.</p>
+        <main className="auth-page relative">
+            <div className="lg:grid lg:min-h-screen lg:grid-cols-2">
+                {/* Left: brand story */}
+                <section className="dot-grid relative hidden flex-col justify-between gap-10 overflow-hidden border-r border-line bg-bg-surface p-8 xl:p-12 lg:flex">
+                    <div className="relative space-y-5">
+                        <Link href="/" aria-label="Back to home" className="inline-block">
+                            <UnplugLogo size="md" />
+                        </Link>
+                        <h1 className="font-display text-[clamp(38px,4vw,54px)] font-bold leading-[1.05] tracking-tight text-ink">
+                            Log in and face your subscriptions.
+                        </h1>
+                        <p className="max-w-md text-[15px] leading-7 text-ink-70">
+                            No fluff. Just a clear view of what you pay, what you use, and what should have been
+                            cancelled months ago.
+                        </p>
+                        <ul role="list" className="space-y-3.5 pt-2">
+                            {features.map((feature) => (
+                                <li key={feature.title} className="flex items-start gap-3">
+                                    <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-green-light text-green">
+                                        <Check aria-hidden="true" className="h-3.5 w-3.5" strokeWidth={3} />
+                                    </span>
+                                    <div>
+                                        <p className="text-sm font-bold text-ink">{feature.title}</p>
+                                        <p className="text-sm leading-6 text-ink-70">{feature.body}</p>
+                                    </div>
+                                </li>
+                            ))}
+                        </ul>
                     </div>
-                    <div className="border-l-4 border-brand pl-6">
-                        <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted">Recoverable Waste</p>
-                        <p className="text-3xl font-bold mt-1">$1,320<span className="text-sm font-normal text-text-muted"> / year</span></p>
+
+                    <div className="relative">
+                        <p className="font-display text-3xl font-extrabold text-green">₦18M+</p>
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-ink-70">Saved from subscription creep · 2,400+ accounts</p>
                     </div>
-                </Card>
+                </section>
 
-                <Card className="p-8 lg:p-12 flex flex-col justify-center">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted mb-8">Account Access</p>
+                {/* Right: form */}
+                <section className="flex min-h-screen flex-col bg-white px-4 py-12 sm:px-10">
+                    <div className="m-auto w-full max-w-md">
+                        <Link href="/" aria-label="Back to home" className="mb-10 inline-block lg:hidden">
+                            <UnplugLogo size="md" />
+                        </Link>
 
-                    {params.error === 'invalid_credentials' && (
-                        <Badge variant="danger" className="w-full justify-center py-3 mb-6">Invalid email or password</Badge>
-                    )}
-                    {params.error === 'delete_failed' && (
-                        <Badge variant="danger" className="w-full justify-center py-3 mb-6">Account deletion failed. Please contact support.</Badge>
-                    )}
-                    {params.reset === 'success' && (
-                        <Badge variant="success" className="w-full justify-center py-3 mb-6">Password reset successful</Badge>
-                    )}
+                        <p className="text-xs font-bold uppercase tracking-widest text-ink-70 mb-6">Log in to Unplug</p>
 
-                    <form action={loginAction} className="space-y-6">
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-bold uppercase tracking-widest text-text-muted ml-1">Email</label>
-                            <Input name="email" type="email" placeholder="you@example.com" required />
+                        {params.error === 'invalid_credentials' && (
+                            <Badge variant="danger" className="w-full justify-center py-3 mb-6">Invalid email or password</Badge>
+                        )}
+                        {params.error === 'delete_failed' && (
+                            <Badge variant="danger" className="w-full justify-center py-3 mb-6">Account deletion failed. Please contact support.</Badge>
+                        )}
+                        {params.reset === 'success' && (
+                            <Badge variant="success" className="w-full justify-center py-3 mb-6">Password reset successful</Badge>
+                        )}
+
+                        <form action={loginAction} className="space-y-4">
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold uppercase tracking-widest text-ink-70 ml-1">Email</label>
+                                <Input name="email" type="email" placeholder="you@example.com" required />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold uppercase tracking-widest text-ink-70 ml-1">Password</label>
+                                <Input name="password" type="password" placeholder="••••••••" required />
+                            </div>
+                            <FormSubmitButton
+                                idleLabel="Log in"
+                                pendingLabel="Logging in..."
+                                className="w-full h-12 text-sm font-bold uppercase tracking-widest mt-4"
+                            />
+                        </form>
+
+                        <div className="mt-8 flex items-center justify-between text-xs font-bold uppercase tracking-widest">
+                            <Link href="/signup" className="text-green hover:underline">Create account</Link>
+                            <Link href="/forgot-password" title="Coming soon" className="text-ink-70 hover:text-ink">Forgot password</Link>
                         </div>
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-bold uppercase tracking-widest text-text-muted ml-1">Password</label>
-                            <Input name="password" type="password" placeholder="••••••••" required />
-                        </div>
-                        <FormSubmitButton
-                            idleLabel="Log in"
-                            pendingLabel="Logging in..."
-                            className="w-full h-12 text-[10px] font-bold uppercase tracking-widest"
-                        />
-                    </form>
-
-                    <div className="mt-8 flex justify-between items-center text-[10px] font-bold uppercase tracking-widest">
-                        <Link href="/signup" className="text-brand hover:underline">Create account</Link>
-                        <Link href="/forgot-password" title="Coming soon" className="text-text-muted hover:text-text-primary">Forgot password</Link>
                     </div>
-                </Card>
+                </section>
             </div>
         </main>
     );
