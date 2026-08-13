@@ -46,7 +46,7 @@ export function PricingCards() {
                     <ul role="list" className="mt-8 space-y-3.5 border-t border-line pt-8 text-[15px]">
                         {plan.features.map((feature) => (
                             <li key={feature} className="flex items-start gap-3 text-ink">
-                                <Check aria-hidden="true" className="mt-1 h-4 w-4 shrink-0 text-green stroke-[3]" />
+                                <Check aria-hidden="true" className="mt-1 h-4 w-4 shrink-0 text-green stroke-3" />
                                 <span>{feature}</span>
                             </li>
                         ))}

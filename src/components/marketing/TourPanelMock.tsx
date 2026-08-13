@@ -23,7 +23,7 @@ function Chrome({ title, children }: { title: string; children: React.ReactNode 
                     <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full bg-amber-400/70" />
                     <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full bg-green/50" />
                 </div>
-                <span className="ml-1 text-[11px] font-bold uppercase tracking-[0.1em] text-ink-70">{title}</span>
+                <span className="ml-1 text-[11px] font-bold uppercase tracking-widest text-ink-70">{title}</span>
             </div>
             <div className="p-4">{children}</div>
         </div>
@@ -33,7 +33,7 @@ function Chrome({ title, children }: { title: string; children: React.ReactNode 
 function Stat({ label, value, accent, sub }: { label: string; value: string; accent?: boolean; sub?: string }) {
     return (
         <div className="rounded-xl border border-line bg-white p-3.5">
-            <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-ink-70">{label}</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-ink-70">{label}</p>
             <p className={cn('mt-1.5 font-mono text-[20px] font-bold tabular-nums', accent ? 'text-orange' : 'text-ink')}>{value}</p>
             {sub ? <p className="mt-0.5 text-[10px] font-medium text-ink-70">{sub}</p> : null}
         </div>

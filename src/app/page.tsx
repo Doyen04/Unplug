@@ -1,4 +1,4 @@
-import { AlarmClock, BellOff, DoorClosed, Shield, TrendingUp } from 'lucide-react';
+import { BellOff, DoorClosed, TrendingUp } from 'lucide-react';
 
 import { ComparisonTable } from '@/components/marketing/ComparisonTable';
 import { CtaLink } from '@/components/marketing/CtaLink';
@@ -65,10 +65,10 @@ function Hero() {
 
                 {/* Hero Graphic: Isolated Cutout Photo on White Base + Floating Demo Card */}
                 <Reveal as="div" variant="scale" delay={0.1} className="relative lg:justify-self-end">
-                    <div className="relative mx-auto w-full max-w-[460px]">
+                    <div className="relative mx-auto w-full max-w-115">
                         {/* Cutout Photo container */}
                         <div className="relative overflow-hidden rounded-[28px] border-2 border-line bg-white p-4">
-                            <div className="relative aspect-[4/5] w-full overflow-hidden rounded-[20px] bg-slate-50 flex items-center justify-center">
+                            <div className="relative aspect-4/5 w-full overflow-hidden rounded-[20px] bg-slate-50 flex items-center justify-center">
                                 <img
                                     src="/images/hero-1.png"
                                     alt="Young Nigerian professional managing subscriptions on smartphone"
@@ -78,7 +78,7 @@ function Hero() {
                         </div>
 
                         {/* Floating FreezeCardDemo overlaying the bottom right */}
-                        <div className="absolute -bottom-6 -left-4 right-4 sm:-left-8 sm:right-6 max-w-[360px] z-10">
+                        <div className="absolute -bottom-6 -left-4 right-4 sm:-left-8 sm:right-6 max-w-90 z-10">
                             <FreezeCardDemo />
                         </div>
                     </div>
@@ -190,23 +190,6 @@ function Problem() {
     );
 }
 
-const steps = [
-    {
-        step: '01',
-        title: 'Connect your bank, once.',
-        body: 'Read-only connection via Mono. Used one time, solely to discover what you are currently paying for.',
-    },
-    {
-        step: '02',
-        title: 'Get a dedicated card per subscription.',
-        body: 'Every recurring charge gets its own virtual card — Naira or dollar. You paste it into that service once.',
-    },
-    {
-        step: '03',
-        title: 'Freeze or cancel, anytime.',
-        body: 'See a charge you don’t want next cycle? Tap to freeze the card. The merchant gets declined instantly.',
-    },
-] as const;
 
 function HowItWorks() {
     return (
@@ -284,11 +267,11 @@ function HowItWorks() {
                             </div>
                             <div className="space-y-3">
                                 {/* Card 1: Netflix NGN Card */}
-                                <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-[#1C1A17] via-[#2A241F] to-[#12100E] p-3 text-white border border-white/20">
+                                <div className="relative overflow-hidden rounded-xl bg-linear-to-br from-[#1C1A17] via-[#2A241F] to-[#12100E] p-3 text-white border border-white/20">
                                     <div className="flex items-center justify-between text-[10px]">
                                         <div className="flex items-center gap-2">
                                             {/* Mini Golden EMV Chip */}
-                                            <div className="h-4 w-5 rounded-[3px] bg-gradient-to-br from-amber-200 via-yellow-400 to-amber-500 border border-amber-600/40 p-[1px]">
+                                            <div className="h-4 w-5 rounded-[3px] bg-linear-to-br from-amber-200 via-yellow-400 to-amber-500 border border-amber-600/40 p-px">
                                                 <div className="h-full w-full border border-amber-800/30 grid grid-cols-2" />
                                             </div>
                                             <span className="font-bold tracking-widest uppercase text-white">NETFLIX</span>

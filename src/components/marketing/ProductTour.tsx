@@ -157,7 +157,7 @@ export function ProductTour() {
                             {selected && !isPaused.current ? (
                                 <span
                                     key={progressKey}
-                                    className="absolute bottom-0 left-0 h-[2px] bg-orange animate-progress"
+                                    className="absolute bottom-0 left-0 h-0.5 bg-orange animate-progress"
                                 />
                             ) : null}
                         </button>

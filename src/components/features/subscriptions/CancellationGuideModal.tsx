@@ -141,9 +141,9 @@ export const CancellationGuideModal = ({
                                     <div className="flex flex-col items-center gap-3 animate-pulse">
                                         <Loader2
                                             size={28}
-                                            className="animate-spin text-[#E53434]"
+                                            className="animate-spin text-danger"
                                         />
-                                        <p className="text-sm font-bold text-[#E53434] uppercase tracking-widest">
+                                        <p className="text-sm font-bold text-danger uppercase tracking-widest">
                                             Marking as cancelled...
                                         </p>
                                     </div>
@@ -301,7 +301,7 @@ export const CancellationGuideModal = ({
                                         type="button"
                                         onClick={() => handleConfirm()}
                                         disabled={isConfirming}
-                                        className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[#E53434] px-4 py-2.5 text-sm font-bold uppercase tracking-[0.04em] text-white transition-colors hover:bg-[#C93A1A] disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-danger px-4 py-2.5 text-sm font-bold uppercase tracking-[0.04em] text-white transition-colors hover:bg-[#C93A1A] disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         {isConfirming ? (
                                             <>

@@ -37,14 +37,14 @@ export function FreezeCardDemo({
                 {/* Authentic Real-Life Credit Card Face */}
                 <div
                     className={cn(
-                        'relative aspect-[1.586/1] w-full select-none overflow-hidden rounded-[16px] p-4 sm:p-5 border border-white/20 transition-all duration-300',
+                        'relative aspect-[1.586/1] w-full select-none overflow-hidden rounded-2xl p-4 sm:p-5 border border-white/20 transition-all duration-300',
                         frozen
-                            ? 'bg-gradient-to-br from-[#262626] via-[#1A1A1A] to-[#121212] text-white grayscale'
-                            : 'bg-gradient-to-br from-[#1C1A17] via-[#2D2620] to-[#12100E] text-white',
+                            ? 'bg-linear-to-br from-[#262626] via-[#1A1A1A] to-[#121212] text-white grayscale'
+                            : 'bg-linear-to-br from-[#1C1A17] via-[#2D2620] to-[#12100E] text-white',
                     )}
                 >
                     {/* Glossy Metallic Light Reflective Sheen */}
-                    <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-white/15" />
+                    <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-linear-to-tr from-transparent via-white/5 to-white/15" />
 
                     {/* Frozen Dark Blur Overlay */}
                     {frozen && (
@@ -81,8 +81,8 @@ export function FreezeCardDemo({
 
                         {/* Metallic Golden EMV Smart Chip */}
                         <div className="my-0.5">
-                            <div className="relative h-5.5 sm:h-6.5 w-7.5 sm:w-8.5 rounded-[4px] bg-gradient-to-br from-amber-200 via-yellow-400 to-amber-500 p-[1px] border border-amber-600/40 overflow-hidden">
-                                <div className="h-full w-full rounded-[3px] border border-amber-800/30 grid grid-cols-2 gap-0.5 p-[2px]">
+                            <div className="relative h-5.5 sm:h-6.5 w-7.5 sm:w-8.5 rounded-sm bg-linear-to-br from-amber-200 via-yellow-400 to-amber-500 p-px border border-amber-600/40 overflow-hidden">
+                                <div className="h-full w-full rounded-[3px] border border-amber-800/30 grid grid-cols-2 gap-0.5 p-0.5">
                                     <div className="border-r border-b border-amber-800/30" />
                                     <div className="border-b border-amber-800/30" />
                                     <div className="border-r border-amber-800/30" />

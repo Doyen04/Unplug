@@ -55,7 +55,7 @@ function CleanStatus({ support, darkRow }: { support: Support; darkRow?: boolean
     if (support === 'yes') {
         return (
             <span className={cn('inline-flex items-center gap-1.5 text-sm font-bold', darkRow ? 'text-emerald-400' : 'text-emerald-600')}>
-                <Check className="h-4 w-4 stroke-[3]" />
+                <Check className="h-4 w-4 stroke-3" />
                 <span>Yes</span>
             </span>
         );
@@ -72,7 +72,7 @@ function CleanStatus({ support, darkRow }: { support: Support; darkRow?: boolean
 
     return (
         <span className={cn('inline-flex items-center gap-1.5 text-sm font-medium', darkRow ? 'text-white/40' : 'text-slate-300')}>
-            <X className="h-3.5 w-3.5 stroke-[2]" />
+            <X className="h-3.5 w-3.5 stroke-2" />
             <span>No</span>
         </span>
     );
