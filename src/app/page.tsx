@@ -22,12 +22,7 @@ function Hero() {
         <section className="relative overflow-hidden bg-white dot-grid">
             <div className={`${shell} relative grid gap-12 pb-16 pt-10 md:pb-24 md:pt-16 lg:grid-cols-[1.1fr_0.9fr] lg:items-center`}>
                 <Reveal as="div" variant="slide-up" className="max-w-2xl">
-                    <div className="inline-flex items-center gap-2 rounded-full border border-orange/30 bg-orange/10 px-3.5 py-1 text-[13px] font-semibold text-ink">
-                        <span className="flex h-2 w-2 rounded-full bg-orange animate-pulse" />
-                        <span>🇳🇬 Built for Nigeria</span>
-                    </div>
-
-                    <h1 className="mt-6 font-display text-[clamp(42px,6.5vw,72px)] font-bold leading-[0.98] tracking-tight text-ink text-balance">
+                    <h1 className="font-display text-[clamp(42px,6.5vw,72px)] font-bold leading-[0.98] tracking-tight text-ink text-balance">
                         Cancel anything. Even the things that <span className="text-orange underline decoration-orange/30 underline-offset-8">don&apos;t let you.</span>
                     </h1>
 
@@ -345,16 +340,11 @@ function Security() {
         <Reveal as="section" id="security" variant="fade" className="scroll-mt-24 bg-ink py-20 sm:py-28 dot-grid-light text-cream">
             <div className={`${shell} grid gap-14 lg:grid-cols-[0.85fr_1.15fr] lg:gap-20`}>
                 <div>
-                    <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium text-frost-wash">
-                        <Shield className="h-3.5 w-3.5 text-orange" />
-                        <span>Bank-grade safety</span>
-                    </div>
                     <SectionTitle
                         tone="inverse"
                         eyebrow="Security"
                         title="We built this so you don't have to trust us blindly."
                         description="Four things that are true whether or not you take our word for them."
-                        className="mt-4"
                     />
                 </div>
 

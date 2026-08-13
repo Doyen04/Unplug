@@ -44,12 +44,6 @@ export default function OnboardingClient() {
 
             <div className="relative z-10 w-full max-w-md">
                 <Card className="p-8 border border-border bg-bg-surface/85 backdrop-blur-md shadow-2xl flex flex-col items-center text-center">
-                    {/* Welcome Badge */}
-                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-light border border-brand/20 text-brand text-[10px] font-bold uppercase tracking-widest mb-6">
-                        <Sparkles className="w-3 h-3" />
-                        Welcome to Unplug
-                    </div>
-
                     {/* Heading */}
                     <h1 className="text-3xl font-bold tracking-tight text-text-primary mb-3">
                         Stop paying for
