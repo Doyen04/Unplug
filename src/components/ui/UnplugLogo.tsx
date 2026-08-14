@@ -37,7 +37,7 @@ export function UnplugLogo({
         <div className={cn('inline-flex items-center gap-3 select-none group', className)}>
             <div className={cn('shrink-0 transition-transform duration-300 group-hover:scale-105', iconHeights[size])}>
                 <Image
-                    src="/images/logo.png"
+                    src="/images/unplug-logo.svg"
                     alt=""
                     width={500}
                     height={500}
