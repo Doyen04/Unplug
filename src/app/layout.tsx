@@ -32,6 +32,13 @@ export const metadata: Metadata = {
     },
     description:
         'Unplug gives every subscription its own virtual card — Naira or dollar — so you can freeze or cancel it the moment you want to.',
+    icons: {
+        icon: [
+            { url: '/images/unplug-logo.svg', type: 'image/svg+xml' },
+        ],
+        shortcut: '/images/unplug-logo.svg',
+        apple: '/images/unplug-logo.svg',
+    },
 };
 
 interface RootLayoutProps {

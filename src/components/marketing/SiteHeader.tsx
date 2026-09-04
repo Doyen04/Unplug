@@ -57,14 +57,14 @@ export function SiteHeader() {
 
             <header
                 className={cn(
-                    'sticky top-0 z-50 transition-all duration-200',
-                    scrolled || menuOpen ? 'border-b border-line bg-white/95 backdrop-blur-md py-3' : 'bg-transparent py-5',
+                    'sticky top-0 z-50 transition-all duration-200 w-full max-w-full overflow-x-hidden',
+                    scrolled || menuOpen ? 'border-b border-line bg-white/95 backdrop-blur-md py-3' : 'bg-transparent py-3.5 sm:py-5',
                 )}
             >
-                <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 sm:px-8 lg:px-12">
+                <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 sm:gap-4 px-4 sm:px-8 lg:px-12">
                     <Link
                         href="/"
-                        className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2"
+                        className="shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2"
                     >
                         <UnplugLogo size="md" />
                     </Link>
@@ -77,14 +77,14 @@ export function SiteHeader() {
                         ))}
                     </nav>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 sm:gap-3 shrink-0">
                         <Link
                             href="/login"
                             className={cn('hidden text-[14px] font-medium text-ink sm:inline-flex', linkClass)}
                         >
                             Log in
                         </Link>
-                        <CtaLink href="/signup" className="min-h-11 px-5 animate-pulse-ring">
+                        <CtaLink href="/signup" className="min-h-10 sm:min-h-11 px-3 sm:px-5 text-xs sm:text-sm animate-pulse-ring whitespace-nowrap">
                             Get started free
                         </CtaLink>
 
@@ -95,7 +95,7 @@ export function SiteHeader() {
                             aria-expanded={menuOpen}
                             aria-controls="mobile-nav"
                             aria-label={menuOpen ? 'Close menu' : 'Open menu'}
-                            className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-line text-ink transition-colors hover:border-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink md:hidden"
+                            className="inline-flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-full border border-line text-ink transition-colors hover:border-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink md:hidden"
                         >
                             {menuOpen ? <X aria-hidden="true" className="h-5 w-5" /> : <Menu aria-hidden="true" className="h-5 w-5" />}
                         </button>
@@ -106,7 +106,7 @@ export function SiteHeader() {
                     <nav
                         id="mobile-nav"
                         aria-label="Main"
-                        className="border-t border-line bg-white px-6 pb-5 pt-2 sm:px-8 md:hidden"
+                        className="border-t border-line bg-white px-4 pb-6 pt-3 sm:px-8 md:hidden shadow-lg animate-slide-up"
                     >
                         <ul className="flex flex-col">
                             {[...NAV_LINKS, { href: '/login', label: 'Log in' }].map(({ href, label }) => (
@@ -114,13 +114,18 @@ export function SiteHeader() {
                                     <Link
                                         href={href}
                                         onClick={() => setMenuOpen(false)}
-                                        className="block border-b border-line py-3.5 text-[16px] font-medium text-ink transition-colors hover:text-orange focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ink"
+                                        className="block border-b border-line py-3.5 text-[16px] font-semibold text-ink transition-colors hover:text-orange focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ink"
                                     >
                                         {label}
                                     </Link>
                                 </li>
                             ))}
                         </ul>
+                        <div className="mt-4 pt-3">
+                            <CtaLink href="/signup" onClick={() => setMenuOpen(false)} className="w-full min-h-12 justify-center text-base">
+                                Get started free
+                            </CtaLink>
+                        </div>
                     </nav>
                 ) : null}
             </header>
