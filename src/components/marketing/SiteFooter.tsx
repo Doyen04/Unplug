@@ -108,7 +108,7 @@ export function SiteFooter() {
 
                 <div className="mt-12 flex flex-col gap-2 border-t border-line pt-7 text-[14px] text-ink-70 sm:flex-row sm:items-center sm:justify-between">
                     <p>© {new Date().getFullYear()} Unplug. All rights reserved.</p>
-                    <p className="font-mono text-xs">Trusted by 2,400+ subscribers across Nigeria · Cards issued via licensed partners.</p>
+                    <p className="font-mono text-xs leading-relaxed text-balance">Trusted by 2,400+ subscribers across Nigeria · Cards issued via licensed partners.</p>
                 </div>
             </div>
         </footer>

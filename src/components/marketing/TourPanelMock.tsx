@@ -16,8 +16,8 @@ const rows = [
 
 function Chrome({ title, children }: { title: string; children: React.ReactNode }) {
     return (
-        <div className="overflow-hidden rounded-2xl border border-line bg-white">
-            <div className="flex items-center gap-2.5 border-b border-line bg-slate-50/80 px-4 py-2.5">
+        <div className="overflow-hidden rounded-2xl border border-line bg-white w-full max-w-full">
+            <div className="flex items-center gap-2.5 border-b border-line bg-slate-50/80 px-3.5 py-2.5 sm:px-4">
                 <div className="flex gap-1.5">
                     <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full bg-rose-400/70" />
                     <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full bg-amber-400/70" />
@@ -25,7 +25,7 @@ function Chrome({ title, children }: { title: string; children: React.ReactNode 
                 </div>
                 <span className="ml-1 text-[11px] font-bold uppercase tracking-widest text-ink-70">{title}</span>
             </div>
-            <div className="p-4">{children}</div>
+            <div className="p-3 sm:p-4">{children}</div>
         </div>
     );
 }
@@ -42,27 +42,27 @@ function Stat({ label, value, accent, sub }: { label: string; value: string; acc
 
 function SubscriptionRow({ name, meta, amount, frozen }: (typeof rows)[number]) {
     return (
-        <li className="flex items-center justify-between gap-3 border-b border-line/60 py-3 last:border-0 last:pb-0 first:pt-0">
-            <div className="flex items-center gap-3 min-w-0">
+        <li className="flex items-center justify-between gap-2 border-b border-line/60 py-3 last:border-0 last:pb-0 first:pt-0">
+            <div className="flex items-center gap-2.5 min-w-0 flex-1">
                 {/* App icon placeholder */}
                 <div className={cn(
-                    'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[10px] font-extrabold uppercase',
+                    'flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-lg text-[10px] font-extrabold uppercase',
                     frozen ? 'bg-frost-wash text-frost-deep' : 'bg-green-light text-green',
                 )}>
                     {name.charAt(0)}
                 </div>
-                <div className="min-w-0">
-                    <p className="truncate text-[13px] font-semibold text-ink">{name}</p>
-                    <p className="truncate text-[11px] text-ink-70">{meta}</p>
+                <div className="min-w-0 flex-1">
+                    <p className="truncate text-xs sm:text-[13px] font-semibold text-ink">{name}</p>
+                    <p className="truncate text-[10px] sm:text-[11px] text-ink-70">{meta}</p>
                 </div>
             </div>
-            <div className="flex shrink-0 items-center gap-2.5">
-                <span className={cn('font-mono text-[13px] font-semibold tabular-nums', frozen ? 'text-ink-70 line-through' : 'text-ink')}>
+            <div className="flex shrink-0 items-center gap-1.5 sm:gap-2.5">
+                <span className={cn('font-mono text-xs sm:text-[13px] font-semibold tabular-nums', frozen ? 'text-ink-70 line-through' : 'text-ink')}>
                     {amount}
                 </span>
                 <span
                     className={cn(
-                        'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.06em]',
+                        'inline-flex items-center gap-1 rounded-full px-1.5 sm:px-2 py-0.5 text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.06em]',
                         frozen ? 'bg-frost-wash text-frost-deep' : 'bg-green-light text-green',
                     )}
                 >

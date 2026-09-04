@@ -44,7 +44,7 @@ function AnimatedTotal({ value }: { value: number }) {
         return () => window.cancelAnimationFrame(frame);
     }, [value]);
 
-    return <span className="font-display text-[clamp(40px,6vw,64px)] leading-none text-ink tabular-nums">₦{displayValue.toLocaleString()}</span>;
+    return <span className="font-display text-[clamp(28px,6.5vw,64px)] leading-none text-ink tabular-nums break-all sm:break-normal">₦{displayValue.toLocaleString()}</span>;
 }
 
 export function SubscriptionCreepCalculator() {
@@ -60,7 +60,7 @@ export function SubscriptionCreepCalculator() {
     const contextMessage = getContextMessage(annualTotal);
 
     return (
-        <div className="rounded-[24px] border border-line bg-bg-surface p-6 sm:p-8">
+        <div className="rounded-[24px] border border-line bg-bg-surface p-4 sm:p-8">
             <div className="mb-8 max-w-2xl">
                 <p className="text-[13px] font-semibold uppercase tracking-[0.08em] text-ink-70">Subscription creep calculator</p>
                 <h3 className="mt-3 font-display text-[clamp(28px,4vw,40px)] leading-tight text-ink">What&apos;s your subscription creep?</h3>

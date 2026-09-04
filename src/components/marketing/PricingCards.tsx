@@ -12,7 +12,7 @@ export function PricingCards() {
                 <div
                     key={plan.name}
                     className={cn(
-                        'group relative rounded-[24px] border p-8 transition-transform duration-300 hover:-translate-y-1 sm:p-9',
+                        'group relative rounded-[24px] border p-5 transition-transform duration-300 hover:-translate-y-1 sm:p-9',
                         plan.featured ? 'border-2 border-orange bg-bg-surface' : 'border-line bg-white',
                     )}
                 >

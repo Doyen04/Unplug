@@ -91,7 +91,7 @@ export function ProductTour() {
     const activePanel = TOUR_PANELS[active];
 
     return (
-        <div className="mt-12 grid gap-6 lg:grid-cols-[minmax(0,0.55fr)_minmax(0,1.45fr)] lg:gap-10">
+        <div className="mt-12 grid gap-6 lg:grid-cols-[minmax(0,0.55fr)_minmax(0,1.45fr)] lg:gap-10 w-full max-w-full overflow-hidden lg:overflow-visible">
             {/* Tab Rail */}
             <div
                 role="tablist"
@@ -180,7 +180,7 @@ export function ProductTour() {
                 id={`tour-panel-${activePanel.id}`}
                 aria-labelledby={`tour-tab-${activePanel.id}`}
                 tabIndex={0}
-                className="rounded-[24px] border border-line bg-white p-5 sm:p-7 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink"
+                className="rounded-[24px] border border-line bg-white p-4 sm:p-7 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink w-full min-w-0 max-w-full overflow-hidden"
             >
                 <motion.div
                     key={activePanel.id}

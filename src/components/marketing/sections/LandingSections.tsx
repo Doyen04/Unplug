@@ -74,9 +74,9 @@ export function Security() {
 
                 <ol role="list" className="space-y-4">
                     {securityPoints.map((point, index) => (
-                        <li key={point} className="flex gap-5 rounded-[20px] border border-white/12 bg-white/5 p-6 border-l-4 border-l-orange">
-                            <span className="font-mono text-sm font-bold text-orange">0{index + 1}</span>
-                            <p className="text-[16px] leading-8 text-cream/90">{point}</p>
+                        <li key={point} className="flex gap-3 sm:gap-5 rounded-[20px] border border-white/12 bg-white/5 p-4 sm:p-6 border-l-4 border-l-orange">
+                            <span className="font-mono text-sm font-bold text-orange shrink-0">0{index + 1}</span>
+                            <p className="text-[14px] sm:text-[16px] leading-7 sm:leading-8 text-cream/90">{point}</p>
                         </li>
                     ))}
                 </ol>

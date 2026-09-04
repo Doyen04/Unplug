@@ -21,7 +21,7 @@ export default function HomePage() {
         <>
             <StructuredData />
             <SiteHeader />
-            <main id="main" className="bg-white text-ink">
+            <main id="main" className="w-full max-w-full overflow-x-hidden bg-white text-ink">
                 <Hero />
                 <LogoCloud />
                 <Problem />

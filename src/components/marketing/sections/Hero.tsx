@@ -9,11 +9,11 @@ export function Hero() {
         <section className="relative overflow-hidden bg-white dot-grid">
             <div className={`${shell} relative grid gap-12 pb-16 pt-10 md:pb-24 md:pt-16 lg:grid-cols-[1.1fr_0.9fr] lg:items-center`}>
                 <Reveal as="div" variant="slide-up" className="max-w-2xl">
-                    <h1 className="font-display text-[clamp(42px,6.5vw,72px)] font-bold leading-[0.98] tracking-tight text-ink text-balance">
+                    <h1 className="font-display text-[clamp(30px,6.5vw,72px)] font-bold leading-[0.98] tracking-tight text-ink text-balance">
                         Cancel anything. Even the things that <span className="text-orange underline decoration-orange/30 underline-offset-8">don&apos;t let you.</span>
                     </h1>
 
-                    <p className="mt-7 max-w-xl text-[19px] leading-8 text-ink-70">
+                    <p className="mt-7 max-w-xl text-[17px] sm:text-[19px] leading-7 sm:leading-8 text-ink-70">
                         Unplug gives every subscription its own virtual card — Naira or dollar. Freeze it, and the charge
                         simply can&apos;t go through. No calls, no forms, no chasing a refund.
                     </p>
@@ -30,19 +30,19 @@ export function Hero() {
                     </div>
 
                     {/* Social proof metrics strip */}
-                    <div className="mt-12 flex items-center gap-8 pt-6">
+                    <div className="mt-12 flex flex-wrap items-center justify-between gap-3 pt-6 sm:justify-start sm:gap-8">
                         <div>
-                            <p className="font-display text-2xl font-bold text-ink">2,400+</p>
+                            <p className="font-display text-xl sm:text-2xl font-bold text-ink">2,400+</p>
                             <p className="text-xs text-ink-70">Cards frozen</p>
                         </div>
-                        <div className="h-8 w-px bg-line" />
+                        <div className="hidden h-8 w-px bg-line sm:block" />
                         <div>
-                            <p className="font-display text-2xl font-extrabold text-green">₦18M+</p>
+                            <p className="font-display text-xl sm:text-2xl font-extrabold text-green">₦18M+</p>
                             <p className="text-xs font-medium text-ink-70">Saved from creep</p>
                         </div>
-                        <div className="h-8 w-px bg-line" />
+                        <div className="hidden h-8 w-px bg-line sm:block" />
                         <div>
-                            <p className="font-display text-2xl font-extrabold text-ink flex items-center gap-1">
+                            <p className="font-display text-xl sm:text-2xl font-extrabold text-ink flex items-center gap-1">
                                 4.9<span className="text-green text-lg">★</span>
                             </p>
                             <p className="text-xs font-medium text-ink-70">User rating</p>
@@ -65,7 +65,7 @@ export function Hero() {
                         </div>
 
                         {/* Floating FreezeCardDemo overlaying the bottom right */}
-                        <div className="absolute -bottom-6 -left-4 right-4 sm:-left-8 sm:right-6 max-w-90 z-10">
+                        <div className="absolute -bottom-6 left-0 right-0 sm:-left-8 sm:right-6 max-w-90 z-10 mx-auto sm:mx-0">
                             <FreezeCardDemo />
                         </div>
                     </div>
