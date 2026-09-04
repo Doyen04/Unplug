@@ -17,7 +17,7 @@ export const DashboardLayoutShell = ({ children }: { children: React.ReactNode }
 
     return (
 
-        <div className="flex h-screen h-[100dvh] w-full overflow-hidden bg-bg-base text-text-primary">
+        <div className="flex h-screen w-full overflow-hidden bg-bg-base text-text-primary">
             <Sidebar
                 expanded={expanded}
                 toggleExpanded={() => setExpanded(!expanded)}
@@ -31,7 +31,7 @@ export const DashboardLayoutShell = ({ children }: { children: React.ReactNode }
                 alerts={alerts}
             />
 
-            <main className="flex-1 overflow-y-auto overscroll-y-contain min-w-0">
+            <main className="flex-1 overflow-y-auto min-w-0">
                 {/* Mobile Header */}
                 <div className="flex h-16 items-center justify-between border-b border-border bg-bg-base px-4 lg:hidden sticky top-0 z-30">
                     <button onClick={() => setIsMobileOpen(true)} className="p-2 text-text-secondary">

@@ -299,12 +299,13 @@ export default function TransactionsPage() {
                             <th className="py-3 pl-4 pr-6 sr-only">Action</th>
                         </tr>
                     }
-                    renderItem={(tx: Transaction, i: number) => (
+                    renderItem={(tx: Transaction, i: number, viewMode?: 'table' | 'list') => (
                         <TransactionRow
                             key={tx.transaction_id}
                             transaction={tx}
                             currency={currencyForTransaction(tx)}
                             index={i}
+                            viewMode={viewMode}
                         />
                     )}
                     showDivider
