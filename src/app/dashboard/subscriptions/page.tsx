@@ -190,13 +190,14 @@ export default function SubscriptionsPage() {
                         <th className="py-3 pl-4 pr-6 sr-only">Action</th>
                     </tr>
                 }
-                renderItem={(s: Subscription, i: number) => (
+                renderItem={(s: Subscription, i: number, viewMode?: 'table' | 'list') => (
                     <SubscriptionRow
                         key={s.id}
                         subscription={s}
                         index={i}
                         currency={currencyForSubscriptionId(s.id)}
                         onCancel={cancelSubscription}
+                        viewMode={viewMode}
                     />
                 )}
                 showDivider

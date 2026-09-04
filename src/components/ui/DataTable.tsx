@@ -5,7 +5,7 @@ import { Button } from './Button';
 
 interface DataTableProps<T> {
     data: T[];
-    renderItem: (item: T, index: number) => React.ReactNode;
+    renderItem: (item: T, index: number, viewMode?: 'table' | 'list') => React.ReactNode;
     isLoading?: boolean;
     isError?: boolean;
     errorTitle?: string;
@@ -99,7 +99,7 @@ export function DataTable<T>({
                     <table className="w-full min-w-[640px] border-collapse text-sm">
                         {tableHead && <thead>{tableHead}</thead>}
                         <tbody className={showDivider ? 'divide-y divide-border' : ''}>
-                            {data.map((item, index) => renderItem(item, index))}
+                            {data.map((item, index) => renderItem(item, index, 'table'))}
                         </tbody>
                     </table>
                 </div>
@@ -107,7 +107,7 @@ export function DataTable<T>({
 
             {/* ── Mobile card list (always shown) / fallback on desktop when asTable=false ── */}
             <div className={`${asTable ? 'md:hidden' : ''} ${showDivider ? 'divide-y divide-border' : ''} ${itemsClassName}`}>
-                {bodyContent ?? data.map((item, index) => renderItem(item, index))}
+                {bodyContent ?? data.map((item, index) => renderItem(item, index, 'list'))}
             </div>
 
             {/* Loading / empty for table mode */}

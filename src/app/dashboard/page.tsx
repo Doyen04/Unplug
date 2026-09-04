@@ -300,13 +300,13 @@ export default function DashboardPage() {
                         </tr>
                     )
                 }
-                renderItem={(item: Subscription | Transaction, i: number) => {
+                renderItem={(item: Subscription | Transaction, i: number, viewMode?: 'table' | 'list') => {
                     if (ledgerTab === 'subscriptions') {
                         const s = item as Subscription;
-                        return <SubscriptionRow key={s.id} subscription={s} onCancel={cancelSubscription} index={i} currency={currencyForSubscriptionId(s.id)} />;
+                        return <SubscriptionRow key={s.id} subscription={s} onCancel={cancelSubscription} index={i} currency={currencyForSubscriptionId(s.id)} viewMode={viewMode} />;
                     }
                     const t = item as Transaction;
-                    return <TransactionRow key={t.transaction_id} transaction={t} currency={currencyForTransaction(t)} index={i} />;
+                    return <TransactionRow key={t.transaction_id} transaction={t} currency={currencyForTransaction(t)} index={i} viewMode={viewMode} />;
                 }}
                 showDivider
                 itemsClassName=""
