@@ -12,12 +12,22 @@ export function DashboardSkeleton() {
                 </div>
             </div>
 
-            {/* Stats Skeleton */}
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-                {[1, 2, 3, 4].map((i) => (
-                    <Card key={i} className="h-32 bg-bg-muted animate-pulse" />
-                ))}
-            </div>
+            {/* Stats Skeleton — mirrors DashboardStats layout */}
+            <section className="relative">
+                {/* Mobile: horizontal scroll strip */}
+                <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hidden md:hidden -mx-4 px-4 snap-x snap-mandatory">
+                    {[1, 2, 3, 4, 5].map((i) => (
+                        <Card key={i} className="w-[72vw] max-w-[260px] shrink-0 snap-center h-32 bg-bg-muted animate-pulse" />
+                    ))}
+                </div>
+
+                {/* Desktop: 4-col grid */}
+                <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {[1, 2, 3, 4].map((i) => (
+                        <Card key={i} className="h-32 bg-bg-muted animate-pulse" />
+                    ))}
+                </div>
+            </section>
 
             {/* Charts Skeleton */}
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
