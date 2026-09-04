@@ -126,42 +126,44 @@ export const Sidebar = ({ expanded, toggleExpanded, isMobileOpen, setIsMobileOpe
                     })}
                 </nav>
 
-                <div className="border-t border-border p-4 space-y-4">
+                <div className="border-t border-border p-3">
                     {isLoading ? (
                         <div className={`flex items-center gap-3 py-2 ${!expanded ? 'justify-center' : ''}`}>
                             <div className="h-9 w-9 shrink-0 rounded-full bg-bg-muted animate-pulse" />
                             {expanded && (
-                                <div className="min-w-0 flex-1 space-y-2">
-                                    <div className="h-4 w-24 bg-bg-muted rounded animate-pulse" />
+                                <div className="min-w-0 flex-1 space-y-1.5">
+                                    <div className="h-3.5 w-24 bg-bg-muted rounded animate-pulse" />
                                     <div className="h-3 w-32 bg-bg-muted rounded animate-pulse" />
                                 </div>
                             )}
                         </div>
                     ) : (
-                        <div className={`flex items-center gap-3 py-2 ${!expanded ? 'justify-center' : ''}`}>
-                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-bg-muted text-text-secondary ring-1 ring-border transition-colors group-hover:bg-text-primary group-hover:text-white">
-                                <User size={18} />
-                            </div>
-                            {expanded ? (
-                                <div className="min-w-0">
-                                    <p className="truncate text-sm font-bold capitalize text-text-primary leading-tight">{userName}</p>
-                                    <p className="truncate text-[11px] font-medium text-text-muted mt-0.5">{userEmail}</p>
+                        <div className={`flex items-center justify-between gap-2 rounded-xl p-1.5 transition-colors hover:bg-bg-muted/40 ${!expanded ? 'flex-col justify-center gap-3' : ''}`}>
+                            <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-bg-muted text-text-secondary ring-1 ring-border">
+                                    <User size={18} />
                                 </div>
-                            ) : null}
+                                {expanded && (
+                                    <div className="min-w-0 flex-1">
+                                        <p className="truncate text-xs font-bold capitalize text-text-primary leading-tight">{userName}</p>
+                                        <p className="truncate text-[10px] font-medium text-text-muted mt-0.5">{userEmail}</p>
+                                    </div>
+                                )}
+                            </div>
+
+                            <button
+                                type="button"
+                                title="Log out"
+                                aria-label="Log out"
+                                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-danger-light hover:text-danger cursor-pointer"
+                                onClick={async () => {
+                                    await signOutAction();
+                                }}
+                            >
+                                <LogOut size={16} />
+                            </button>
                         </div>
                     )}
-
-                    <button
-                        type="button"
-                        className={`flex w-full items-center rounded-btn px-2 py-2 text-text-secondary transition-colors hover:bg-bg-muted hover:text-danger cursor-pointer ${!expanded ? 'justify-center' : ''
-                            }`}
-                        onClick={async () => {
-                            await signOutAction();
-                        }}
-                    >
-                        <LogOut size={18} className={expanded ? 'mr-3 shrink-0' : 'shrink-0'} />
-                        {expanded && <span className="text-sm font-medium">Log out</span>}
-                    </button>
                 </div>
             </aside>
         </>

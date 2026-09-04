@@ -332,136 +332,95 @@ export default function TransactionsPage() {
                 />
             ) : (
                 /* Virtual Card Transactions */
-                <Card className="overflow-hidden">
-                    <div className="px-4 sm:px-6 py-3 border-b border-border bg-bg-muted/30 flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-text-muted">
-                        <span>{cardTxLoading ? 'Loading…' : `${cardTxs.length} card transactions`}</span>
-                        <CreditCard size={14} className="text-brand" />
-                    </div>
+                <DataTable
+                    data={cardTxs}
+                    asTable
+                    isLoading={cardTxLoading}
+                    emptyIcon={<CreditCard size={32} />}
+                    emptyTitle="No card transactions yet"
+                    emptyMessage="Transactions will appear here once a virtual card is used."
+                    header={
+                        <div className="px-4 sm:px-6 py-3 border-b border-border bg-bg-muted/30 flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-text-muted">
+                            <span>{cardTxLoading ? 'Loading…' : `${cardTxs.length} card transactions`}</span>
+                            <CreditCard size={14} className="text-brand" />
+                        </div>
+                    }
+                    tableHead={
+                        <tr className="border-b border-border bg-bg-muted/40">
+                            <th className="py-3 pl-6 pr-4 text-left text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted">Merchant</th>
+                            <th className="py-3 px-4 text-left text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted">Date</th>
+                            <th className="hidden lg:table-cell py-3 px-4 text-left text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted">Category</th>
+                            <th className="py-3 px-4 text-left text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted">Status</th>
+                            <th className="py-3 px-4 pr-6 text-right text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted">Amount</th>
+                        </tr>
+                    }
+                    renderItem={(tx: any, i: number, viewMode?: 'table' | 'list') => {
+                        const statusColor: Record<string, string> = {
+                            approved: 'text-success bg-success-light border-success/20',
+                            pending: 'text-warning bg-warning-light border-warning/20',
+                            declined: 'text-danger bg-danger-light border-danger/20',
+                            failed: 'text-danger bg-danger-light border-danger/20',
+                        };
+                        const color = statusColor[tx.status] ?? 'text-text-secondary bg-bg-muted border-border';
+                        const dateFormatted = tx.created_at ? new Date(tx.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
+                        const amountFormatted = `${tx.currency === 'NGN' ? '₦' : '$'}${((tx.amount_kobo ?? 0) / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-                    {cardTxLoading ? (
-                        <div className="divide-y divide-border">
-                            {Array.from({ length: 5 }).map((_, i) => (
-                                <div key={i} className="flex items-center justify-between px-4 sm:px-6 py-4 animate-pulse">
-                                    <div className="flex items-center gap-3">
-                                        <div className="h-9 w-9 rounded-full bg-bg-muted" />
-                                        <div className="space-y-1.5">
-                                            <div className="h-3 w-32 rounded bg-bg-muted" />
-                                            <div className="h-2.5 w-20 rounded bg-bg-muted" />
+                        if (viewMode === 'table') {
+                            return (
+                                <tr key={tx.id ?? i} className="group hover:bg-bg-muted/40 transition-colors">
+                                    <td className="py-3.5 pl-6 pr-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-light">
+                                                <CreditCard size={16} className="text-brand" />
+                                            </div>
+                                            <p className="truncate text-sm font-bold text-text-primary max-w-[180px]">
+                                                {tx.merchant_name ?? tx.service_name ?? 'Virtual Card'}
+                                            </p>
                                         </div>
+                                    </td>
+                                    <td className="py-3.5 px-4 whitespace-nowrap">
+                                        <span className="text-[11px] font-medium text-text-secondary uppercase tracking-wider">{dateFormatted}</span>
+                                    </td>
+                                    <td className="hidden lg:table-cell py-3.5 px-4">
+                                        <span className="text-[11px] font-medium text-text-secondary uppercase tracking-wider capitalize">{tx.merchant_category ?? '—'}</span>
+                                    </td>
+                                    <td className="py-3.5 px-4">
+                                        <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${color}`}>
+                                            {tx.status}
+                                        </span>
+                                    </td>
+                                    <td className="py-3.5 px-4 pr-6 text-right tabular-nums">
+                                        <span className="text-sm font-bold text-text-primary">{amountFormatted}</span>
+                                    </td>
+                                </tr>
+                            );
+                        }
+
+                        return (
+                            <div key={tx.id ?? i} className="flex items-center justify-between gap-3 px-4 py-3.5 hover:bg-bg-muted/40 active:bg-bg-muted/60 transition-colors">
+                                <div className="flex items-center gap-3 min-w-0 flex-1">
+                                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-brand-light/80 text-brand shadow-xs border border-brand/10">
+                                        <CreditCard size={18} className="text-brand" />
                                     </div>
-                                    <div className="h-3 w-16 rounded bg-bg-muted" />
+                                    <div className="min-w-0 space-y-0.5">
+                                        <p className="truncate text-sm font-bold text-text-primary">
+                                            {tx.merchant_name ?? tx.service_name ?? 'Virtual Card'}
+                                        </p>
+                                        <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">
+                                            {dateFormatted}{tx.merchant_category && ` · ${tx.merchant_category}`}
+                                        </p>
+                                    </div>
                                 </div>
-                            ))}
-                        </div>
-                    ) : cardTxs.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center gap-3 py-16 text-text-secondary">
-                            <CreditCard size={32} className="opacity-30" />
-                            <p className="text-sm font-medium">No card transactions yet</p>
-                            <p className="text-xs">Transactions will appear here once a virtual card is used.</p>
-                        </div>
-                    ) : (
-                        <>
-                            {/* Desktop table */}
-                            <div className="hidden md:block overflow-x-auto">
-                                <table className="w-full min-w-[560px] border-collapse text-sm">
-                                    <thead>
-                                        <tr className="border-b border-border bg-bg-muted/40">
-                                            <th className="py-3 pl-6 pr-4 text-left text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted">Merchant</th>
-                                            <th className="py-3 px-4 text-left text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted">Date</th>
-                                            <th className="hidden lg:table-cell py-3 px-4 text-left text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted">Category</th>
-                                            <th className="py-3 px-4 text-left text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted">Status</th>
-                                            <th className="py-3 px-4 pr-6 text-right text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted">Amount</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-border">
-                                        {cardTxs.map((tx: any) => {
-                                            const statusColor: Record<string, string> = {
-                                                approved: 'text-success bg-success-light',
-                                                pending: 'text-warning bg-warning-light',
-                                                declined: 'text-danger bg-danger-light',
-                                                failed: 'text-danger bg-danger-light',
-                                            };
-                                            const color = statusColor[tx.status] ?? 'text-text-secondary bg-bg-muted';
-                                            return (
-                                                <tr key={tx.id} className="group hover:bg-bg-muted/40 transition-colors">
-                                                    <td className="py-3.5 pl-6 pr-4">
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-light">
-                                                                <CreditCard size={16} className="text-brand" />
-                                                            </div>
-                                                            <p className="truncate text-sm font-bold text-text-primary max-w-[180px]">
-                                                                {tx.merchant_name ?? tx.service_name ?? 'Virtual Card'}
-                                                            </p>
-                                                        </div>
-                                                    </td>
-                                                    <td className="py-3.5 px-4 whitespace-nowrap">
-                                                        <span className="text-[11px] font-medium text-text-secondary uppercase tracking-wider">
-                                                            {tx.created_at ? new Date(tx.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}
-                                                        </span>
-                                                    </td>
-                                                    <td className="hidden lg:table-cell py-3.5 px-4">
-                                                        <span className="text-[11px] font-medium text-text-secondary uppercase tracking-wider capitalize">
-                                                            {tx.merchant_category ?? '—'}
-                                                        </span>
-                                                    </td>
-                                                    <td className="py-3.5 px-4">
-                                                        <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${color}`}>
-                                                            {tx.status}
-                                                        </span>
-                                                    </td>
-                                                    <td className="py-3.5 px-4 pr-6 text-right tabular-nums">
-                                                        <span className="text-sm font-bold text-text-primary">
-                                                            {tx.currency === 'NGN' ? '₦' : '$'}{((tx.amount_kobo ?? 0) / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            );
-                                        })}
-                                    </tbody>
-                                </table>
+                                <div className="flex flex-col items-end gap-1 shrink-0 tabular-nums">
+                                    <span className="text-sm font-bold text-text-primary">{amountFormatted}</span>
+                                    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider border ${color}`}>
+                                        {tx.status}
+                                    </span>
+                                </div>
                             </div>
-
-                            {/* Mobile list */}
-                            <div className="divide-y divide-border md:hidden">
-                                {cardTxs.map((tx: any) => {
-                                    const statusColor: Record<string, string> = {
-                                        approved: 'text-success bg-success-light border-success/20',
-                                        pending: 'text-warning bg-warning-light border-warning/20',
-                                        declined: 'text-danger bg-danger-light border-danger/20',
-                                        failed: 'text-danger bg-danger-light border-danger/20',
-                                    };
-                                    const color = statusColor[tx.status] ?? 'text-text-secondary bg-bg-muted border-border';
-                                    return (
-                                        <div key={tx.id} className="flex items-center justify-between gap-3 px-4 py-3.5 hover:bg-bg-muted/40 active:bg-bg-muted/60 transition-colors">
-                                            <div className="flex items-center gap-3 min-w-0 flex-1">
-                                                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-brand-light/80 text-brand shadow-xs border border-brand/10">
-                                                    <CreditCard size={18} className="text-brand" />
-                                                </div>
-                                                <div className="min-w-0 space-y-0.5">
-                                                    <p className="truncate text-sm font-bold text-text-primary">
-                                                        {tx.merchant_name ?? tx.service_name ?? 'Virtual Card'}
-                                                    </p>
-                                                    <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">
-                                                        {tx.created_at ? new Date(tx.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''}
-                                                        {tx.merchant_category && ` · ${tx.merchant_category}`}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                            <div className="flex flex-col items-end gap-1 shrink-0 tabular-nums">
-                                                <span className="text-sm font-bold text-text-primary">
-                                                    {tx.currency === 'NGN' ? '₦' : '$'}{((tx.amount_kobo ?? 0) / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                                </span>
-                                                <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider border ${color}`}>
-                                                    {tx.status}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </>
-                    )}
-                </Card>
+                        );
+                    }}
+                />
             )}
         </div>
     );
