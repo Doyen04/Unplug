@@ -58,7 +58,7 @@ export default async function SignupPage({ searchParams }: { searchParams?: Prom
     if (session) redirect('/dashboard');
 
     return (
-        <main className="auth-page relative">
+        <main className="auth-page relative min-h-dvh w-full max-w-full overflow-x-hidden">
             <div className="lg:grid lg:min-h-screen lg:grid-cols-2">
                 {/* Left: brand story */}
                 <section className="dot-grid relative hidden flex-col justify-between gap-10 overflow-hidden border-r border-line bg-bg-surface p-8 xl:p-12 lg:flex">
@@ -95,43 +95,51 @@ export default async function SignupPage({ searchParams }: { searchParams?: Prom
                 </section>
 
                 {/* Right: form */}
-                <section className="flex min-h-screen flex-col bg-white px-4 py-12 sm:px-10">
-                    <div className="m-auto w-full max-w-md">
-                        <Link href="/" aria-label="Back to home" className="mb-10 inline-block lg:hidden">
-                            <UnplugLogo size="md" />
-                        </Link>
+                <section className="flex min-h-dvh flex-col justify-center bg-white px-4 py-8 sm:px-10 sm:py-12">
+                    <div className="mx-auto w-full max-w-md">
+                        <div className="mb-6 sm:mb-8 flex items-center justify-between lg:hidden">
+                            <Link href="/" aria-label="Back to home">
+                                <UnplugLogo size="md" />
+                            </Link>
+                            <Link href="/" className="text-xs font-semibold text-ink-70 hover:text-ink transition-colors">
+                                ← Home
+                            </Link>
+                        </div>
 
-                        <p className="text-xs font-bold uppercase tracking-widest text-ink-70 mb-6">Create Account</p>
+                        <div className="mb-6">
+                            <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-ink">Create Account</h2>
+                            <p className="mt-1 text-xs font-bold uppercase tracking-widest text-ink-70">Get started with Unplug free in 2 minutes</p>
+                        </div>
 
                         {params.error === 'signup_failed' && (
                             <Badge variant="danger" className="w-full justify-center py-3 mb-6">Sign-up failed. Try again.</Badge>
                         )}
 
-                        <form action={signupAction} className="space-y-4">
-                            <div className="space-y-2">
+                        <form action={signupAction} className="space-y-3">
+                            <div className="space-y-1">
                                 <label className="text-xs font-bold uppercase tracking-widest text-ink-70 ml-1">Full Name</label>
                                 <Input name="name" type="text" placeholder="Your name" required />
                             </div>
-                            <div className="space-y-2">
+                            <div className="space-y-1">
                                 <label className="text-xs font-bold uppercase tracking-widest text-ink-70 ml-1">Email</label>
                                 <Input name="email" type="email" placeholder="you@example.com" required />
                             </div>
-                            <div className="space-y-2">
+                            <div className="space-y-1">
                                 <label className="text-xs font-bold uppercase tracking-widest text-ink-70 ml-1">Phone Number</label>
                                 <Input name="phoneNumber" type="tel" placeholder="+234 801 234 5678" required />
                             </div>
-                            <div className="space-y-2">
+                            <div className="space-y-1">
                                 <label className="text-xs font-bold uppercase tracking-widest text-ink-70 ml-1">Password</label>
                                 <Input name="password" type="password" placeholder="At least 8 characters" required />
                             </div>
                             <FormSubmitButton
                                 idleLabel="Create account"
                                 pendingLabel="Creating..."
-                                className="w-full h-12 text-sm font-bold uppercase tracking-widest mt-4"
+                                className="w-full h-12 text-sm font-bold uppercase tracking-widest mt-5"
                             />
                         </form>
 
-                        <p className="mt-8 text-center text-xs font-bold uppercase tracking-widest text-ink-70">
+                        <p className="mt-6 border-t border-line pt-5 text-center text-xs font-bold uppercase tracking-widest text-ink-70">
                             Already have an account?{' '}
                             <Link href="/login" className="text-green hover:underline">Log in</Link>
                         </p>

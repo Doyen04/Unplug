@@ -49,7 +49,7 @@ export default async function LoginPage({ searchParams }: { searchParams?: Promi
     if (session) redirect('/dashboard');
 
     return (
-        <main className="auth-page relative">
+        <main className="auth-page relative min-h-dvh w-full max-w-full overflow-x-hidden">
             <div className="lg:grid lg:min-h-screen lg:grid-cols-2">
                 {/* Left: brand story */}
                 <section className="dot-grid relative hidden flex-col justify-between gap-10 overflow-hidden border-r border-line bg-bg-surface p-8 xl:p-12 lg:flex">
@@ -86,13 +86,21 @@ export default async function LoginPage({ searchParams }: { searchParams?: Promi
                 </section>
 
                 {/* Right: form */}
-                <section className="flex min-h-screen flex-col bg-white px-4 py-12 sm:px-10">
-                    <div className="m-auto w-full max-w-md">
-                        <Link href="/" aria-label="Back to home" className="mb-10 inline-block lg:hidden">
-                            <UnplugLogo size="md" />
-                        </Link>
+                <section className="flex min-h-dvh flex-col justify-center bg-white px-4 py-8 sm:px-10 sm:py-12">
+                    <div className="mx-auto w-full max-w-md">
+                        <div className="mb-6 sm:mb-8 flex items-center justify-between lg:hidden">
+                            <Link href="/" aria-label="Back to home">
+                                <UnplugLogo size="md" />
+                            </Link>
+                            <Link href="/" className="text-xs font-semibold text-ink-70 hover:text-ink transition-colors">
+                                ← Home
+                            </Link>
+                        </div>
 
-                        <p className="text-xs font-bold uppercase tracking-widest text-ink-70 mb-6">Log in to Unplug</p>
+                        <div className="mb-6">
+                            <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-ink">Welcome back</h2>
+                            <p className="mt-1 text-xs font-bold uppercase tracking-widest text-ink-70">Log in to your Unplug account</p>
+                        </div>
 
                         {params.error === 'invalid_credentials' && (
                             <Badge variant="danger" className="w-full justify-center py-3 mb-6">Invalid email or password</Badge>
@@ -105,24 +113,27 @@ export default async function LoginPage({ searchParams }: { searchParams?: Promi
                         )}
 
                         <form action={loginAction} className="space-y-4">
-                            <div className="space-y-2">
+                            <div className="space-y-1.5">
                                 <label className="text-xs font-bold uppercase tracking-widest text-ink-70 ml-1">Email</label>
                                 <Input name="email" type="email" placeholder="you@example.com" required />
                             </div>
-                            <div className="space-y-2">
-                                <label className="text-xs font-bold uppercase tracking-widest text-ink-70 ml-1">Password</label>
+                            <div className="space-y-1.5">
+                                <div className="flex items-center justify-between ml-1">
+                                    <label className="text-xs font-bold uppercase tracking-widest text-ink-70">Password</label>
+                                    <Link href="/forgot-password" className="text-xs font-semibold text-orange hover:underline">Forgot?</Link>
+                                </div>
                                 <Input name="password" type="password" placeholder="••••••••" required />
                             </div>
                             <FormSubmitButton
                                 idleLabel="Log in"
                                 pendingLabel="Logging in..."
-                                className="w-full h-12 text-sm font-bold uppercase tracking-widest mt-4"
+                                className="w-full h-12 text-sm font-bold uppercase tracking-widest mt-6"
                             />
                         </form>
 
-                        <div className="mt-8 flex items-center justify-between text-xs font-bold uppercase tracking-widest">
+                        <div className="mt-8 border-t border-line pt-6 text-center text-xs font-bold uppercase tracking-widest text-ink-70">
+                            Don&apos;t have an account?{' '}
                             <Link href="/signup" className="text-green hover:underline">Create account</Link>
-                            <Link href="/forgot-password" title="Coming soon" className="text-ink-70 hover:text-ink">Forgot password</Link>
                         </div>
                     </div>
                 </section>

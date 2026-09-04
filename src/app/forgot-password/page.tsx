@@ -113,7 +113,7 @@ const ForgotPasswordPage = async ({ searchParams }: ForgotPasswordPageProps) => 
     const hasInvalidCodeError = params.error === 'invalid_code';
 
     return (
-        <main className="auth-page relative">
+        <main className="auth-page relative min-h-dvh w-full max-w-full overflow-x-hidden">
             <div className="lg:grid lg:min-h-screen lg:grid-cols-2">
                 {/* Left: brand story */}
                 <section className="dot-grid relative hidden flex-col justify-between gap-10 overflow-hidden border-r border-line bg-bg-surface p-8 xl:p-12 lg:flex">
@@ -150,13 +150,23 @@ const ForgotPasswordPage = async ({ searchParams }: ForgotPasswordPageProps) => 
                 </section>
 
                 {/* Right: form */}
-                <section className="flex min-h-screen flex-col bg-white px-4 py-12 sm:px-10">
-                    <div className="m-auto w-full max-w-md">
-                        <Link href="/" aria-label="Back to home" className="mb-10 inline-block lg:hidden">
-                            <UnplugLogo size="md" />
-                        </Link>
+                <section className="flex min-h-dvh flex-col justify-center bg-white px-4 py-8 sm:px-10 sm:py-12">
+                    <div className="mx-auto w-full max-w-md">
+                        <div className="mb-6 sm:mb-8 flex items-center justify-between lg:hidden">
+                            <Link href="/" aria-label="Back to home">
+                                <UnplugLogo size="md" />
+                            </Link>
+                            <Link href="/" className="text-xs font-semibold text-ink-70 hover:text-ink transition-colors">
+                                ← Home
+                            </Link>
+                        </div>
 
-                        <p className="text-xs font-bold uppercase tracking-widest text-ink-70 mb-6">Password Recovery</p>
+                        <div className="mb-6">
+                            <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-ink">Password Recovery</h2>
+                            <p className="mt-1 text-xs font-bold uppercase tracking-widest text-ink-70">
+                                {showReset ? 'Enter the code sent to your email' : 'Reset your password'}
+                            </p>
+                        </div>
 
                         {showRequest && (
                             <>
@@ -171,25 +181,27 @@ const ForgotPasswordPage = async ({ searchParams }: ForgotPasswordPageProps) => 
                                 )}
 
                                 <form action={requestResetCodeAction} className="space-y-4">
-                                    <div className="space-y-2">
+                                    <div className="space-y-1.5">
                                         <label className="text-xs font-bold uppercase tracking-widest text-ink-70 ml-1">Email</label>
                                         <Input name="email" type="email" defaultValue={email} placeholder="you@example.com" required />
                                     </div>
                                     <FormSubmitButton
                                         idleLabel="Send reset code"
                                         pendingLabel="Sending..."
-                                        className="w-full h-12 text-sm font-bold uppercase tracking-widest mt-4"
+                                        className="w-full h-12 text-sm font-bold uppercase tracking-widest mt-6"
                                     />
                                 </form>
 
-                                <p className="mt-6 text-center text-xs font-bold uppercase tracking-widest text-ink-70">
-                                    Already have a code?{' '}
-                                    <Link href={resetStepUrl} className="text-green hover:underline">Enter it</Link>
-                                </p>
-                                <p className="mt-8 text-center text-xs font-bold uppercase tracking-widest text-ink-70">
-                                    Remembered your password?{' '}
-                                    <Link href="/login" className="text-green hover:underline">Back to login</Link>
-                                </p>
+                                <div className="mt-6 space-y-3 text-center text-xs font-bold uppercase tracking-widest text-ink-70">
+                                    <p>
+                                        Already have a code?{' '}
+                                        <Link href={resetStepUrl} className="text-green hover:underline">Enter it</Link>
+                                    </p>
+                                    <p className="border-t border-line pt-4">
+                                        Remembered your password?{' '}
+                                        <Link href="/login" className="text-green hover:underline">Back to login</Link>
+                                    </p>
+                                </div>
                             </>
                         )}
 
@@ -202,12 +214,12 @@ const ForgotPasswordPage = async ({ searchParams }: ForgotPasswordPageProps) => 
                                     <Badge variant="danger" className="w-full justify-center py-3 mb-6">Invalid or expired code. Request another code and retry.</Badge>
                                 )}
 
-                                <form action={resetPasswordAction} className="space-y-4">
-                                    <div className="space-y-2">
+                                <form action={resetPasswordAction} className="space-y-3.5">
+                                    <div className="space-y-1.5">
                                         <label className="text-xs font-bold uppercase tracking-widest text-ink-70 ml-1">Email</label>
                                         <Input name="email" type="email" defaultValue={email} placeholder="you@example.com" required />
                                     </div>
-                                    <div className="space-y-2">
+                                    <div className="space-y-1.5">
                                         <label className="text-xs font-bold uppercase tracking-widest text-ink-70 ml-1">Reset code</label>
                                         <Input
                                             name="otp"
@@ -221,25 +233,27 @@ const ForgotPasswordPage = async ({ searchParams }: ForgotPasswordPageProps) => 
                                             required
                                         />
                                     </div>
-                                    <div className="space-y-2">
+                                    <div className="space-y-1.5">
                                         <label className="text-xs font-bold uppercase tracking-widest text-ink-70 ml-1">New password</label>
                                         <Input name="password" type="password" minLength={8} placeholder="At least 8 characters" required />
                                     </div>
                                     <FormSubmitButton
                                         idleLabel="Reset password"
                                         pendingLabel="Resetting..."
-                                        className="w-full h-12 text-sm font-bold uppercase tracking-widest mt-4"
+                                        className="w-full h-12 text-sm font-bold uppercase tracking-widest mt-6"
                                     />
                                 </form>
 
-                                <p className="mt-6 text-center text-xs font-bold uppercase tracking-widest text-ink-70">
-                                    Need a new code?{' '}
-                                    <Link href={requestStepUrl} className="text-green hover:underline">Go back</Link>
-                                </p>
-                                <p className="mt-8 text-center text-xs font-bold uppercase tracking-widest text-ink-70">
-                                    Remembered your password?{' '}
-                                    <Link href="/login" className="text-green hover:underline">Back to login</Link>
-                                </p>
+                                <div className="mt-6 space-y-3 text-center text-xs font-bold uppercase tracking-widest text-ink-70">
+                                    <p>
+                                        Need a new code?{' '}
+                                        <Link href={requestStepUrl} className="text-green hover:underline">Go back</Link>
+                                    </p>
+                                    <p className="border-t border-line pt-4">
+                                        Remembered your password?{' '}
+                                        <Link href="/login" className="text-green hover:underline">Back to login</Link>
+                                    </p>
+                                </div>
                             </>
                         )}
                     </div>
