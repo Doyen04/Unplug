@@ -200,7 +200,7 @@ export default function SubscriptionsPage() {
                     />
                 )}
                 showDivider
-                itemsClassName="p-4 space-y-3 md:p-0 md:space-y-0"
+                itemsClassName=""
                 isLoading={isLoading || isFetching}
                 isError={isError}
                 onRetry={refetch}

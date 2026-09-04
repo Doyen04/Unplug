@@ -309,7 +309,7 @@ export default function DashboardPage() {
                     return <TransactionRow key={t.transaction_id} transaction={t} currency={currencyForTransaction(t)} index={i} />;
                 }}
                 showDivider
-                itemsClassName={ledgerTab === 'subscriptions' ? "p-4 space-y-3 md:p-0 md:space-y-0" : ""}
+                itemsClassName=""
                 pagination={ledgerTab === 'subscriptions' ? {
                     page,
                     pageCount,

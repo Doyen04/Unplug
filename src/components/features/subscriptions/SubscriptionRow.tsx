@@ -4,12 +4,11 @@ import { AlertTriangle, Shield, Calendar, Ban } from 'lucide-react';
 
 import { CancelButton } from './CancelButton';
 import { CancellationGuideModal } from './CancellationGuideModal';
-import { formatCurrencyPrecise, toSentenceCase } from '@/lib/utils/format';
+import { formatCurrencyPrecise } from '@/lib/utils/format';
 import { getAvatarClass } from '@/lib/utils/avatar';
 import { getServiceIcon } from '@/lib/utils/service-icons';
 import type { Subscription } from '@/types/subscription';
 import { Badge } from '@/components/ui/Badge';
-import { Card } from '@/components/ui/Card';
 
 interface SubscriptionRowProps {
     subscription: Subscription;
@@ -49,11 +48,11 @@ export const SubscriptionRow = ({
         </Badge>
     );
 
-    const alertRow = hasAlert && !isCancelled &&
+    const alertChip = hasAlert && !isCancelled &&
         !subscription.alert?.message.toLowerCase().includes(subscription.verdict.replace('_', ' ').toLowerCase()) && (
-            <div className="mt-1 flex items-center gap-1.5 rounded bg-warning-light/40 px-2 py-1 border border-warning/10">
+            <div className="flex items-center gap-1.5 rounded bg-warning-light/40 px-2 py-1 border border-warning/10 w-fit">
                 <AlertTriangle size={10} className="text-warning shrink-0" />
-                <span className="text-[10px] font-semibold text-warning uppercase tracking-tight truncate">
+                <span className="text-[10px] font-semibold text-warning uppercase tracking-tight">
                     {subscription.alert!.message}
                 </span>
             </div>
@@ -79,9 +78,7 @@ export const SubscriptionRow = ({
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: isCancelled ? 0.55 : 1, y: 0 }}
                 transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1], delay: index * 0.03 }}
-                className={`hidden md:table-row group hover:bg-bg-muted/40 transition-colors
-                    ${hasAlert && !isCancelled ? 'border-l-4 border-l-warning' : ''}
-                    ${subscription.status === 'unused' ? 'alert-pulse-border' : ''}`}
+                className="hidden md:table-row group hover:bg-bg-muted/40 transition-colors"
             >
                 {/* Service */}
                 <td className="py-3.5 pl-6 pr-4">
@@ -89,11 +86,11 @@ export const SubscriptionRow = ({
                         <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${getAvatarClass(subscription.serviceName)} ${isCancelled ? 'grayscale' : ''}`}>
                             {getServiceIcon(subscription.serviceName)}
                         </div>
-                        <div className="min-w-0">
+                        <div className="min-w-0 space-y-0.5">
                             <p className={`truncate text-sm font-bold leading-tight ${isCancelled ? 'line-through text-text-muted' : 'text-text-primary'}`}>
                                 {subscription.serviceName}
                             </p>
-                            {alertRow}
+                            {alertChip}
                         </div>
                     </div>
                 </td>
@@ -135,53 +132,51 @@ export const SubscriptionRow = ({
                 </td>
             </motion.tr>
 
-            {/* ── Mobile card ── */}
+            {/* ── Mobile row ── */}
             <motion.div
-                initial={{ opacity: 0, y: 12 }}
+                initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: isCancelled ? 0.55 : 1, y: 0 }}
-                transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1], delay: index * 0.03 }}
-                className="block md:hidden"
+                transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1], delay: index * 0.03 }}
+                className="flex items-center gap-3 px-4 py-3.5 hover:bg-bg-muted/30 transition-colors group md:hidden"
             >
-                <Card className={`group flex flex-col gap-3 p-4
-                    ${isCancelled ? 'opacity-60' : ''}
-                    ${hasAlert && !isCancelled ? 'border-l-4 border-l-warning' : ''}
-                    ${subscription.status === 'unused' ? 'alert-pulse-border' : ''}`}
-                >
-                    {/* Top: avatar + name + badge */}
-                    <div className="flex items-center gap-3">
-                        <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${getAvatarClass(subscription.serviceName)} ${isCancelled ? 'grayscale' : ''}`}>
-                            {getServiceIcon(subscription.serviceName)}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                            <div className="flex flex-wrap items-center gap-1.5">
-                                <p className={`truncate text-sm font-bold ${isCancelled ? 'line-through text-text-muted' : 'text-text-primary'}`}>
-                                    {subscription.serviceName}
-                                </p>
-                                {statusBadge}
-                            </div>
-                            <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] font-medium text-text-secondary uppercase tracking-wider">
-                                <span className="flex items-center gap-1"><Shield size={10} /> {subscription.confidence}</span>
-                                <span className="h-1 w-1 rounded-full bg-border" aria-hidden />
-                                <span className="flex items-center gap-1"><Calendar size={10} /> {subscription.frequencyLabel}</span>
-                            </div>
-                        </div>
+                {/* Avatar */}
+                <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${getAvatarClass(subscription.serviceName)} ${isCancelled ? 'grayscale' : ''}`}>
+                    {getServiceIcon(subscription.serviceName)}
+                </div>
+
+                {/* Name + meta */}
+                <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                        <p className={`truncate text-sm font-bold ${isCancelled ? 'line-through text-text-muted' : 'text-text-primary'}`}>
+                            {subscription.serviceName}
+                        </p>
+                        {statusBadge}
                     </div>
+                    <div className="mt-0.5 flex items-center gap-2 text-[10px] font-medium text-text-secondary uppercase tracking-wider">
+                        <span className="flex items-center gap-1"><Calendar size={9} />{subscription.frequencyLabel}</span>
+                        {hasAlert && !isCancelled && (
+                            <>
+                                <span className="h-1 w-1 rounded-full bg-border" aria-hidden />
+                                <span className="flex items-center gap-1 text-warning"><AlertTriangle size={9} />{subscription.alert!.message}</span>
+                            </>
+                        )}
+                    </div>
+                </div>
 
-                    {alertRow}
-
-                    {/* Bottom: amount + action */}
-                    <div className="flex items-center justify-between border-t border-border/50 pt-2.5">
-                        <div className="tabular-nums">
-                            <p className={`font-ui text-base font-bold ${isCancelled ? 'text-text-muted line-through' : 'text-text-primary'}`}>
-                                {formatCurrencyPrecise(subscription.amountMonthly, currencyCode)}
-                            </p>
-                            {isCancelled && (
-                                <p className="text-[9px] font-bold uppercase tracking-widest text-success mt-0.5">Saving this</p>
-                            )}
-                        </div>
+                {/* Amount + action */}
+                <div className="flex items-center gap-3 shrink-0 tabular-nums">
+                    <div className="text-right">
+                        <p className={`text-sm font-bold ${isCancelled ? 'text-text-muted line-through' : 'text-text-primary'}`}>
+                            {formatCurrencyPrecise(subscription.amountMonthly, currencyCode)}
+                        </p>
+                        {isCancelled && (
+                            <p className="text-[9px] font-bold uppercase tracking-widest text-success">Saving</p>
+                        )}
+                    </div>
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-150">
                         {cancelAction}
                     </div>
-                </Card>
+                </div>
             </motion.div>
 
             <CancellationGuideModal
