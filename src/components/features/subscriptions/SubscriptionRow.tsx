@@ -39,18 +39,18 @@ export const SubscriptionRow = ({
                 : 'secondary';
 
     const statusBadge = isCancelled ? (
-        <Badge variant="secondary" className="flex items-center gap-1 shrink-0">
+        <Badge variant="secondary" className="flex items-center gap-1 shrink-0 text-[10px]">
             <Ban size={10} /> cancelled
         </Badge>
     ) : (
-        <Badge variant={verdictVariant} className="shrink-0">
+        <Badge variant={verdictVariant} className="shrink-0 text-[10px]">
             {subscription.verdict.replace('_', ' ')}
         </Badge>
     );
 
     const alertChip = hasAlert && !isCancelled &&
         !subscription.alert?.message.toLowerCase().includes(subscription.verdict.replace('_', ' ').toLowerCase()) && (
-            <div className="flex items-center gap-1.5 rounded bg-warning-light/40 px-2 py-1 border border-warning/10 w-fit">
+            <div className="flex items-center gap-1 rounded bg-warning-light/40 px-1.5 py-0.5 border border-warning/10 w-fit">
                 <AlertTriangle size={10} className="text-warning shrink-0" />
                 <span className="text-[10px] font-semibold text-warning uppercase tracking-tight">
                     {subscription.alert!.message}
@@ -137,43 +137,47 @@ export const SubscriptionRow = ({
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: isCancelled ? 0.55 : 1, y: 0 }}
                 transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1], delay: index * 0.03 }}
-                className="flex items-center gap-3 px-4 py-3.5 hover:bg-bg-muted/30 transition-colors group md:hidden"
+                className="flex items-center justify-between gap-3 px-4 py-3.5 hover:bg-bg-muted/30 transition-colors group md:hidden border-b border-border/60 last:border-b-0"
             >
-                {/* Avatar */}
-                <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${getAvatarClass(subscription.serviceName)} ${isCancelled ? 'grayscale' : ''}`}>
-                    {getServiceIcon(subscription.serviceName)}
+                {/* Avatar + Info */}
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${getAvatarClass(subscription.serviceName)} ${isCancelled ? 'grayscale' : ''}`}>
+                        {getServiceIcon(subscription.serviceName)}
+                    </div>
+
+                    <div className="min-w-0 space-y-1">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                            <p className={`truncate text-sm font-bold ${isCancelled ? 'line-through text-text-muted' : 'text-text-primary'}`}>
+                                {subscription.serviceName}
+                            </p>
+                            {statusBadge}
+                        </div>
+
+                        <div className="flex items-center gap-2 text-[10px] font-medium text-text-secondary uppercase tracking-wider flex-wrap">
+                            <span className="flex items-center gap-1"><Calendar size={10} />{subscription.frequencyLabel}</span>
+                            {hasAlert && !isCancelled && (
+                                <span className="flex items-center gap-1 text-warning font-semibold">
+                                    <AlertTriangle size={10} />{subscription.alert!.message}
+                                </span>
+                            )}
+                        </div>
+                    </div>
                 </div>
 
-                {/* Name + meta */}
-                <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-1.5 min-w-0">
-                        <p className={`truncate text-sm font-bold ${isCancelled ? 'line-through text-text-muted' : 'text-text-primary'}`}>
-                            {subscription.serviceName}
-                        </p>
-                        {statusBadge}
-                    </div>
-                    <div className="mt-0.5 flex items-center gap-2 text-[10px] font-medium text-text-secondary uppercase tracking-wider">
-                        <span className="flex items-center gap-1"><Calendar size={9} />{subscription.frequencyLabel}</span>
-                        {hasAlert && !isCancelled && (
-                            <>
-                                <span className="h-1 w-1 rounded-full bg-border" aria-hidden />
-                                <span className="flex items-center gap-1 text-warning"><AlertTriangle size={9} />{subscription.alert!.message}</span>
-                            </>
-                        )}
-                    </div>
-                </div>
-
-                {/* Amount + action */}
-                <div className="flex items-center gap-3 shrink-0 tabular-nums">
+                {/* Right side: Amount & Action */}
+                <div className="flex items-center gap-2.5 shrink-0 tabular-nums">
                     <div className="text-right">
                         <p className={`text-sm font-bold ${isCancelled ? 'text-text-muted line-through' : 'text-text-primary'}`}>
                             {formatCurrencyPrecise(subscription.amountMonthly, currencyCode)}
                         </p>
-                        {isCancelled && (
-                            <p className="text-[9px] font-bold uppercase tracking-widest text-success">Saving</p>
+                        {isCancelled ? (
+                            <p className="text-[9px] font-bold uppercase tracking-widest text-success">Saved</p>
+                        ) : (
+                            <span className="text-[9px] font-semibold text-text-muted uppercase">/ mo</span>
                         )}
                     </div>
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+
+                    <div className="shrink-0">
                         {cancelAction}
                     </div>
                 </div>
