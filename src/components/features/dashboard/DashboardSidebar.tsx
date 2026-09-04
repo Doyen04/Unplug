@@ -151,14 +151,17 @@ export const Sidebar = ({ expanded, toggleExpanded, isMobileOpen, setIsMobileOpe
                         </div>
                     )}
 
-                    <div
-                        className={`flex items-center rounded-btn px-2 py-2 text-text-secondary transition-colors hover:bg-bg-muted hover:text-danger ${!expanded ? 'justify-center' : ''
+                    <button
+                        type="button"
+                        className={`flex w-full items-center rounded-btn px-2 py-2 text-text-secondary transition-colors hover:bg-bg-muted hover:text-danger cursor-pointer ${!expanded ? 'justify-center' : ''
                             }`}
-                        onClick = {() => signOutAction(() => router.push("/login"))}
+                        onClick={async () => {
+                            await signOutAction();
+                        }}
                     >
                         <LogOut size={18} className={expanded ? 'mr-3 shrink-0' : 'shrink-0'} />
                         {expanded && <span className="text-sm font-medium">Log out</span>}
-                    </div>
+                    </button>
                 </div>
             </aside>
         </>

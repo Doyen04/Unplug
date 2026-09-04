@@ -3,7 +3,18 @@
 import { authClient } from "@/lib/auth-client";
 
 export const signOutAction = async (onSuccess?: () => void) => {
-    await authClient.signOut({
-        fetchOptions: { onSuccess },
-    });
+    try {
+        await authClient.signOut({
+            fetchOptions: {
+                onSuccess: () => {
+                    if (onSuccess) onSuccess();
+                    window.location.href = "/login";
+                },
+            },
+        });
+    } catch {
+        // no-op: proceed to redirect regardless
+    } finally {
+        window.location.href = "/login";
+    }
 };
