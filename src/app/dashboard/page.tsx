@@ -278,6 +278,28 @@ export default function DashboardPage() {
                         )}
                     </div>
                 }
+                asTable
+                tableHead={
+                    ledgerTab === 'subscriptions' ? (
+                        <tr className="border-b border-border bg-bg-muted/40">
+                            <th className="py-3 pl-6 pr-4 text-left text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted">Service</th>
+                            <th className="py-3 px-4 text-left text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted">Status</th>
+                            <th className="py-3 px-4 text-left text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted">Frequency</th>
+                            <th className="hidden lg:table-cell py-3 px-4 text-left text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted">Confidence</th>
+                            <th className="py-3 px-4 text-right text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted">Monthly</th>
+                            <th className="py-3 pl-4 pr-6 text-right text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted sr-only">Action</th>
+                        </tr>
+                    ) : (
+                        <tr className="border-b border-border bg-bg-muted/40">
+                            <th className="py-3 pl-6 pr-4 text-left text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted">Merchant</th>
+                            <th className="py-3 px-4 text-left text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted">Date</th>
+                            <th className="hidden lg:table-cell py-3 px-4 text-left text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted">Category</th>
+                            <th className="py-3 px-4 text-left text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted">Type</th>
+                            <th className="py-3 px-4 text-right text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted">Amount</th>
+                            <th className="py-3 pl-4 pr-6 sr-only">Action</th>
+                        </tr>
+                    )
+                }
                 renderItem={(item: Subscription | Transaction, i: number) => {
                     if (ledgerTab === 'subscriptions') {
                         const s = item as Subscription;
@@ -286,8 +308,8 @@ export default function DashboardPage() {
                     const t = item as Transaction;
                     return <TransactionRow key={t.transaction_id} transaction={t} currency={currencyForTransaction(t)} index={i} />;
                 }}
-                showDivider={ledgerTab === 'transactions'}
-                itemsClassName={ledgerTab === 'subscriptions' ? "p-6 space-y-4" : ""}
+                showDivider
+                itemsClassName={ledgerTab === 'subscriptions' ? "p-4 space-y-3 md:p-0 md:space-y-0" : ""}
                 pagination={ledgerTab === 'subscriptions' ? {
                     page,
                     pageCount,

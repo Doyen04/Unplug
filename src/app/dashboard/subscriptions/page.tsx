@@ -12,7 +12,6 @@ import type { DashboardProvider, Subscription } from "@/types/subscription";
 
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { Badge } from "@/components/ui/Badge";
 import { Input } from "@/components/ui/Input";
 import { DataTable } from "@/components/ui/DataTable";
 import { CreateCardModal } from "@/components/features/subscriptions/CreateCardModal";
@@ -180,6 +179,17 @@ export default function SubscriptionsPage() {
 
             <DataTable
                 data={subscriptions}
+                asTable
+                tableHead={
+                    <tr className="border-b border-border bg-bg-muted/40">
+                        <th className="py-3 pl-6 pr-4 text-left text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted">Service</th>
+                        <th className="py-3 px-4 text-left text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted">Status</th>
+                        <th className="py-3 px-4 text-left text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted">Frequency</th>
+                        <th className="hidden lg:table-cell py-3 px-4 text-left text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted">Confidence</th>
+                        <th className="py-3 px-4 text-right text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted">Monthly</th>
+                        <th className="py-3 pl-4 pr-6 sr-only">Action</th>
+                    </tr>
+                }
                 renderItem={(s: Subscription, i: number) => (
                     <SubscriptionRow
                         key={s.id}
@@ -189,8 +199,8 @@ export default function SubscriptionsPage() {
                         onCancel={cancelSubscription}
                     />
                 )}
-                showDivider={false}
-                itemsClassName="p-6 space-y-4"
+                showDivider
+                itemsClassName="p-4 space-y-3 md:p-0 md:space-y-0"
                 isLoading={isLoading || isFetching}
                 isError={isError}
                 onRetry={refetch}
@@ -208,7 +218,7 @@ export default function SubscriptionsPage() {
                     </Button>
                 }
                 header={
-                    <div className="border-b border-border bg-bg-muted/30 px-6 h-14 flex items-center">
+                    <div className="border-b border-border bg-bg-muted/30 px-4 sm:px-6 h-14 flex items-center">
                         <div className="flex items-center gap-2 overflow-x-auto scrollbar-hidden w-full">
                             {DASHBOARD_FILTER_OPTIONS.map((item) => (
                                 <button

@@ -2,7 +2,6 @@ import React from 'react';
 import { ChevronLeft, ChevronRight, AlertTriangle, Search } from 'lucide-react';
 import { Card } from './Card';
 import { Button } from './Button';
-import { Badge } from './Badge';
 
 interface DataTableProps<T> {
     data: T[];
@@ -27,6 +26,10 @@ interface DataTableProps<T> {
     footer?: React.ReactNode;
     className?: string;
     containerClassName?: string;
+    /** Column header row rendered inside <thead> on desktop */
+    tableHead?: React.ReactNode;
+    /** When true the rows are rendered inside a real <table> on desktop */
+    asTable?: boolean;
     showDivider?: boolean;
     itemsClassName?: string;
 }
@@ -36,20 +39,22 @@ export function DataTable<T>({
     renderItem,
     isLoading,
     isError,
-    errorTitle = "Failed to load data",
-    errorMessage = "There was a problem fetching the records.",
+    errorTitle = 'Failed to load data',
+    errorMessage = 'There was a problem fetching the records.',
     onRetry,
     emptyIcon = <Search size={32} />,
-    emptyTitle = "No results found",
-    emptyMessage = "Try adjusting your search or filters.",
+    emptyTitle = 'No results found',
+    emptyMessage = 'Try adjusting your search or filters.',
     emptyAction,
     pagination,
     header,
     footer,
-    className = "",
-    containerClassName = "p-0 overflow-hidden",
+    className = '',
+    containerClassName = 'p-0 overflow-hidden',
+    tableHead,
+    asTable = false,
     showDivider = true,
-    itemsClassName = "",
+    itemsClassName = '',
 }: DataTableProps<T>) {
 
     if (isError) {
@@ -69,33 +74,51 @@ export function DataTable<T>({
 
     const hasData = data.length > 0;
 
+    const bodyContent = isLoading ? (
+        <div className="p-12 text-center animate-pulse space-y-4">
+            <div className="h-12 w-12 bg-bg-muted rounded-full mx-auto" />
+            <div className="h-4 w-48 bg-bg-muted rounded mx-auto" />
+            <div className="h-4 w-32 bg-bg-muted rounded mx-auto" />
+        </div>
+    ) : !hasData ? (
+        <div className="p-12 text-center text-text-secondary">
+            <div className="opacity-20 mb-4 flex justify-center">{emptyIcon}</div>
+            <p className="font-semibold text-text-primary">{emptyTitle}</p>
+            <p className="text-sm mt-1 mb-6">{emptyMessage}</p>
+            {emptyAction}
+        </div>
+    ) : null;
+
     return (
         <Card className={`${containerClassName} ${className}`}>
             {header}
 
-            <div className={`${showDivider ? 'divide-y divide-border' : ''} ${itemsClassName}`}>
-                {isLoading ? (
-                    <div className="p-12 text-center animate-pulse space-y-4">
-                        <div className="h-12 w-12 bg-bg-muted rounded-full mx-auto" />
-                        <div className="h-4 w-48 bg-bg-muted rounded mx-auto" />
-                        <div className="h-4 w-32 bg-bg-muted rounded mx-auto" />
-                    </div>
-                ) : !hasData ? (
-                    <div className="p-12 text-center text-text-secondary">
-                        <div className="opacity-20 mb-4 flex justify-center">{emptyIcon}</div>
-                        <p className="font-semibold text-text-primary">{emptyTitle}</p>
-                        <p className="text-sm mt-1 mb-6">{emptyMessage}</p>
-                        {emptyAction}
-                    </div>
-                ) : (
-                    data.map((item, index) => renderItem(item, index))
-                )}
+            {/* ── Desktop table view ── */}
+            {asTable && !bodyContent && (
+                <div className="hidden md:block overflow-x-auto">
+                    <table className="w-full min-w-[640px] border-collapse text-sm">
+                        {tableHead && <thead>{tableHead}</thead>}
+                        <tbody className={showDivider ? 'divide-y divide-border' : ''}>
+                            {data.map((item, index) => renderItem(item, index))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
+
+            {/* ── Mobile card list (always shown) / fallback on desktop when asTable=false ── */}
+            <div className={`${asTable ? 'md:hidden' : ''} ${showDivider ? 'divide-y divide-border' : ''} ${itemsClassName}`}>
+                {bodyContent ?? data.map((item, index) => renderItem(item, index))}
             </div>
+
+            {/* Loading / empty for table mode */}
+            {asTable && bodyContent && (
+                <div>{bodyContent}</div>
+            )}
 
             {footer}
 
             {pagination && pagination.pageCount > 1 && (
-                <div className="flex items-center justify-between border-t border-border px-6 py-4 bg-bg-muted/30">
+                <div className="flex items-center justify-between border-t border-border px-4 sm:px-6 py-4 bg-bg-muted/30">
                     <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted">
                         Page {pagination.page} / {pagination.pageCount}
                         {pagination.total !== undefined && ` · ${pagination.total} total`}

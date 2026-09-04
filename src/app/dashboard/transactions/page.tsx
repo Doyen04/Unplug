@@ -288,6 +288,17 @@ export default function TransactionsPage() {
             {ledgerTab === 'bank' ? (
                 <DataTable
                     data={data?.transactions ?? []}
+                    asTable
+                    tableHead={
+                        <tr className="border-b border-border bg-bg-muted/40">
+                            <th className="py-3 pl-6 pr-4 text-left text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted">Merchant</th>
+                            <th className="py-3 px-4 text-left text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted">Date</th>
+                            <th className="hidden lg:table-cell py-3 px-4 text-left text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted">Category</th>
+                            <th className="py-3 px-4 text-left text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted">Type</th>
+                            <th className="py-3 px-4 text-right text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted">Amount</th>
+                            <th className="py-3 pl-4 pr-6 sr-only">Action</th>
+                        </tr>
+                    }
                     renderItem={(tx: Transaction, i: number) => (
                         <TransactionRow
                             key={tx.transaction_id}
@@ -296,6 +307,7 @@ export default function TransactionsPage() {
                             index={i}
                         />
                     )}
+                    showDivider
                     isLoading={isLoading || isFetching}
                     isError={isError}
                     onRetry={refetch}
@@ -305,11 +317,9 @@ export default function TransactionsPage() {
                     emptyTitle="No transactions found"
                     emptyMessage="Try a different search or date range."
                     header={
-                        <div className="px-5 py-3 border-b border-border bg-bg-muted/30 flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-text-muted">
+                        <div className="px-4 sm:px-6 py-3 border-b border-border bg-bg-muted/30 flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-text-muted">
                             <span>{data?.total ?? 0} transactions</span>
-                            <span>
-                                Page {data?.page ?? 1} / {data?.pageCount ?? 1}
-                            </span>
+                            <span>Page {data?.page ?? 1} / {data?.pageCount ?? 1}</span>
                         </div>
                     }
                     pagination={{
@@ -323,7 +333,7 @@ export default function TransactionsPage() {
             ) : (
                 /* Virtual Card Transactions */
                 <Card className="overflow-hidden">
-                    <div className="px-5 py-3 border-b border-border bg-bg-muted/30 flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-text-muted">
+                    <div className="px-4 sm:px-6 py-3 border-b border-border bg-bg-muted/30 flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-text-muted">
                         <span>{cardTxLoading ? 'Loading…' : `${cardTxs.length} card transactions`}</span>
                         <CreditCard size={14} className="text-brand" />
                     </div>
@@ -331,7 +341,7 @@ export default function TransactionsPage() {
                     {cardTxLoading ? (
                         <div className="divide-y divide-border">
                             {Array.from({ length: 5 }).map((_, i) => (
-                                <div key={i} className="flex items-center justify-between px-5 py-4 animate-pulse">
+                                <div key={i} className="flex items-center justify-between px-4 sm:px-6 py-4 animate-pulse">
                                     <div className="flex items-center gap-3">
                                         <div className="h-9 w-9 rounded-full bg-bg-muted" />
                                         <div className="space-y-1.5">
@@ -350,43 +360,106 @@ export default function TransactionsPage() {
                             <p className="text-xs">Transactions will appear here once a virtual card is used.</p>
                         </div>
                     ) : (
-                        <div className="divide-y divide-border">
-                            {cardTxs.map((tx: any) => {
-                                const statusColor: Record<string, string> = {
-                                    approved: 'text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20',
-                                    pending:  'text-amber-600  bg-amber-50  dark:bg-amber-900/20',
-                                    declined: 'text-red-600    bg-red-50    dark:bg-red-900/20',
-                                    failed:   'text-red-600    bg-red-50    dark:bg-red-900/20',
-                                };
-                                const color = statusColor[tx.status] ?? 'text-text-secondary bg-bg-muted';
-                                return (
-                                    <div key={tx.id} className="flex items-center justify-between px-5 py-4 hover:bg-bg-muted/40 transition-colors">
-                                        <div className="flex items-center gap-3 min-w-0">
-                                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-light">
-                                                <CreditCard size={16} className="text-brand" />
+                        <>
+                            {/* Desktop table */}
+                            <div className="hidden md:block overflow-x-auto">
+                                <table className="w-full min-w-[560px] border-collapse text-sm">
+                                    <thead>
+                                        <tr className="border-b border-border bg-bg-muted/40">
+                                            <th className="py-3 pl-6 pr-4 text-left text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted">Merchant</th>
+                                            <th className="py-3 px-4 text-left text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted">Date</th>
+                                            <th className="hidden lg:table-cell py-3 px-4 text-left text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted">Category</th>
+                                            <th className="py-3 px-4 text-left text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted">Status</th>
+                                            <th className="py-3 px-4 pr-6 text-right text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted">Amount</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-border">
+                                        {cardTxs.map((tx: any) => {
+                                            const statusColor: Record<string, string> = {
+                                                approved: 'text-success bg-success-light',
+                                                pending:  'text-warning bg-warning-light',
+                                                declined: 'text-danger bg-danger-light',
+                                                failed:   'text-danger bg-danger-light',
+                                            };
+                                            const color = statusColor[tx.status] ?? 'text-text-secondary bg-bg-muted';
+                                            return (
+                                                <tr key={tx.id} className="group hover:bg-bg-muted/40 transition-colors">
+                                                    <td className="py-3.5 pl-6 pr-4">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-light">
+                                                                <CreditCard size={16} className="text-brand" />
+                                                            </div>
+                                                            <p className="truncate text-sm font-bold text-text-primary max-w-[180px]">
+                                                                {tx.merchant_name ?? tx.service_name ?? 'Virtual Card'}
+                                                            </p>
+                                                        </div>
+                                                    </td>
+                                                    <td className="py-3.5 px-4 whitespace-nowrap">
+                                                        <span className="text-[11px] font-medium text-text-secondary uppercase tracking-wider">
+                                                            {tx.created_at ? new Date(tx.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}
+                                                        </span>
+                                                    </td>
+                                                    <td className="hidden lg:table-cell py-3.5 px-4">
+                                                        <span className="text-[11px] font-medium text-text-secondary uppercase tracking-wider capitalize">
+                                                            {tx.merchant_category ?? '—'}
+                                                        </span>
+                                                    </td>
+                                                    <td className="py-3.5 px-4">
+                                                        <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${color}`}>
+                                                            {tx.status}
+                                                        </span>
+                                                    </td>
+                                                    <td className="py-3.5 px-4 pr-6 text-right tabular-nums">
+                                                        <span className="text-sm font-bold text-text-primary">
+                                                            {tx.currency === 'NGN' ? '₦' : '$'}{((tx.amount_kobo ?? 0) / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            {/* Mobile list */}
+                            <div className="divide-y divide-border md:hidden">
+                                {cardTxs.map((tx: any) => {
+                                    const statusColor: Record<string, string> = {
+                                        approved: 'text-success bg-success-light',
+                                        pending:  'text-warning bg-warning-light',
+                                        declined: 'text-danger bg-danger-light',
+                                        failed:   'text-danger bg-danger-light',
+                                    };
+                                    const color = statusColor[tx.status] ?? 'text-text-secondary bg-bg-muted';
+                                    return (
+                                        <div key={tx.id} className="flex items-center justify-between px-4 py-3.5 hover:bg-bg-muted/40 transition-colors">
+                                            <div className="flex items-center gap-3 min-w-0">
+                                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-light">
+                                                    <CreditCard size={16} className="text-brand" />
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <p className="truncate text-sm font-bold text-text-primary">
+                                                        {tx.merchant_name ?? tx.service_name ?? 'Virtual Card'}
+                                                    </p>
+                                                    <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted">
+                                                        {tx.created_at ? new Date(tx.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''}
+                                                        {tx.merchant_category && ` · ${tx.merchant_category}`}
+                                                    </p>
+                                                </div>
                                             </div>
-                                            <div className="min-w-0">
-                                                <p className="truncate text-sm font-semibold text-text-primary">
-                                                    {tx.merchant_name ?? tx.service_name ?? 'Virtual Card'}
-                                                </p>
-                                                <p className="text-xs text-text-secondary">
-                                                    {tx.merchant_category && <span className="mr-2 capitalize">{tx.merchant_category}</span>}
-                                                    {tx.created_at ? new Date(tx.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''}
-                                                </p>
+                                            <div className="flex items-center gap-2 shrink-0">
+                                                <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${color}`}>
+                                                    {tx.status}
+                                                </span>
+                                                <span className="text-sm font-bold text-text-primary tabular-nums">
+                                                    {tx.currency === 'NGN' ? '₦' : '$'}{((tx.amount_kobo ?? 0) / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                </span>
                                             </div>
                                         </div>
-                                        <div className="flex items-center gap-3 shrink-0">
-                                            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${color}`}>
-                                                {tx.status}
-                                            </span>
-                                            <p className="font-mono text-sm font-semibold text-text-primary tabular-nums">
-                                                {tx.currency === 'NGN' ? '₦' : '$'}{((tx.amount_kobo ?? 0) / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                            </p>
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
+                                    );
+                                })}
+                            </div>
+                        </>
                     )}
                 </Card>
             )}
