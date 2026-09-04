@@ -12,9 +12,10 @@ interface TransactionRowProps {
     currency: string;
     index: number;
     onDelete?: (id: string) => void;
+    viewMode?: 'table' | 'list';
 }
 
-export const TransactionRow = ({ transaction, currency, index, onDelete }: TransactionRowProps) => {
+export const TransactionRow = ({ transaction, currency, index, onDelete, viewMode }: TransactionRowProps) => {
     const merchantLabel = transaction.merchant_name ?? transaction.name;
     const dateStr = new Date(transaction.date).toLocaleDateString('en-US', {
         month: 'short', day: 'numeric', year: 'numeric',
@@ -37,14 +38,14 @@ export const TransactionRow = ({ transaction, currency, index, onDelete }: Trans
         </Button>
     );
 
-    return (
-        <>
-            {/* ── Desktop table row ── */}
+    // Desktop table row ONLY
+    if (viewMode === 'table') {
+        return (
             <motion.tr
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1], delay: index * 0.02 }}
-                className="hidden md:table-row group hover:bg-bg-muted/40 transition-colors"
+                className="group hover:bg-bg-muted/40 transition-colors"
             >
                 {/* Merchant */}
                 <td className="py-3.5 pl-6 pr-4">
@@ -87,38 +88,40 @@ export const TransactionRow = ({ transaction, currency, index, onDelete }: Trans
                     </div>
                 </td>
             </motion.tr>
+        );
+    }
 
-            {/* ── Mobile list row ── */}
-            <motion.article
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1], delay: index * 0.02 }}
-                className="flex items-center justify-between gap-3 px-4 py-3.5 hover:bg-bg-base/50 transition-colors group relative md:hidden"
-            >
-                <div className="flex min-w-0 items-center gap-3">
-                    <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${getAvatarClass(merchantLabel)}`}>
-                        {getServiceIcon(merchantLabel)}
-                    </div>
-                    <div className="min-w-0">
-                        <p className="truncate text-sm font-bold text-text-primary">{merchantLabel}</p>
-                        <p className="mt-0.5 text-[10px] font-bold uppercase tracking-widest text-text-muted">
-                            {dateStr}{transaction.category?.length ? ` · ${category}` : ''}
-                        </p>
-                    </div>
+    // Mobile list item ONLY
+    return (
+        <motion.article
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1], delay: index * 0.02 }}
+            className="flex items-center justify-between gap-3 px-4 py-3.5 hover:bg-bg-muted/40 active:bg-bg-muted/60 transition-colors group relative"
+        >
+            <div className="flex min-w-0 items-center gap-3">
+                <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${getAvatarClass(merchantLabel)} shadow-xs`}>
+                    {getServiceIcon(merchantLabel)}
                 </div>
+                <div className="min-w-0 space-y-0.5">
+                    <p className="truncate text-sm font-bold text-text-primary">{merchantLabel}</p>
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">
+                        {dateStr}{transaction.category?.length ? ` · ${category}` : ''}
+                    </p>
+                </div>
+            </div>
 
-                <div className="flex items-center gap-2 tabular-nums shrink-0">
-                    <div className="text-right">
-                        <p className={`text-sm font-bold ${isOutflow ? 'text-text-primary' : 'text-success'}`}>
-                            {isOutflow ? '' : '+'}{amountFormatted}
-                        </p>
-                        <Badge variant={isOutflow ? 'warning' : 'success'} className="mt-0.5">
-                            {isOutflow ? 'Out' : 'In'}
-                        </Badge>
-                    </div>
-                    {deleteBtn}
+            <div className="flex items-center gap-2 tabular-nums shrink-0">
+                <div className="text-right">
+                    <p className={`text-sm font-bold ${isOutflow ? 'text-text-primary' : 'text-success'}`}>
+                        {isOutflow ? '' : '+'}{amountFormatted}
+                    </p>
+                    <Badge variant={isOutflow ? 'warning' : 'success'} className="mt-0.5 text-[9px] px-2 py-0.5 font-bold uppercase tracking-wider">
+                        {isOutflow ? 'Out' : 'In'}
+                    </Badge>
                 </div>
-            </motion.article>
-        </>
+                {deleteBtn}
+            </div>
+        </motion.article>
     );
 };

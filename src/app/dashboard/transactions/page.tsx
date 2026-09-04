@@ -425,34 +425,34 @@ export default function TransactionsPage() {
                             <div className="divide-y divide-border md:hidden">
                                 {cardTxs.map((tx: any) => {
                                     const statusColor: Record<string, string> = {
-                                        approved: 'text-success bg-success-light',
-                                        pending: 'text-warning bg-warning-light',
-                                        declined: 'text-danger bg-danger-light',
-                                        failed: 'text-danger bg-danger-light',
+                                        approved: 'text-success bg-success-light border-success/20',
+                                        pending: 'text-warning bg-warning-light border-warning/20',
+                                        declined: 'text-danger bg-danger-light border-danger/20',
+                                        failed: 'text-danger bg-danger-light border-danger/20',
                                     };
-                                    const color = statusColor[tx.status] ?? 'text-text-secondary bg-bg-muted';
+                                    const color = statusColor[tx.status] ?? 'text-text-secondary bg-bg-muted border-border';
                                     return (
-                                        <div key={tx.id} className="flex items-center justify-between px-4 py-3.5 hover:bg-bg-muted/40 transition-colors">
-                                            <div className="flex items-center gap-3 min-w-0">
-                                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-light">
-                                                    <CreditCard size={16} className="text-brand" />
+                                        <div key={tx.id} className="flex items-center justify-between gap-3 px-4 py-3.5 hover:bg-bg-muted/40 active:bg-bg-muted/60 transition-colors">
+                                            <div className="flex items-center gap-3 min-w-0 flex-1">
+                                                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-brand-light/80 text-brand shadow-xs border border-brand/10">
+                                                    <CreditCard size={18} className="text-brand" />
                                                 </div>
-                                                <div className="min-w-0">
+                                                <div className="min-w-0 space-y-0.5">
                                                     <p className="truncate text-sm font-bold text-text-primary">
                                                         {tx.merchant_name ?? tx.service_name ?? 'Virtual Card'}
                                                     </p>
-                                                    <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted">
+                                                    <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">
                                                         {tx.created_at ? new Date(tx.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''}
                                                         {tx.merchant_category && ` · ${tx.merchant_category}`}
                                                     </p>
                                                 </div>
                                             </div>
-                                            <div className="flex items-center gap-2 shrink-0">
-                                                <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${color}`}>
-                                                    {tx.status}
-                                                </span>
-                                                <span className="text-sm font-bold text-text-primary tabular-nums">
+                                            <div className="flex flex-col items-end gap-1 shrink-0 tabular-nums">
+                                                <span className="text-sm font-bold text-text-primary">
                                                     {tx.currency === 'NGN' ? '₦' : '$'}{((tx.amount_kobo ?? 0) / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                </span>
+                                                <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider border ${color}`}>
+                                                    {tx.status}
                                                 </span>
                                             </div>
                                         </div>
