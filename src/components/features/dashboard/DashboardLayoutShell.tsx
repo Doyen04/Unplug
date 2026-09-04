@@ -51,7 +51,7 @@ export const DashboardLayoutShell = ({ children }: { children: React.ReactNode }
                     </button>
                 </div>
 
-                <div className="mx-auto w-full max-w-7xl p-4 md:p-8">
+                <div className="mx-auto w-full max-w-7xl px-4 pt-4 pb-4 md:p-8">
                     {children}
                 </div>
             </main>
