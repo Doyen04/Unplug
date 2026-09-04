@@ -22,19 +22,19 @@ export function UnplugLogo({
     const isInverse = tone === 'inverse';
 
     const iconHeights = {
-        sm: 'h-7 sm:h-8',
-        md: 'h-9 sm:h-10.5',
-        lg: 'h-11 sm:h-13',
+        sm: 'h-8 sm:h-9',
+        md: 'h-11 sm:h-12',
+        lg: 'h-14 sm:h-16',
     };
 
     const textSizes = {
-        sm: 'text-lg',
-        md: 'text-2xl sm:text-[26px]',
-        lg: 'text-3xl sm:text-4xl',
+        sm: 'text-xs sm:text-sm',
+        md: 'text-sm sm:text-base',
+        lg: 'text-base sm:text-lg',
     };
 
     return (
-        <div className={cn('inline-flex items-center gap-2.5 sm:gap-3 select-none group', className)}>
+        <div className={cn('inline-flex items-center gap-2 sm:gap-2.5 select-none group', className)}>
             <div className={cn('shrink-0 transition-transform duration-300 group-hover:scale-105', iconHeights[size])}>
                 <Image
                     src="/images/unplug-logo.svg"
@@ -48,7 +48,7 @@ export function UnplugLogo({
             {!iconOnly && (
                 <span
                     className={cn(
-                        'font-display font-extrabold tracking-tight transition-colors',
+                        'font-display font-bold tracking-tight transition-colors',
                         textSizes[size],
                         isInverse ? 'text-white' : 'text-ink',
                     )}
