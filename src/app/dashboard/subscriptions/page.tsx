@@ -190,14 +190,13 @@ export default function SubscriptionsPage() {
                         <th className="py-3 pl-4 pr-6 sr-only">Action</th>
                     </tr>
                 }
-                renderItem={(s: Subscription, i: number, viewMode?: 'table' | 'list') => (
+                renderItem={(s: Subscription, i: number) => (
                     <SubscriptionRow
                         key={s.id}
                         subscription={s}
                         index={i}
                         currency={currencyForSubscriptionId(s.id)}
                         onCancel={cancelSubscription}
-                        viewMode={viewMode}
                     />
                 )}
                 showDivider
@@ -228,11 +227,10 @@ export default function SubscriptionsPage() {
                                         setFilter(item.key);
                                         setPage(1);
                                     }}
-                                    className={`h-8 rounded-pill px-4 flex shrink-0 items-center justify-center text-[10px] font-bold uppercase tracking-widest transition-all ${
-                                        item.key === filter
+                                    className={`h-8 rounded-pill px-4 flex shrink-0 items-center justify-center text-[10px] font-bold uppercase tracking-widest transition-all ${item.key === filter
                                             ? "bg-brand text-white"
                                             : "bg-bg-muted text-text-secondary hover:bg-bg-subtle border border-border"
-                                    }`}
+                                        }`}
                                 >
                                     {item.label} ({filterCounts[item.key]})
                                 </button>

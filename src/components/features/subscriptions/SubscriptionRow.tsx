@@ -16,7 +16,6 @@ interface SubscriptionRowProps {
     index: number;
     showAlerts?: boolean;
     currency?: string;
-    viewMode?: 'table' | 'list';
 }
 
 export const SubscriptionRow = ({
@@ -25,7 +24,6 @@ export const SubscriptionRow = ({
     index,
     showAlerts = true,
     currency,
-    viewMode,
 }: SubscriptionRowProps) => {
     const currencyCode = currency ?? 'USD';
     const hasAlert = Boolean(showAlerts && subscription.alert);
@@ -73,148 +71,16 @@ export const SubscriptionRow = ({
         </Badge>
     );
 
-    const modalComponent = (
-        <CancellationGuideModal
-            isOpen={isModalOpen}
-            onClose={() => setIsModalOpen(false)}
-            onConfirmCancel={() => onCancel(subscription.id)}
-            serviceName={subscription.serviceName}
-        />
-    );
-
-    // Desktop table row ONLY
-    if (viewMode === 'table') {
-        return (
-            <>
-                <motion.tr
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: isCancelled ? 0.55 : 1, y: 0 }}
-                    transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1], delay: index * 0.03 }}
-                    className="group hover:bg-bg-muted/40 transition-colors"
-                >
-                    {/* Service */}
-                    <td className="py-3.5 pl-6 pr-4">
-                        <div className="flex items-center gap-3 min-w-0">
-                            <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${getAvatarClass(subscription.serviceName)} ${isCancelled ? 'grayscale' : ''}`}>
-                                {getServiceIcon(subscription.serviceName)}
-                            </div>
-                            <div className="min-w-0 space-y-0.5">
-                                <p className={`truncate text-sm font-bold leading-tight ${isCancelled ? 'line-through text-text-muted' : 'text-text-primary'}`}>
-                                    {subscription.serviceName}
-                                </p>
-                                {alertChip}
-                            </div>
-                        </div>
-                    </td>
-
-                    {/* Status */}
-                    <td className="py-3.5 px-4">{statusBadge}</td>
-
-                    {/* Frequency */}
-                    <td className="py-3.5 px-4">
-                        <span className="flex items-center gap-1.5 text-[11px] font-medium text-text-secondary uppercase tracking-wider whitespace-nowrap">
-                            <Calendar size={11} />
-                            {subscription.frequencyLabel}
-                        </span>
-                    </td>
-
-                    {/* Confidence */}
-                    <td className="hidden lg:table-cell py-3.5 px-4">
-                        <span className="flex items-center gap-1.5 text-[11px] font-medium text-text-secondary uppercase tracking-wider whitespace-nowrap">
-                            <Shield size={11} />
-                            {subscription.confidence}
-                        </span>
-                    </td>
-
-                    {/* Amount */}
-                    <td className="py-3.5 px-4 text-right tabular-nums">
-                        <p className={`text-sm font-bold ${isCancelled ? 'text-text-muted line-through' : 'text-text-primary'}`}>
-                            {formatCurrencyPrecise(subscription.amountMonthly, currencyCode)}
-                        </p>
-                        {isCancelled && (
-                            <p className="text-[9px] font-bold uppercase tracking-widest text-success mt-0.5">Saving</p>
-                        )}
-                    </td>
-
-                    {/* Action */}
-                    <td className="py-3.5 pl-4 pr-6 text-right">
-                        <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-150 flex justify-end">
-                            {cancelAction}
-                        </div>
-                    </td>
-                </motion.tr>
-                {modalComponent}
-            </>
-        );
-    }
-
-    // Mobile list item ONLY
-    if (viewMode === 'list') {
-        return (
-            <>
-                <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: isCancelled ? 0.55 : 1, y: 0 }}
-                    transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1], delay: index * 0.03 }}
-                    className="flex items-center justify-between gap-3 px-4 py-3.5 hover:bg-bg-muted/30 transition-colors group"
-                >
-                    {/* Avatar + Info */}
-                    <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${getAvatarClass(subscription.serviceName)} ${isCancelled ? 'grayscale' : ''}`}>
-                            {getServiceIcon(subscription.serviceName)}
-                        </div>
-
-                        <div className="min-w-0 space-y-1">
-                            <div className="flex items-center gap-1.5 flex-wrap">
-                                <p className={`truncate text-sm font-bold ${isCancelled ? 'line-through text-text-muted' : 'text-text-primary'}`}>
-                                    {subscription.serviceName}
-                                </p>
-                                {statusBadge}
-                            </div>
-
-                            <div className="flex items-center gap-2 text-[10px] font-medium text-text-secondary uppercase tracking-wider flex-wrap">
-                                <span className="flex items-center gap-1"><Calendar size={10} />{subscription.frequencyLabel}</span>
-                                {hasAlert && !isCancelled && (
-                                    <span className="flex items-center gap-1 text-warning font-semibold">
-                                        <AlertTriangle size={10} />{subscription.alert!.message}
-                                    </span>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Right side: Amount & Action */}
-                    <div className="flex items-center gap-2.5 shrink-0 tabular-nums">
-                        <div className="text-right">
-                            <p className={`text-sm font-bold ${isCancelled ? 'text-text-muted line-through' : 'text-text-primary'}`}>
-                                {formatCurrencyPrecise(subscription.amountMonthly, currencyCode)}
-                            </p>
-                            {isCancelled ? (
-                                <p className="text-[9px] font-bold uppercase tracking-widest text-success">Saved</p>
-                            ) : (
-                                <span className="text-[9px] font-semibold text-text-muted uppercase">/ mo</span>
-                            )}
-                        </div>
-
-                        <div className="shrink-0">
-                            {cancelAction}
-                        </div>
-                    </div>
-                </motion.div>
-                {modalComponent}
-            </>
-        );
-    }
-
-    // Default fallback if viewMode is unspecified: render both responsive wrappers
     return (
         <>
+            {/* ── Desktop table row ── */}
             <motion.tr
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: isCancelled ? 0.55 : 1, y: 0 }}
                 transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1], delay: index * 0.03 }}
                 className="hidden md:table-row group hover:bg-bg-muted/40 transition-colors"
             >
+                {/* Service */}
                 <td className="py-3.5 pl-6 pr-4">
                     <div className="flex items-center gap-3 min-w-0">
                         <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${getAvatarClass(subscription.serviceName)} ${isCancelled ? 'grayscale' : ''}`}>
@@ -228,19 +94,27 @@ export const SubscriptionRow = ({
                         </div>
                     </div>
                 </td>
+
+                {/* Status */}
                 <td className="py-3.5 px-4">{statusBadge}</td>
+
+                {/* Frequency */}
                 <td className="py-3.5 px-4">
                     <span className="flex items-center gap-1.5 text-[11px] font-medium text-text-secondary uppercase tracking-wider whitespace-nowrap">
                         <Calendar size={11} />
                         {subscription.frequencyLabel}
                     </span>
                 </td>
+
+                {/* Confidence */}
                 <td className="hidden lg:table-cell py-3.5 px-4">
                     <span className="flex items-center gap-1.5 text-[11px] font-medium text-text-secondary uppercase tracking-wider whitespace-nowrap">
                         <Shield size={11} />
                         {subscription.confidence}
                     </span>
                 </td>
+
+                {/* Amount */}
                 <td className="py-3.5 px-4 text-right tabular-nums">
                     <p className={`text-sm font-bold ${isCancelled ? 'text-text-muted line-through' : 'text-text-primary'}`}>
                         {formatCurrencyPrecise(subscription.amountMonthly, currencyCode)}
@@ -249,6 +123,8 @@ export const SubscriptionRow = ({
                         <p className="text-[9px] font-bold uppercase tracking-widest text-success mt-0.5">Saving</p>
                     )}
                 </td>
+
+                {/* Action */}
                 <td className="py-3.5 pl-4 pr-6 text-right">
                     <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-150 flex justify-end">
                         {cancelAction}
@@ -256,16 +132,19 @@ export const SubscriptionRow = ({
                 </td>
             </motion.tr>
 
+            {/* ── Mobile row ── */}
             <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: isCancelled ? 0.55 : 1, y: 0 }}
                 transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1], delay: index * 0.03 }}
-                className="flex items-center justify-between gap-3 px-4 py-3.5 hover:bg-bg-muted/30 transition-colors group md:hidden"
+                className="flex items-center justify-between gap-3 px-4 py-3.5 hover:bg-bg-muted/30 transition-colors group md:hidden border-b border-border/60 last:border-b-0"
             >
+                {/* Avatar + Info */}
                 <div className="flex items-center gap-3 min-w-0 flex-1">
                     <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${getAvatarClass(subscription.serviceName)} ${isCancelled ? 'grayscale' : ''}`}>
                         {getServiceIcon(subscription.serviceName)}
                     </div>
+
                     <div className="min-w-0 space-y-1">
                         <div className="flex items-center gap-1.5 flex-wrap">
                             <p className={`truncate text-sm font-bold ${isCancelled ? 'line-through text-text-muted' : 'text-text-primary'}`}>
@@ -273,6 +152,7 @@ export const SubscriptionRow = ({
                             </p>
                             {statusBadge}
                         </div>
+
                         <div className="flex items-center gap-2 text-[10px] font-medium text-text-secondary uppercase tracking-wider flex-wrap">
                             <span className="flex items-center gap-1"><Calendar size={10} />{subscription.frequencyLabel}</span>
                             {hasAlert && !isCancelled && (
@@ -283,6 +163,8 @@ export const SubscriptionRow = ({
                         </div>
                     </div>
                 </div>
+
+                {/* Right side: Amount & Action */}
                 <div className="flex items-center gap-2.5 shrink-0 tabular-nums">
                     <div className="text-right">
                         <p className={`text-sm font-bold ${isCancelled ? 'text-text-muted line-through' : 'text-text-primary'}`}>
@@ -294,10 +176,19 @@ export const SubscriptionRow = ({
                             <span className="text-[9px] font-semibold text-text-muted uppercase">/ mo</span>
                         )}
                     </div>
-                    <div className="shrink-0">{cancelAction}</div>
+
+                    <div className="shrink-0">
+                        {cancelAction}
+                    </div>
                 </div>
             </motion.div>
-            {modalComponent}
+
+            <CancellationGuideModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onConfirmCancel={() => onCancel(subscription.id)}
+                serviceName={subscription.serviceName}
+            />
         </>
     );
 };

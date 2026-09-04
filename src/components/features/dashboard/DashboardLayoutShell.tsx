@@ -17,7 +17,7 @@ export const DashboardLayoutShell = ({ children }: { children: React.ReactNode }
 
     return (
 
-        <div className="flex h-screen w-full overflow-hidden bg-bg-base text-text-primary">
+        <div className="fixed inset-0 flex overflow-hidden bg-bg-base text-text-primary">
             <Sidebar
                 expanded={expanded}
                 toggleExpanded={() => setExpanded(!expanded)}

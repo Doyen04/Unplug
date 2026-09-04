@@ -62,7 +62,7 @@ export const Sidebar = ({ expanded, toggleExpanded, isMobileOpen, setIsMobileOpe
             )}
 
             <aside
-                className={`text-text-primary fixed inset-y-0 left-0 z-50 flex flex-col border-r border-border bg-bg-base transition-all duration-300 lg:static ${isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+                className={`text-text-primary fixed inset-y-0 left-0 z-50 flex flex-col border-r border-border bg-bg-base transition-all duration-300 lg:static lg:h-full shrink-0 ${isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
                     } ${expanded ? 'w-60' : 'w-16'}`}
             >
                 <div className={`flex h-20 items-center justify-between pb-3 pt-7 transition-all ${expanded ? 'px-4' : 'px-2'}`}>

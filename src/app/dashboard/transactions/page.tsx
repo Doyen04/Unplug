@@ -218,71 +218,71 @@ export default function TransactionsPage() {
             </header>
 
             {ledgerTab === 'bank' && (
-            <div className="flex flex-wrap items-center justify-between gap-4">
-                <div className="flex items-center gap-4">
-                    {providers.hasBoth && (
-                        <div className="flex items-center gap-1 rounded-pill bg-bg-muted p-1">
-                            <Button
-                                variant={
-                                    !selectedProvider ? "primary" : "ghost"
-                                }
-                                size="sm"
-                                onClick={() => {
-                                    setSelectedProvider(undefined);
-                                    setPage(1);
-                                }}
-                                className="rounded-pill"
-                            >
-                                All
-                            </Button>
-                            {providers.connected.map((p: DashboardProvider) => (
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                        {providers.hasBoth && (
+                            <div className="flex items-center gap-1 rounded-pill bg-bg-muted p-1">
                                 <Button
-                                    key={p}
                                     variant={
-                                        selectedProvider === p
-                                            ? "primary"
-                                            : "ghost"
+                                        !selectedProvider ? "primary" : "ghost"
                                     }
                                     size="sm"
                                     onClick={() => {
-                                        setSelectedProvider(
-                                            selectedProvider === p
-                                                ? undefined
-                                                : p,
-                                        );
+                                        setSelectedProvider(undefined);
                                         setPage(1);
                                     }}
                                     className="rounded-pill"
                                 >
-                                    {providerLabel(p)}
+                                    All
                                 </Button>
-                            ))}
-                        </div>
-                    )}
-                    {!providers.hasBoth && providers.active && (
-                        <Badge variant="secondary">
-                            Using {providerLabel(providers.active)} data
-                        </Badge>
-                    )}
-                </div>
+                                {providers.connected.map((p: DashboardProvider) => (
+                                    <Button
+                                        key={p}
+                                        variant={
+                                            selectedProvider === p
+                                                ? "primary"
+                                                : "ghost"
+                                        }
+                                        size="sm"
+                                        onClick={() => {
+                                            setSelectedProvider(
+                                                selectedProvider === p
+                                                    ? undefined
+                                                    : p,
+                                            );
+                                            setPage(1);
+                                        }}
+                                        className="rounded-pill"
+                                    >
+                                        {providerLabel(p)}
+                                    </Button>
+                                ))}
+                            </div>
+                        )}
+                        {!providers.hasBoth && providers.active && (
+                            <Badge variant="secondary">
+                                Using {providerLabel(providers.active)} data
+                            </Badge>
+                        )}
+                    </div>
 
-                <div className="relative w-full sm:w-72 h-10 group">
-                    <div className="absolute left-3 inset-y-0 flex items-center pointer-events-none z-10">
-                        <Search
-                            size={16}
-                            className="text-text-muted transition-colors group-focus-within:text-brand"
+                    <div className="relative w-full sm:w-72 h-10 group">
+                        <div className="absolute left-3 inset-y-0 flex items-center pointer-events-none z-10">
+                            <Search
+                                size={16}
+                                className="text-text-muted transition-colors group-focus-within:text-brand"
+                            />
+                        </div>
+                        <Input
+                            value={search}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                setSearch(e.target.value)
+                            }
+                            placeholder="Search transactions"
+                            className="pl-10 h-full w-full"
                         />
                     </div>
-                    <Input
-                        value={search}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                            setSearch(e.target.value)
-                        }
-                        placeholder="Search transactions"
-                        className="pl-10 h-full w-full"
-                    />
                 </div>
-            </div>
             )}
 
             {ledgerTab === 'bank' ? (
@@ -299,13 +299,12 @@ export default function TransactionsPage() {
                             <th className="py-3 pl-4 pr-6 sr-only">Action</th>
                         </tr>
                     }
-                    renderItem={(tx: Transaction, i: number, viewMode?: 'table' | 'list') => (
+                    renderItem={(tx: Transaction, i: number) => (
                         <TransactionRow
                             key={tx.transaction_id}
                             transaction={tx}
                             currency={currencyForTransaction(tx)}
                             index={i}
-                            viewMode={viewMode}
                         />
                     )}
                     showDivider
@@ -378,9 +377,9 @@ export default function TransactionsPage() {
                                         {cardTxs.map((tx: any) => {
                                             const statusColor: Record<string, string> = {
                                                 approved: 'text-success bg-success-light',
-                                                pending:  'text-warning bg-warning-light',
+                                                pending: 'text-warning bg-warning-light',
                                                 declined: 'text-danger bg-danger-light',
-                                                failed:   'text-danger bg-danger-light',
+                                                failed: 'text-danger bg-danger-light',
                                             };
                                             const color = statusColor[tx.status] ?? 'text-text-secondary bg-bg-muted';
                                             return (
@@ -427,9 +426,9 @@ export default function TransactionsPage() {
                                 {cardTxs.map((tx: any) => {
                                     const statusColor: Record<string, string> = {
                                         approved: 'text-success bg-success-light',
-                                        pending:  'text-warning bg-warning-light',
+                                        pending: 'text-warning bg-warning-light',
                                         declined: 'text-danger bg-danger-light',
-                                        failed:   'text-danger bg-danger-light',
+                                        failed: 'text-danger bg-danger-light',
                                     };
                                     const color = statusColor[tx.status] ?? 'text-text-secondary bg-bg-muted';
                                     return (
